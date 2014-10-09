@@ -56,6 +56,7 @@ public class SimulatedPeriodicOperation extends PeriodicOperation {
 	
 	@Override
 	protected void doStop(StopHandler<Operation> handler) {
+		executor.shutdownNow();
 		handler.hasStopped(this);
 	}
 

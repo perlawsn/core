@@ -84,7 +84,7 @@ public class Executor {
 		}
 
 		pool.shutdown();
-		boolean terminated = pool.awaitTermination(20, TimeUnit.SECONDS);
+		boolean terminated = pool.awaitTermination(timeoutSec, TimeUnit.SECONDS);
 		if (!terminated) {
 			logger.info("Termination timeout expired, attempting to interrupt lingering Scripts");
 			pool.shutdownNow();
