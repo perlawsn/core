@@ -3,6 +3,7 @@ package org.dei.perla.fpc.engine;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -48,8 +49,24 @@ public class Executor {
 	private static final Logger logger = Logger.getLogger(Executor.class);
 
 	private static final AtomicBoolean isRunning = new AtomicBoolean(true);
-	private static final ExecutorService pool = Executors.newCachedThreadPool();
 	private static final ExpressionFactory expFct = ExpressionFactory.newInstance();
+	
+	private static final ExecutorService pool;
+	static {
+		// Custom thread naming pattern
+		pool = Executors.newCachedThreadPool(new ThreadFactory() {
+			
+			private final ThreadFactory fct = Executors.defaultThreadFactory();
+			
+			@Override
+			public Thread newThread(Runnable r) {
+				Thread t = fct.newThread(r);
+				t.setName("Executor_" + t.getName());
+				return t;
+			}
+			
+		});
+	}
 
 	/**
 	 * Shuts down the executor. Execution of this method will prevent new
