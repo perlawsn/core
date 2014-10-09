@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<device type="test-json" name="test" xmlns="http://perla.dei.org/device"
+	xmlns:sim="http://perla.dei.org/channel/simulator">
+
+	<attributes>
+		<attribute id="room_number" type="integer" access="static"
+			value="4" />
+		<attribute id="temperature" type="float" permission="read-write" />
+		<attribute id="pressure" type="float" />
+		<attribute id="period" type="integer" permission="write-only" />
+		<attribute id="timestamp" type="timestamp" permission="read-only" />
+	</attributes>
+
+	<channels>
+		<sim:channel id="test">
+			<sim:generator id="temp-only">
+				<sim:field name="type" qualifier="static" value="temp-only" />
+				<sim:field name="temperature" qualifier="dynamic" type="float"
+					min="12" max="32" />
+			</sim:generator>
+			<sim:generator id="press-only">
+				<sim:field name="type" qualifier="static" value="press-only" />
+				<sim:field name="pressure" qualifier="dynamic" type="float"
+					min="450" max="600" />
+			</sim:generator>
+			<sim:generator id="all">
+				<sim:field name="type" qualifier="static" value="all" />
+				<sim:field name="temperature" qualifier="dynamic" type="float"
+					min="12" max="32" />
+				<sim:field name="pressure" qualifier="dynamic" type="float"
+					min="450" max="600" />
+				<sim:field name="timestamp" qualifier="dynamic" type="timestamp" />
+			</sim:generator>
+		</sim:channel>
+	</channels>
+
+	<messages>
+		<sim:message id="temp-only">
+			<sim:field name="type" qualifier="static" value="temp-only" />
+			<sim:field name="temperature" type="float" />
+		</sim:message>
+		<sim:message id="press-only">
+			<sim:field name="type" qualifier="static" value="press-only" />
+			<sim:field name="pressure" type="float" />
+		</sim:message>
+		<sim:message id="all">
+			<sim:field name="type" qualifier="static" value="all" />
+			<sim:field name="temperature" type="float" />
+			<sim:field name="pressure" type="float" />
+			<sim:field name="timestamp" type="timestamp" />
+		</sim:message>
+		<sim:message id="sampling-period">
+			<sim:field name="millis" type="integer" />
+		</sim:message>
+	</messages>
+
+	<requests>
+		<sim:request id="temp-only" generator="temp-only" />
+		<sim:request id="press-only" generator="press-only" />
+		<sim:request id="all" generator="all" />
+		<sim:request id="temp-periodic" generator="temp-only" />
+	</requests>
+
+</device>

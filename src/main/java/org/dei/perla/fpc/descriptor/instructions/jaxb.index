@@ -1,0 +1,12 @@
+AppendInstructionDescriptor
+ForeachInstructionDescriptor
+InstructionDescriptor
+CreateInstructionDescriptor
+EmitInstructionDescriptor
+ErrorInstructionDescriptor
+IfInstructionDescriptor
+PutInstructionDescriptor
+SetInstructionDescriptor
+StopInstructionDescriptor
+SubmitInstructionDescriptor
+ParameterBinding

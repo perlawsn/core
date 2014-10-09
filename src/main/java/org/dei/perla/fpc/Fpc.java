@@ -1,0 +1,31 @@
+package org.dei.perla.fpc;
+
+import java.util.Collection;
+import java.util.Map;
+
+import org.dei.perla.utils.StopHandler;
+
+public interface Fpc {
+
+	/**
+	 * Returns the PerLa identifier of the device associated with this
+	 * <code>Fpc</code>.
+	 * 
+	 * @return PerLa device identifier
+	 */
+	public int getId();
+
+	public Collection<Attribute> getAttributes();
+
+	public Task set(Map<Attribute, Object> valueMap, TaskHandler handler);
+
+	public Task get(Collection<Attribute> attributes, TaskHandler handler);
+
+	public Task get(Collection<Attribute> attributes, long periodMs,
+			TaskHandler handler);
+
+	public Task async(Collection<Attribute> attributes, TaskHandler handler);
+
+	public void stop(StopHandler<Fpc> handler);
+
+}

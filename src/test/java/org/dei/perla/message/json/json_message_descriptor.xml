@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<device type="test-json"
+	xmlns="http://perla.dei.org/device"
+	xmlns:js="http://perla.dei.org/fpc/message/json">
+
+	<attributes>
+		<attribute id="room_number" type="integer" access="static"/>
+		<attribute id="temperature" type="float" permission="read-write"/>
+		<attribute id="pressure" type="float"/>
+		<attribute id="timestamp" type="timestamp" permission="read-write"/>
+	</attributes>
+	
+	<messages>
+		<js:object id="environment">
+			<js:value name="temperature" type="float"/>
+			<js:value name="pressure" type="float"/>
+			<js:value name="light" type="integer"/>
+			<js:value name="gravity" type="float" qualifier="static" value="9.18"/> 
+		</js:object>
+		
+		<js:object id="room">
+			<js:value name="name" type="string"/>
+			<js:value name="time" type="timestamp" format="d MMM uuuu HH:mm"/>
+			<js:value name="number" type="integer"/>
+			<js:value name="environment" type="environment"/>			
+			<js:value name="occupants" qualifier="list" type="string"/>
+		</js:object>
+	</messages>
+	
+</device>

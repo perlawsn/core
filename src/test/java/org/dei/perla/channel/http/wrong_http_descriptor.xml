@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<device type="test-json" xmlns="http://perla.dei.org/device"
+	xmlns:ue="http://perla.dei.org/fpc/message/urlencoded" xmlns:ht="http://perla.dei.org/channel/http"
+	xmlns:js="http://perla.dei.org/fpc/message/json">
+
+	<attributes>
+		<attribute id="temperature" type="float" permission="read" />
+		<attribute id="pressure" type="float" permission="read" />
+	</attributes>
+
+	<messages>
+		<ue:message id="ue_openweathermap">
+			<ue:parameters>
+				<ue:parameter name="q" qualifier="static" value="London,uk" />
+			</ue:parameters>
+		</ue:message>
+		<js:message id="js_openweathermap_info">
+			<js:object name="mex" type="object">
+				<js:object name="main" type="object">
+					<js:object name="temp" type="float" qualifier="attribute"
+						attribute-id="temperature" />
+					<js:object name="pressure" type="float" qualifier="attribute"
+						attribute-id="pressure" />
+				</js:object>
+			</js:object>
+		</js:message>
+	</messages>
+	<channels>
+		<ht:channel id="http_ch_01" />
+	</channels>
+	<requests>
+		<ht:request id="post_all_info"
+			host="http://api.openweathermap.org/data/2.5/weather" method="get"
+			content-type="application/x-www-form-urlencoded" />
+		<ht:request id="get_all_info" method="post" />
+		<ht:request id="del_all_info" method="put" />
+		<ht:request id="put_all_info" content-type="application/x-www-form-urlencoded"
+			host="http://api.openweathermap.org/data/2.5/weather" method="delete" />
+	</requests>
+</device>

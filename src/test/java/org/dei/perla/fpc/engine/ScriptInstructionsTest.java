@@ -1,0 +1,716 @@
+package org.dei.perla.fpc.engine;
+
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.dei.perla.channel.Channel;
+import org.dei.perla.channel.IORequestBuilder;
+import org.dei.perla.channel.loopback.LoopbackChannel;
+import org.dei.perla.channel.loopback.LoopbackIORequestBuilder;
+import org.dei.perla.channel.loopback.TestMapper;
+import org.dei.perla.channel.loopback.TestMessage;
+import org.dei.perla.fpc.descriptor.AttributeDescriptor;
+import org.dei.perla.fpc.descriptor.AttributeDescriptor.AttributePermission;
+import org.dei.perla.fpc.descriptor.DataType;
+import org.dei.perla.fpc.engine.Record.Field;
+import org.dei.perla.fpc.engine.SubmitInstruction.RequestParameter;
+import org.dei.perla.message.FpcMessage;
+import org.dei.perla.message.Mapper;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+public class ScriptInstructionsTest {
+
+	private static AttributeDescriptor integer;
+	private static AttributeDescriptor string;
+	private static AttributeDescriptor bool;
+
+	private static Mapper mapper1;
+	private static Mapper mapper2;
+
+	private static Channel channel;
+	private static IORequestBuilder request1;
+
+	@BeforeClass
+	public static void setup() {
+		integer = new AttributeDescriptor("integer", DataType.INTEGER,
+				AttributePermission.READ_WRITE);
+		string = new AttributeDescriptor("string", DataType.STRING,
+				AttributePermission.READ_WRITE);
+		bool = new AttributeDescriptor("bool", DataType.BOOLEAN,
+				AttributePermission.READ_WRITE);
+
+		mapper1 = new TestMapper("message1");
+		mapper2 = new TestMapper("message2");
+
+		channel = new LoopbackChannel();
+		request1 = new LoopbackIORequestBuilder("request1");
+	}
+
+	@Test
+	public void testCreateSimpleInstruction() throws Exception {
+		final AtomicBoolean inDebugger = new AtomicBoolean(false);
+		Script script = ScriptBuilder
+				.newScript()
+				.add(new CreatePrimitiveInstruction("integer", DataType.INTEGER))
+				.add(new CreatePrimitiveInstruction("string", DataType.STRING))
+				.add(new CreatePrimitiveInstruction("float", DataType.FLOAT))
+				.add(new CreatePrimitiveInstruction("boolean", DataType.BOOLEAN))
+				.add(new CreatePrimitiveInstruction("id", DataType.ID))
+				.add(new BreakpointInstruction()).add(new StopInstruction())
+				.buildScript("testCreatePrimitiveInstruction");
+
+		SynchronizerScriptHandler syncHandler = new SynchronizerScriptHandler();
+		Executor.execute(script, new ScriptParameter[] {}, syncHandler,
+				new ScriptDebugger() {
+					@Override
+					public void breakpoint(Runner runner, Script script,
+							Instruction instruction) {
+						inDebugger.set(true);
+
+						Object obj = runner.ctx.getVariable("integer");
+						assertThat(obj, notNullValue());
+						assertTrue(obj instanceof Integer);
+
+						obj = runner.ctx.getVariable("string");
+						assertThat(obj, notNullValue());
+						assertTrue(obj instanceof String);
+
+						obj = runner.ctx.getVariable("float");
+						assertThat(obj, notNullValue());
+						assertTrue(obj instanceof Float);
+
+						obj = runner.ctx.getVariable("boolean");
+						assertThat(obj, notNullValue());
+						assertTrue(obj instanceof Boolean);
+
+						obj = runner.ctx.getVariable("id");
+						assertThat(obj, notNullValue());
+						assertTrue(obj instanceof Integer);
+					}
+				});
+		// Wait until script execution terminates
+		syncHandler.getResult();
+		assertTrue(inDebugger.get());
+	}
+
+	@Test
+	public void testCreateComplexInstruction() throws Exception {
+		final AtomicBoolean inDebugger = new AtomicBoolean(false);
+		Script script = ScriptBuilder.newScript()
+				.add(new CreateComplexInstruction("var1", mapper1))
+				.add(new CreateComplexInstruction("var2", mapper2))
+				.add(new CreateComplexInstruction("var3", mapper2))
+				.add(new BreakpointInstruction()).add(new StopInstruction())
+				.buildScript("testCreateComplexInstruction");
+
+		SynchronizerScriptHandler syncHandler = new SynchronizerScriptHandler();
+		Executor.execute(script, new ScriptParameter[] {}, syncHandler,
+				new ScriptDebugger() {
+					@Override
+					public void breakpoint(Runner runner, Script script,
+							Instruction instruction) {
+						inDebugger.set(true);
+						TestMessage variable = (TestMessage) runner.ctx
+								.getVariable("var1");
+						assertThat(variable, notNullValue());
+						assertThat(variable.getMessageId(), equalTo("message1"));
+
+						variable = (TestMessage) runner.ctx.getVariable("var2");
+						assertThat(variable, notNullValue());
+						assertThat(variable.getMessageId(), equalTo("message2"));
+
+						variable = (TestMessage) runner.ctx.getVariable("var3");
+						assertThat(variable, notNullValue());
+						assertThat(variable.getMessageId(), equalTo("message2"));
+					}
+				});
+		// Wait until script execution terminates
+		syncHandler.getResult();
+		assertTrue(inDebugger.get());
+	}
+
+	@Test
+	public void testSetInstruction() throws Exception {
+		final AtomicBoolean inDebugger = new AtomicBoolean(false);
+		Script script = ScriptBuilder
+				.newScript()
+				.add(new CreatePrimitiveInstruction("integer", DataType.INTEGER))
+				.add(new SetPrimitiveInstruction("integer", Integer.class, "10"))
+				.add(new CreateComplexInstruction("var1", mapper1))
+				.add(new SetComplexInstruction("var1", "integer",
+						Integer.class, "${5 + 4}"))
+				.add(new SetComplexInstruction("var1", "string", String.class,
+						"test"))
+				.add(new SetComplexInstruction("var1", "float", Float.class,
+						"${5.2 * 0.4}"))
+				.add(new CreateComplexInstruction("var2", mapper1))
+				.add(new SetComplexInstruction("var2", "integer",
+						Integer.class, "${var1.integer}"))
+				.add(new BreakpointInstruction()).add(new StopInstruction())
+				.buildScript("testSetInstruction");
+
+		SynchronizerScriptHandler syncHandler = new SynchronizerScriptHandler();
+		Executor.execute(script, new ScriptParameter[] {}, syncHandler,
+				new ScriptDebugger() {
+					@Override
+					public void breakpoint(Runner runner, Script script,
+							Instruction instruction) {
+						inDebugger.set(true);
+						Object obj = runner.ctx.getVariable("integer");
+						assertThat(obj, notNullValue());
+						assertTrue(obj instanceof Integer);
+						assertThat((Integer) obj, equalTo(10));
+
+						FpcMessage var1 = (FpcMessage) runner.ctx
+								.getVariable("var1");
+						FpcMessage var2 = (FpcMessage) runner.ctx
+								.getVariable("var2");
+						Object att;
+
+						att = var1.getField("integer");
+						assertThat(att, notNullValue());
+						assertTrue(att instanceof Integer);
+						assertThat((Integer) att, equalTo(9));
+
+						att = var1.getField("string");
+						assertThat(att, notNullValue());
+						assertTrue(att instanceof String);
+						assertThat((String) att, equalTo("test"));
+
+						att = var1.getField("float");
+						assertThat(att, notNullValue());
+						assertTrue(att instanceof Float);
+						assertThat((Float) att, equalTo(2.08f));
+
+						att = var2.getField("integer");
+						assertThat(att, notNullValue());
+						assertTrue(att instanceof Integer);
+						assertThat((Integer) att, equalTo(9));
+					}
+				});
+		// Wait until script execution terminates
+		syncHandler.getResult();
+		assertTrue(inDebugger.get());
+	}
+
+	@Test
+	public void testAppendInstruction() throws Exception {
+		final AtomicBoolean inDebugger = new AtomicBoolean(false);
+		Script script = ScriptBuilder.newScript()
+				.add(new CreateComplexInstruction("var", mapper1))
+				.add(new AppendInstruction("var", "list", Integer.class, "1"))
+				.add(new AppendInstruction("var", "list", Integer.class, "2"))
+				.add(new AppendInstruction("var", "list", Integer.class, "3"))
+				.add(new BreakpointInstruction())
+				.buildScript("testAppendInstruction");
+		SynchronizerScriptHandler syncHandler = new SynchronizerScriptHandler();
+		Executor.execute(script, new ScriptParameter[] {}, syncHandler,
+				new ScriptDebugger() {
+					@Override
+					public void breakpoint(Runner runner, Script script,
+							Instruction instruction) {
+						inDebugger.set(true);
+						Object var = runner.ctx.getVariable("var");
+						List<?> list = (List<?>) ((FpcMessage) var)
+								.getField("list");
+
+						assertThat(list, notNullValue());
+						assertThat(list.size(), equalTo(3));
+						assertThat(list.get(0), equalTo(1));
+						assertThat(list.get(1), equalTo(2));
+						assertThat(list.get(2), equalTo(3));
+					}
+				});
+		// Wait until script execution terminates
+		syncHandler.getResult();
+		assertTrue(inDebugger.get());
+	}
+	
+	@Test
+	public void testForeachInstruction0() throws Exception {
+		Instruction body = ScriptBuilder.newScript()
+				.add(new PutInstruction("${element}", integer))
+				.add(new EmitInstruction())
+				.getCode();
+		Script script = ScriptBuilder.newScript()
+				.add(new CreateComplexInstruction("var", mapper1))
+				.add(new AppendInstruction("var", "list", Integer.class, "1"))
+				.add(new AppendInstruction("var", "list", Integer.class, "2"))
+				.add(new AppendInstruction("var", "list", Integer.class, "3"))
+				.add(new ForeachInstruction("var", "list", "element", body))
+				.buildScript("testForeachInstruction0");
+		SynchronizerScriptHandler syncHandler = new SynchronizerScriptHandler();
+		
+		Executor.execute(script, syncHandler);
+		List<Record> recordList = syncHandler.getResult();
+		assertThat(recordList, notNullValue());
+		assertThat(recordList.size(), equalTo(3));
+		
+		assertThat(recordList.get(0).get("integer"), equalTo(1));
+		assertThat(recordList.get(1).get("integer"), equalTo(2));
+		assertThat(recordList.get(2).get("integer"), equalTo(3));
+	}
+	
+	@Test
+	public void testForeachInstruction1() throws Exception {
+		Instruction body = ScriptBuilder.newScript()
+				.add(new PutInstruction("${element * index}", integer))
+				.add(new EmitInstruction())
+				.getCode();
+		Script script = ScriptBuilder.newScript()
+				.add(new CreateComplexInstruction("var", mapper1))
+				.add(new AppendInstruction("var", "list", Integer.class, "1"))
+				.add(new AppendInstruction("var", "list", Integer.class, "2"))
+				.add(new AppendInstruction("var", "list", Integer.class, "3"))
+				.add(new ForeachInstruction("var", "list", "element", "index", body))
+				.buildScript("testForeachInstruction0");
+		SynchronizerScriptHandler syncHandler = new SynchronizerScriptHandler();
+		
+		Executor.execute(script, syncHandler);
+		List<Record> recordList = syncHandler.getResult();
+		assertThat(recordList, notNullValue());
+		assertThat(recordList.size(), equalTo(3));
+		
+		assertThat(recordList.get(0).get("integer"), equalTo(0));
+		assertThat(recordList.get(1).get("integer"), equalTo(2));
+		assertThat(recordList.get(2).get("integer"), equalTo(6));
+	}
+
+	@Test
+	public void testIfInstruction0() throws Exception {
+		final AtomicBoolean inDebugger = new AtomicBoolean(false);
+		Script script = ScriptBuilder
+				.newScript()
+				.add(new CreateComplexInstruction("var", mapper1))
+				.add(new SetComplexInstruction("var", "integer", Integer.class,
+						"2"))
+				.add(new SetComplexInstruction("var", "boolean", Boolean.class,
+						"false"))
+				.add(new SetComplexInstruction("var", "string", String.class,
+						"before"))
+				.add(new BreakpointInstruction())
+				.add(new IfInstruction("${var.integer < 5}", ScriptBuilder
+						.newScript()
+						.add(new SetComplexInstruction("var", "boolean",
+								Boolean.class, "true"))
+						.add(new SetComplexInstruction("var", "string",
+								String.class, "then")).getCode(), ScriptBuilder
+						.newScript()
+						.add(new SetComplexInstruction("var", "boolean",
+								Boolean.class, "true"))
+						.add(new SetComplexInstruction("var", "string",
+								String.class, "else")).getCode()))
+				.add(new BreakpointInstruction()).add(new StopInstruction())
+				.buildScript("testIfInstruction0");
+
+		SynchronizerScriptHandler syncHandler = new SynchronizerScriptHandler();
+		Executor.execute(script, new ScriptParameter[] {}, syncHandler,
+				new ScriptDebugger() {
+					@Override
+					public void breakpoint(Runner runner, Script script,
+							Instruction instruction) {
+						inDebugger.set(true);
+						FpcMessage msg = (FpcMessage) runner.ctx
+								.getVariable("var");
+
+						boolean ifExecuted = (boolean) msg.getField("boolean");
+						if (ifExecuted == false) {
+							assertThat((String) msg.getField("string"),
+									equalTo("before"));
+						} else {
+							assertThat((String) msg.getField("string"),
+									equalTo("then"));
+						}
+					}
+				});
+		// Wait until script execution terminates
+		syncHandler.getResult();
+		assertTrue(inDebugger.get());
+	}
+
+	@Test
+	public void testIfInstruction1() throws Exception {
+		final AtomicBoolean inDebugger = new AtomicBoolean(false);
+		Script script = ScriptBuilder
+				.newScript()
+				.add(new CreateComplexInstruction("var", mapper1))
+				.add(new SetComplexInstruction("var", "integer", Integer.class,
+						"2"))
+				.add(new SetComplexInstruction("var", "boolean", Boolean.class,
+						"false"))
+				.add(new SetComplexInstruction("var", "string", String.class,
+						"before"))
+				.add(new BreakpointInstruction())
+				.add(new IfInstruction("${var.integer > 5}", ScriptBuilder
+						.newScript()
+						.add(new SetComplexInstruction("var", "boolean",
+								Boolean.class, "true"))
+						.add(new SetComplexInstruction("var", "string",
+								String.class, "then")).getCode(), ScriptBuilder
+						.newScript()
+						.add(new SetComplexInstruction("var", "boolean",
+								Boolean.class, "true"))
+						.add(new SetComplexInstruction("var", "string",
+								String.class, "else")).getCode()))
+				.add(new BreakpointInstruction()).add(new StopInstruction())
+				.buildScript("testIfInstruction1");
+
+		SynchronizerScriptHandler syncHandler = new SynchronizerScriptHandler();
+		Executor.execute(script, new ScriptParameter[] {}, syncHandler,
+				new ScriptDebugger() {
+					@Override
+					public void breakpoint(Runner runner, Script script,
+							Instruction instruction) {
+						inDebugger.set(true);
+						FpcMessage msg = (FpcMessage) runner.ctx
+								.getVariable("var");
+
+						boolean ifExecuted = (boolean) msg.getField("boolean");
+						if (ifExecuted == false) {
+							assertThat((String) msg.getField("string"),
+									equalTo("before"));
+						} else {
+							assertThat((String) msg.getField("string"),
+									equalTo("else"));
+						}
+					}
+				});
+		// Wait until script execution terminates
+		syncHandler.getResult();
+		assertTrue(inDebugger.get());
+	}
+
+	@Test
+	public void testIfInstruction2() throws Exception {
+		final AtomicBoolean inDebugger = new AtomicBoolean(false);
+		Script script = ScriptBuilder
+				.newScript()
+				.add(new CreateComplexInstruction("var", mapper1))
+				.add(new SetComplexInstruction("var", "integer", Integer.class,
+						"8"))
+				.add(new SetComplexInstruction("var", "boolean", Boolean.class,
+						"false"))
+				.add(new SetComplexInstruction("var", "string", String.class,
+						"before"))
+				.add(new BreakpointInstruction())
+				.add(new IfInstruction("${var.integer > 5}", ScriptBuilder
+						.newScript()
+						.add(new SetComplexInstruction("var", "boolean",
+								Boolean.class, "true"))
+						.add(new SetComplexInstruction("var", "string",
+								String.class, "then")).getCode()))
+				.add(new BreakpointInstruction()).add(new StopInstruction())
+				.buildScript("testIfInstruction2");
+
+		SynchronizerScriptHandler syncHandler = new SynchronizerScriptHandler();
+		Executor.execute(script, new ScriptParameter[] {}, syncHandler,
+				new ScriptDebugger() {
+					@Override
+					public void breakpoint(Runner runner, Script script,
+							Instruction instruction) {
+						inDebugger.set(true);
+						FpcMessage msg = (FpcMessage) runner.ctx
+								.getVariable("var");
+
+						boolean ifExecuted = (boolean) msg.getField("boolean");
+						if (ifExecuted == false) {
+							assertThat((String) msg.getField("string"),
+									equalTo("before"));
+						} else {
+							assertThat((String) msg.getField("string"),
+									equalTo("then"));
+						}
+					}
+				});
+		// Wait until script execution terminates
+		syncHandler.getResult();
+		assertTrue(inDebugger.get());
+	}
+
+	@Test
+	public void testIfInstruction3() throws Exception {
+		final AtomicBoolean inDebugger = new AtomicBoolean(false);
+		Script script = ScriptBuilder
+				.newScript()
+				.add(new CreateComplexInstruction("var", mapper1))
+				.add(new SetComplexInstruction("var", "integer", Integer.class,
+						"8"))
+				.add(new SetComplexInstruction("var", "boolean", Boolean.class,
+						"false"))
+				.add(new SetComplexInstruction("var", "string", String.class,
+						"before"))
+				.add(new BreakpointInstruction())
+				.add(new IfInstruction("${var.integer != 8}", ScriptBuilder
+						.newScript()
+						.add(new SetComplexInstruction("var", "boolean",
+								Boolean.class, "true"))
+						.add(new SetComplexInstruction("var", "string",
+								String.class, "then")).getCode()))
+				.add(new BreakpointInstruction()).add(new StopInstruction())
+				.buildScript("testIfInstruction3");
+
+		SynchronizerScriptHandler syncHandler = new SynchronizerScriptHandler();
+		Executor.execute(script, new ScriptParameter[] {}, syncHandler,
+				new ScriptDebugger() {
+					@Override
+					public void breakpoint(Runner runner, Script script,
+							Instruction instruction) {
+						inDebugger.set(true);
+						FpcMessage msg = (FpcMessage) runner.ctx
+								.getVariable("var");
+						assertThat((String) msg.getField("string"),
+								equalTo("before"));
+					}
+				});
+		// Wait until script execution terminates
+		syncHandler.getResult();
+		assertTrue(inDebugger.get());
+	}
+
+	@Test
+	public void testPutEmitInstructions() throws Exception {
+		Script script = ScriptBuilder
+				.newScript()
+				.add(new CreateComplexInstruction("var", mapper1))
+				.add(new SetComplexInstruction("var", "integer", Integer.class,
+						"4"))
+				.add(new SetComplexInstruction("var", "string", String.class,
+						"test"))
+				.add(new SetComplexInstruction("var", "bool", Boolean.class,
+						"false"))
+				.add(new PutInstruction("${var.integer}", integer))
+				.add(new PutInstruction("${var.string}", string))
+				.add(new PutInstruction("${!var.bool}", bool))
+				.add(new EmitInstruction()).add(new StopInstruction())
+				.buildScript("testPutEmitInstructions");
+
+		SynchronizerScriptHandler syncHandler = new SynchronizerScriptHandler();
+		Executor.execute(script, syncHandler);
+		List<Record> recordList = syncHandler.getResult();
+		assertThat(recordList, notNullValue());
+		assertThat(recordList.size(), equalTo(1));
+
+		Record record = recordList.get(0);
+		for (Field f : record.fields()) {
+			assertThat(f, notNullValue());
+			assertThat(f.getValue(), notNullValue());
+			switch (f.getName()) {
+			case "integer":
+				assertTrue(f.getValue() instanceof Integer);
+				assertThat(f.getIntValue(), equalTo(4));
+				break;
+			case "string":
+				assertTrue(f.getValue() instanceof String);
+				assertThat(f.getStringValue(), equalTo("test"));
+				break;
+			case "bool":
+				assertTrue(f.getValue() instanceof Boolean);
+				assertThat(f.getBooleanValue(), equalTo(true));
+				break;
+			default:
+				throw new RuntimeException("Unexpected attribute '"
+						+ f.getName() + "'.");
+			}
+		}
+	}
+
+	@Test
+	public void testComplexTypeManagement() throws Exception {
+		Script script = ScriptBuilder
+				.newScript()
+				.add(new CreateComplexInstruction("var1", mapper1))
+				.add(new CreateComplexInstruction("var2", mapper2))
+				.add(new SetComplexInstruction("var1", "integer",
+						Integer.class, "4"))
+				.add(new SetComplexInstruction("var1", "string", String.class,
+						"test"))
+				.add(new SetComplexInstruction("var1", "bool", Boolean.class,
+						"false"))
+				.add(new SetComplexInstruction("var2", "var1",
+						FpcMessage.class, "${var1}"))
+				.add(new PutInstruction("${var2.var1.integer}", integer))
+				.add(new PutInstruction("${var2.var1.string}", string))
+				.add(new PutInstruction("${!var2.var1.bool}", bool))
+				.add(new EmitInstruction()).add(new StopInstruction())
+				.buildScript("testPutEmitInstructions");
+
+		SynchronizerScriptHandler syncHandler = new SynchronizerScriptHandler();
+		Executor.execute(script, syncHandler);
+		List<Record> recordList = syncHandler.getResult();
+		assertThat(recordList, notNullValue());
+		assertThat(recordList.size(), equalTo(1));
+
+		Record record = recordList.get(0);
+		for (Field f : record.fields()) {
+			assertThat(f, notNullValue());
+			assertThat(f.getValue(), notNullValue());
+			switch (f.getName()) {
+			case "integer":
+				assertTrue(f.getValue() instanceof Integer);
+				assertThat(f.getIntValue(), equalTo(4));
+				break;
+			case "string":
+				assertTrue(f.getValue() instanceof String);
+				assertThat(f.getStringValue(), equalTo("test"));
+				break;
+			case "bool":
+				assertTrue(f.getValue() instanceof Boolean);
+				assertThat(f.getBooleanValue(), equalTo(true));
+				break;
+			default:
+				throw new RuntimeException("Unexpected attribute '"
+						+ f.getName() + "'.");
+			}
+		}
+	}
+
+	@Test
+	public void testMultiplePutEmitInstructions() throws Exception {
+		Script script = ScriptBuilder
+				.newScript()
+				.add(new CreateComplexInstruction("var", mapper1))
+				.add(new SetComplexInstruction("var", "integer", Integer.class,
+						"4"))
+				.add(new SetComplexInstruction("var", "string", String.class,
+						"test"))
+				.add(new PutInstruction("${var.integer}", integer))
+				.add(new PutInstruction("${var.string}", string))
+				.add(new EmitInstruction())
+				.add(new SetComplexInstruction("var", "integer", Integer.class,
+						"5"))
+				.add(new SetComplexInstruction("var", "string", String.class,
+						"test"))
+				.add(new PutInstruction("${var.integer}", integer))
+				.add(new PutInstruction("${var.string}", string))
+				.add(new EmitInstruction())
+				.add(new SetComplexInstruction("var", "integer", Integer.class,
+						"6"))
+				.add(new SetComplexInstruction("var", "string", String.class,
+						"test"))
+				.add(new PutInstruction("${var.integer}", integer))
+				.add(new PutInstruction("${var.string}", string))
+				.add(new EmitInstruction()).add(new StopInstruction())
+				.buildScript("testMultiplePutEmitInstructions");
+
+		SynchronizerScriptHandler syncHandler = new SynchronizerScriptHandler();
+		Executor.execute(script, syncHandler);
+		List<Record> recordList = syncHandler.getResult();
+		assertThat(recordList, notNullValue());
+		assertThat(recordList.size(), equalTo(3));
+
+		Record record = recordList.get(0);
+		for (Field f : record.fields()) {
+			assertThat(f, notNullValue());
+			assertThat(f.getValue(), notNullValue());
+			switch (f.getName()) {
+			case "integer":
+				assertTrue(f.getValue() instanceof Integer);
+				assertThat(f.getIntValue(), equalTo(4));
+				break;
+			case "string":
+				assertTrue(f.getValue() instanceof String);
+				assertThat(f.getStringValue(), equalTo("test"));
+				break;
+			default:
+				throw new RuntimeException("Unexpected attribute '"
+						+ f.getName() + "'.");
+			}
+		}
+
+		record = recordList.get(1);
+		for (Field f : record.fields()) {
+			assertThat(f, notNullValue());
+			assertThat(f.getValue(), notNullValue());
+			switch (f.getName()) {
+			case "integer":
+				assertTrue(f.getValue() instanceof Integer);
+				assertThat(f.getIntValue(), equalTo(5));
+				break;
+			case "string":
+				assertTrue(f.getValue() instanceof String);
+				assertThat(f.getStringValue(), equalTo("test"));
+				break;
+			default:
+				throw new RuntimeException("Unexpected attribute '"
+						+ f.getName() + "'.");
+			}
+		}
+
+		record = recordList.get(2);
+		for (Field f : record.fields()) {
+			assertThat(f, notNullValue());
+			assertThat(f.getValue(), notNullValue());
+			switch (f.getName()) {
+			case "integer":
+				assertTrue(f.getValue() instanceof Integer);
+				assertThat(f.getIntValue(), equalTo(6));
+				break;
+			case "string":
+				assertTrue(f.getValue() instanceof String);
+				assertThat(f.getStringValue(), equalTo("test"));
+				break;
+			default:
+				throw new RuntimeException("Unexpected attribute '"
+						+ f.getName() + "'.");
+			}
+		}
+	}
+
+	@Test
+	public void testErrorInstruction() throws Exception {
+		Script script = ScriptBuilder.newScript()
+				.add(new ErrorInstruction("Test error instruction"))
+				.add(new StopInstruction()).buildScript("testErrorInstruction");
+
+		SynchronizerScriptHandler syncHandler = new SynchronizerScriptHandler();
+		Runner runner = Executor.execute(script, syncHandler);
+		try {
+			syncHandler.getResult();
+			assertTrue(runner.isDone());
+			assertTrue(runner.isCancelled());
+		} catch (ExecutionException e) {
+			assertThat(e, notNullValue());
+			assertTrue(e.getCause() instanceof ScriptException);
+		}
+	}
+
+	@Test
+	public void testSubmitInstruction() throws Exception {
+		Instruction submit = new SubmitInstruction(request1, channel,
+				new RequestParameter[] { new RequestParameter("param", "param",
+						mapper1) }, "output", mapper2);
+
+		Script script = ScriptBuilder
+				.newScript()
+				.add(new CreateComplexInstruction("param", mapper1))
+				.add(new SetComplexInstruction("param", "integer",
+						Integer.class, "5"))
+				.add(new SetComplexInstruction("param", "string", String.class,
+						"test")).add(submit)
+				.add(new PutInstruction("${output.integer}", integer))
+				.add(new PutInstruction("${output.string}", string))
+				.add(new EmitInstruction()).add(new StopInstruction())
+				.buildScript("testSubmitInstruction");
+
+		SynchronizerScriptHandler syncHandler = new SynchronizerScriptHandler();
+		Executor.execute(script, syncHandler);
+		List<Record> recordList = syncHandler.getResult();
+		assertThat(recordList, notNullValue());
+		assertThat(recordList.size(), equalTo(1));
+
+		Record record = recordList.get(0);
+		assertThat(record, notNullValue());
+		assertThat(record.get("integer"), notNullValue());
+		assertThat((Integer) record.get("integer"), equalTo(5));
+		assertThat(record.get("string"), notNullValue());
+		assertThat((String) record.get("string"), equalTo("test"));
+	}
+
+}

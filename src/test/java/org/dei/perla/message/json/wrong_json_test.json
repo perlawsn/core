@@ -1,0 +1,11 @@
+{
+	"name" : "test_room",
+	"number" : 12,
+	"environment" : {
+		"temperature" : 21,
+		"pressure" : 234,
+		"light" : 12,
+		"gravity" : 1.66
+	},
+	"occupants" : ["Mario", "Gianni"]
+}

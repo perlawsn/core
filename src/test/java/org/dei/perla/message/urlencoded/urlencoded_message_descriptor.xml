@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<device type="test-json"
+	xmlns="http://perla.dei.org/device"
+	xmlns:ue="http://perla.dei.org/fpc/message/urlencoded">
+
+	<attributes>
+		<attribute id="temperature" type="float" permission="read-write"/>
+		<attribute id="pressure" type="float" permission="read-write"/>
+		<attribute id="timestamp" type="timestamp" permission="read-write"/>
+	</attributes>
+
+	<messages>
+		<ue:message id="urlencoded_message">
+			<ue:parameter name="temperature" type="float"/>
+			<ue:parameter name="pressure" type="float"/>
+			<ue:parameter name="location" type="string"/>
+			<ue:parameter name="key" qualifier="static" type="integer" value="5"/>
+			<ue:parameter name="timestamp" type="timestamp" format="d MMM uuuu HH:mm"/>
+		</ue:message>
+	</messages>
+
+</device>
