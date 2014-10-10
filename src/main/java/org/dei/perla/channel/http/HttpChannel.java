@@ -108,28 +108,23 @@ public class HttpChannel extends AbstractChannel {
 	private Payload executeHttpRequest(HttpIORequest request,
 			HttpUriRequest uriRequest) throws ChannelException {
 		try {
-			CloseableHttpResponse response = null;
-			
-			try {
-				response = client.execute(uriRequest);
-				HttpEntity entity = response.getEntity();
-				Payload payload = null;
-				if (entity != null) {
-					payload = new ByteArrayPayload(EntityUtils.toByteArray(response
-							.getEntity()));
-				}
-				int statusCode = response.getStatusLine().getStatusCode();
-				if (statusCode < 200 || statusCode > 299) {
-					throw new ChannelException("Invalid status code '" + statusCode
-							+ "' received while processing HTTP request '"
-							+ request.getId());
-				}
-				return payload;
 
-			} finally {
-				response.close();
-			}
-		} catch (IOException | ChannelException e) {
+            try (CloseableHttpResponse response = client.execute(uriRequest)) {
+                HttpEntity entity = response.getEntity();
+                Payload payload = null;
+                if (entity != null) {
+                    payload = new ByteArrayPayload(EntityUtils.toByteArray(response
+                            .getEntity()));
+                }
+                int statusCode = response.getStatusLine().getStatusCode();
+                if (statusCode < 200 || statusCode > 299) {
+                    throw new ChannelException("Invalid status code '" + statusCode
+                            + "' received while processing HTTP request '"
+                            + request.getId());
+                }
+                return payload;
+            }
+        } catch (IOException | ChannelException e) {
 			throw new ChannelException(e);
 		}
 	}

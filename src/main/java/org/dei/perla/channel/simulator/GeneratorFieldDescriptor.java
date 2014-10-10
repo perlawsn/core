@@ -11,15 +11,15 @@ import org.dei.perla.fpc.descriptor.DataType;
 
 /**
  * This class contains all information needed by the <code>SimulatorChannel</code>
- * to dynamically generate field values. 
- * 
+ * to dynamically generate field values.
+ *
  * See <code>SimulatorChannel</code>'s javadoc entries for more information
  * about the meaning of the min and max field for different
  * <code>AttributeType</code>s.
- * 
- * 
+ *
+ *
  * @author Guido Rota (2014)
- * 
+ *
  */
 @XmlRootElement(name = "field")
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -27,41 +27,45 @@ public class GeneratorFieldDescriptor {
 
 	@XmlAttribute
 	private String name;
-	
+
 	@XmlAttribute
-	private GeneratorFieldQualifier qualifier;
-	
+	private GeneratorFieldStrategy strategy;
+
 	@XmlAttribute
 	private DataType type;
 
 	@XmlAttribute
 	private String value;
-	
+
 	@XmlAttribute
 	private Integer min;
 
 	@XmlAttribute
 	private Integer max;
 
+    @XmlAttribute
+    private Integer increment;
+
 	protected GeneratorFieldDescriptor() {
 		super();
 		type = DataType.STRING;
 		min = 0;
 		max = 1;
+        increment = 1;
 	}
-	
+
 	public String getName() {
 		return name;
 	}
 
-	public GeneratorFieldQualifier getQualifier() {
-		return qualifier;
+	public GeneratorFieldStrategy getStrategy() {
+		return strategy;
 	}
-	
+
 	public DataType getType() {
 		return type;
 	}
-	
+
 	public String getValue() {
 		return value;
 	}
@@ -74,15 +78,22 @@ public class GeneratorFieldDescriptor {
 		return max;
 	}
 
+    public Integer getIncrement() {
+        return increment;
+    }
+
 	@XmlEnum
-	public enum GeneratorFieldQualifier {
-		
+	public enum GeneratorFieldStrategy {
+
 		@XmlEnumValue("static")
 		STATIC,
-		
+
 		@XmlEnumValue("dynamic")
-		DYNAMIC
-		
+		DYNAMIC,
+
+        @XmlEnumValue("step")
+        STEP
+
 	}
-	
+
 }

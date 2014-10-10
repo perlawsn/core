@@ -13,39 +13,39 @@
 		<attribute id="period" type="integer" permission="write-only"/>
 		<attribute id="static" type="integer" access="static" value="5"/>
 	</attributes>
-	
+
 	<channels>
 		<sim:channel id="simulator">
 			<sim:generator id="all">
-				<sim:field name="type" qualifier="static" value="all"/>
-				<sim:field name="integer" qualifier="dynamic" 
+				<sim:field name="type" strategy="static" value="all"/>
+				<sim:field name="integer" strategy="dynamic"
 					type="integer" min="12" max="32"/>
-				<sim:field name="float" qualifier="dynamic" 
+				<sim:field name="float" strategy="dynamic"
 					type="float" min="450" max="600"/>
-				<sim:field name="string" qualifier="dynamic" 
+				<sim:field name="string" strategy="dynamic"
 					type="string" min="10" max="15"/>
 			</sim:generator>
 			<sim:generator id="integer">
-				<sim:field name="type" qualifier="static" value="integer"/>
-				<sim:field name="integer" qualifier="dynamic"
+				<sim:field name="type" strategy="static" value="integer"/>
+				<sim:field name="integer" strategy="dynamic"
 					type="integer" min="47" max="58"/>
 			</sim:generator>
 			<sim:generator id="string">
-				<sim:field name="type" qualifier="static" value="integer"/>
-				<sim:field name="string" qualifier="dynamic"
+				<sim:field name="type" strategy="static" value="integer"/>
+				<sim:field name="string" strategy="dynamic"
 					type="string" min="5" max="5"/>
 			</sim:generator>
 			<sim:generator id="boolean">
-				<sim:field name="type" qualifier="static" value="boolean"/>
-				<sim:field name="boolean" qualifier="dynamic" type="boolean"/>
+				<sim:field name="type" strategy="static" value="boolean"/>
+				<sim:field name="boolean" strategy="dynamic" type="boolean"/>
 			</sim:generator>
 			<sim:generator id="event">
-				<sim:field name="type" qualifier="static" value="event"/>
-				<sim:field name="event" qualifier="dynamic" type="boolean"/>
+				<sim:field name="type" strategy="static" value="event"/>
+				<sim:field name="event" strategy="dynamic" type="boolean"/>
 			</sim:generator>
 		</sim:channel>
 	</channels>
-	
+
 	<messages>
 		<sim:message id="set-msg">
 			<sim:field name="test" type="integer"/>
@@ -76,7 +76,7 @@
 			<sim:field name="event" type="boolean"/>
 		</sim:message>
 	</messages>
-	
+
 	<requests>
 		<sim:request id="all-request" generator="all"/>
 		<sim:request id="integer-request" generator="integer"/>
@@ -84,7 +84,7 @@
 		<sim:request id="boolean-request" generator="boolean"/>
 		<sim:request id="event-request" generator="event"/>
 	</requests>
-	
+
 	<operations>
 		<get id="integer-get">
 			<i:submit request="integer-request" channel="simulator" variable="result" type="integer-msg"/>
@@ -167,5 +167,5 @@
 			</on>
 		</async>
 	</operations>
-	
+
 </device>

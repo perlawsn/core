@@ -14,22 +14,22 @@
 	<channels>
 		<sim:channel id="test">
 			<sim:generator id="temp-only">
-				<sim:field name="type" qualifier="static" value="temp-only" />
-				<sim:field name="temperature" qualifier="dynamic" type="float"
+				<sim:field name="type" strategy="static" value="temp-only" />
+				<sim:field name="temperature" strategy="dynamic" type="float"
 					min="12" max="32" />
 			</sim:generator>
 			<sim:generator id="press-only">
-				<sim:field name="type" qualifier="static" value="press-only" />
-				<sim:field name="pressure" qualifier="dynamic" type="float"
-					min="450" max="600" />
+				<sim:field name="type" strategy="static" value="press-only" />
+				<sim:field name="pressure" strategy="step" type="float"
+					min="450" max="600" increment="1"/>
 			</sim:generator>
 			<sim:generator id="all">
-				<sim:field name="type" qualifier="static" value="all" />
-				<sim:field name="temperature" qualifier="dynamic" type="float"
+				<sim:field name="type" strategy="static" value="all" />
+				<sim:field name="temperature" strategy="dynamic" type="float"
 					min="12" max="32" />
-				<sim:field name="pressure" qualifier="dynamic" type="float"
+				<sim:field name="pressure" strategy="dynamic" type="float"
 					min="450" max="600" />
-				<sim:field name="timestamp" qualifier="dynamic" type="timestamp" />
+				<sim:field name="timestamp" strategy="dynamic" type="timestamp" />
 			</sim:generator>
 		</sim:channel>
 	</channels>

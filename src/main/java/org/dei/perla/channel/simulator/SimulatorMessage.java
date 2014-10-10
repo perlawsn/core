@@ -10,12 +10,12 @@ import org.dei.perla.message.FpcMessage;
 /**
  * A custom <code>FpcMessage</code> implementation designed for the
  * <code>SimulatorChannel</code>.
- * 
+ *
  * This class is only intended to be used in conjunction with the
  * <code>SimulatorChannel</code> and <code>SimulatorMapper</code> components.
- * 
+ *
  * @author Guido Rota (2014)
- * 
+ *
  */
 public class SimulatorMessage implements FpcMessage {
 
@@ -27,7 +27,7 @@ public class SimulatorMessage implements FpcMessage {
 	protected SimulatorMessage(String id,
 			Map<String, ? extends FieldDescriptor> fieldMap,
 			Map<String, String> staticFieldMap) {
-		this(id, fieldMap, new HashMap<String, Object>(), staticFieldMap);
+		this(id, fieldMap, new HashMap<>(), staticFieldMap);
 	}
 
 	protected SimulatorMessage(String id,
@@ -42,10 +42,10 @@ public class SimulatorMessage implements FpcMessage {
 	/**
 	 * Returns a <code>Map</code> containing the the data stored inside this
 	 * <code>SimulatorPayload</code>.
-	 * 
+	 *
 	 * This method is used by the <code>SimulatorMapper</code> to retrieve the
 	 * payload data during the marshal operation.
-	 * 
+	 *
 	 * @return <code>Map</code> containing the payload data
 	 */
 	protected Map<String, Object> getValueMap() {
@@ -59,10 +59,7 @@ public class SimulatorMessage implements FpcMessage {
 
 	@Override
 	public boolean hasField(String name) {
-		if (!fieldMap.containsKey(name)) {
-			return false;
-		}
-		return true;
+        return fieldMap.containsKey(name);
 	}
 
 	@Override
@@ -89,11 +86,11 @@ public class SimulatorMessage implements FpcMessage {
 		}
 		valueMap.put(name, value);
 	}
-	
+
 	@Override
 	public void appendElement(String name, Object value)
 			throws IllegalArgumentException {
-		throw new RuntimeException("Simulator messages do not support list type");	
+		throw new RuntimeException("Simulator messages do not support list type");
 	}
 
 	@Override

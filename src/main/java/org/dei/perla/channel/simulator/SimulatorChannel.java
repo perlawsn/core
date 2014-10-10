@@ -16,13 +16,13 @@ import org.dei.perla.channel.Payload;
  * <p>
  * A <code>Channel</code> for simulating a network node.
  * </p>
- * 
+ * <p/>
  * <p>
  * The <code>SimulatorChannel</code> behaviour can be specified directly in the
  * XML Device Descriptor using the appropriate {@code<channel>} element with
  * namespace http://perla.dei.org/channel/simulator.
  * </p>
- * 
+ * <p/>
  * <p>
  * A <code>SimulatorChannel</code> is able to reply a user-defined series of
  * messages containing fixed or random data. The following snippet of code
@@ -51,35 +51,35 @@ import org.dei.perla.channel.Payload;
  * </li>
  * <ul>
  * </p>
- * 
+ * <p/>
  * <p>
- * 
+ * <p/>
  * <pre>
  * {@code
  * <sim:channel id="test">
  *   <sim:generator id="temp-only">
  *     <sim:field name="type" qualifier="static" value="temp-only"/>
- *     <sim:field name="temperature" qualifier="dynamic" 
+ *     <sim:field name="temperature" qualifier="dynamic"
  *         type="float" min="12" max="32"/>
  *     </sim:generator>
  *   <sim:generator id="press-only">
  *     <sim:field name="type" qualifier="static" value="press-only"/>
- *     <sim:field name="pressure" qualifier="dynamic" 
+ *     <sim:field name="pressure" qualifier="dynamic"
  *         type="float" min="450" max="600"/>
  *   </sim:generator>
  *   <sim:generator id="all">
  *     <sim:field name="type" qualifier="static" value="all"/>
- *     <sim:field name="temperature" qualifier="dynamic" 
+ *     <sim:field name="temperature" qualifier="dynamic"
  *         type="float" min="12" max="32"/>
- *     <sim:field name="pressure" qualifier="dynamic" 
+ *     <sim:field name="pressure" qualifier="dynamic"
  *         type="float" min="450" max="600"/>
  *   </sim:generator>
- * </sim:channel> 
+ * </sim:channel>
  * }
  * </pre>
- * 
+ * <p/>
  * </p>
- * 
+ * <p/>
  * <p>
  * The {@code<field>} qualifier attribute allows users to specify how that field
  * is produced by the <code>SimulatorChannel</code>.
@@ -91,7 +91,7 @@ import org.dei.perla.channel.Payload;
  * element.</li>
  * </ul>
  * </p>
- * 
+ * <p/>
  * <p>
  * Dynamic field generation depends on the field type:
  * <ul>
@@ -105,26 +105,26 @@ import org.dei.perla.channel.Payload;
  * <li></li>
  * </ul>
  * </p>
- * 
+ * <p/>
  * <p>
  * <code>SimulatorChannel</code> does not provide any means of creating dynamic
  * attributes with a static value. Such behaviour can be achieved by configuring
  * an FPC attribute with static <code>access</code>.
  * </p>
- * 
+ * <p/>
  * <p>
  * <code>SimulatorChannel</code> users can request a specific response by
  * sending a <code>SimulatorIORequest</code> with the desired response
  * identifier set in the <code>generatorId</code> field.
  * </p>
- * 
+ * <p/>
  * <p>
  * For example, sending a <code>SimulatorIORequest</code> with the
  * <code>responseId</code> field set to <code>press-only</code> will result in
  * the creation of a <code>ChannelResponse</code> conforming to the
  * <code>press-only</code> section of the XML code snippet above.
  * </p>
- * 
+ * <p/>
  * <p>
  * The <code>period</code> parameter inside the <code>SimulatorIORequest</code>
  * is used for starting, stopping and re-scheduling value generation at periodic
@@ -133,102 +133,98 @@ import org.dei.perla.channel.Payload;
  * 'period', which represents the interval in ms of the periodic value
  * generation task.
  * </p>
- * 
+ * <p/>
  * <p>
  * Scheduling (or re-scheduling) happens when the period is > 0. A running
  * periodic generation task is stopped when the <code>SimulatorChannel</code>
  * receive a request with period equal to 0.
  * </p>
- * 
+ *
  * @author Guido Rota (2014)
- * 
  */
 public class SimulatorChannel extends AbstractChannel {
 
-	private final Generator[] generatorArray;
-	private ScheduledExecutorService exec = new ScheduledThreadPoolExecutor(5);
-	private Map<String, ScheduledFuture<?>> runningMap = new HashMap<>();
+    private final Generator[] generatorArray;
+    private ScheduledExecutorService exec = new ScheduledThreadPoolExecutor(5);
+    private Map<String, ScheduledFuture<?>> runningMap = new HashMap<>();
 
-	public SimulatorChannel(String id, Generator[] generatorArray) {
-		super(id);
-		this.generatorArray = generatorArray;
-	}
+    public SimulatorChannel(String id, Generator[] generatorArray) {
+        super(id);
+        this.generatorArray = generatorArray;
+    }
 
-	@Override
-	public Payload handleRequest(IORequest request) throws ChannelException,
-			InterruptedException {
-		SimulatorIORequest simReq;
+    @Override
+    public Payload handleRequest(IORequest request) throws ChannelException,
+            InterruptedException {
+        SimulatorIORequest simReq;
 
-		simReq = (SimulatorIORequest) request;
+        simReq = (SimulatorIORequest) request;
 
-		Generator generator = findGenerator(simReq.getGeneratorId());
-		if (generator == null) {
-			return null;
-		}
+        Generator generator = findGenerator(simReq.getGeneratorId());
+        if (generator == null) {
+            return null;
+        }
 
-		if (simReq.getPeriod() != null) {
-			SimulatorPayload payload = (SimulatorPayload) simReq.getPeriod();
-			if (!payload.getValueMap().containsKey("period")) {
-				throw new ChannelException(
-						"Missing 'period' attribute in period message");
-			}
-			int period = (Integer) payload.getValueMap().get("period");
-			scheduleResponse(simReq, period, generator);
-			return null;
-		}
+        if (simReq.getPeriod() != null) {
+            SimulatorPayload payload = (SimulatorPayload) simReq.getPeriod();
+            if (!payload.getValueMap().containsKey("period")) {
+                throw new ChannelException(
+                        "Missing 'period' attribute in period message");
+            }
+            int period = (Integer) payload.getValueMap().get("period");
+            scheduleResponse(simReq, period, generator);
+            return null;
+        }
 
-		return generator.generateResponse();
-	}
+        return generator.generateResponse();
+    }
 
-	private Generator findGenerator(String id) {
-		for (Generator generator : generatorArray) {
-			if (generator.getId().equals(id)) {
-				return generator;
-			}
-		}
-		return null;
-	}
+    private Generator findGenerator(String id) {
+        for (Generator generator : generatorArray) {
+            if (generator.getId().equals(id)) {
+                return generator;
+            }
+        }
+        return null;
+    }
 
-	private void scheduleResponse(SimulatorIORequest request, int period,
-			final Generator generator) throws ChannelException {
+    private void scheduleResponse(SimulatorIORequest request, int period,
+            final Generator generator) throws ChannelException {
 
-		if (period < 0) {
-			throw new ChannelException(
-					"Invalid negative period in Simulator request '"
-							+ request.getId() + "'.");
-		}
+        if (period < 0) {
+            throw new ChannelException(
+                    "Invalid negative period in Simulator request '"
+                            + request.getId() + "'.");
+        }
 
-		ScheduledFuture<?> future = runningMap.remove(request.getGeneratorId());
-		if (future != null) {
-			future.cancel(true);
-		}
+        ScheduledFuture<?> future = runningMap.remove(request.getGeneratorId());
+        if (future != null) {
+            future.cancel(true);
+        }
 
-		// Setting a period = 0 stops the simulator from periodically generating
-		// values
-		if (period == 0) {
-			return;
-		}
+        // Setting a period = 0 stops the simulator from periodically generating
+        // values
+        if (period == 0) {
+            return;
+        }
 
-		future = exec.scheduleAtFixedRate(new Runnable() {
-			@Override
-			public void run() {
-				Payload response = generator.generateResponse();
-				notifyAsyncData(response);
-			}
-		}, 0, period, TimeUnit.MILLISECONDS);
+        future = exec.scheduleAtFixedRate(() -> {
+            Payload response = generator.generateResponse();
+            notifyAsyncData(response);
+        }, 0, period, TimeUnit.MILLISECONDS);
 
-		runningMap.put(request.getGeneratorId(), future);
-	}
+        runningMap.put(request.getGeneratorId(), future);
+    }
 
-	@Override
-	public void close() {
-		super.close();
-		for (ScheduledFuture<?> future : runningMap.values()) {
-			future.cancel(true);
-		}
-		runningMap = null;
-		exec.shutdownNow();
-		exec = null;
-	}
+    @Override
+    public void close() {
+        super.close();
+        for (ScheduledFuture<?> future : runningMap.values()) {
+            future.cancel(true);
+        }
+        runningMap = null;
+        exec.shutdownNow();
+        exec = null;
+    }
 
 }
