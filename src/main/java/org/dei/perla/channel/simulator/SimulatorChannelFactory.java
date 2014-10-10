@@ -108,10 +108,13 @@ public class SimulatorChannelFactory implements ChannelFactory {
                 err.addError("Missing field name");
                 continue;
             }
-
+            if (field.getStrategy() == null) {
+                err.addError("Missing generation strategy");
+                continue;
+            }
             if (attributeList.contains(fieldName)) {
                 err.addError("Duplicate field name '" + field.getName() + "'");
-
+                continue;
             }
             attributeList.add(field.getName());
             valueGeneratorArray[i] = parseField(
