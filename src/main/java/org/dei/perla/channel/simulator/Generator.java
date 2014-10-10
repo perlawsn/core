@@ -1,6 +1,5 @@
 package org.dei.perla.channel.simulator;
 
-import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
