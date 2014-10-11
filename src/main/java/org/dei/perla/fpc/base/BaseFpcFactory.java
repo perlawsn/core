@@ -78,7 +78,7 @@ public class BaseFpcFactory implements FpcFactory {
         Conditions.checkNotNull(descriptor, "descriptor");
         ParsingContext ctx = new ParsingContext(id);
 
-        Errors err = new Errors("Device descriptor '%s'", descriptor.getName());
+        Errors err = new Errors("Device descriptor '%s'", descriptor.getType());
         try {
             parseDescriptor(err, descriptor, ctx);
         } catch (Exception e) {
@@ -91,22 +91,22 @@ public class BaseFpcFactory implements FpcFactory {
 
         OperationScheduler scheduler = new OperationScheduler(ctx.getOpList,
                 ctx.setOpList, ctx.periodicOpList, ctx.asyncOpList);
-        return new BaseFpc(id, ctx.attributeSet, ctx.staticAttributeSet,
-                ctx.channelMgr, scheduler);
+        return new BaseFpc(id, descriptor.getType(), ctx.attributeSet,
+                ctx.staticAttributeSet, ctx.channelMgr, scheduler);
     }
 
     /**
      * Parses the device descriptor passed as parameter.
-     * <p/>
+     * <p>
      * This method update the ParsingContext data structure with all the
      * information and software components needed to create a new FPC.
-     * <p/>
+     * <p>
      * The parsing procedure continues even when errors are found. This allows
      * the parser to catch as many error as possible, and return to the user a
      * clearer pictures of the changes that need to be applied to the Device
      * Descriptor.
      *
-     * @param err Errors object
+     * @param err  Errors object
      * @param desc Device descriptor
      * @param ctx  Data structure for storing intermediate parsing result
      * @return Number of errors found while parsing the Device Descriptor
@@ -114,7 +114,7 @@ public class BaseFpcFactory implements FpcFactory {
     private void parseDescriptor(Errors err, DeviceDescriptor desc, ParsingContext ctx) {
 
         // Check device name
-        String deviceName = desc.getName();
+        String deviceName = desc.getType();
         if (Check.nullOrEmpty(deviceName)) {
             err.addError(MISSING_DEVICE_TYPE);
         }
@@ -256,7 +256,7 @@ public class BaseFpcFactory implements FpcFactory {
                 err.addError(DUPLICATE_FIELD_NAME, field.getName());
             }
             fieldNameSet.add(field.getName());
-            checkField(field, ctx, err.inContext("Field '%s'", field.getName()));
+            checkField(field, err.inContext("Field '%s'", field.getName()));
         }
 
         if (!err.isEmpty()) {
@@ -287,8 +287,7 @@ public class BaseFpcFactory implements FpcFactory {
         ctx.addMapper(mapper);
     }
 
-    private void checkField(FieldDescriptor field, ParsingContext ctx,
-            Errors err) {
+    private void checkField(FieldDescriptor field, Errors err) {
         String fieldName = field.getName();
         String value = field.getValue();
 

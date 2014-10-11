@@ -30,6 +30,7 @@ public class BaseFpc implements Fpc {
 			DataType.ID);
 
 	private final int id;
+    private final String type;
 	private final Set<Attribute> attributeSet;
 	private final Set<StaticAttribute> staticAttributeSet;
 	private final ChannelManager channelMgr;
@@ -47,10 +48,11 @@ public class BaseFpc implements Fpc {
 				Collections.emptySet(), doNothing);
 	}
 
-	protected BaseFpc(int id, Set<Attribute> attributeSet,
+	protected BaseFpc(int id, String type, Set<Attribute> attributeSet,
 			Set<StaticAttribute> staticAttributeSet, ChannelManager channelMgr,
 			OperationScheduler scheduler) {
 		this.id = id;
+        this.type = type;
 		this.attributeSet = attributeSet;
 		this.staticAttributeSet = staticAttributeSet;
 		this.channelMgr = channelMgr;
@@ -61,6 +63,11 @@ public class BaseFpc implements Fpc {
 	public int getId() {
 		return id;
 	}
+
+    @Override
+    public String getType() {
+        return type;
+    }
 
 	@Override
 	public Set<Attribute> getAttributes() {
@@ -165,17 +172,17 @@ public class BaseFpc implements Fpc {
 
 	@Override
 	public void stop(final StopHandler<Fpc> handler) {
-		scheduler.stop((Void) -> { 
+		scheduler.stop((Void) -> {
 			channelMgr.stop();
 			handler.hasStopped(this);
 		});
 	}
-	
+
 	/**
 	 * Implementation of a {@link Task} that terminates immediately. This class is
 	 * mainly used as a return value for 'get' requests that only return static
 	 * attributes, or for which the result was already available.
-	 * 
+	 *
 	 * @author Guido Rota (2014)
 	 *
 	 */

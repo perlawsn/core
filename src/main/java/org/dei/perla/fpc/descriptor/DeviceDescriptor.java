@@ -1,25 +1,18 @@
 package org.dei.perla.fpc.descriptor;
 
+import javax.xml.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementRef;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Java representation of a Device, mainly to be used by the FPCFactory and
  * related classes to create new FPCs. This class
  * contains various JAXB annotations that allow automatic data binding from an
  * XML file.
- * 
- * 
+ *
+ *
  * @author Guido Rota (2014)
- * 
+ *
  */
 @XmlRootElement(name = "device")
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -28,8 +21,8 @@ public class DeviceDescriptor {
 	/**
 	 * Device type
 	 */
-	@XmlAttribute(name = "name", required = true)
-	private String name;
+	@XmlAttribute(name = "type", required = true)
+	private String type;
 
 	/**
 	 * List of attributes exposed by the device. Attributes in this list can be
@@ -73,13 +66,13 @@ public class DeviceDescriptor {
 	public DeviceDescriptor() {
 	}
 
-	public DeviceDescriptor(String name,
+	public DeviceDescriptor(String type,
 			List<AttributeDescriptor> attributeList,
 			List<MessageDescriptor> messageList,
 			List<ChannelDescriptor> channelList,
 			List<IORequestDescriptor> requestList,
 			List<OperationDescriptor> operationList) {
-		this.name = name;
+		this.type = type;
 		this.attributeList = attributeList;
 		this.messageList = messageList;
 		this.channelList = channelList;
@@ -87,8 +80,8 @@ public class DeviceDescriptor {
 		this.operationList = operationList;
 	}
 
-	public String getName() {
-		return name;
+	public String getType() {
+		return type;
 	}
 
 	public List<AttributeDescriptor> getAttributeList() {

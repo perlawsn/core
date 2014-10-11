@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<device type="test-json" name="test"
+<device type="test" name="test"
 	xmlns="http://perla.dei.org/device"
 	xmlns:i="http://perla.dei.org/device/instructions"
 	xmlns:sim="http://perla.dei.org/channel/simulator">
@@ -9,29 +9,29 @@
 		<attribute id="temperature" type="float" permission="read-write"/>
 		<attribute id="pressure" type="float"/>
 	</attributes>
-	
+
 	<channels>
 		<sim:channel id="test">
 			<sim:response id="temp-only">
 				<sim:response-field name="type" qualifier="static" value="temp-only"/>
-				<sim:response-field name="temperature" qualifier="attribute" 
+				<sim:response-field name="temperature" qualifier="attribute"
 					type="float" min="12" max="32"/>
 			</sim:response>
 			<sim:response id="press-only">
 				<sim:response-field name="type" qualifier="static" value="press-only"/>
-				<sim:response-field name="pressure" qualifier="attribute" 
+				<sim:response-field name="pressure" qualifier="attribute"
 					type="float" min="450" max="600"/>
 			</sim:response>
 			<sim:response id="all">
 				<sim:response-field name="type" qualifier="static" value="all"/>
-				<sim:response-field name="temperature" qualifier="attribute" 
+				<sim:response-field name="temperature" qualifier="attribute"
 					type="float" min="12" max="32"/>
-				<sim:response-field name="pressure" qualifier="attribute" 
+				<sim:response-field name="pressure" qualifier="attribute"
 					type="float" min="450" max="600"/>
 			</sim:response>
 		</sim:channel>
 	</channels>
-	
+
 	<messages>
 		<sim:message id="temp-only">
 			<sim:field name="type" qualifier="static" value="temp-only"/>
@@ -47,13 +47,13 @@
 			<sim:field name="pressure" qualifier="attribute" attribute-id="pressure"/>
 		</sim:message>
 	</messages>
-	
+
 	<requests>
 		<sim:request id="temp-only" generator="temp-only" />
 		<sim:request id="press-only" generator="press-only" />
 		<sim:request id="all" generator="all" />
 	</requests>
-	
+
 	<operations>
 		<periodic id="periodic">
 			<start>
@@ -92,5 +92,5 @@
 			</on>
 		</async>
 	</operations>
-	
+
 </device>

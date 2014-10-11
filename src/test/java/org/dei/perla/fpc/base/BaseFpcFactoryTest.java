@@ -42,7 +42,7 @@ public class BaseFpcFactoryTest {
 	private static final Attribute floatAttribute = new Attribute("float", DataType.FLOAT);
 	private static final Attribute stringAttribute = new Attribute("string", DataType.STRING);
 	private static final Attribute booleanAttribute = new Attribute("boolean", DataType.BOOLEAN);
-	
+
 	private static final String descriptorPath = "src/test/java/org/dei/perla/fpc/base/fpc_descriptor.xml";
 	private static List<String> packageList = Arrays.asList(new String[] {
 			"org.dei.perla.fpc.descriptor",
@@ -82,32 +82,32 @@ public class BaseFpcFactoryTest {
 	public void checkAttributes() {
 		Attribute att;
 		Collection<Attribute> attributes = baseFpc.getAttributes();
-		
+
 		att = find("integer", attributes);
 		assertThat(att, notNullValue());
 		assertThat(att.getId(), equalTo("integer"));
 		assertThat(att.getType(), equalTo(DataType.INTEGER));
-		
+
 		att = find("float", attributes);
 		assertThat(att, notNullValue());
 		assertThat(att.getId(), equalTo("float"));
 		assertThat(att.getType(), equalTo(DataType.FLOAT));
-		
+
 		att = find("boolean", attributes);
 		assertThat(att, notNullValue());
 		assertThat(att.getId(), equalTo("boolean"));
 		assertThat(att.getType(), equalTo(DataType.BOOLEAN));
-		
+
 		att = find("string", attributes);
 		assertThat(att, notNullValue());
 		assertThat(att.getId(), equalTo("string"));
 		assertThat(att.getType(), equalTo(DataType.STRING));
-		
+
 		att = find("period", attributes);
 		assertThat(att, notNullValue());
 		assertThat(att.getId(), equalTo("period"));
 		assertThat(att.getType(), equalTo(DataType.INTEGER));
-		
+
 		att = find("static", attributes);
 		assertThat(att, notNullValue());
 		assertThat(att.getId(), equalTo("static"));
@@ -119,7 +119,7 @@ public class BaseFpcFactoryTest {
 		Integer value = (Integer) staticAtt.getValue();
 		assertThat(value, equalTo(5));
 	}
-	
+
 	private static Attribute find(String id, Collection<Attribute> attributes) {
 		for (Attribute a : attributes) {
 			if (a.getId().equals(id)) {
@@ -129,11 +129,16 @@ public class BaseFpcFactoryTest {
 		return null;
 	}
 
+    @Test
+    public void checkType() {
+        assertThat(baseFpc.getType(), equalTo("test"));
+    }
+
 	@Test
 	public void checkGetOperations() {
 		Operation op;
 		Collection<Attribute> attributes;
-		
+
 		op = scheduler.getGetOperation("integer-get");
 		assertThat(op, notNullValue());
 		assertTrue(op instanceof OneoffOperation);
@@ -152,12 +157,12 @@ public class BaseFpcFactoryTest {
 		assertFalse(attributes.contains(booleanAttribute));
 		assertFalse(attributes.contains(intAttribute));
 	}
-	
+
 	@Test
 	public void checkSetOperation() {
 		Operation op;
 		Collection<Attribute> attributes;
-		
+
 		op = scheduler.getSetOperation("integer-set");
 		assertThat(op, notNullValue());
 		assertTrue(op instanceof OneoffOperation);
@@ -231,7 +236,7 @@ public class BaseFpcFactoryTest {
 		op = scheduler.getPeriodicOperation("all-periodic");
 		assertTrue(op instanceof NativePeriodicOperation);
 		script = ((NativePeriodicOperation) op).getStartScript();
-		
+
 		i = script.getCode();
 		assertTrue(i instanceof CreateComplexInstruction);
 		i = i.next();

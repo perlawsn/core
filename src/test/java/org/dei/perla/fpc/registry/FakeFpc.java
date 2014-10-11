@@ -23,6 +23,11 @@ public class FakeFpc implements Fpc {
 		return 0;
 	}
 
+    @Override
+    public String getType() {
+        return "";
+    }
+
 	@Override
 	public Collection<Attribute> getAttributes() {
 		return attributes;

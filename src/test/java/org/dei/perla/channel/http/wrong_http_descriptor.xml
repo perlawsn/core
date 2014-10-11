@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<device type="test-json" xmlns="http://perla.dei.org/device"
+<device type="test-html" xmlns="http://perla.dei.org/device"
 	xmlns:ue="http://perla.dei.org/fpc/message/urlencoded" xmlns:ht="http://perla.dei.org/channel/http"
 	xmlns:js="http://perla.dei.org/fpc/message/json">
 

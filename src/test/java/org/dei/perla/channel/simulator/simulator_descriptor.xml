@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<device type="test-json" name="test" xmlns="http://perla.dei.org/device"
+<device type="test-simulator" name="test" xmlns="http://perla.dei.org/device"
 	xmlns:sim="http://perla.dei.org/channel/simulator">
 
 	<attributes>
