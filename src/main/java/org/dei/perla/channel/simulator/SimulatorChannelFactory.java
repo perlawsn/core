@@ -183,14 +183,21 @@ public class SimulatorChannelFactory implements ChannelFactory {
             e.addError(INVALID_BOUNDARY_GENERATOR);
         }
 
-        switch (f.getType()) {
-            case INTEGER:
-                return new StepIntFieldGenerator(f.getName(), f.getMin(), f.getMax(), f.getIncrement());
-            case FLOAT:
-                return new StepFloatFieldGenerator(f.getName(), f.getMin(), f.getMax(), f.getIncrement());
-            default:
-                e.addError("Unsupported step field generator for type '" + f.getType() + "'");
-                return null;
+        try {
+            switch (f.getType()) {
+                case INTEGER:
+                    int iInc = Integer.parseInt(f.getIncrement());
+                    return new StepIntFieldGenerator(f.getName(), f.getMin(), f.getMax(), iInc);
+                case FLOAT:
+                    float fInc = Float.parseFloat(f.getIncrement());
+                    return new StepFloatFieldGenerator(f.getName(), f.getMin(), f.getMax(), fInc);
+                default:
+                    e.addError("Unsupported step field generator for type '" + f.getType() + "'");
+                    return null;
+            }
+        } catch (NumberFormatException exc) {
+            e.addError("Invalid 'increment' value", exc);
+            return null;
         }
     }
 

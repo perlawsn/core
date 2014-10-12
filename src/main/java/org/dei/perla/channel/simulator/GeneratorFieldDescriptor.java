@@ -44,14 +44,14 @@ public class GeneratorFieldDescriptor {
 	private Integer max;
 
     @XmlAttribute
-    private Integer increment;
+    private String increment;
 
 	protected GeneratorFieldDescriptor() {
 		super();
 		type = DataType.STRING;
 		min = 0;
 		max = 1;
-        increment = 1;
+        increment = "1";
 	}
 
 	public String getName() {
@@ -78,7 +78,7 @@ public class GeneratorFieldDescriptor {
 		return max;
 	}
 
-    public Integer getIncrement() {
+    public String getIncrement() {
         return increment;
     }
 

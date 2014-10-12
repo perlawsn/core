@@ -94,7 +94,7 @@ public class SimulatorChannelTest {
                             equalTo(GeneratorFieldDescriptor.GeneratorFieldStrategy.STEP));
                     assertThat(field1.getMin(), equalTo(450));
                     assertThat(field1.getMax(), equalTo(600));
-                    assertThat(field1.getIncrement(), equalTo(1));
+                    assertThat(field1.getIncrement(), equalTo("1"));
                     break;
                 case "all":
                     field0 = generator.getFieldList().get(0);
