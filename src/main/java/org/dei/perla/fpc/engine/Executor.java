@@ -21,7 +21,7 @@ import org.dei.perla.utils.Conditions;
  * executing <code>Script</code>s and evaluating expressions found in various
  * <code>Script Instruction</code>s.
  * </p>
- * 
+ *
  * <p>
  * All methods used for executing <code>Script</code>s return a
  * <code>Runner</code> object to allow callers control and manage the
@@ -30,14 +30,14 @@ import org.dei.perla.utils.Conditions;
  * structures from within <code>Instruction</code> be properly guarded with
  * adequate concurrency control mechanisms (locks, immutability, etc.).
  * </p>
- * 
+ *
  * <p>
  * The <code>resume</code> method is provided for restarting execution after
  * suspension. <code>ScriptDebugger</code>s and
  * <code>ScriptHandler<code>s are preserved during suspension.
  * </p>
- * 
- * 
+ *
+ *
  * @author Guido Rota (2014)
  *
  */
@@ -50,21 +50,21 @@ public class Executor {
 
 	private static final AtomicBoolean isRunning = new AtomicBoolean(true);
 	private static final ExpressionFactory expFct = ExpressionFactory.newInstance();
-	
+
 	private static final ExecutorService pool;
 	static {
 		// Custom thread naming pattern
 		pool = Executors.newCachedThreadPool(new ThreadFactory() {
-			
+
 			private final ThreadFactory fct = Executors.defaultThreadFactory();
-			
+
 			@Override
 			public Thread newThread(Runnable r) {
 				Thread t = fct.newThread(r);
 				t.setName("Executor_" + t.getName());
 				return t;
 			}
-			
+
 		});
 	}
 
@@ -73,7 +73,7 @@ public class Executor {
 	 * {@link Script}s to be started, although previously submitted
 	 * {@link Script}s will continue to run until they terminate normally or the
 	 * the timeout expires, whichever comes first.
-	 * 
+	 *
 	 * @param timeoutSec
 	 *            seconds that this method waits before interrupting all
 	 *            running {@link Script}s.
@@ -103,7 +103,7 @@ public class Executor {
 	 * Runs a <code>Script</code> with a <code>ScriptHandler</code> attached.
 	 * The <code>ScriptHandler</code> is invoked when the <code>Script</code> is
 	 * terminated, normally or abnormally.
-	 * 
+	 *
 	 * @param script
 	 *            <code>Script</code> to execute
 	 * @param handler
@@ -120,7 +120,7 @@ public class Executor {
 	 * Runs a <code>Script</code> with a <code>ScriptHandler</code> attached.
 	 * The <code>ScriptHandler</code> is invoked when the <code>Script</code> is
 	 * terminated, normally or abnormally.
-	 * 
+	 *
 	 * @param script
 	 *            <code>Script</code> to execute
 	 * @param paramArray
@@ -141,7 +141,7 @@ public class Executor {
 	 * <code>ScriptDebugger</code> attached. The <code>ScriptHandler</code> is
 	 * invoked when the <code>Script</code> is terminated, normally or
 	 * abnormally.
-	 * 
+	 *
 	 * @param script
 	 *            <code>Script</code> to execute
 	 * @param paramArray
@@ -170,18 +170,13 @@ public class Executor {
 		handler = Conditions.checkNotNull(handler, "handler");
 
 		final Runner runner = new Runner(script, paramArray, handler, debugger);
-		pool.submit(new Runnable() {
-			@Override
-			public void run() {
-				runner.execute();
-			}
-		});
+		pool.submit(runner::execute);
 		return runner;
 	}
 
 	/**
 	 * Resumes a previously suspended <code>Script</code>.
-	 * 
+	 *
 	 * @param runner
 	 *            <code>Runner</code> object representing the suspended
 	 *            <code>Script</code>
@@ -191,18 +186,13 @@ public class Executor {
 			throw new IllegalStateException(
 					"Cannot resume, runner is not in suspended state");
 		}
-		pool.submit(new Runnable() {
-			@Override
-			public void run() {
-				runner.execute();
-			}
-		});
+		pool.submit(runner::execute);
 	}
 
 	/**
 	 * Convenience method for creating a
 	 * <code>ValueExpression<code> that wraps a Java object.
-	 * 
+	 *
 	 * @param value
 	 *            The object to be wrapped
 	 * @param type
@@ -216,7 +206,7 @@ public class Executor {
 
 	/**
 	 * Evaluates an EL expression.
-	 * 
+	 *
 	 * @param context
 	 *            <code>ExecutionContext</code> to be used during evaluation
 	 * @param expression
@@ -231,7 +221,7 @@ public class Executor {
 	/**
 	 * Evaluates an EL expression and returns the results appropriately coerced
 	 * into the specified type.
-	 * 
+	 *
 	 * @param context
 	 *            <code>ExecutionContext</code> to be used during evaluation
 	 * @param expression

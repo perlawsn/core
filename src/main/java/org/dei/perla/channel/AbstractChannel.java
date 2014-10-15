@@ -14,14 +14,14 @@ import org.dei.perla.utils.Conditions;
  * An abstract {@code Channel} implementation with several convenience methods
  * for handling {@code IORequest}s.
  * </p>
- * 
+ *
  * <p>
  * This {@code AbstractChannel} guarantees that all submitted requests are
  * performed sequentially in insertion order.
  * </p>
- * 
+ *
  * @author Guido Rota (2014)
- * 
+ *
  */
 public abstract class AbstractChannel implements Channel {
 
@@ -39,12 +39,7 @@ public abstract class AbstractChannel implements Channel {
 	public AbstractChannel(String id) {
 		this.id = id;
 		log = Logger.getLogger(this.getClass().getCanonicalName() + "_" + id);
-		thread = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				dispatch();
-			}
-		});
+		thread = new Thread(this::dispatch);
 		stopped = new AtomicBoolean(false);
 		thread.start();
 	}
@@ -100,7 +95,7 @@ public abstract class AbstractChannel implements Channel {
 	/**
 	 * Notifies an interested component that data was received asynchronously
 	 * from the remote device.
-	 * 
+	 *
 	 * @param result
 	 *            Data asynchronously received from the remote device
 	 */
@@ -114,7 +109,7 @@ public abstract class AbstractChannel implements Channel {
 	/**
 	 * Notifies an interested component that an exception occurred while
 	 * processing a communication asynchronously initiated by the remote device.
-	 * 
+	 *
 	 * @param cause
 	 *            Exception caught while handling an asynchronous communication
 	 */
@@ -129,7 +124,7 @@ public abstract class AbstractChannel implements Channel {
 	/**
 	 * Returns the pending queue size, which represents the number of requests
 	 * waiting to be processed by this channel.
-	 * 
+	 *
 	 * @return Number of requests in the pending queue
 	 */
 	protected int pendingRequestCount() {
@@ -157,7 +152,7 @@ public abstract class AbstractChannel implements Channel {
 	 * {@code IORequest} handler. This method is invoked by the main working
 	 * thread to execute IOrequests submitted to this {@code Channel}.
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * {@code AbstractChannel} implementations are required to encapsulate any
 	 * exception or error received while performing the {@code IORequest} into a
@@ -167,7 +162,7 @@ public abstract class AbstractChannel implements Channel {
 	 * caller instead, where it is appropriately handled by the main
 	 * {@code AbstractChannel} thread.
 	 * </p>
-	 * 
+	 *
 	 * @param request
 	 *            {@code IORequest} to be performed.
 	 * @return Response {@code Response} received by the device or by the
@@ -182,9 +177,9 @@ public abstract class AbstractChannel implements Channel {
 
 	/**
 	 * Convenience implementation of the {@code IOTask} interface.
-	 * 
+	 *
 	 * @author Guido Rota (2014)
-	 * 
+	 *
 	 */
 	private class FutureIOTask implements IOTask {
 
@@ -232,7 +227,7 @@ public abstract class AbstractChannel implements Channel {
 				complete();
 				close();
 
-			} catch (Throwable e) {
+			} catch (Exception e) {
 				log.error("Unexpected error while processing an I/O Request", e);
 				exception = new ChannelException(e);
 				complete();

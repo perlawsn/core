@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * A class for running <code>Script</code>s. <code>Runner</code> objects contain
  * various methods for controlling <code>Script</code> execution.
  * </p>
- * 
+ *
  *
  * <p>
  * <code>Script</code> execution can be monitored and influenced using a
@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * debugging may severly impact on the overall system performance, and it is not
  * intended to be used in a production environment.
  * </p>
- * 
+ *
  * @author Guido Rota (2014)
  *
  */
@@ -62,7 +62,7 @@ public class Runner {
 	 * Returns an <code>ExecutionContext</code> taken from a pool of unused
 	 * contexts. The <code>ExecutionContext</code> object is cleared of all
 	 * previous information prior to return.
-	 * 
+	 *
 	 * @return <code>ExecutionContext</code> object
 	 */
 	private static final ExecutionContext getContext() {
@@ -78,7 +78,7 @@ public class Runner {
 
 	/**
 	 * Places an <code>ExecutionContext</code> in the pool.
-	 * 
+	 *
 	 * @param context
 	 *            <code>ExecutionContext</code> to be returned to the pool
 	 */
@@ -92,7 +92,7 @@ public class Runner {
 	 * <code>Runner</code>. Suspended <code>Runners</code> can be resumed using
 	 * the <code>Executor.resume()</code> method.
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * A suspended <code>Runner</code> is not considered done. Invoking the
 	 * <code>getResult()</code> method on a suspended <code>Runner</code> will
@@ -137,7 +137,7 @@ public class Runner {
 
 	/**
 	 * Indicates whether the <code>Runner</code> is suspended or not
-	 * 
+	 *
 	 * @return True if the <code>Runner</code> is suspended, false otherwise
 	 */
 	public boolean isSuspended() {
@@ -147,7 +147,7 @@ public class Runner {
 	/**
 	 * Indicates whether the <code>Runner</code> has stopped or has been
 	 * cancelled.
-	 * 
+	 *
 	 * @return True if the <code>Runner</code> has stopped or has been
 	 *         cancelled, false otherwise
 	 */
@@ -159,7 +159,7 @@ public class Runner {
 	 * <p>
 	 * Indicates whether the <code>Runner</code> has been cancelled or not.
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * <code>Runner</code>s enter the cancelled state if they are explicitly
 	 * cancelled by a user through the <code>cancel()</code> method or if an
@@ -167,7 +167,7 @@ public class Runner {
 	 * this latter case the exception that caused cancellation can be retrieved
 	 * with an invocation to the <code>getResult()</code> method.
 	 * </p>
-	 * 
+	 *
 	 * @return True if the <code>Runner</code> was cancelled, false otherwise
 	 */
 	public boolean isCancelled() {
@@ -204,7 +204,7 @@ public class Runner {
 			} while (state.get() == RUNNING);
 
 
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			state.set(CANCELLED);
 			relinquishContext(ctx);
 			handler.error(new ScriptException("Unexpected error in script '"
