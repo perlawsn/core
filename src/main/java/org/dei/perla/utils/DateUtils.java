@@ -16,7 +16,7 @@ public class DateUtils {
 	 * Parses a string into an {@link Instant}. Approximations may be introduced
 	 * if the text passed as parameter does not represent an instant in time
 	 * down to a nanosecond resolution.
-	 * 
+	 *
 	 * @param formatter
 	 *            Formatter to be used for the parsing operation
 	 * @param string
@@ -38,9 +38,7 @@ public class DateUtils {
 		if (a.isSupported(ChronoField.YEAR)) {
 			year = a.get(ChronoField.YEAR);
 		} else {
-			if (now == null) {
-				now = ZonedDateTime.now();
-			}
+			now = ZonedDateTime.now();
 			year = now.getMonthValue();
 		}
 
@@ -110,12 +108,12 @@ public class DateUtils {
 	 * Formats a {@link TemporalAccessor} object into a {@code String} using the
 	 * specified {@link DateTimeFormatter}.
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * This method was implemented for allowing {@link Mapper}s to
 	 * format an unknown object of PerLa type TIMESTAMP.
 	 * </p>
-	 * 
+	 *
 	 * @param formatter
 	 *            {@link DateTimeFormatter} to be used to format the date object
 	 * @param object
@@ -129,7 +127,7 @@ public class DateUtils {
 	/**
 	 * Formats a {@link TemporalAccessor} object into a {@code String} using the
 	 * specified {@link DateTimeFormatter}.
-	 * 
+	 *
 	 * @param formatter
 	 *            {@link DateTimeFormatter} to be used to format the date object
 	 * @param instant

@@ -3,6 +3,7 @@ package org.dei.perla.message.urlencoded;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import javassist.ClassPool;
@@ -78,7 +79,7 @@ public class UrlEncodedMapperFactory extends AbstractMapperFactory {
 		if (DataType.TIMESTAMP.is(param.getType())) {
 			ctx.fieldMap.put(param.getName(), param);
 			DateTimeFormatter fmt = DateTimeFormatter.ofPattern(param
-					.getFormat());
+					.getFormat()).withLocale(Locale.ENGLISH);
 			if (fmt.getZone() == null) {
 				fmt = fmt.withZone(ZoneId.systemDefault());
 			}
@@ -89,9 +90,9 @@ public class UrlEncodedMapperFactory extends AbstractMapperFactory {
 	/**
 	 * Simple convenience class to used to store common information needed at
 	 * various stages of the HttpQueryMessageDescriptor parsing procedure.
-	 * 
+	 *
 	 * @author Guido Rota (2014)
-	 * 
+	 *
 	 */
 	private class ParsingContext {
 

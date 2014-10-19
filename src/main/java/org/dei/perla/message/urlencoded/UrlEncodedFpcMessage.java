@@ -22,7 +22,7 @@ public class UrlEncodedFpcMessage implements FpcMessage {
 			Map<String, ? extends FieldDescriptor> fieldMap,
 			Map<String, String> staticFieldMap,
 			Map<String, DateTimeFormatter> dateFormatterMap) {
-		this(id, fieldMap, new HashMap<String, String>(staticFieldMap),
+		this(id, fieldMap, new HashMap<>(staticFieldMap),
 				staticFieldMap, dateFormatterMap);
 	}
 
@@ -37,7 +37,7 @@ public class UrlEncodedFpcMessage implements FpcMessage {
 		this.staticFieldMap = staticFieldMap;
 		this.dateFormatterMap = dateFormatterMap;
 
-		this.fieldDataType = new HashMap<String, DataType>();
+		this.fieldDataType = new HashMap<>();
 		fieldMap.forEach((name, field) -> {
 			DataType type = DataType.valueOf(field.getType().toUpperCase());
 			fieldDataType.put(name, type);
@@ -56,10 +56,7 @@ public class UrlEncodedFpcMessage implements FpcMessage {
 	@Override
 	public boolean hasField(String name) {
 		FieldDescriptor field = fieldMap.get(name);
-		if (field == null) {
-			return false;
-		}
-		return true;
+        return field != null;
 	}
 
 	@Override
@@ -92,7 +89,7 @@ public class UrlEncodedFpcMessage implements FpcMessage {
 
 		fieldValueMap.put(name, asString(field, value));
 	}
-	
+
 	@Override
 	public void appendElement(String name, Object value)
 			throws IllegalArgumentException {
