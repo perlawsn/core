@@ -3,19 +3,38 @@ package org.dei.perla.fpc;
 import org.dei.perla.fpc.descriptor.AttributeDescriptor;
 import org.dei.perla.fpc.descriptor.DataType;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Attribute implements Comparable<Attribute> {
+
+    private static Map<String, Attribute> cache = new HashMap<>();
 
 	private final String id;
 	private final DataType type;
-	
-	public Attribute(AttributeDescriptor descriptor) {
-		this(descriptor.getId(), descriptor.getType());
-	}
 
-	public Attribute(String id, DataType type) {
-		this.id = id;
-		this.type = type;
-	}
+    public static Attribute ID_ATTRIBUTE = Attribute.create("id", DataType.ID);
+    public static Attribute TIMESTAMP_ATTRIBUTE =
+            Attribute.create("timestamp", DataType.TIMESTAMP);
+
+    private Attribute(String id, DataType type) {
+        this.id = id;
+        this.type = type;
+    }
+
+    public static Attribute create(AttributeDescriptor d) {
+       return create(d.getId(), d.getType());
+    }
+
+    public static Attribute create(String id, DataType type) {
+        String cid = id + type.toString();
+        Attribute a = cache.get(cid);
+        if (a == null) {
+            a = new Attribute(id, type);
+            cache.put(cid, a);
+        }
+        return a;
+    }
 
 	public String getId() {
 		return id;
@@ -38,7 +57,7 @@ public class Attribute implements Comparable<Attribute> {
 
 		return true;
 	}
-	
+
 	@Override
 	public int hashCode() {
         return (id + type.toString()).hashCode();
@@ -55,8 +74,8 @@ public class Attribute implements Comparable<Attribute> {
 		if (idComparison == 0) {
 			type.compareTo(o.type);
 		}
-		
+
 		return idComparison;
 	}
-	
+
 }

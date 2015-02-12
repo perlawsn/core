@@ -11,7 +11,7 @@ import java.util.Map.Entry;
 
 /**
  * A simple {@code Record} object that maps field names with field values.
- * 
+ *
  * @author Guido Rota (2014)
  *
  */
@@ -24,7 +24,7 @@ public abstract class Record {
 
 	/**
 	 * Creates a new {@code Record} instance from a map of field values
-	 * 
+	 *
 	 * @param fieldMap
 	 *            Map containing field values and names
 	 * @return New record instance
@@ -38,7 +38,7 @@ public abstract class Record {
 
 	/**
 	 * Checks whether the {@code Record} contains the specified field
-	 * 
+	 *
 	 * @param name
 	 *            Field name
 	 * @return true if the record contains the field, false otherwise
@@ -48,14 +48,14 @@ public abstract class Record {
 	/**
 	 * Returns a <code>Set</code> with all field names in the
 	 * <code>Record</code>
-	 * 
+	 *
 	 * @return Set of fields in the <code>Record</code>
 	 */
 	public abstract Collection<Field> fields();
 
 	/**
 	 * Returns the value of a field contained in the <code>Record</code>
-	 * 
+	 *
 	 * @param field
 	 *            Field name
 	 * @return Field value
@@ -64,7 +64,7 @@ public abstract class Record {
 
 	/**
 	 * Indicates whether the {@code record} is empty (i.e., no fields) or not.
-	 * 
+	 *
 	 * @return true if the {@code Record} does not contain any field, false
 	 *         otherwise
 	 */
@@ -76,12 +76,12 @@ public abstract class Record {
 	 * current record and the record passed as parameter. This method does not
 	 * alter the content of the source records.
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * In case of field name collisions, the resulting object will contain the
 	 * field value present in the record passed as parameter.
 	 * </p>
-	 * 
+	 *
 	 * @param source
 	 *            {@code Record} to be merged
 	 * @return New record instance resulting from the merge of the current
@@ -97,12 +97,12 @@ public abstract class Record {
 	 * records passed as parameter. This method does not alter the content of
 	 * the source records.
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * In case of field name collisions, the resulting object will contain the
 	 * field value present in the second record (r2).
 	 * </p>
-	 * 
+	 *
 	 * @param r1
 	 *            First record to be merged
 	 * @param r2
@@ -118,14 +118,14 @@ public abstract class Record {
 		}
 
 		List<Field> mergedList = new ArrayList<>();
-		r1.fields().forEach(f -> mergedList.add(f));
-		r2.fields().forEach(f -> mergedList.add(f));
+		r1.fields().forEach(mergedList::add);
+		r2.fields().forEach(mergedList::add);
 		return new MapRecord(mergedList);
 	}
 
 	/**
 	 * An empty {@code Record}
-	 * 
+	 *
 	 * @author Guido Rota (2014)
 	 *
 	 */
@@ -158,7 +158,7 @@ public abstract class Record {
 
 	/**
 	 * A {@code Record} backed by a Map
-	 * 
+	 *
 	 * @author Guido Rota (2014)
 	 *
 	 */
@@ -204,7 +204,7 @@ public abstract class Record {
 
 	/**
 	 * Class modelling a single {@code Field} of a {@link Record}
-	 * 
+	 *
 	 * @author Guido Rota (2014)
 	 *
 	 */
@@ -220,7 +220,7 @@ public abstract class Record {
 
 		/**
 		 * Name of the {@code Field}
-		 * 
+		 *
 		 * @return Field name
 		 */
 		public String getName() {
@@ -229,7 +229,7 @@ public abstract class Record {
 
 		/**
 		 * Value of the {@code Field}
-		 * 
+		 *
 		 * @return Field value
 		 */
 		public Object getValue() {
@@ -238,7 +238,7 @@ public abstract class Record {
 
 		/**
 		 * Value of the {@code Field} cast to {@link Integer}
-		 * 
+		 *
 		 * @return Field value cast to {@link Integer}
 		 * @throws ClassCastException
 		 *             If the {@code Field} value is not of type {@link Integer}
@@ -252,7 +252,7 @@ public abstract class Record {
 
 		/**
 		 * Value of the {@code Field} cast to {@link Float}
-		 * 
+		 *
 		 * @return Field value cast to {@link Float}
 		 * @throws ClassCastException
 		 *             If the {@code Field} value is not of type {@link Float}
@@ -266,7 +266,7 @@ public abstract class Record {
 
 		/**
 		 * Value of the {@code Field} cast to {@link Boolean}
-		 * 
+		 *
 		 * @return Field value cast to {@link Boolean}
 		 * @throws ClassCastException
 		 *             If the {@code Field} value is not of type {@link Boolean}
@@ -280,7 +280,7 @@ public abstract class Record {
 
 		/**
 		 * Value of the {@code Field} cast to {@link String}
-		 * 
+		 *
 		 * @return Field value cast to {@link String}
 		 * @throws ClassCastException
 		 *             If the {@code Field} value is not of type {@link String}
@@ -295,7 +295,7 @@ public abstract class Record {
 		/**
 		 * Value of the {@code Field} cast to {@link Integer} (Java backing type
 		 * for PerLa ID)
-		 * 
+		 *
 		 * @return Field value cast to {@link Integer}
 		 * @throws ClassCastException
 		 *             If the {@code Field} value is not of type {@link Integer}
@@ -310,7 +310,7 @@ public abstract class Record {
 		/**
 		 * Value of the {@code Field} cast to {@link ZonedDateTime} (Java
 		 * backing type for PerLa TIMESTAMP)
-		 * 
+		 *
 		 * @return Field value cast to {@link ZonedDateTime}
 		 * @throws ClassCastException
 		 *             If the {@code Field} value is not of type

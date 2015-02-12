@@ -23,6 +23,11 @@ public interface Fpc {
      */
     public String getType();
 
+    /**
+     * Returns the list of {@link Attribute} managed by this {@code Fpc}
+     *
+     * @return {@link Attribute} managed by the {@code Fpc}
+     */
     public Collection<Attribute> getAttributes();
 
     public Task set(Map<Attribute, Object> valueMap, TaskHandler handler);

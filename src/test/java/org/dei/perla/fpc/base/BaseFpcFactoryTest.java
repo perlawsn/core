@@ -38,10 +38,11 @@ import org.junit.Test;
 
 public class BaseFpcFactoryTest {
 
-	private static final Attribute intAttribute = new Attribute("integer", DataType.INTEGER);
-	private static final Attribute floatAttribute = new Attribute("float", DataType.FLOAT);
-	private static final Attribute stringAttribute = new Attribute("string", DataType.STRING);
-	private static final Attribute booleanAttribute = new Attribute("boolean", DataType.BOOLEAN);
+	private static final Attribute intAttribute = Attribute.create("integer",
+            DataType.INTEGER);
+	private static final Attribute floatAttribute = Attribute.create("float", DataType.FLOAT);
+	private static final Attribute stringAttribute = Attribute.create("string", DataType.STRING);
+	private static final Attribute booleanAttribute = Attribute.create("boolean", DataType.BOOLEAN);
 
 	private static final String descriptorPath = "src/test/java/org/dei/perla/fpc/base/fpc_descriptor.xml";
 	private static List<String> packageList = Arrays.asList(new String[] {
@@ -112,12 +113,6 @@ public class BaseFpcFactoryTest {
 		assertThat(att, notNullValue());
 		assertThat(att.getId(), equalTo("static"));
 		assertThat(att.getType(), equalTo(DataType.INTEGER));
-		assertTrue(att instanceof StaticAttribute);
-		StaticAttribute staticAtt = (StaticAttribute) att;
-		assertThat(staticAtt.getValue(), notNullValue());
-		assertTrue(staticAtt.getValue() instanceof Integer);
-		Integer value = (Integer) staticAtt.getValue();
-		assertThat(value, equalTo(5));
 	}
 
 	private static Attribute find(String id, Collection<Attribute> attributes) {

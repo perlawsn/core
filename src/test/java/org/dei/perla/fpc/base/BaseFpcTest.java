@@ -65,7 +65,7 @@ public class BaseFpcTest {
 
 		// integer-get
 		attributeList = new ArrayList<>();
-		attributeList.add(new Attribute("integer", DataType.INTEGER));
+		attributeList.add(Attribute.create("integer", DataType.INTEGER));
 		handler = new SynchronizerTaskHandler();
 		fpc.get(attributeList, handler);
 		record = handler.getResult();
@@ -79,7 +79,7 @@ public class BaseFpcTest {
 
 		// string-get
 		attributeList.clear();
-		attributeList.add(new Attribute("string", DataType.STRING));
+		attributeList.add(Attribute.create("string", DataType.STRING));
 		handler = new SynchronizerTaskHandler();
 		fpc.get(attributeList, handler);
 		record = handler.getResult();
@@ -100,8 +100,8 @@ public class BaseFpcTest {
 		Record record;
 
 		attributeList = new ArrayList<>();
-		attributeList.add(new Attribute("integer", DataType.INTEGER));
-		attributeList.add(new Attribute("static", DataType.INTEGER));
+		attributeList.add(Attribute.create("integer", DataType.INTEGER));
+		attributeList.add(Attribute.create("static", DataType.INTEGER));
 		handler = new SynchronizerTaskHandler();
 		fpc.get(attributeList, handler);
 		record = handler.getResult();
@@ -126,7 +126,7 @@ public class BaseFpcTest {
 		Record record;
 
 		attributeList = new ArrayList<>();
-		attributeList.add(new Attribute("static", DataType.INTEGER));
+		attributeList.add(Attribute.create("static", DataType.INTEGER));
 		handler = new SynchronizerTaskHandler();
 		fpc.get(attributeList, handler);
 		record = handler.getResult();
@@ -150,8 +150,8 @@ public class BaseFpcTest {
 
 		// Request string and integer
 		attributeList = new ArrayList<>();
-		attributeList.add(new Attribute("string", DataType.STRING));
-		attributeList.add(new Attribute("integer", DataType.INTEGER));
+		attributeList.add(Attribute.create("string", DataType.STRING));
+		attributeList.add(Attribute.create("integer", DataType.INTEGER));
 		LatchingTaskHandler handler1 = new LatchingTaskHandler(100);
 		Task task1 = fpc.get(attributeList, 10, handler1);
 
@@ -171,8 +171,8 @@ public class BaseFpcTest {
 
 		// Request string and float
 		attributeList = new ArrayList<>();
-		attributeList.add(new Attribute("string", DataType.STRING));
-		attributeList.add(new Attribute("float", DataType.FLOAT));
+		attributeList.add(Attribute.create("string", DataType.STRING));
+		attributeList.add(Attribute.create("float", DataType.FLOAT));
 		LatchingTaskHandler handler2 = new LatchingTaskHandler(1000);
 		Task task2 = fpc.get(attributeList, 1, handler2);
 
@@ -216,9 +216,9 @@ public class BaseFpcTest {
 
 		// Request string and integer
 		attributeList = new ArrayList<>();
-		attributeList.add(new Attribute("string", DataType.STRING));
-		attributeList.add(new Attribute("integer", DataType.INTEGER));
-		attributeList.add(new Attribute("static", DataType.INTEGER));
+		attributeList.add(Attribute.create("string", DataType.STRING));
+		attributeList.add(Attribute.create("integer", DataType.INTEGER));
+		attributeList.add(Attribute.create("static", DataType.INTEGER));
 		LatchingTaskHandler handler1 = new LatchingTaskHandler(1);
 		Task task = fpc.get(attributeList, 10, handler1);
 
@@ -248,7 +248,7 @@ public class BaseFpcTest {
 		Record record;
 
 		attributeList = new ArrayList<>();
-		attributeList.add(new Attribute("static", DataType.INTEGER));
+		attributeList.add(Attribute.create("static", DataType.INTEGER));
 		LatchingTaskHandler handler = new LatchingTaskHandler(100);
 		Task task = fpc.get(attributeList, 10, handler);
 
@@ -276,8 +276,8 @@ public class BaseFpcTest {
 
 		// Request string and integer
 		attributeList = new ArrayList<>();
-		attributeList.add(new Attribute("boolean", DataType.BOOLEAN));
-		attributeList.add(new Attribute("integer", DataType.INTEGER));
+		attributeList.add(Attribute.create("boolean", DataType.BOOLEAN));
+		attributeList.add(Attribute.create("integer", DataType.INTEGER));
 		LatchingTaskHandler handler1 = new LatchingTaskHandler(100);
 		Task task1 = fpc.get(attributeList, 10, handler1);
 
@@ -300,7 +300,7 @@ public class BaseFpcTest {
 	public void testSetOperation() throws InterruptedException,
 			ExecutionException {
 		Map<Attribute, Object> valueMap = new HashMap<>();
-		valueMap.put(new Attribute("integer", DataType.INTEGER), 8);
+		valueMap.put(Attribute.create("integer", DataType.INTEGER), 8);
 		SynchronizerTaskHandler handler = new SynchronizerTaskHandler();
 		Task task = fpc.set(valueMap, handler);
 		assertThat(task, notNullValue());
@@ -317,7 +317,7 @@ public class BaseFpcTest {
 
 		// Request the async event
 		attributeList = new ArrayList<>();
-		attributeList.add(new Attribute("event", DataType.BOOLEAN));
+		attributeList.add(Attribute.create("event", DataType.BOOLEAN));
 		LatchingTaskHandler handler = new LatchingTaskHandler(2);
 		Task task = fpc.get(attributeList, 500, handler);
 
@@ -340,7 +340,7 @@ public class BaseFpcTest {
 
 		// Request the async event
 		attributeList = new ArrayList<>();
-		attributeList.add(new Attribute("event", DataType.BOOLEAN));
+		attributeList.add(Attribute.create("event", DataType.BOOLEAN));
 		SynchronizerTaskHandler handler = new SynchronizerTaskHandler();
 		Task task = fpc.get(attributeList, handler);
 
@@ -358,7 +358,7 @@ public class BaseFpcTest {
 
 		// Request the async event
 		attributeList = new ArrayList<>();
-		attributeList.add(new Attribute("event", DataType.BOOLEAN));
+		attributeList.add(Attribute.create("event", DataType.BOOLEAN));
 		LatchingTaskHandler handler = new LatchingTaskHandler(5);
 		Task task = fpc.async(attributeList, handler);
 

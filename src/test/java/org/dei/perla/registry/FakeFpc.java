@@ -1,4 +1,4 @@
-package org.dei.perla.fpc.registry;
+package org.dei.perla.registry;
 
 import java.util.ArrayList;
 import java.util.Collection;

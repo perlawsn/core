@@ -1,15 +1,7 @@
 package org.dei.perla.fpc.base;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import javassist.ClassClassPath;
 import javassist.ClassPool;
-
 import org.apache.log4j.Logger;
 import org.dei.perla.channel.Channel;
 import org.dei.perla.channel.ChannelFactory;
@@ -20,22 +12,9 @@ import org.dei.perla.fpc.Fpc;
 import org.dei.perla.fpc.FpcFactory;
 import org.dei.perla.fpc.base.AsyncOperation.AsyncMessageHandler;
 import org.dei.perla.fpc.base.NativePeriodicOperation.PeriodicMessageHandler;
-import org.dei.perla.fpc.descriptor.AsyncOperationDescriptor;
-import org.dei.perla.fpc.descriptor.AttributeDescriptor;
+import org.dei.perla.fpc.descriptor.*;
 import org.dei.perla.fpc.descriptor.AttributeDescriptor.AttributeAccessType;
 import org.dei.perla.fpc.descriptor.AttributeDescriptor.AttributePermission;
-import org.dei.perla.fpc.descriptor.ChannelDescriptor;
-import org.dei.perla.fpc.descriptor.DataType;
-import org.dei.perla.fpc.descriptor.DeviceDescriptor;
-import org.dei.perla.fpc.descriptor.FieldDescriptor;
-import org.dei.perla.fpc.descriptor.GetOperationDescriptor;
-import org.dei.perla.fpc.descriptor.IORequestDescriptor;
-import org.dei.perla.fpc.descriptor.InvalidDeviceDescriptorException;
-import org.dei.perla.fpc.descriptor.MessageDescriptor;
-import org.dei.perla.fpc.descriptor.OnReceiveDescriptor;
-import org.dei.perla.fpc.descriptor.OperationDescriptor;
-import org.dei.perla.fpc.descriptor.PeriodicOperationDescriptor;
-import org.dei.perla.fpc.descriptor.SetOperationDescriptor;
 import org.dei.perla.fpc.descriptor.instructions.InstructionDescriptor;
 import org.dei.perla.fpc.engine.CompiledScript;
 import org.dei.perla.fpc.engine.Compiler;
@@ -44,6 +23,8 @@ import org.dei.perla.message.MapperFactory;
 import org.dei.perla.utils.Check;
 import org.dei.perla.utils.Conditions;
 import org.dei.perla.utils.Errors;
+
+import java.util.*;
 
 public class BaseFpcFactory implements FpcFactory {
 
@@ -92,7 +73,7 @@ public class BaseFpcFactory implements FpcFactory {
         OperationScheduler scheduler = new OperationScheduler(ctx.getOpList,
                 ctx.setOpList, ctx.periodicOpList, ctx.asyncOpList);
         return new BaseFpc(id, descriptor.getType(), ctx.attributeSet,
-                ctx.staticAttributeSet, ctx.channelMgr, scheduler);
+                ctx.attValues, ctx.channelMgr, scheduler);
     }
 
     /**
@@ -654,7 +635,7 @@ public class BaseFpcFactory implements FpcFactory {
         // Attributes
         private final Map<String, AttributeDescriptor> attDescMap = new HashMap<>();
         private final Set<Attribute> attributeSet = new HashSet<>();
-        private final Set<StaticAttribute> staticAttributeSet = new HashSet<>();
+        private final Map<Attribute, Object> attValues = new HashMap<>();
 
         private final Map<String, Mapper> mapperMap = new HashMap<>();
         private final Map<String, Channel> channelMap = new HashMap<>();
@@ -682,12 +663,11 @@ public class BaseFpcFactory implements FpcFactory {
 
         protected void addAttribute(AttributeDescriptor desc) {
             attDescMap.put(desc.getId(), desc);
+            Attribute a = Attribute.create(desc);
+            attributeSet.add(a);
             if (desc.getAccess() == AttributeAccessType.STATIC) {
-                StaticAttribute att = new StaticAttribute(desc);
-                attributeSet.add(att);
-                staticAttributeSet.add(att);
-            } else {
-                attributeSet.add(new Attribute(desc));
+                Object v = DataType.parse(a.getType(), desc.getValue());
+                attValues.put(a, v);
             }
         }
 

@@ -1,38 +1,22 @@
 package org.dei.perla.fpc.base;
 
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.dei.perla.fpc.Attribute;
 import org.dei.perla.fpc.Fpc;
 import org.dei.perla.fpc.Task;
 import org.dei.perla.fpc.TaskHandler;
 import org.dei.perla.fpc.base.RecordPipeline.PipelineBuilder;
-import org.dei.perla.fpc.descriptor.DataType;
-import org.dei.perla.fpc.engine.EmitInstruction;
-import org.dei.perla.fpc.engine.Record;
-import org.dei.perla.fpc.engine.Script;
-import org.dei.perla.fpc.engine.ScriptBuilder;
-import org.dei.perla.fpc.engine.StopInstruction;
+import org.dei.perla.fpc.engine.*;
 import org.dei.perla.utils.StopHandler;
+
+import java.time.ZonedDateTime;
+import java.util.*;
 
 public class BaseFpc implements Fpc {
 
-	public static final Attribute TIMESTAMP_ATTRIBUTE = new Attribute(
-			"timestamp", DataType.TIMESTAMP);
-	public static final Attribute ID_ATTRIBUTE = new Attribute("id",
-			DataType.ID);
-
 	private final int id;
     private final String type;
-	private final Set<Attribute> attributeSet;
-	private final Set<StaticAttribute> staticAttributeSet;
+	private final Set<Attribute> atts;
+    private final Map<Attribute, Object> attValues;
 	private final ChannelManager channelMgr;
 	private final OperationScheduler scheduler;
 
@@ -48,14 +32,14 @@ public class BaseFpc implements Fpc {
 				Collections.emptySet(), doNothing);
 	}
 
-	protected BaseFpc(int id, String type, Set<Attribute> attributeSet,
-			Set<StaticAttribute> staticAttributeSet, ChannelManager channelMgr,
+	protected BaseFpc(int id, String type, Set<Attribute> atts,
+            Map<Attribute, Object> attValues, ChannelManager channelMgr,
 			OperationScheduler scheduler) {
 		this.id = id;
         this.type = type;
-		this.attributeSet = attributeSet;
-		this.staticAttributeSet = staticAttributeSet;
-		this.channelMgr = channelMgr;
+        this.atts = atts;
+        this.attValues = attValues;
+        this.channelMgr = channelMgr;
 		this.scheduler = scheduler;
 	}
 
@@ -71,7 +55,7 @@ public class BaseFpc implements Fpc {
 
 	@Override
 	public Set<Attribute> getAttributes() {
-		return attributeSet;
+		return atts;
 	}
 
 	protected OperationScheduler getOperationScheduler() {
@@ -84,90 +68,55 @@ public class BaseFpc implements Fpc {
 	}
 
 	@Override
-	public Task get(Collection<Attribute> attributes, TaskHandler handler) {
+	public Task get(Collection<Attribute> atts, TaskHandler handler) {
 		PipelineBuilder pBuilder = RecordPipeline.newBuilder();
+        Request req = new Request(atts);
 
-		List<Attribute> dynamicAtts = new ArrayList<>();
-		List<StaticAttribute> staticAtts = new ArrayList<>();
-		filterAttributes(attributes, dynamicAtts, staticAtts);
+		if (req.staticOnly()) {
+            Task t = new CompletedTask(req.statAtts);
+            handler.newRecord(t, req.staticRecord());
+            handler.complete(t);
+            return t;
 
-		if (dynamicAtts.isEmpty() && !staticAtts.isEmpty()) {
-			return forwardStaticAttributes(staticAtts, handler);
-
-		} else if (!dynamicAtts.isEmpty() && !staticAtts.isEmpty()) {
-			dynamicAtts = new ArrayList<>(attributes);
-			dynamicAtts.removeAll(staticAtts);
-			pBuilder.add(new RecordModifier.StaticAppender(staticAtts));
+		} else if (req.mixed()) {
+			pBuilder.add(new RecordModifier.StaticAppender(req.staticValues()));
 		}
 
-		return scheduler.scheduleGet(dynamicAtts, handler, pBuilder);
-	}
-
-	public Task forwardStaticAttributes(Collection<StaticAttribute> attributes,
-			TaskHandler handler) {
-		Map<String, Object> fieldMap = new HashMap<>();
-		attributes.stream().forEach(a -> fieldMap.put(a.getId(), a.getValue()));
-		fieldMap.put("timestamp", ZonedDateTime.now());
-		Record record = Record.from(fieldMap);
-
-		Task task = new CompletedTask(attributes);
-		handler.newRecord(task, record);
-		handler.complete(task);
-		return task;
+		return scheduler.scheduleGet(req.dynAtts, handler, pBuilder);
 	}
 
 	@Override
-	public Task get(Collection<Attribute> attributes, long periodMs,
+	public Task get(Collection<Attribute> atts, long periodMs,
 			TaskHandler handler) {
 		PipelineBuilder pBuilder = RecordPipeline.newBuilder();
+        Request req = new Request(atts);
 
-		List<Attribute> dynamicAtts = new ArrayList<>();
-		List<StaticAttribute> staticAtts = new ArrayList<>();
-		filterAttributes(attributes, dynamicAtts, staticAtts);
-
-		if (!staticAtts.isEmpty()) {
-			pBuilder.add(new RecordModifier.StaticAppender(staticAtts));
+		if (!req.statAtts.isEmpty()) {
+			pBuilder.add(new RecordModifier.StaticAppender(req.staticValues()));
 		}
 
-		if (dynamicAtts.isEmpty()) {
-			pBuilder.add(new RecordModifier.TimestampAppender());
-			Map<String, Object> paramMap = new HashMap<>();
-			paramMap.put("period", periodMs);
-			return emptyRecordOperation.schedule(paramMap, handler,
-					pBuilder.create());
-
-		} else {
-			dynamicAtts = new ArrayList<>(attributes);
-			dynamicAtts.removeAll(staticAtts);
-			return scheduler.schedulePeriodic(dynamicAtts, periodMs, handler,
-					pBuilder);
-		}
+        if (req.staticOnly()) {
+            pBuilder.add(new RecordModifier.TimestampAppender());
+            Map<String, Object> paramMap = new HashMap<>();
+            paramMap.put("period", periodMs);
+            return emptyRecordOperation.schedule(paramMap, handler,
+                    pBuilder.create());
+        } else {
+            return scheduler.schedulePeriodic(req.dynAtts, periodMs, handler,
+                    pBuilder);
+        }
 	}
 
 	@Override
-	public Task async(Collection<Attribute> attributes, TaskHandler handler) {
+	public Task async(Collection<Attribute> atts, TaskHandler handler) {
 		PipelineBuilder pBuilder = RecordPipeline.newBuilder();
+        Request req = new Request(atts);
 
-		List<Attribute> dynamicAtts = new ArrayList<>();
-		List<StaticAttribute> staticAtts = new ArrayList<>();
-		filterAttributes(attributes, dynamicAtts, staticAtts);
-		if (!staticAtts.isEmpty()) {
+		if (!req.statAtts.isEmpty()) {
 			return null;
 		}
 
-		return scheduler.scheduleAsync(attributes, handler, pBuilder);
-	}
-
-	public void filterAttributes(Collection<Attribute> source,
-			Collection<Attribute> dynamicAtts,
-			Collection<StaticAttribute> staticAtts) {
-		dynamicAtts.addAll(source);
-		for (StaticAttribute attribute : staticAttributeSet) {
-			if (source.contains(attribute)) {
-				staticAtts.add(attribute);
-				dynamicAtts.remove(attribute);
-			}
-		}
+		return scheduler.scheduleAsync(req.dynAtts, handler, pBuilder);
 	}
 
 	@Override
@@ -177,6 +126,67 @@ public class BaseFpc implements Fpc {
 			handler.hasStopped(this);
 		});
 	}
+
+    /**
+     * Request is a simple utility class employed to classify the
+     * attributes requested by the user as static or dynamic.
+     */
+    private class Request {
+
+        private final List<Attribute> dynAtts = new ArrayList<>();
+        private final List<Attribute> statAtts = new ArrayList<>();
+
+        private Request(Collection<Attribute> atts) {
+            atts.forEach(a -> {
+                if (attValues.containsKey(a)) {
+                    statAtts.add(a);
+                } else {
+                    dynAtts.add(a);
+                }
+            });
+        }
+
+        /**
+         * staticOnly returns true if the request contains only static
+         * attributes.
+         */
+        private boolean staticOnly() {
+            return dynAtts.isEmpty() && !statAtts.isEmpty();
+        }
+
+        /**
+         * dynamicOnly returns true if the request contains only dynamic
+         * attributes.
+         */
+        private boolean dynamicOnly() {
+            return !dynAtts.isEmpty() && statAtts.isEmpty();
+        }
+
+        /**
+         * mixed returns true if the request contains both static and dynamic
+         * attributes.
+         */
+        private boolean mixed() {
+            return !dynAtts.isEmpty() && !statAtts.isEmpty();
+        }
+
+        /**
+         * staticRecord returns a new Record composed only of static values.
+         */
+        private Record staticRecord() {
+            Map<String, Object> av = new HashMap<>();
+            statAtts.forEach(a -> av.put(a.getId(), attValues.get(a)));
+            av.put(Attribute.TIMESTAMP_ATTRIBUTE.getId(), ZonedDateTime.now());
+            return Record.from(av);
+        }
+
+        private Map<Attribute, Object> staticValues() {
+            Map<Attribute, Object> av = new HashMap<>();
+            statAtts.forEach(a -> av.put(a, attValues.get(a)));
+            return av;
+        }
+
+    }
 
 	/**
 	 * Implementation of a {@link Task} that terminates immediately. This class is

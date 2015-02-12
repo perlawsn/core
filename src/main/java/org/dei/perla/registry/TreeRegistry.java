@@ -1,4 +1,4 @@
-package org.dei.perla.fpc.registry;
+package org.dei.perla.registry;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,7 +21,7 @@ public class TreeRegistry implements Registry {
 	private final ReadWriteLock lock = new ReentrantReadWriteLock();
 	private volatile Node root = new Node(null);
 	private Map<Integer, Fpc> fpcMap = new HashMap<>();
-	
+
 	@Override
 	public Fpc get(int id) {
 		lock.readLock().lock();
@@ -31,7 +31,7 @@ public class TreeRegistry implements Registry {
 			lock.readLock().unlock();
 		}
 	}
-	
+
 	@Override
 	public Collection<Fpc> getAll() {
 		lock.readLock().lock();
@@ -41,7 +41,7 @@ public class TreeRegistry implements Registry {
 			lock.readLock().unlock();
 		}
 	}
-	
+
 	@Override
 	public Collection<Fpc> getByAttribute(Collection<Attribute> with,
 			Collection<Attribute> without) {
@@ -78,7 +78,7 @@ public class TreeRegistry implements Registry {
 						result.addAll(child.fpcs);
 					}
 				}
-				
+
 				if (with <= 0) {
 					find(child, withList, withIdx, withoutList, withoutIdx, result);
 				} else {
@@ -93,7 +93,7 @@ public class TreeRegistry implements Registry {
 					withoutIdx += 1;
 					result.removeAll(child.fpcs);
 				}
-				
+
 				if (withIdx == withList.size() && withoutIdx < withoutList.size()) {
 					find(child, withList, withIdx, withoutList, withoutIdx, result);
 					continue;
@@ -211,14 +211,14 @@ public class TreeRegistry implements Registry {
 	}
 
 	/**
-	 * 
+	 *
 	 * @author Guido Rota (2014)
 	 *
 	 */
 	public class Node implements Comparable<Node> {
 
 		private final Attribute id;
-		private final Collection<Fpc> fpcs = new HashSet<Fpc>();
+		private final Collection<Fpc> fpcs = new HashSet<>();
 		private final SortedSet<Node> children = new TreeSet<>();
 
 		protected Node(Attribute id) {

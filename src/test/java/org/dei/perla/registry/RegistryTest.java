@@ -1,32 +1,29 @@
-package org.dei.perla.fpc.registry;
-
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.TreeSet;
+package org.dei.perla.registry;
 
 import org.dei.perla.fpc.Attribute;
 import org.dei.perla.fpc.Fpc;
 import org.dei.perla.fpc.descriptor.DataType;
 import org.junit.Test;
 
+import java.util.*;
+
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertThat;
+
 public class RegistryTest {
 
-	private static final Attribute intAtt = new Attribute("integer",
-			DataType.INTEGER);
-	private static final Attribute floatAtt = new Attribute("float",
-			DataType.FLOAT);
-	private static final Attribute stringAtt = new Attribute("string",
-			DataType.STRING);
-	private static final Attribute tempAtt = new Attribute("temperature",
-			DataType.INTEGER);
-	private static final Attribute pressAtt = new Attribute("pressure",
-			DataType.FLOAT);
-	
+	private static final Attribute intAtt =
+            Attribute.create("integer", DataType.INTEGER);
+	private static final Attribute floatAtt =
+            Attribute.create("float", DataType.FLOAT);
+	private static final Attribute stringAtt =
+            Attribute.create("string", DataType.STRING);
+	private static final Attribute tempAtt =
+            Attribute.create("temperature", DataType.INTEGER);
+	private static final Attribute pressAtt =
+            Attribute.create("pressure", DataType.FLOAT);
+
 	@Test
 	public void singleAddition() {
 		Registry registry = new TreeRegistry();
@@ -72,7 +69,7 @@ public class RegistryTest {
 		result = registry.getByAttribute(withSet, Collections.emptyList());
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(0));
-		
+
 		// All fpcs with 'integer' but without 'temperature'
 		withSet.clear();
 		withSet.add(intAtt);
@@ -81,7 +78,7 @@ public class RegistryTest {
 		result = registry.getByAttribute(withSet, withoutSet);
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(0));
-		
+
 		// All fpcs with 'integer' but without 'pressure'
 		withSet.clear();
 		withSet.add(intAtt);
@@ -91,7 +88,7 @@ public class RegistryTest {
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(1));
 	}
-	
+
 	@Test
 	public void multipleAdditions() {
 		Registry registry = new TreeRegistry();
@@ -106,26 +103,26 @@ public class RegistryTest {
 		attributeSet.add(tempAtt);
 		Fpc fpc1 = new FakeFpc(attributeSet);
 		registry.add(fpc1);
-		
+
 		attributeSet.clear();
 		attributeSet.add(intAtt);
 		attributeSet.add(floatAtt);
 		attributeSet.add(pressAtt);
 		Fpc fpc2 = new FakeFpc(attributeSet);
 		registry.add(fpc2);
-		
+
 		withSet.add(intAtt);
 		result = registry.getByAttribute(withSet, Collections.emptyList());
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(2));
-		
+
 		withSet.clear();
 		withSet.add(stringAtt);
 		result = registry.getByAttribute(withSet, Collections.emptyList());
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(1));
 		result.forEach(fpc -> assertThat(fpc, equalTo(fpc1)));
-		
+
 		withSet.clear();
 		withoutSet.clear();
 		withSet.add(intAtt);
@@ -135,7 +132,7 @@ public class RegistryTest {
 		assertThat(result.size(), equalTo(1));
 		result.forEach(fpc -> assertThat(fpc, equalTo(fpc1)));
 	}
-	
+
 	@Test
 	public void testRemove() {
 		Registry registry = new TreeRegistry();
@@ -149,21 +146,21 @@ public class RegistryTest {
 		attributeSet.add(tempAtt);
 		Fpc fpc1 = new FakeFpc(attributeSet);
 		registry.add(fpc1);
-		
+
 		attributeSet.clear();
 		attributeSet.add(intAtt);
 		attributeSet.add(floatAtt);
 		attributeSet.add(pressAtt);
 		Fpc fpc2 = new FakeFpc(attributeSet);
 		registry.add(fpc2);
-		
+
 		withSet.add(intAtt);
 		result = registry.getByAttribute(withSet, Collections.emptyList());
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(2));
-		
+
 		registry.remove(fpc1);
-		
+
 		withSet.add(intAtt);
 		result = registry.getByAttribute(withSet, Collections.emptyList());
 		assertThat(result, notNullValue());

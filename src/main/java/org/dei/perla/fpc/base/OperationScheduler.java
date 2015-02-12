@@ -1,40 +1,29 @@
 package org.dei.perla.fpc.base;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-
 import org.dei.perla.fpc.Attribute;
 import org.dei.perla.fpc.TaskHandler;
 import org.dei.perla.fpc.base.RecordPipeline.PipelineBuilder;
 import org.dei.perla.fpc.descriptor.DataType;
 import org.dei.perla.utils.StopHandler;
 
+import java.util.*;
+
 public class OperationScheduler {
 
 	// Used to order operations by number of attributes
-	private static final Comparator<Operation> attCountComparator;
+	private static final Comparator<Operation> attComp =
+            (Operation o1, Operation o2) -> {
+        int o1s = o1.getAttributes().size();
+        int o2s = o2.getAttributes().size();
 
-	static {
-		attCountComparator = new Comparator<Operation>() {
-			public int compare(Operation o1, Operation o2) {
-				int o1s = o1.getAttributes().size();
-				int o2s = o2.getAttributes().size();
-
-				if (o1s < o2s) {
-					return -1;
-				} else if (o1s > o2s) {
-					return 1;
-				} else {
-					return 0;
-				}
-			};
-		};
-	}
+        if (o1s < o2s) {
+            return -1;
+        } else if (o1s > o2s) {
+            return 1;
+        } else {
+            return 0;
+        }
+    };
 
 	private volatile boolean schedulable = true;
 
@@ -53,15 +42,15 @@ public class OperationScheduler {
 		this.periodicOperationList = periodicOperationList;
 		this.asyncOperationList = asyncOperationList;
 
-		Collections.sort(this.getOperationList, attCountComparator);
-		Collections.sort(this.setOperationList, attCountComparator);
-		Collections.sort(this.periodicOperationList, attCountComparator);
-		Collections.sort(this.asyncOperationList, attCountComparator);
+		Collections.sort(this.getOperationList, attComp);
+		Collections.sort(this.setOperationList, attComp);
+		Collections.sort(this.periodicOperationList, attComp);
+		Collections.sort(this.asyncOperationList, attComp);
 	}
 
 	private RecordPipeline createTimestampedPipeline(Operation op,
 			PipelineBuilder pBuilder) {
-		if (op.getAttributes().contains(BaseFpc.TIMESTAMP_ATTRIBUTE)) {
+		if (op.getAttributes().contains(Attribute.TIMESTAMP_ATTRIBUTE)) {
 			return pBuilder.create();
 		}
 
@@ -158,7 +147,7 @@ public class OperationScheduler {
 			// operation does not provide it natively (see method
 			// createTimestampedPipeline)
 			if (att.getId().compareToIgnoreCase(
-					BaseFpc.TIMESTAMP_ATTRIBUTE.getId()) == 0
+					Attribute.TIMESTAMP_ATTRIBUTE.getId()) == 0
 					&& att.getType() == DataType.TIMESTAMP) {
 				continue;
 			}
@@ -201,7 +190,7 @@ public class OperationScheduler {
 	}
 
 	/**
-	 * 
+	 *
 	 * @author Guido Rota (2014)
 	 *
 	 */

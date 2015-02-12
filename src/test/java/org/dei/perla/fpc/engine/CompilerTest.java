@@ -335,9 +335,9 @@ public class CompilerTest {
 				requestBuilderMap, channelMap);
 		assertThat(cScript, notNullValue());
 		assertFalse(cScript.getEmitSet().isEmpty());
-		assertTrue(cScript.getEmitSet().contains(new Attribute(integer)));
-		assertTrue(cScript.getEmitSet().contains(new Attribute(string)));
-		assertFalse(cScript.getEmitSet().contains(new Attribute(bool)));
+		assertTrue(cScript.getEmitSet().contains(Attribute.create(integer)));
+		assertTrue(cScript.getEmitSet().contains(Attribute.create(string)));
+		assertFalse(cScript.getEmitSet().contains(Attribute.create(bool)));
 		assertTrue(cScript.getSetSet().isEmpty());
 	}
 
@@ -356,9 +356,9 @@ public class CompilerTest {
 		assertThat(cScript, notNullValue());
 		assertTrue(cScript.getEmitSet().isEmpty());
 		assertFalse(cScript.getSetSet().isEmpty());
-		assertTrue(cScript.getSetSet().contains(new Attribute(integer)));
-		assertTrue(cScript.getSetSet().contains(new Attribute(string)));
-		assertFalse(cScript.getSetSet().contains(new Attribute(bool)));
+		assertTrue(cScript.getSetSet().contains(Attribute.create(integer)));
+		assertTrue(cScript.getSetSet().contains(Attribute.create(string)));
+		assertFalse(cScript.getSetSet().contains(Attribute.create(bool)));
 	}
 
 	@Test

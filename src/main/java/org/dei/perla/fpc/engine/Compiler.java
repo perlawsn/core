@@ -39,7 +39,7 @@ import org.dei.perla.utils.Errors;
 /**
  * Script compiler. This class can be used to compile a list of {@Link
  * InstructionDescriptor}s into an executable {@link Script}.
- * 
+ *
  * @author Guido Rota (2014)
  *
  */
@@ -47,7 +47,7 @@ public class Compiler {
 
 	/**
 	 * Compilers a list of {@link InstructionDescriptor}s into a {@link Script}.
-	 * 
+	 *
 	 * @param instructionList
 	 *            List of {@link InstructionDescriptors}s to be compiled
 	 * @param scriptName
@@ -381,7 +381,7 @@ public class Compiler {
 			return new NoopInstruction();
 		}
 
-		ctx.emitSet.add(new Attribute(att));
+        ctx.emitSet.add(Attribute.create(att));
 		return new PutInstruction(iDesc.getExpression(), att);
 	}
 
@@ -464,7 +464,7 @@ public class Compiler {
 				err.addError(READ_ONLY_ATTRIBUTE, s);
 				continue;
 			}
-			ctx.setSet.add(new Attribute(att));
+            ctx.setSet.add(Attribute.create(att));
 		}
 		sc.close();
 	}
@@ -611,9 +611,9 @@ public class Compiler {
 	/**
 	 * Convenience class for storing common information related to the
 	 * <code>Script</code> being parsed.
-	 * 
+	 *
 	 * @author Guido Rota (2014)
-	 * 
+	 *
 	 */
 	private static class CompilerContext {
 
