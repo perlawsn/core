@@ -8,10 +8,10 @@ import java.util.concurrent.TimeUnit;
 
 import org.dei.perla.core.fpc.Attribute;
 import org.dei.perla.core.fpc.FpcException;
-import org.dei.perla.core.fpc.engine.Executor;
-import org.dei.perla.core.fpc.engine.Record;
-import org.dei.perla.core.fpc.engine.Script;
-import org.dei.perla.core.fpc.engine.ScriptHandler;
+import org.dei.perla.core.engine.Executor;
+import org.dei.perla.core.engine.Record;
+import org.dei.perla.core.engine.Script;
+import org.dei.perla.core.engine.ScriptHandler;
 import org.dei.perla.core.utils.StopHandler;
 
 public class SimulatedPeriodicOperation extends PeriodicOperation {

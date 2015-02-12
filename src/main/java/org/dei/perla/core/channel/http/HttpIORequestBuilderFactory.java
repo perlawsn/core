@@ -8,8 +8,8 @@ import org.apache.log4j.Logger;
 import org.dei.perla.core.channel.IORequestBuilder;
 import org.dei.perla.core.channel.IORequestBuilderFactory;
 import org.dei.perla.core.channel.http.HttpIORequestDescriptor.HttpMethod;
-import org.dei.perla.core.fpc.descriptor.IORequestDescriptor;
-import org.dei.perla.core.fpc.descriptor.InvalidDeviceDescriptorException;
+import org.dei.perla.core.descriptor.IORequestDescriptor;
+import org.dei.perla.core.descriptor.InvalidDeviceDescriptorException;
 import org.dei.perla.core.utils.Check;
 import org.dei.perla.core.utils.Errors;
 

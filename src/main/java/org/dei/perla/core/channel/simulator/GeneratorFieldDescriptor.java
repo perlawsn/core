@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.dei.perla.core.fpc.descriptor.DataType;
+import org.dei.perla.core.descriptor.DataType;
 
 /**
  * This class contains all information needed by the <code>SimulatorChannel</code>

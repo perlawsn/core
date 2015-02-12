@@ -1,6 +1,6 @@
 package org.dei.perla.core.message;
 
-import org.dei.perla.core.fpc.descriptor.MessageDescriptor;
+import org.dei.perla.core.descriptor.MessageDescriptor;
 
 public abstract class AbstractMapperFactory implements MapperFactory {
 

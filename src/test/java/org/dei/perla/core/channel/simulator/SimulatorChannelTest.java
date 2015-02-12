@@ -26,7 +26,7 @@ import org.dei.perla.core.channel.IORequest;
 import org.dei.perla.core.channel.IOTask;
 import org.dei.perla.core.channel.Payload;
 import org.dei.perla.core.channel.SynchronizerIOHandler;
-import org.dei.perla.core.fpc.descriptor.DeviceDescriptor;
+import org.dei.perla.core.descriptor.DeviceDescriptor;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -38,8 +38,8 @@ public class SimulatorChannelTest {
 
     @BeforeClass
     public static void parseDeviceDescriptor() throws Exception {
-        JAXBContext jc = JAXBContext.newInstance("org.dei.perla.core.fpc.descriptor"
-                + ":org.dei.perla.core.fpc.descriptor.instructions"
+        JAXBContext jc = JAXBContext.newInstance("org.dei.perla.core.descriptor"
+                + ":org.dei.perla.core.descriptor.instructions"
                 + ":org.dei.perla.core.channel.simulator");
 
         Unmarshaller unmarshaller = jc.createUnmarshaller();

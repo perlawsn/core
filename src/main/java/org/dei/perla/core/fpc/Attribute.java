@@ -1,7 +1,7 @@
 package org.dei.perla.core.fpc;
 
-import org.dei.perla.core.fpc.descriptor.AttributeDescriptor;
-import org.dei.perla.core.fpc.descriptor.DataType;
+import org.dei.perla.core.descriptor.AttributeDescriptor;
+import org.dei.perla.core.descriptor.DataType;
 
 import java.util.HashMap;
 import java.util.Map;

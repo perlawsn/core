@@ -5,9 +5,9 @@ import java.util.Map;
 
 import javassist.ClassPool;
 
-import org.dei.perla.core.fpc.descriptor.FieldDescriptor;
-import org.dei.perla.core.fpc.descriptor.InvalidDeviceDescriptorException;
-import org.dei.perla.core.fpc.descriptor.MessageDescriptor;
+import org.dei.perla.core.descriptor.FieldDescriptor;
+import org.dei.perla.core.descriptor.InvalidDeviceDescriptorException;
+import org.dei.perla.core.descriptor.MessageDescriptor;
 import org.dei.perla.core.message.AbstractMapperFactory;
 import org.dei.perla.core.message.Mapper;
 import org.dei.perla.core.utils.Conditions;

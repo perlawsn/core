@@ -3,7 +3,7 @@ package org.dei.perla.core.channel.simulator;
 import java.util.Map;
 
 import org.dei.perla.core.channel.Payload;
-import org.dei.perla.core.fpc.descriptor.FieldDescriptor;
+import org.dei.perla.core.descriptor.FieldDescriptor;
 import org.dei.perla.core.message.AbstractMapper;
 import org.dei.perla.core.message.FpcMessage;
 

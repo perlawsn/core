@@ -5,12 +5,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
 import org.dei.perla.core.fpc.Attribute;
-import org.dei.perla.core.fpc.engine.Record;
+import org.dei.perla.core.engine.Record;
 
 /**
  * A class implementing a single processing operation to be performed on a

@@ -5,8 +5,8 @@ import java.util.Map;
 import javassist.ClassPool;
 
 import org.apache.http.annotation.ThreadSafe;
-import org.dei.perla.core.fpc.descriptor.InvalidDeviceDescriptorException;
-import org.dei.perla.core.fpc.descriptor.MessageDescriptor;
+import org.dei.perla.core.descriptor.InvalidDeviceDescriptorException;
+import org.dei.perla.core.descriptor.MessageDescriptor;
 
 /**
  * A factory for creating new Mapper classes. Each MapperFactory implementation

@@ -12,9 +12,9 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 
 import org.dei.perla.core.channel.Payload;
-import org.dei.perla.core.fpc.descriptor.AttributeDescriptor;
-import org.dei.perla.core.fpc.descriptor.DeviceDescriptor;
-import org.dei.perla.core.fpc.descriptor.MessageDescriptor;
+import org.dei.perla.core.descriptor.AttributeDescriptor;
+import org.dei.perla.core.descriptor.DeviceDescriptor;
+import org.dei.perla.core.descriptor.MessageDescriptor;
 import org.dei.perla.core.message.FpcMessage;
 import org.dei.perla.core.message.Mapper;
 import org.dei.perla.core.message.MapperFactory;
@@ -30,8 +30,8 @@ public class SimulatorMessageTest {
 
 	@BeforeClass
 	public static void parseDeviceDescriptor() throws Exception {
-		JAXBContext jc = JAXBContext.newInstance("org.dei.perla.core.fpc.descriptor"
-				+ ":org.dei.perla.core.fpc.descriptor.instructions"
+		JAXBContext jc = JAXBContext.newInstance("org.dei.perla.core.descriptor"
+				+ ":org.dei.perla.core.descriptor.instructions"
 				+ ":org.dei.perla.core.channel.simulator");
 
 		Unmarshaller unmarshaller = jc.createUnmarshaller();

@@ -8,7 +8,7 @@ import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.dei.perla.core.channel.ByteArrayPayload;
 import org.dei.perla.core.channel.Payload;
-import org.dei.perla.core.fpc.descriptor.FieldDescriptor;
+import org.dei.perla.core.descriptor.FieldDescriptor;
 import org.dei.perla.core.message.AbstractMapper;
 import org.dei.perla.core.message.FpcMessage;
 

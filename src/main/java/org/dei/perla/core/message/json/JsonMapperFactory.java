@@ -15,10 +15,10 @@ import javassist.Modifier;
 import javassist.NotFoundException;
 import javassist.bytecode.BadBytecode;
 
-import org.dei.perla.core.fpc.descriptor.DataType;
-import org.dei.perla.core.fpc.descriptor.FieldDescriptor;
-import org.dei.perla.core.fpc.descriptor.InvalidDeviceDescriptorException;
-import org.dei.perla.core.fpc.descriptor.MessageDescriptor;
+import org.dei.perla.core.descriptor.DataType;
+import org.dei.perla.core.descriptor.FieldDescriptor;
+import org.dei.perla.core.descriptor.InvalidDeviceDescriptorException;
+import org.dei.perla.core.descriptor.MessageDescriptor;
 import org.dei.perla.core.message.AbstractMapperFactory;
 import org.dei.perla.core.message.FpcMessage;
 import org.dei.perla.core.message.Mapper;

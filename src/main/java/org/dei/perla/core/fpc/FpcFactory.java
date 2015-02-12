@@ -1,7 +1,7 @@
 package org.dei.perla.core.fpc;
 
-import org.dei.perla.core.fpc.descriptor.DeviceDescriptor;
-import org.dei.perla.core.fpc.descriptor.InvalidDeviceDescriptorException;
+import org.dei.perla.core.descriptor.DeviceDescriptor;
+import org.dei.perla.core.descriptor.InvalidDeviceDescriptorException;
 
 /**
  * A software component for creating new <code>FPC</code> entities.

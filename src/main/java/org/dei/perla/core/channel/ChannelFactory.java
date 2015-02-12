@@ -1,7 +1,7 @@
 package org.dei.perla.core.channel;
 
-import org.dei.perla.core.fpc.descriptor.ChannelDescriptor;
-import org.dei.perla.core.fpc.descriptor.InvalidDeviceDescriptorException;
+import org.dei.perla.core.descriptor.ChannelDescriptor;
+import org.dei.perla.core.descriptor.InvalidDeviceDescriptorException;
 
 /**
  * A factory interface for creating new <code>Channel</code> instances.Each

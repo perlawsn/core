@@ -4,8 +4,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.dei.perla.core.fpc.descriptor.DataType;
-import org.dei.perla.core.fpc.descriptor.FieldDescriptor;
+import org.dei.perla.core.descriptor.DataType;
+import org.dei.perla.core.descriptor.FieldDescriptor;
 import org.dei.perla.core.message.FpcMessage;
 import org.dei.perla.core.utils.DateUtils;
 

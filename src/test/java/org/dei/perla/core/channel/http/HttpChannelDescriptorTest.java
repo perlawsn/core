@@ -10,8 +10,8 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.apache.http.entity.ContentType;
 import org.dei.perla.core.channel.http.HttpIORequestDescriptor.HttpMethod;
-import org.dei.perla.core.fpc.descriptor.ChannelDescriptor;
-import org.dei.perla.core.fpc.descriptor.DeviceDescriptor;
+import org.dei.perla.core.descriptor.ChannelDescriptor;
+import org.dei.perla.core.descriptor.DeviceDescriptor;
 import org.dei.perla.core.utils.Check;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -25,8 +25,8 @@ public class HttpChannelDescriptorTest {
 	@BeforeClass
 	public static void parseDeviceDescriptor() throws Exception {
 		StringBuilder sb = new StringBuilder();
-		sb.append("org.dei.perla.core.fpc.descriptor");
-		sb.append(":org.dei.perla.core.fpc.descriptor.instructions");
+		sb.append("org.dei.perla.core.descriptor");
+		sb.append(":org.dei.perla.core.descriptor.instructions");
 		sb.append(":org.dei.perla.core.message.urlencoded");
 		sb.append(":org.dei.perla.core.message.json");
 		sb.append(":org.dei.perla.core.channel.http");

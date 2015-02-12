@@ -2,8 +2,8 @@ package org.dei.perla.core.fpc.base;
 
 import org.dei.perla.core.fpc.Attribute;
 import org.dei.perla.core.fpc.base.RecordPipeline.PipelineBuilder;
-import org.dei.perla.core.fpc.descriptor.DataType;
-import org.dei.perla.core.fpc.engine.Record;
+import org.dei.perla.core.descriptor.DataType;
+import org.dei.perla.core.engine.Record;
 import org.junit.Test;
 
 import java.util.Collections;

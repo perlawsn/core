@@ -14,7 +14,7 @@ import org.dei.perla.core.channel.ChannelFactory;
 import org.dei.perla.core.channel.Payload;
 import org.dei.perla.core.channel.SynchronizerIOHandler;
 import org.dei.perla.core.channel.http.HttpIORequestDescriptor.HttpMethod;
-import org.dei.perla.core.fpc.descriptor.InvalidDeviceDescriptorException;
+import org.dei.perla.core.descriptor.InvalidDeviceDescriptorException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

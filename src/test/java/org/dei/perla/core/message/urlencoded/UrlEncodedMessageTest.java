@@ -20,10 +20,10 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.dei.perla.core.channel.ByteArrayPayload;
 import org.dei.perla.core.channel.Payload;
-import org.dei.perla.core.fpc.descriptor.DataType;
-import org.dei.perla.core.fpc.descriptor.DeviceDescriptor;
-import org.dei.perla.core.fpc.descriptor.FieldDescriptor;
-import org.dei.perla.core.fpc.descriptor.InvalidDeviceDescriptorException;
+import org.dei.perla.core.descriptor.DataType;
+import org.dei.perla.core.descriptor.DeviceDescriptor;
+import org.dei.perla.core.descriptor.FieldDescriptor;
+import org.dei.perla.core.descriptor.InvalidDeviceDescriptorException;
 import org.dei.perla.core.message.FpcMessage;
 import org.dei.perla.core.message.MapperFactory;
 import org.junit.BeforeClass;
@@ -38,8 +38,8 @@ public class UrlEncodedMessageTest {
 
 	@BeforeClass
 	public static void parseDeviceDescriptor() throws Exception {
-		JAXBContext jc = JAXBContext.newInstance("org.dei.perla.core.fpc.descriptor"
-				+ ":org.dei.perla.core.fpc.descriptor.instructions"
+		JAXBContext jc = JAXBContext.newInstance("org.dei.perla.core.descriptor"
+				+ ":org.dei.perla.core.descriptor.instructions"
 				+ ":org.dei.perla.core.message.json"
 				+ ":org.dei.perla.core.message.urlencoded"
 				+ ":org.dei.perla.core.channel.http");

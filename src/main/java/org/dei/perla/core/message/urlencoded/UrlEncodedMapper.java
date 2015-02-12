@@ -12,7 +12,7 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
 import org.dei.perla.core.channel.ByteArrayPayload;
 import org.dei.perla.core.channel.Payload;
-import org.dei.perla.core.fpc.descriptor.FieldDescriptor;
+import org.dei.perla.core.descriptor.FieldDescriptor;
 import org.dei.perla.core.message.AbstractMapper;
 import org.dei.perla.core.message.FpcMessage;
 

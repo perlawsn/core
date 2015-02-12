@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 import org.dei.perla.core.fpc.TaskHandler;
-import org.dei.perla.core.fpc.engine.Record;
+import org.dei.perla.core.engine.Record;
 
 public class PeriodicTask extends AbstractTask {
 

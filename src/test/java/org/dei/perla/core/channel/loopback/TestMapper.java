@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.dei.perla.core.channel.Payload;
-import org.dei.perla.core.fpc.descriptor.FieldDescriptor;
+import org.dei.perla.core.descriptor.FieldDescriptor;
 import org.dei.perla.core.message.FpcMessage;
 import org.dei.perla.core.message.Mapper;
 

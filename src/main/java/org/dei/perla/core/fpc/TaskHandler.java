@@ -1,6 +1,6 @@
 package org.dei.perla.core.fpc;
 
-import org.dei.perla.core.fpc.engine.Record;
+import org.dei.perla.core.engine.Record;
 
 /**
  * <p>

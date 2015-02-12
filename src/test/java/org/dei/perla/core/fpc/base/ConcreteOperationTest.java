@@ -33,21 +33,21 @@ import org.dei.perla.core.channel.simulator.SimulatorMapperFactory;
 import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.base.AsyncOperation.AsyncMessageHandler;
 import org.dei.perla.core.fpc.base.NativePeriodicOperation.PeriodicMessageHandler;
-import org.dei.perla.core.fpc.descriptor.AttributeDescriptor;
-import org.dei.perla.core.fpc.descriptor.ChannelDescriptor;
-import org.dei.perla.core.fpc.descriptor.DeviceDescriptor;
-import org.dei.perla.core.fpc.descriptor.IORequestDescriptor;
-import org.dei.perla.core.fpc.descriptor.MessageDescriptor;
-import org.dei.perla.core.fpc.engine.CreateComplexVarInstruction;
-import org.dei.perla.core.fpc.engine.EmitInstruction;
-import org.dei.perla.core.fpc.engine.PutInstruction;
-import org.dei.perla.core.fpc.engine.Record;
-import org.dei.perla.core.fpc.engine.Script;
-import org.dei.perla.core.fpc.engine.ScriptBuilder;
-import org.dei.perla.core.fpc.engine.SetComplexInstruction;
-import org.dei.perla.core.fpc.engine.StopInstruction;
-import org.dei.perla.core.fpc.engine.SubmitInstruction;
-import org.dei.perla.core.fpc.engine.SubmitInstruction.RequestParameter;
+import org.dei.perla.core.descriptor.AttributeDescriptor;
+import org.dei.perla.core.descriptor.ChannelDescriptor;
+import org.dei.perla.core.descriptor.DeviceDescriptor;
+import org.dei.perla.core.descriptor.IORequestDescriptor;
+import org.dei.perla.core.descriptor.MessageDescriptor;
+import org.dei.perla.core.engine.CreateComplexVarInstruction;
+import org.dei.perla.core.engine.EmitInstruction;
+import org.dei.perla.core.engine.PutInstruction;
+import org.dei.perla.core.engine.Record;
+import org.dei.perla.core.engine.Script;
+import org.dei.perla.core.engine.ScriptBuilder;
+import org.dei.perla.core.engine.SetComplexInstruction;
+import org.dei.perla.core.engine.StopInstruction;
+import org.dei.perla.core.engine.SubmitInstruction;
+import org.dei.perla.core.engine.SubmitInstruction.RequestParameter;
 import org.dei.perla.core.message.Mapper;
 import org.dei.perla.core.message.MapperFactory;
 import org.junit.BeforeClass;
@@ -67,8 +67,8 @@ public class ConcreteOperationTest {
 
 	@BeforeClass
 	public static void setup() throws Exception {
-		JAXBContext jc = JAXBContext.newInstance("org.dei.perla.core.fpc.descriptor"
-				+ ":org.dei.perla.core.fpc.descriptor.instructions"
+		JAXBContext jc = JAXBContext.newInstance("org.dei.perla.core.descriptor"
+				+ ":org.dei.perla.core.descriptor.instructions"
 				+ ":org.dei.perla.core.channel.simulator");
 
 		Unmarshaller unmarshaller = jc.createUnmarshaller();

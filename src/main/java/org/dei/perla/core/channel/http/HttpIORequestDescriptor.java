@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.dei.perla.core.fpc.descriptor.IORequestDescriptor;
+import org.dei.perla.core.descriptor.IORequestDescriptor;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "request")

@@ -7,11 +7,11 @@ import java.util.Set;
 
 import org.dei.perla.core.fpc.Attribute;
 import org.dei.perla.core.fpc.FpcException;
-import org.dei.perla.core.fpc.engine.Executor;
-import org.dei.perla.core.fpc.engine.Record;
-import org.dei.perla.core.fpc.engine.Script;
-import org.dei.perla.core.fpc.engine.ScriptHandler;
-import org.dei.perla.core.fpc.engine.ScriptParameter;
+import org.dei.perla.core.engine.Executor;
+import org.dei.perla.core.engine.Record;
+import org.dei.perla.core.engine.Script;
+import org.dei.perla.core.engine.ScriptHandler;
+import org.dei.perla.core.engine.ScriptParameter;
 import org.dei.perla.core.message.FpcMessage;
 import org.dei.perla.core.message.Mapper;
 import org.dei.perla.core.utils.Check;

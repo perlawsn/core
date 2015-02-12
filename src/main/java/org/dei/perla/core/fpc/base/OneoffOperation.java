@@ -5,7 +5,7 @@ import java.util.Set;
 
 import org.dei.perla.core.fpc.Attribute;
 import org.dei.perla.core.fpc.TaskHandler;
-import org.dei.perla.core.fpc.engine.Script;
+import org.dei.perla.core.engine.Script;
 import org.dei.perla.core.utils.StopHandler;
 
 public class OneoffOperation extends AbstractOperation<AbstractTask> {

@@ -3,7 +3,7 @@ package org.dei.perla.core.fpc.base;
 import org.dei.perla.core.fpc.Attribute;
 import org.dei.perla.core.fpc.TaskHandler;
 import org.dei.perla.core.fpc.base.RecordPipeline.PipelineBuilder;
-import org.dei.perla.core.fpc.descriptor.DataType;
+import org.dei.perla.core.descriptor.DataType;
 import org.dei.perla.core.utils.StopHandler;
 
 import java.util.*;

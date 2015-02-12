@@ -1,7 +1,7 @@
 package org.dei.perla.core.channel;
 
-import org.dei.perla.core.fpc.descriptor.IORequestDescriptor;
-import org.dei.perla.core.fpc.descriptor.InvalidDeviceDescriptorException;
+import org.dei.perla.core.descriptor.IORequestDescriptor;
+import org.dei.perla.core.descriptor.InvalidDeviceDescriptorException;
 
 /**
  * A component for creating <code>IORequestBuilder</code> objects.

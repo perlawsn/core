@@ -23,10 +23,10 @@ import javax.xml.transform.stream.StreamSource;
 import org.apache.commons.io.FileUtils;
 import org.dei.perla.core.channel.ByteArrayPayload;
 import org.dei.perla.core.channel.Payload;
-import org.dei.perla.core.fpc.descriptor.AttributeDescriptor;
-import org.dei.perla.core.fpc.descriptor.DeviceDescriptor;
-import org.dei.perla.core.fpc.descriptor.FieldDescriptor;
-import org.dei.perla.core.fpc.descriptor.InvalidDeviceDescriptorException;
+import org.dei.perla.core.descriptor.AttributeDescriptor;
+import org.dei.perla.core.descriptor.DeviceDescriptor;
+import org.dei.perla.core.descriptor.FieldDescriptor;
+import org.dei.perla.core.descriptor.InvalidDeviceDescriptorException;
 import org.dei.perla.core.message.FpcMessage;
 import org.dei.perla.core.message.Mapper;
 import org.junit.BeforeClass;
@@ -47,8 +47,8 @@ public class JsonMessageTest {
 	@BeforeClass
 	public static void parseDeviceDescriptor() throws Exception {
 		JAXBContext jc = JAXBContext
-				.newInstance("org.dei.perla.core.fpc.descriptor"
-						+ ":org.dei.perla.core.fpc.descriptor.instructions"
+				.newInstance("org.dei.perla.core.descriptor"
+						+ ":org.dei.perla.core.descriptor.instructions"
 						+ ":org.dei.perla.core.message.json"
 						+ ":org.dei.perla.core.channel.http");
 

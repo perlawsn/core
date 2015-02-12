@@ -9,8 +9,8 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.dei.perla.core.fpc.descriptor.FieldDescriptor;
-import org.dei.perla.core.fpc.descriptor.MessageDescriptor;
+import org.dei.perla.core.descriptor.FieldDescriptor;
+import org.dei.perla.core.descriptor.MessageDescriptor;
 
 /**
  * A custom <code>MessageDescriptor</code> implementation designed for the

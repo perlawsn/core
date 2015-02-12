@@ -9,7 +9,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.dei.perla.core.fpc.descriptor.MessageDescriptor;
+import org.dei.perla.core.descriptor.MessageDescriptor;
 
 @XmlRootElement(name = "message")
 @XmlAccessorType(XmlAccessType.FIELD)

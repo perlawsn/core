@@ -4,7 +4,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.dei.perla.core.fpc.descriptor.FieldDescriptor;
+import org.dei.perla.core.descriptor.FieldDescriptor;
 
 @XmlRootElement(name = "value")
 @XmlAccessorType(XmlAccessType.FIELD)

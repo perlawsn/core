@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.dei.perla.core.fpc.Attribute;
-import org.dei.perla.core.fpc.engine.Record;
+import org.dei.perla.core.engine.Record;
 import org.dei.perla.core.utils.Check;
 
 /**

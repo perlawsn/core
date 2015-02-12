@@ -1,6 +1,6 @@
 package org.dei.perla.core.fpc;
 
-import org.dei.perla.core.fpc.descriptor.DataType;
+import org.dei.perla.core.descriptor.DataType;
 import org.junit.Test;
 
 import static org.hamcrest.Matchers.*;

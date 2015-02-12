@@ -20,10 +20,10 @@ import org.dei.perla.core.fpc.Attribute;
 import org.dei.perla.core.fpc.Fpc;
 import org.dei.perla.core.fpc.FpcFactory;
 import org.dei.perla.core.fpc.Task;
-import org.dei.perla.core.fpc.descriptor.DataType;
-import org.dei.perla.core.fpc.descriptor.DeviceDescriptor;
-import org.dei.perla.core.fpc.descriptor.JaxbDeviceDescriptorParser;
-import org.dei.perla.core.fpc.engine.Record;
+import org.dei.perla.core.descriptor.DataType;
+import org.dei.perla.core.descriptor.DeviceDescriptor;
+import org.dei.perla.core.descriptor.JaxbDeviceDescriptorParser;
+import org.dei.perla.core.engine.Record;
 import org.dei.perla.core.message.MapperFactory;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -37,8 +37,8 @@ public class BaseFpcTest {
 	@BeforeClass
 	public static void createFpc() throws Exception {
 		List<String> packageList = new ArrayList<>();
-		packageList.add("org.dei.perla.core.fpc.descriptor");
-		packageList.add("org.dei.perla.core.fpc.descriptor.instructions");
+		packageList.add("org.dei.perla.core.descriptor");
+		packageList.add("org.dei.perla.core.descriptor.instructions");
 		packageList.add("org.dei.perla.core.channel.simulator");
 		JaxbDeviceDescriptorParser parser = new JaxbDeviceDescriptorParser(
 				packageList);

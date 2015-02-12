@@ -1,8 +1,8 @@
 package org.dei.perla.core.channel.simulator;
 
 import org.dei.perla.core.channel.IORequestBuilderFactory;
-import org.dei.perla.core.fpc.descriptor.IORequestDescriptor;
-import org.dei.perla.core.fpc.descriptor.InvalidDeviceDescriptorException;
+import org.dei.perla.core.descriptor.IORequestDescriptor;
+import org.dei.perla.core.descriptor.InvalidDeviceDescriptorException;
 import org.dei.perla.core.utils.Check;
 import org.dei.perla.core.utils.Conditions;
 

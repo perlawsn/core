@@ -5,7 +5,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.dei.perla.core.fpc.descriptor.IORequestDescriptor;
+import org.dei.perla.core.descriptor.IORequestDescriptor;
 
 @XmlRootElement(name = "request")
 @XmlAccessorType(XmlAccessType.FIELD)

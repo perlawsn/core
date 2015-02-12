@@ -1,6 +1,6 @@
 package org.dei.perla.core.channel.loopback;
 
-import org.dei.perla.core.fpc.descriptor.FieldDescriptor;
+import org.dei.perla.core.descriptor.FieldDescriptor;
 
 public class TestFieldDescriptor extends FieldDescriptor {
 

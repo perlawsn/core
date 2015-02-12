@@ -7,7 +7,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.TaskHandler;
-import org.dei.perla.core.fpc.engine.Record;
+import org.dei.perla.core.engine.Record;
 
 /**
  * {@code ScriptHandler} implementation for accessing synchronously to the

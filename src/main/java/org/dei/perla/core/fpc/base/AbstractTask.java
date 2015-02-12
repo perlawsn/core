@@ -10,7 +10,7 @@ import org.dei.perla.core.fpc.Attribute;
 import org.dei.perla.core.fpc.FpcException;
 import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.TaskHandler;
-import org.dei.perla.core.fpc.engine.Record;
+import org.dei.perla.core.engine.Record;
 
 /**
  * An abstract implementation of the {@link Task} interface. It is the base

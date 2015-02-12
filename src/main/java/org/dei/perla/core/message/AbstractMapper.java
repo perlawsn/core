@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
-import org.dei.perla.core.fpc.descriptor.FieldDescriptor;
+import org.dei.perla.core.descriptor.FieldDescriptor;
 
 /**
  * A convenience implementation of the Mapper interface.
