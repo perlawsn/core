@@ -98,19 +98,19 @@
 		</get>
 		<set id="integer-set">
 			<!-- This script doesn't accomplish anything. It's just used for test purposes -->
-			<i:create variable="set-data" type="set-msg"/>
+			<i:var name="set-data" type="set-msg"/>
 			<i:set variable="set-data" field="test" value="${param['integer']}"/>
 		</set>
 		<periodic id="all-periodic">
 			<start>
-				<i:create variable="period" type="sampling-period"/>
+				<i:var name="period" type="sampling-period"/>
 				<i:set variable="period" field="period" value="${param['period']}"/>
 				<i:submit request="all-request" channel="simulator">
 					<i:param name="period" variable="period"/>
 				</i:submit>
 			</start>
 			<stop>
-				<i:create variable="period" type="sampling-period"/>
+				<i:var name="period" type="sampling-period"/>
 				<i:set variable="period" field="period" value="0"/>
 				<i:submit request="all-request" channel="simulator">
 					<i:param name="period" variable="period"/>
@@ -125,7 +125,7 @@
 		</periodic>
 		<periodic id="multiple-periodic">
 			<start>
-				<i:create variable="period" type="sampling-period"/>
+				<i:var name="period" type="sampling-period"/>
 				<i:set variable="period" field="period" value="${param['period']}"/>
 				<i:submit request="integer-request" channel="simulator">
 					<i:param name="period" variable="period"/>
@@ -135,7 +135,7 @@
 				</i:submit>
 			</start>
 			<stop>
-				<i:create variable="period" type="sampling-period"/>
+				<i:var name="period" type="sampling-period"/>
 				<i:set variable="period" field="period" value="0"/>
 				<i:submit request="integer-request" channel="simulator">
 					<i:param name="period" variable="period"/>
@@ -155,7 +155,7 @@
 		</periodic>
 		<async id="event-async">
 			<start>
-				<i:create variable="period" type="sampling-period"/>
+				<i:var name="period" type="sampling-period"/>
 				<i:set variable="period" field="period" value="200"/>
 				<i:submit request="event-request" channel="simulator">
 					<i:param name="period" variable="period"/>

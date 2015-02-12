@@ -24,7 +24,7 @@ import org.dei.perla.fpc.descriptor.DataType;
 import org.dei.perla.fpc.descriptor.DeviceDescriptor;
 import org.dei.perla.fpc.descriptor.DeviceDescriptorParser;
 import org.dei.perla.fpc.descriptor.JaxbDeviceDescriptorParser;
-import org.dei.perla.fpc.engine.CreateComplexInstruction;
+import org.dei.perla.fpc.engine.CreateComplexVarInstruction;
 import org.dei.perla.fpc.engine.EmitInstruction;
 import org.dei.perla.fpc.engine.Instruction;
 import org.dei.perla.fpc.engine.PutInstruction;
@@ -233,7 +233,7 @@ public class BaseFpcFactoryTest {
 		script = ((NativePeriodicOperation) op).getStartScript();
 
 		i = script.getCode();
-		assertTrue(i instanceof CreateComplexInstruction);
+		assertTrue(i instanceof CreateComplexVarInstruction);
 		i = i.next();
 		assertTrue(i instanceof SetComplexInstruction);
 		i = i.next();

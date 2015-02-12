@@ -107,7 +107,7 @@ public class CompilerTest {
 		script = Compiler.compile(iList, "append", attributeMap, mapperMap,
 				requestBuilderMap, channelMap).getScript();
 		i = script.getCode();
-		assertTrue(i instanceof CreateComplexInstruction);
+		assertTrue(i instanceof CreateComplexVarInstruction);
 		i = i.next();
 		assertTrue(i instanceof AppendInstruction);
 		AppendInstruction app = (AppendInstruction) i;
@@ -157,14 +157,14 @@ public class CompilerTest {
 		assertThat(script, notNullValue());
 
 		i = script.getCode();
-		assertTrue(i instanceof CreateComplexInstruction);
-		CreateComplexInstruction comp = (CreateComplexInstruction) i;
-		assertThat(comp.getVariable(), equalTo("var1"));
+		assertTrue(i instanceof CreateComplexVarInstruction);
+		CreateComplexVarInstruction comp = (CreateComplexVarInstruction) i;
+		assertThat(comp.getName(), equalTo("var1"));
 		assertThat(comp.getMapper(), equalTo(mapper1));
 
 		i = i.next();
-		assertTrue(i instanceof CreatePrimitiveInstruction);
-		CreatePrimitiveInstruction prim = (CreatePrimitiveInstruction) i;
+		assertTrue(i instanceof CreatePrimitiveVarInstruction);
+		CreatePrimitiveVarInstruction prim = (CreatePrimitiveVarInstruction) i;
 		assertThat(prim.getVariable(), equalTo("var2"));
 		assertThat(prim.getType(), equalTo(DataType.STRING));
 	}
@@ -183,7 +183,7 @@ public class CompilerTest {
 				requestBuilderMap, channelMap).getScript();
 		assertThat(script, notNullValue());
 		i = script.getCode();
-		assertTrue(i instanceof CreateComplexInstruction);
+		assertTrue(i instanceof CreateComplexVarInstruction);
 
 		i = i.next();
 		assertTrue(i instanceof SetComplexInstruction);
@@ -194,7 +194,7 @@ public class CompilerTest {
 		assertThat(comp.getValue(), equalTo("5"));
 
 		i = i.next();
-		assertTrue(i instanceof CreatePrimitiveInstruction);
+		assertTrue(i instanceof CreatePrimitiveVarInstruction);
 		i = i.next();
 		assertTrue(i instanceof SetPrimitiveInstruction);
 		SetPrimitiveInstruction prim = (SetPrimitiveInstruction) i;
@@ -216,7 +216,7 @@ public class CompilerTest {
 				requestBuilderMap, channelMap).getScript();
 		assertThat(script, notNullValue());
 		i = script.getCode();
-		assertTrue(i instanceof CreateComplexInstruction);
+		assertTrue(i instanceof CreateComplexVarInstruction);
 		i = i.next();
 		assertTrue(i instanceof SetComplexInstruction);
 		i = i.next();
@@ -240,7 +240,7 @@ public class CompilerTest {
 				requestBuilderMap, channelMap).getScript();
 		assertThat(script, notNullValue());
 		i = script.getCode();
-		assertTrue(i instanceof CreateComplexInstruction);
+		assertTrue(i instanceof CreateComplexVarInstruction);
 		i = i.next();
 		assertTrue(i instanceof SetComplexInstruction);
 		i = i.next();
@@ -263,7 +263,7 @@ public class CompilerTest {
 				requestBuilderMap, channelMap).getScript();
 		assertThat(script, notNullValue());
 		i = script.getCode();
-		assertTrue(i instanceof CreateComplexInstruction);
+		assertTrue(i instanceof CreateComplexVarInstruction);
 		i = i.next();
 		assertTrue(i instanceof SetComplexInstruction);
 		i = i.next();
@@ -296,7 +296,7 @@ public class CompilerTest {
 				requestBuilderMap, channelMap).getScript();
 		assertThat(script, notNullValue());
 		i = script.getCode();
-		assertTrue(i instanceof CreateComplexInstruction);
+		assertTrue(i instanceof CreateComplexVarInstruction);
 		i = i.next();
 		assertTrue(i instanceof IfInstruction);
 		IfInstruction ifInst = (IfInstruction) i;

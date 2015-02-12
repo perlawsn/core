@@ -106,7 +106,7 @@ public class Compiler {
 		if (d instanceof AppendInstructionDescriptor) {
 			iErr = err.inContext("Append instruction");
 			return parseAppendInstruction((AppendInstructionDescriptor) d,
-					ctx, iErr);
+                    ctx, iErr);
 
 		} else if (d instanceof BreakpointInstructionDescriptor) {
 			return new BreakpointInstruction();
@@ -214,17 +214,17 @@ public class Compiler {
 		boolean errorFound = false;
 
 		// Check variable field
-		if (Check.nullOrEmpty(d.getVariable())) {
+		if (Check.nullOrEmpty(d.getName())) {
 			err.addError(MISSING_VARIABLE_NAME);
 			errorFound = true;
-		} else if (d.getVariable().equals("param")) {
+		} else if (d.getName().equals("param")) {
 			err.addError(INVALID_PARAM_VARIABLE_NAME);
 			errorFound = true;
-		} else if (ctx.variableTypeMap.containsKey(d.getVariable())) {
-			err.addError(DUPLICATE_VARIABLE, d.getVariable());
+		} else if (ctx.variableTypeMap.containsKey(d.getName())) {
+			err.addError(DUPLICATE_VARIABLE, d.getName());
 			errorFound = true;
 		}
-		ctx.variableTypeMap.put(d.getVariable(), d.getType());
+		ctx.variableTypeMap.put(d.getName(), d.getType());
 
 		// Check variable type
 		if (Check.nullOrEmpty(d.getType())) {
@@ -238,14 +238,14 @@ public class Compiler {
 
 		if (DataType.isPrimitive(d.getType())) {
 			DataType type = DataType.valueOf(d.getType().toUpperCase());
-			return new CreatePrimitiveInstruction(d.getVariable(), type);
+			return new CreatePrimitiveVarInstruction(d.getName(), type);
 		} else {
 			Mapper mapper = ctx.mappers.get(d.getType());
 			if (mapper == null) {
 				err.addError(INVALID_TYPE, d.getType());
 				return new NoopInstruction();
 			}
-			return new CreateComplexInstruction(d.getVariable(), mapper);
+			return new CreateComplexVarInstruction(d.getName(), mapper);
 		}
 	}
 

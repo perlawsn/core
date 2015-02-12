@@ -38,7 +38,7 @@ import org.dei.perla.fpc.descriptor.ChannelDescriptor;
 import org.dei.perla.fpc.descriptor.DeviceDescriptor;
 import org.dei.perla.fpc.descriptor.IORequestDescriptor;
 import org.dei.perla.fpc.descriptor.MessageDescriptor;
-import org.dei.perla.fpc.engine.CreateComplexInstruction;
+import org.dei.perla.fpc.engine.CreateComplexVarInstruction;
 import org.dei.perla.fpc.engine.EmitInstruction;
 import org.dei.perla.fpc.engine.PutInstruction;
 import org.dei.perla.fpc.engine.Record;
@@ -115,7 +115,7 @@ public class ConcreteOperationTest {
 
 		Script perStartScript = ScriptBuilder
 				.newScript()
-				.add(new CreateComplexInstruction("period-message", mmMap
+				.add(new CreateComplexVarInstruction("period-message", mmMap
 						.get("sampling-period")))
 				.add(new SetComplexInstruction("period-message", "period",
 						Integer.class, "${param['period']}"))
@@ -125,7 +125,7 @@ public class ConcreteOperationTest {
 
 		Script perStopScript = ScriptBuilder
 				.newScript()
-				.add(new CreateComplexInstruction("period-message", mmMap
+				.add(new CreateComplexVarInstruction("period-message", mmMap
 						.get("sampling-period")))
 				.add(new SetComplexInstruction("period-message", "period",
 						Integer.class, "${param['period']}"))
@@ -153,7 +153,7 @@ public class ConcreteOperationTest {
 
 		Script asyncStartScript = ScriptBuilder
 				.newScript()
-				.add(new CreateComplexInstruction("period-message", mmMap
+				.add(new CreateComplexVarInstruction("period-message", mmMap
 						.get("sampling-period")))
 				.add(new SetComplexInstruction("period-message", "period",
 						Integer.class, "50"))
@@ -176,7 +176,8 @@ public class ConcreteOperationTest {
 
 		Script getScript = ScriptBuilder
 				.newScript()
-				.add(new CreateComplexInstruction("test", mmMap.get("message1")))
+				.add(new CreateComplexVarInstruction("test",
+                        mmMap.get("message1")))
 				.add(new SetComplexInstruction("test", "integer", Integer.class, "5"))
 				.add(new SetComplexInstruction("test", "float", Float.class, "5.2"))
 				.add(new SetComplexInstruction("test", "boolean", Boolean.class,
@@ -201,7 +202,8 @@ public class ConcreteOperationTest {
 
 		Script script = ScriptBuilder
 				.newScript()
-				.add(new CreateComplexInstruction("test", mmMap.get("message1")))
+				.add(new CreateComplexVarInstruction("test",
+                        mmMap.get("message1")))
 				.add(new SetComplexInstruction("test", "integer", Integer.class, "5"))
 				.add(new SetComplexInstruction("test", "float", Float.class, "5.2"))
 				.add(new SetComplexInstruction("test", "boolean", Boolean.class,

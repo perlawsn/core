@@ -10,31 +10,31 @@ import javax.xml.bind.annotation.XmlRootElement;
  * Create instruction descriptor. Instructs the <code>FpcFactory</code> to
  * create a <code>CreateInstruction</code>.
  * </p>
- * 
+ *
  * <p>
  * Script variables are identified by a name, which is used to refer to
  * the variable in other <code>Script</code> instructions, and a message type
  * used by the system to infer which attributes can be set or retrieved on the
  * variable.
  * </p>
- * 
+ *
  * Usage:
- * 
+ *
  * <pre>
  * {@code
- * <i:create variable="variable_name" message="message_type" /> 
+ * <i:create variable="variable_name" message="message_type" />
  * }
  * </pre>
- * 
+ *
  * @author Guido Rota (2014)
  *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name = "create")
+@XmlRootElement(name = "var")
 public class CreateInstructionDescriptor extends InstructionDescriptor {
 
 	@XmlAttribute(required = true)
-	private String variable;
+	private String name;
 
 	@XmlAttribute(required = true)
 	private String type;
@@ -42,23 +42,23 @@ public class CreateInstructionDescriptor extends InstructionDescriptor {
 	public CreateInstructionDescriptor() {
 	}
 
-	public CreateInstructionDescriptor(String variable, String type) {
-		this.variable = variable;
+	public CreateInstructionDescriptor(String name, String type) {
+		this.name = name;
 		this.type = type;
 	}
 
 	/**
 	 * Returns the name of the variable
-	 * 
+	 *
 	 * @return Variable name
 	 */
-	public String getVariable() {
-		return variable;
+	public String getName() {
+		return name;
 	}
 
 	/**
 	 * Returns the variable type
-	 * 
+	 *
 	 * @return Variable type
 	 */
 	public String getType() {

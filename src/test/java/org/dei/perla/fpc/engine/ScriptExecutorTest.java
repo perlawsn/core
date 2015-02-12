@@ -1,16 +1,5 @@
 package org.dei.perla.fpc.engine;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.LinkedBlockingQueue;
-
 import org.dei.perla.channel.loopback.TestMapper;
 import org.dei.perla.fpc.descriptor.AttributeDescriptor;
 import org.dei.perla.fpc.descriptor.AttributeDescriptor.AttributePermission;
@@ -20,11 +9,18 @@ import org.dei.perla.message.Mapper;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.LinkedBlockingQueue;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
 public class ScriptExecutorTest {
 
 	private static AttributeDescriptor integer;
 	private static AttributeDescriptor string;
-	
+
 	private static Mapper mapper1;
 
 	private static Script emitScript;
@@ -35,10 +31,10 @@ public class ScriptExecutorTest {
 				AttributePermission.READ_WRITE);
 		string = new AttributeDescriptor("string", DataType.STRING,
 				AttributePermission.READ_WRITE);
-		
+
 		mapper1 = new TestMapper("message1");
 		emitScript = ScriptBuilder.newScript()
-				.add(new CreateComplexInstruction("var", mapper1))
+				.add(new CreateComplexVarInstruction("var", mapper1))
 				.add(new SetComplexInstruction("var", "integer", Integer.class, "4"))
 				.add(new SetComplexInstruction("var", "string", String.class, "test"))
 				.add(new PutInstruction("${var.integer}", integer))
@@ -87,7 +83,7 @@ public class ScriptExecutorTest {
 			ScriptException {
 		PauseInstruction pauseInstruction = new PauseInstruction();
 		Script pauseScript = ScriptBuilder.newScript()
-				.add(new CreateComplexInstruction("var", mapper1))
+				.add(new CreateComplexVarInstruction("var", mapper1))
 				.add(new SetComplexInstruction("var", "integer", Integer.class, "4"))
 				.add(new SetComplexInstruction("var", "string", String.class, "test"))
 				.add(new PutInstruction("${var.integer}", integer))
@@ -118,7 +114,7 @@ public class ScriptExecutorTest {
 			ScriptException, ExecutionException {
 		Script script = ScriptBuilder
 				.newScript()
-				.add(new CreateComplexInstruction("var", mapper1))
+				.add(new CreateComplexVarInstruction("var", mapper1))
 				.add(new SetComplexInstruction("var", "integer", Integer.class,
 						"${param['intParam']}"))
 				.add(new SetComplexInstruction("var", "string", String.class,
@@ -147,7 +143,7 @@ public class ScriptExecutorTest {
 			ExecutionException {
 		SuspendInstruction suspendInstruction = new SuspendInstruction();
 		Script suspendScript = ScriptBuilder.newScript()
-				.add(new CreateComplexInstruction("var", mapper1))
+				.add(new CreateComplexVarInstruction("var", mapper1))
 				.add(new SetComplexInstruction("var", "integer", Integer.class, "4"))
 				.add(new SetComplexInstruction("var", "string", String.class, "test"))
 				.add(new PutInstruction("${var.integer}", integer))
@@ -176,7 +172,7 @@ public class ScriptExecutorTest {
 		Runner runner2 = new Runner(emitScript, Executor.EMPTY_PARAMETER_ARRAY,
 				null, null);
 
-		InstructionLocal<Integer> il = new InstructionLocal<Integer>(5);
+		InstructionLocal<Integer> il = new InstructionLocal<>(5);
 
 		assertThat(il.getValue(runner1), equalTo(il.getValue(runner2)));
 

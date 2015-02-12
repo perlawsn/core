@@ -57,37 +57,37 @@
 	<operations>
 		<periodic id="periodic">
 			<start>
-				<i:create variable="test" message="temp-only"/>
+				<i:var name="test" message="temp-only"/>
 				<i:set variable="test" attribute="temperature" value="5"/>
 			</start>
 			<stop>
-				<i:create variable="test" message="temp-only"/>
+				<i:var name="test" message="temp-only"/>
 				<i:set variable="test" attribute="temperature" value="5"/>
 			</stop>
 			<on message="temp-only" variable="message">
-				<i:create variable="test" message="temp-only"/>
+				<i:var name="test" message="temp-only"/>
 				<i:set variable="test" attribute="temperature" value="5"/>
 			</on>
 			<on message="press-only" variable="message">
-				<i:create variable="test" message="temp-only"/>
+				<i:var name="test" message="temp-only"/>
 				<i:set variable="test" attribute="temperature" value="5"/>
 			</on>
 		</periodic>
 		<get id="get">
-			<i:create variable="test" message="temp-only"/>
+			<i:var name="test" message="temp-only"/>
 			<i:set variable="test" attribute="temperature" value="5"/>
 		</get>
 		<set id="set">
-			<i:create variable="test" message="temp-only"/>
+			<i:var name="test" message="temp-only"/>
 			<i:set variable="test" attribute="temperature" value="5"/>
 		</set>
 		<async id="async">
 			<start>
-				<i:create variable="test" message="temp-only"/>
+				<i:var name="test" message="temp-only"/>
 				<i:set variable="test" attribute="temperature" value="5"/>
 			</start>
 			<on message="temp-only" variable="message">
-				<i:create variable="test" message="temp-only"/>
+				<i:var name="test" message="temp-only"/>
 				<i:set variable="test" attribute="temperature" value="5"/>
 			</on>
 		</async>
