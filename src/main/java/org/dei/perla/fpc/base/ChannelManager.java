@@ -17,14 +17,15 @@ public class ChannelManager {
 
 	private static final Logger logger = Logger.getLogger(ChannelManager.class);
 
-	private final List<Channel> channelList;
-	private final Map<Mapper, AsyncChannelCallback> callbackMap = new ConcurrentHashMap<>();
+	private final List<Channel> channels;
+	private final Map<Mapper, AsyncChannelCallback> callbacks =
+            new ConcurrentHashMap<>();
 
-	public ChannelManager(List<Channel> channelList) {
-		this.channelList = channelList;
+	public ChannelManager(List<Channel> channels) {
+		this.channels = channels;
 
 		// Set the asynchronous handler on every channel
-		IOHandler ioHandler = new IOHandler() {
+		IOHandler h = new IOHandler() {
 			@Override
 			public void complete(IORequest request, Optional<Payload> result) {
 				asyncDispatch(result);
@@ -35,48 +36,44 @@ public class ChannelManager {
 				logger.warn("Error in asynchronous receive", cause);
 			}
 		};
-		for (Channel channel : channelList) {
-			channel.setAsyncIOHandler(ioHandler);
-		}
+        this.channels.forEach(c -> c.setAsyncIOHandler(h));
 	}
 
 	public void addCallback(Mapper mapper, AsyncChannelCallback callback) {
-		callbackMap.put(mapper, callback);
+		callbacks.put(mapper, callback);
 	}
 
 	public void removeCallback(Mapper mapper) {
-		callbackMap.remove(mapper);
+		callbacks.remove(mapper);
 	}
 
 	private void asyncDispatch(Optional<Payload> response) {
-		if (!response.isPresent() || callbackMap.isEmpty()) {
+		if (!response.isPresent() || callbacks.isEmpty()) {
 			return;
 		}
 
-		for (Mapper mapper : callbackMap.keySet()) {
+		for (Mapper mapper : callbacks.keySet()) {
 			FpcMessage msg = mapper.unmarshal(response.get());
 			if (!msg.validate()) {
 				continue;
 			}
 
-			AsyncChannelCallback callback = callbackMap.get(mapper);
+			AsyncChannelCallback callback = callbacks.get(mapper);
 			callback.newMessage(msg);
 			break;
 		}
 	}
 
 	public void stop() {
-		callbackMap.clear();
-		for (Channel channel : channelList) {
-			channel.close();
-		}
+		callbacks.clear();
+        channels.forEach(Channel::close);
 	}
 
 	public static interface AsyncChannelCallback {
 
 		/**
 		 * Invoked when a new message is received asynchronously
-		 * 
+		 *
 		 * @param message
 		 */
 		public void newMessage(FpcMessage message);

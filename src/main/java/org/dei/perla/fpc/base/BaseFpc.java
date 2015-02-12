@@ -17,8 +17,8 @@ public class BaseFpc implements Fpc {
     private final String type;
 	private final Set<Attribute> atts;
     private final Map<Attribute, Object> attValues;
-	private final ChannelManager channelMgr;
-	private final OperationScheduler scheduler;
+	private final ChannelManager cmgr;
+	private final Scheduler sched;
 
 	// This Operation creates an empty record. It is used for scheduling the
 	// periodic creation of empty records, to which additional static fields
@@ -33,14 +33,14 @@ public class BaseFpc implements Fpc {
 	}
 
 	protected BaseFpc(int id, String type, Set<Attribute> atts,
-            Map<Attribute, Object> attValues, ChannelManager channelMgr,
-			OperationScheduler scheduler) {
+            Map<Attribute, Object> attValues, ChannelManager cmgr,
+			Scheduler sched) {
 		this.id = id;
         this.type = type;
         this.atts = atts;
         this.attValues = attValues;
-        this.channelMgr = channelMgr;
-		this.scheduler = scheduler;
+        this.cmgr = cmgr;
+		this.sched = sched;
 	}
 
 	@Override
@@ -58,13 +58,13 @@ public class BaseFpc implements Fpc {
 		return atts;
 	}
 
-	protected OperationScheduler getOperationScheduler() {
-		return scheduler;
+	protected Scheduler getOperationScheduler() {
+		return sched;
 	}
 
 	@Override
 	public Task set(Map<Attribute, Object> valueMap, TaskHandler handler) {
-		return scheduler.scheduleSet(valueMap, handler);
+		return sched.set(valueMap, handler);
 	}
 
 	@Override
@@ -82,7 +82,7 @@ public class BaseFpc implements Fpc {
 			pBuilder.add(new RecordModifier.StaticAppender(req.staticValues()));
 		}
 
-		return scheduler.scheduleGet(req.dynAtts, handler, pBuilder);
+		return sched.get(req.dynAtts, handler, pBuilder);
 	}
 
 	@Override
@@ -102,7 +102,7 @@ public class BaseFpc implements Fpc {
             return emptyRecordOperation.schedule(paramMap, handler,
                     pBuilder.create());
         } else {
-            return scheduler.schedulePeriodic(req.dynAtts, periodMs, handler,
+            return sched.periodic(req.dynAtts, periodMs, handler,
                     pBuilder);
         }
 	}
@@ -116,13 +116,13 @@ public class BaseFpc implements Fpc {
 			return null;
 		}
 
-		return scheduler.scheduleAsync(req.dynAtts, handler, pBuilder);
+		return sched.async(req.dynAtts, handler, pBuilder);
 	}
 
 	@Override
 	public void stop(final StopHandler<Fpc> handler) {
-		scheduler.stop((Void) -> {
-			channelMgr.stop();
+		sched.stop((Void) -> {
+			cmgr.stop();
 			handler.hasStopped(this);
 		});
 	}

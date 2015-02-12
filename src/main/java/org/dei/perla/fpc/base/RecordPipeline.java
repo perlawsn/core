@@ -14,17 +14,13 @@ import org.dei.perla.fpc.engine.Record;
 import org.dei.perla.utils.Check;
 
 /**
- * <p>
  * An immutable pipeline of {@link RecordModifier}s for adding new fields to an
  * existing {@link Record}.
- * </p>
- * 
- * <p>
+ *
  * New {@code RecordPipeline} objects are created using a
  * {@code PipelineBuilder}, which can be obtained through the
  * {@code RecordPipeline.newBuilder()} method.
- * </p>
- * 
+ *
  * @author Guido Rota (2014)
  *
  */
@@ -39,7 +35,7 @@ public abstract class RecordPipeline {
 	/**
 	 * Returns a new {@code PipelineBuilder} instance for creating new
 	 * {@code RecordPipeline} objects.
-	 * 
+	 *
 	 * @return New {@code PipelineBuilder} object
 	 */
 	public static PipelineBuilder newBuilder() {
@@ -49,14 +45,14 @@ public abstract class RecordPipeline {
 	/**
 	 * Returns a collection of all {@link Attribute}s that this
 	 * {@code RecordPipeline} adds to the processed {@link Record}
-	 * 
+	 *
 	 * @return {@link Attribute}s added to the processed {@link Record}
 	 */
 	public abstract Collection<Attribute> attributes();
 
 	/**
 	 * Runs a {@link Record} through the {@code RecordPipeline}.
-	 * 
+	 *
 	 * @param source
 	 *            {@link Record} to be processed
 	 * @return New {@link Record} produced by the pipeline
@@ -65,13 +61,13 @@ public abstract class RecordPipeline {
 
 	/**
 	 * A builder class for creating new {@code RecordPipeline} objects.
-	 * 
+	 *
 	 * @author Guido Rota (2014)
 	 *
 	 */
 	public static class PipelineBuilder {
 
-		private List<RecordModifier> modifierList = null;
+		private List<RecordModifier> mods = null;
 
 		private PipelineBuilder() {
 		}
@@ -79,70 +75,68 @@ public abstract class RecordPipeline {
 		/**
 		 * Appends a new {@link RecordModifier} to the end of the
 		 * {@code RecordPipeline} being built.
-		 * 
+		 *
 		 * @param modifier
 		 *            {@link RecordModifier} to be added
 		 */
-		public void add(RecordModifier modifier) {
-			if (modifierList == null) {
-				modifierList = new ArrayList<>();
+		public void add(RecordModifier mod) {
+			if (mods == null) {
+				mods = new ArrayList<>();
 			}
 
-			modifierList.add(modifier);
+			mods.add(mod);
 		}
 
 		/**
 		 * Appends all the {@link RecordModifier}s contained in the pipeline
 		 * passed as parameter to the end of the {@code RecordPipeline} being
 		 * built.
-		 * 
+		 *
 		 * @param pipeline
 		 *            Pipeline containing the {@link RecordModifier}s to add
 		 */
-		public void add(RecordPipeline pipeline) {
-			if (pipeline instanceof EmptyPipeline) {
+		public void add(RecordPipeline p) {
+			if (p instanceof EmptyPipeline) {
 				return;
 			}
 
-			if (modifierList == null) {
-				modifierList = new ArrayList<>();
+			if (mods == null) {
+				mods = new ArrayList<>();
 			}
 
-			ModifierPipeline p = (ModifierPipeline) pipeline;
-			modifierList.addAll(p.modifierList);
+			ModifierPipeline mp = (ModifierPipeline) p;
+			mods.addAll(mp.mods);
 		}
 
 		/**
 		 * Appends all the {@link RecordModifier}s passed as parameter to the
 		 * end of the {@code RecordPipeline} being built.
-		 * 
+		 *
 		 * @param modifiers
 		 *            Collection of {@link RecordModifier}s to be added
 		 */
-		public void addAll(Collection<RecordModifier> modifiers) {
-			if (modifierList == null) {
-				modifierList = new ArrayList<>();
+		public void addAll(Collection<RecordModifier> newMods) {
+			if (mods == null) {
+				mods = new ArrayList<>();
 			}
 
-			modifierList.addAll(modifiers);
+			mods.addAll(newMods);
 		}
 
 		/**
 		 * Creates a new immutable {@code RecordPipeline} containing all
 		 * {@link RecordModifier}s added to the builder
-		 * 
+		 *
 		 * @return
 		 */
 		public RecordPipeline create() {
-			if (Check.nullOrEmpty(modifierList)) {
+			if (Check.nullOrEmpty(mods)) {
 				return RecordPipeline.EMPTY;
 			}
 
-			Set<Attribute> attributeSet = new HashSet<>();
-			for (RecordModifier modifier : modifierList) {
-				attributeSet.addAll(modifier.attributes());
-			}
-			return new ModifierPipeline(modifierList, attributeSet);
+			Set<Attribute> atts = new HashSet<>();
+            mods.forEach(m -> atts.addAll(m.attributes()));
+			return new ModifierPipeline(mods, atts);
 		}
 
 	}
@@ -150,7 +144,7 @@ public abstract class RecordPipeline {
 	/**
 	 * An empty {@code RecordPipeline}. This pipeline does not apply any
 	 * modifications to the {@link Record}s that run through it.
-	 * 
+	 *
 	 * @author Guido Rota (2014)
 	 *
 	 */
@@ -171,33 +165,32 @@ public abstract class RecordPipeline {
 	/**
 	 * A pipeline of {@link RecordModifier}s that are applied sequentially to
 	 * add new {@link Record} fields.
-	 * 
+	 *
 	 * @author Guido Rota (2014)
 	 *
 	 */
 	private static class ModifierPipeline extends RecordPipeline {
 
-		private final List<RecordModifier> modifierList;
-		private final Set<Attribute> attributeSet;
+		private final List<RecordModifier> mods;
+		private final Set<Attribute> atts;
 
-		private ModifierPipeline(List<RecordModifier> modifierList,
-				Set<Attribute> attributeSet) {
-			this.modifierList = modifierList;
-			this.attributeSet = attributeSet;
+		private ModifierPipeline(List<RecordModifier> mods, Set<Attribute> atts) {
+			this.mods = mods;
+			this.atts = atts;
 		}
 
 		@Override
 		public Set<Attribute> attributes() {
-			return attributeSet;
+			return atts;
 		}
 
 		@Override
 		public Record run(Record source) {
-			Map<String, Object> recordMap = new HashMap<>();
-			for (RecordModifier modifier : modifierList) {
-				modifier.process(source, recordMap);
+			Map<String, Object> rm = new HashMap<>();
+			for (RecordModifier m : mods) {
+				m.process(source, rm);
 			}
-			Record computed = Record.from(recordMap);
+			Record computed = Record.from(rm);
 			return Record.merge(computed, source);
 		}
 	}

@@ -50,7 +50,7 @@ public class BaseFpcFactoryTest {
 			"org.dei.perla.fpc.descriptor.instructions",
 			"org.dei.perla.channel.simulator" });
 	private static BaseFpc baseFpc;
-	private static OperationScheduler scheduler;
+	private static Scheduler scheduler;
 
 	@BeforeClass
 	public static void setup() throws Exception {

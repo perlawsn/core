@@ -70,7 +70,7 @@ public class BaseFpcFactory implements FpcFactory {
             throw new InvalidDeviceDescriptorException(err.asString());
         }
 
-        OperationScheduler scheduler = new OperationScheduler(ctx.getOpList,
+        Scheduler scheduler = new Scheduler(ctx.getOpList,
                 ctx.setOpList, ctx.periodicOpList, ctx.asyncOpList);
         return new BaseFpc(id, descriptor.getType(), ctx.attributeSet,
                 ctx.attValues, ctx.channelMgr, scheduler);

@@ -16,7 +16,7 @@ import org.dei.perla.fpc.engine.Record;
  * An abstract implementation of the {@link Task} interface. It is the base
  * class implemented by all {@link Task}s scheduled from an
  * {@link AbstractOperation}.
- * 
+ *
  * @author Guido Rota (2014)
  *
  */
@@ -30,7 +30,7 @@ public abstract class AbstractTask implements Task {
 
 	/**
 	 * Instantiates a new {@code AbstractTask}.
-	 * 
+	 *
 	 * @param operation
 	 *            {@link AbstractOperation} from which this {@code AbstractTask}
 	 *            was scheduled
@@ -48,11 +48,11 @@ public abstract class AbstractTask implements Task {
 		this.pipeline = pipeline == RecordPipeline.EMPTY ? null : pipeline;
 
 		// Enrich the attribute set with all attributes added by the Pipeline
-		Set<Attribute> newAttSet = new HashSet<>(operation.getAttributes());
+		Set<Attribute> atts = new HashSet<>(operation.getAttributes());
 		if (pipeline != null) {
-			newAttSet.addAll(pipeline.attributes());
+			atts.addAll(pipeline.attributes());
 		}
-		this.attributes = Collections.unmodifiableSet(newAttSet);
+		this.attributes = Collections.unmodifiableSet(atts);
 	}
 
 	@Override
@@ -67,7 +67,7 @@ public abstract class AbstractTask implements Task {
 
 	/**
 	 * Returns the {@link Operation} used to schedule this {@link Task}
-	 * 
+	 *
 	 * @return {@link Operation} that scheduled this {@link Task}
 	 */
 	protected final Operation getOperation() {
@@ -93,23 +93,17 @@ public abstract class AbstractTask implements Task {
 	}
 
 	/**
-	 * <p>
 	 * Immediately cancels the {@link AbstractTask} execution following an error
 	 * occurred to the connected {@link Operation}.
-	 * </p>
-	 * 
-	 * <p>
+	 *
 	 * This method is intended to be called by an {@link Operation} object to
 	 * indicate that an exception occurred while processing a script. Invoking
 	 * this method will not remove the task from the {@link AbstractOperation}'s
 	 * task list.
-	 * </p>
-	 * 
-	 * <p>
+	 *
 	 * Invoking this method does not produce any effect if the
 	 * {@code AbstractTask} is stopped
-	 * </p>
-	 * 
+	 *
 	 * @param cause
 	 *            Cause of the error
 	 */
@@ -125,14 +119,14 @@ public abstract class AbstractTask implements Task {
 	 * <p>
 	 * Immediately stops the {@link AbstractTask} execution.
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * This method is intended to be called by an {@link AbstractOperation}
 	 * object to indicate that no more records will be produced. Invoking this
 	 * method will not remove the task from the {@link AbstractOperation}'s task
 	 * list.
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * Invoking this method does not produce any effect if the
 	 * {@code AbstractTask} is stopped
@@ -153,12 +147,12 @@ public abstract class AbstractTask implements Task {
 	 * be invoked by a {@link AbstractOperation} whenever a new record is
 	 * produced by the remote device.
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * Invoking this method does not produce any effect if the
 	 * {@code AbstractTask} is stopped
 	 * </p>
-	 * 
+	 *
 	 * @param record
 	 *            {@link Record} to be processed
 	 */
@@ -182,7 +176,7 @@ public abstract class AbstractTask implements Task {
 	 * object that the {@link Task} is complete, and that no new {@link Record}
 	 * are going to be produced.
 	 * </p>
-	 * 
+	 *
 	 * <p>
 	 * Invoking this method does not produce any effect if the
 	 * {@code AbstractTask} is stopped
@@ -197,18 +191,14 @@ public abstract class AbstractTask implements Task {
 	}
 
 	/**
-	 * <p>
 	 * Invokes the registered {@link TaskHandler} to inform any interested
 	 * object that an error has occurred. The additional {@code stop} parameter
 	 * may be used to indicate whether the error is unrecoverable (no new
 	 * {@link Record}s will be produced) or not.
-	 * </p>
-	 * 
-	 * <p>
+	 *
 	 * Invoking this method does not produce any effect if the
 	 * {@code AbstractTask} is stopped
-	 * </p>
-	 * 
+	 *
 	 * @param cause
 	 *            Cause of the error
 	 * @param stop
