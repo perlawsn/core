@@ -30,14 +30,14 @@ public interface Fpc {
      */
     public Collection<Attribute> getAttributes();
 
-    public Task set(Map<Attribute, Object> valueMap, TaskHandler handler);
+    public Task set(Map<Attribute, Object> values, TaskHandler handler);
 
-    public Task get(Collection<Attribute> attributes, TaskHandler handler);
+    public Task get(Collection<Attribute> atts, TaskHandler handler);
 
     public Task get(Collection<Attribute> attributes, long periodMs,
             TaskHandler handler);
 
-    public Task async(Collection<Attribute> attributes, TaskHandler handler);
+    public Task async(Collection<Attribute> atts, TaskHandler handler);
 
     public void stop(StopHandler<Fpc> handler);
 

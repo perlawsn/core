@@ -48,17 +48,17 @@ public class Compiler {
 	/**
 	 * Compilers a list of {@link InstructionDescriptor}s into a {@link Script}.
 	 *
-	 * @param instructionList
+	 * @param inst
 	 *            List of {@link InstructionDescriptors}s to be compiled
-	 * @param scriptName
+	 * @param name
 	 *            Script name
-	 * @param attributeMap
+	 * @param atts
 	 *            Map of {@link AttributeDescriptor}s, indexed by attribute name
-	 * @param mapperMap
+	 * @param mappers
 	 *            Map of message {@link Mapper}s, indexed by message id
-	 * @param requestBuilderMap
+	 * @param requests
 	 *            Map of {@link IORequestBuilder}s, indexed by request id
-	 * @param channelMap
+	 * @param channels
 	 *            Map of {@link Channel}s, indexed by channel id
 	 * @return Compiled Script, ready for execution
 	 * @throws InvalidDeviceDescriptorException
@@ -66,123 +66,124 @@ public class Compiler {
 	 *             correspond to a valid {@link Script}
 	 */
 	public static CompiledScript compile(
-			List<InstructionDescriptor> instructionList, String scriptName,
-			Map<String, AttributeDescriptor> attributeMap,
-			Map<String, Mapper> mapperMap,
-			Map<String, IORequestBuilder> requestBuilderMap,
-			Map<String, Channel> channelMap)
+			List<InstructionDescriptor> inst, String name,
+			Map<String, AttributeDescriptor> atts,
+			Map<String, Mapper> mappers,
+			Map<String, IORequestBuilder> requests,
+			Map<String, Channel> channels)
 			throws InvalidDeviceDescriptorException {
-		CompilerContext ctx = new CompilerContext(attributeMap, mapperMap,
-				requestBuilderMap, channelMap);
-		Errors err = new Errors("Script '%s'", scriptName);
+		CompilerContext ctx = new CompilerContext(atts, mappers,
+				requests, channels);
+		Errors err = new Errors("Script '%s'", name);
 
-		ScriptBuilder builder = parseInstList(instructionList, ctx, err);
+		ScriptBuilder bldr = parseInstList(inst, ctx, err);
 		if (err.getErrorCount() != 0) {
 			throw new InvalidDeviceDescriptorException(err.asString());
 		}
-		return new CompiledScript(builder.buildScript(scriptName), ctx.emitSet,
+		return new CompiledScript(bldr.buildScript(name), ctx.emitSet,
 				ctx.setSet);
 	}
 
 	private static ScriptBuilder parseInstList(
-			List<InstructionDescriptor> iList, CompilerContext ctx, Errors err) {
+            List<InstructionDescriptor> descs,
+            CompilerContext ctx, Errors err) {
 		ScriptBuilder builder = ScriptBuilder.newScript();
 
-		for (InstructionDescriptor iDesc : iList) {
-			Instruction inst = parseInstruction(iDesc, ctx,
+		for (InstructionDescriptor d : descs) {
+			Instruction i = parseInstruction(d, ctx,
 					err.inContext("Instruction nr. " + ctx.instCount));
-			builder.add(inst);
+			builder.add(i);
 			ctx.instCount += 1;
 		}
 
 		return builder;
 	}
 
-	private static Instruction parseInstruction(InstructionDescriptor iDesc,
+	private static Instruction parseInstruction(InstructionDescriptor d,
 			CompilerContext ctx, Errors err) {
 		Errors iErr;
 
-		if (iDesc instanceof AppendInstructionDescriptor) {
+		if (d instanceof AppendInstructionDescriptor) {
 			iErr = err.inContext("Append instruction");
-			return parseAppendInstruction((AppendInstructionDescriptor) iDesc,
+			return parseAppendInstruction((AppendInstructionDescriptor) d,
 					ctx, iErr);
 
-		} else if (iDesc instanceof BreakpointInstructionDescriptor) {
+		} else if (d instanceof BreakpointInstructionDescriptor) {
 			return new BreakpointInstruction();
 
-		} else if (iDesc instanceof CreateInstructionDescriptor) {
+		} else if (d instanceof CreateInstructionDescriptor) {
 			iErr = err.inContext("Create instruction");
-			return parseCreateInstruction((CreateInstructionDescriptor) iDesc,
+			return parseCreateInstruction((CreateInstructionDescriptor) d,
 					ctx, iErr);
 
-		} else if (iDesc instanceof EmitInstructionDescriptor) {
+		} else if (d instanceof EmitInstructionDescriptor) {
 			return new EmitInstruction();
 
-		} else if (iDesc instanceof ErrorInstructionDescriptor) {
+		} else if (d instanceof ErrorInstructionDescriptor) {
 			iErr = err.inContext("Error instruction");
-			return parseErrorInstruction((ErrorInstructionDescriptor) iDesc,
+			return parseErrorInstruction((ErrorInstructionDescriptor) d,
 					ctx, iErr);
 
-		} else if (iDesc instanceof ForeachInstructionDescriptor) {
+		} else if (d instanceof ForeachInstructionDescriptor) {
 			iErr = err.inContext("Foreach instruction");
 			return parseForeachInstruction(
-					(ForeachInstructionDescriptor) iDesc, ctx, iErr);
+					(ForeachInstructionDescriptor) d, ctx, iErr);
 
-		} else if (iDesc instanceof IfInstructionDescriptor) {
+		} else if (d instanceof IfInstructionDescriptor) {
 			iErr = err.inContext("If instruction");
-			return parseIfInstruction((IfInstructionDescriptor) iDesc, ctx,
+			return parseIfInstruction((IfInstructionDescriptor) d, ctx,
 					iErr);
 
-		} else if (iDesc instanceof PutInstructionDescriptor) {
+		} else if (d instanceof PutInstructionDescriptor) {
 
 			iErr = err.inContext("Put instruction");
-			return parsePutInstruction((PutInstructionDescriptor) iDesc, ctx,
+			return parsePutInstruction((PutInstructionDescriptor) d, ctx,
 					iErr);
 
-		} else if (iDesc instanceof SetInstructionDescriptor) {
+		} else if (d instanceof SetInstructionDescriptor) {
 			iErr = err.inContext("Set instruction");
-			return parseSetInstruction((SetInstructionDescriptor) iDesc, ctx,
+			return parseSetInstruction((SetInstructionDescriptor) d, ctx,
 					iErr);
 
-		} else if (iDesc instanceof StopInstructionDescriptor) {
+		} else if (d instanceof StopInstructionDescriptor) {
 			return new StopInstruction();
 
-		} else if (iDesc instanceof SubmitInstructionDescriptor) {
+		} else if (d instanceof SubmitInstructionDescriptor) {
 			iErr = err.inContext("Submit instruction");
-			return parseSubmitInstruction((SubmitInstructionDescriptor) iDesc,
+			return parseSubmitInstruction((SubmitInstructionDescriptor) d,
 					ctx, iErr);
 
 		} else {
 			throw new RuntimeException("Cannot parse '"
-					+ iDesc.getClass().getSimpleName()
+					+ d.getClass().getSimpleName()
 					+ "' instruction descriptor.");
 		}
 	}
 
 	private static Instruction parseAppendInstruction(
-			AppendInstructionDescriptor iDesc, CompilerContext ctx, Errors err) {
+			AppendInstructionDescriptor d, CompilerContext ctx, Errors err) {
 		boolean errorFound = false;
 
 		// Check variable
-		if (Check.nullOrEmpty(iDesc.getVariable())) {
+		if (Check.nullOrEmpty(d.getVariable())) {
 			err.addError(MISSING_VARIABLE_NAME);
 			return new NoopInstruction();
 		}
-		String type = ctx.variableTypeMap.get(iDesc.getVariable());
+		String type = ctx.variableTypeMap.get(d.getVariable());
 		if (Check.nullOrEmpty(type)) {
-			err.addError(UNDECLARED_VARIABLE, iDesc.getVariable());
+			err.addError(UNDECLARED_VARIABLE, d.getVariable());
 			return new NoopInstruction();
 		}
 
 		// Check variable field
-		if (Check.nullOrEmpty(iDesc.getField())) {
+		if (Check.nullOrEmpty(d.getField())) {
 			err.addError(MISSING_FIELD);
 			return new NoopInstruction();
 		}
-		Mapper mapper = ctx.mapperMap.get(type);
-		FieldDescriptor field = mapper.getFieldDescriptor(iDesc.getField());
+		Mapper mapper = ctx.mappers.get(type);
+		FieldDescriptor field = mapper.getFieldDescriptor(d.getField());
 		if (field == null) {
-			err.addError(INVALID_FIELD, iDesc.getField(), iDesc.getVariable(),
+			err.addError(INVALID_FIELD, d.getField(), d.getVariable(),
 					type);
 			errorFound = true;
 		}
@@ -195,7 +196,7 @@ public class Compiler {
 		}
 
 		// Check value
-		if (iDesc.getValue() == null) {
+		if (d.getValue() == null) {
 			err.addError(MISSING_EXPRESSION);
 			errorFound = true;
 		}
@@ -204,29 +205,29 @@ public class Compiler {
 			return new NoopInstruction();
 		}
 
-		return new AppendInstruction(iDesc.getVariable(), iDesc.getField(),
-				fieldClass, iDesc.getValue());
+		return new AppendInstruction(d.getVariable(), d.getField(),
+				fieldClass, d.getValue());
 	}
 
 	private static Instruction parseCreateInstruction(
-			CreateInstructionDescriptor iDesc, CompilerContext ctx, Errors err) {
+			CreateInstructionDescriptor d, CompilerContext ctx, Errors err) {
 		boolean errorFound = false;
 
 		// Check variable field
-		if (Check.nullOrEmpty(iDesc.getVariable())) {
+		if (Check.nullOrEmpty(d.getVariable())) {
 			err.addError(MISSING_VARIABLE_NAME);
 			errorFound = true;
-		} else if (iDesc.getVariable().equals("param")) {
+		} else if (d.getVariable().equals("param")) {
 			err.addError(INVALID_PARAM_VARIABLE_NAME);
 			errorFound = true;
-		} else if (ctx.variableTypeMap.containsKey(iDesc.getVariable())) {
-			err.addError(DUPLICATE_VARIABLE, iDesc.getVariable());
+		} else if (ctx.variableTypeMap.containsKey(d.getVariable())) {
+			err.addError(DUPLICATE_VARIABLE, d.getVariable());
 			errorFound = true;
 		}
-		ctx.variableTypeMap.put(iDesc.getVariable(), iDesc.getType());
+		ctx.variableTypeMap.put(d.getVariable(), d.getType());
 
 		// Check variable type
-		if (Check.nullOrEmpty(iDesc.getType())) {
+		if (Check.nullOrEmpty(d.getType())) {
 			err.addError(MISSING_MESSAGE_TYPE);
 			return new NoopInstruction();
 		}
@@ -235,145 +236,145 @@ public class Compiler {
 			return new NoopInstruction();
 		}
 
-		if (DataType.isPrimitive(iDesc.getType())) {
-			DataType type = DataType.valueOf(iDesc.getType().toUpperCase());
-			return new CreatePrimitiveInstruction(iDesc.getVariable(), type);
+		if (DataType.isPrimitive(d.getType())) {
+			DataType type = DataType.valueOf(d.getType().toUpperCase());
+			return new CreatePrimitiveInstruction(d.getVariable(), type);
 		} else {
-			Mapper mapper = ctx.mapperMap.get(iDesc.getType());
+			Mapper mapper = ctx.mappers.get(d.getType());
 			if (mapper == null) {
-				err.addError(INVALID_TYPE, iDesc.getType());
+				err.addError(INVALID_TYPE, d.getType());
 				return new NoopInstruction();
 			}
-			return new CreateComplexInstruction(iDesc.getVariable(), mapper);
+			return new CreateComplexInstruction(d.getVariable(), mapper);
 		}
 	}
 
 	private static Instruction parseErrorInstruction(
-			ErrorInstructionDescriptor iDesc, CompilerContext ctx, Errors err) {
+			ErrorInstructionDescriptor d, CompilerContext ctx, Errors err) {
 
-		if (Check.nullOrEmpty(iDesc.getMessage())) {
+		if (Check.nullOrEmpty(d.getMessage())) {
 			err.addError(MISSING_ERROR_MESSAGE);
 			return new NoopInstruction();
 		}
 
-		return new ErrorInstruction(iDesc.getMessage());
+		return new ErrorInstruction(d.getMessage());
 	}
 
 	private static Instruction parseForeachInstruction(
-			ForeachInstructionDescriptor iDesc, CompilerContext ctx, Errors err) {
+			ForeachInstructionDescriptor d, CompilerContext ctx, Errors err) {
 		boolean errorFound = false;
 
 		// Check item variable
-		if (Check.nullOrEmpty(iDesc.getItemsVar())) {
+		if (Check.nullOrEmpty(d.getItemsVar())) {
 			err.addError(MISSING_ITEMS_VARIABLE);
 			return new NoopInstruction();
 		}
-		String varType = ctx.variableTypeMap.get(iDesc.getItemsVar());
+		String varType = ctx.variableTypeMap.get(d.getItemsVar());
 		if (varType == null) {
-			err.addError(UNDECLARED_VARIABLE, iDesc.getItemsVar());
+			err.addError(UNDECLARED_VARIABLE, d.getItemsVar());
 			return new NoopInstruction();
 		}
 		if (DataType.isPrimitive(varType)) {
 			err.addError(PRIMITIVE_TYPE_NOT_ALLOWED, varType);
 			return new NoopInstruction();
 		}
-		Mapper mapper = ctx.mapperMap.get(varType);
+		Mapper mapper = ctx.mappers.get(varType);
 
 		// Check item field
-		if (Check.nullOrEmpty(iDesc.getItemsField())) {
+		if (Check.nullOrEmpty(d.getItemsField())) {
 			err.addError(MISSING_ITEMS_FIELD);
 			return new NoopInstruction();
 		}
 		FieldDescriptor field = mapper
-				.getFieldDescriptor(iDesc.getItemsField());
+				.getFieldDescriptor(d.getItemsField());
 		if (field == null) {
-			err.addError(INVALID_FIELD, iDesc.getItemsField(),
-					iDesc.getItemsVar(), varType);
+			err.addError(INVALID_FIELD, d.getItemsField(),
+					d.getItemsVar(), varType);
 			return new NoopInstruction();
 		}
 		String fieldType = field.getType();
 
 		// Check variable
-		if (Check.nullOrEmpty(iDesc.getVariable())) {
+		if (Check.nullOrEmpty(d.getVariable())) {
 			err.addError(MISSING_VARIABLE_NAME);
 			errorFound = true;
-		} else if (ctx.variableTypeMap.containsKey(iDesc.getVariable())) {
+		} else if (ctx.variableTypeMap.containsKey(d.getVariable())) {
 			err.addError(DUPLICATE_VARIABLE);
 			errorFound = true;
 		}
-		ctx.variableTypeMap.put(iDesc.getVariable(), fieldType);
+		ctx.variableTypeMap.put(d.getVariable(), fieldType);
 
 		// Check body
-		if (Check.nullOrEmpty(iDesc.getBody())) {
+		if (Check.nullOrEmpty(d.getBody())) {
 			err.addError(MISSING_FOREACH_BODY);
 			return new NoopInstruction();
 		}
-		ScriptBuilder body = parseInstList(iDesc.getBody(), ctx, err);
+		ScriptBuilder body = parseInstList(d.getBody(), ctx, err);
 
 		if (errorFound == true) {
 			return new NoopInstruction();
 		}
 
-		if (Check.nullOrEmpty(iDesc.getIndex())) {
-			return new ForeachInstruction(iDesc.getItemsVar(),
-					iDesc.getItemsField(), iDesc.getVariable(), body.getCode());
+		if (Check.nullOrEmpty(d.getIndex())) {
+			return new ForeachInstruction(d.getItemsVar(),
+					d.getItemsField(), d.getVariable(), body.getCode());
 		} else {
-			return new ForeachInstruction(iDesc.getItemsVar(),
-					iDesc.getItemsField(), iDesc.getVariable(),
-					iDesc.getIndex(), body.getCode());
+			return new ForeachInstruction(d.getItemsVar(),
+					d.getItemsField(), d.getVariable(),
+					d.getIndex(), body.getCode());
 		}
 	}
 
 	private static Instruction parseIfInstruction(
-			IfInstructionDescriptor iDesc, CompilerContext ctx, Errors err) {
+			IfInstructionDescriptor d, CompilerContext ctx, Errors err) {
 		ScriptBuilder thenBlock = null;
 		ScriptBuilder elseBlock = null;
 		boolean errorFound = false;
 
 		// Check condition
-		if (Check.nullOrEmpty(iDesc.getCondition())) {
+		if (Check.nullOrEmpty(d.getCondition())) {
 			err.addError(MISSING_CONDITION_IF);
 			errorFound = true;
 		}
 
 		// Parse then and else instruction lists
-		thenBlock = parseInstList(iDesc.getThenInstructionList(), ctx, err);
+		thenBlock = parseInstList(d.getThenInstructionList(), ctx, err);
 		if (thenBlock == null) {
 			err.addError(MISSING_THEN_IF);
 			errorFound = true;
 		}
-		if (!Check.nullOrEmpty(iDesc.getElseInstructionList())) {
-			elseBlock = parseInstList(iDesc.getElseInstructionList(), ctx, err);
+		if (!Check.nullOrEmpty(d.getElseInstructionList())) {
+			elseBlock = parseInstList(d.getElseInstructionList(), ctx, err);
 		}
 
 		if (errorFound) {
 			return new NoopInstruction();
 		}
-		return new IfInstruction(iDesc.getCondition(), thenBlock.getCode(),
+		return new IfInstruction(d.getCondition(), thenBlock.getCode(),
 				elseBlock.getCode());
 	}
 
 	private static Instruction parsePutInstruction(
-			PutInstructionDescriptor iDesc, CompilerContext ctx, Errors err) {
+			PutInstructionDescriptor d, CompilerContext ctx, Errors err) {
 		boolean errorFound = false;
 
 		// Check value
-		if (Check.nullOrEmpty(iDesc.getExpression())) {
+		if (Check.nullOrEmpty(d.getExpression())) {
 			err.addError(MISSING_EXPRESSION);
 			errorFound = true;
 		}
 
 		// Check attribute
-		if (Check.nullOrEmpty(iDesc.getAttribute())) {
+		if (Check.nullOrEmpty(d.getAttribute())) {
 			err.addError(MISSING_ATTRIBUTE);
 			return new NoopInstruction();
 		}
-		AttributeDescriptor att = ctx.attributeMap.get(iDesc.getAttribute());
+		AttributeDescriptor att = ctx.atts.get(d.getAttribute());
 		if (att == null) {
-			err.addError(INVALID_ATTRIBUTE_PUT, iDesc.getAttribute());
+			err.addError(INVALID_ATTRIBUTE_PUT, d.getAttribute());
 			return new NoopInstruction();
 		} else if (att.getPermission() == AttributePermission.WRITE_ONLY) {
-			err.addError(INVALID_PERMISSION_PUT, iDesc.getAttribute());
+			err.addError(INVALID_PERMISSION_PUT, d.getAttribute());
 			errorFound = true;
 		}
 
@@ -382,52 +383,52 @@ public class Compiler {
 		}
 
         ctx.emitSet.add(Attribute.create(att));
-		return new PutInstruction(iDesc.getExpression(), att);
+		return new PutInstruction(d.getExpression(), att);
 	}
 
 	private static Instruction parseSetInstruction(
-			SetInstructionDescriptor iDesc, CompilerContext ctx, Errors err) {
+			SetInstructionDescriptor d, CompilerContext ctx, Errors err) {
 		// Check variable
-		if (Check.nullOrEmpty(iDesc.getVariable())) {
+		if (Check.nullOrEmpty(d.getVariable())) {
 			err.addError(MISSING_VARIABLE_NAME);
 			return new NoopInstruction();
 		}
-		String varType = ctx.variableTypeMap.get(iDesc.getVariable());
+		String varType = ctx.variableTypeMap.get(d.getVariable());
 		if (Check.nullOrEmpty(varType)) {
-			err.addError(UNDECLARED_VARIABLE, iDesc.getVariable());
+			err.addError(UNDECLARED_VARIABLE, d.getVariable());
 			return new NoopInstruction();
 		}
 
 		// Check field
-		if (DataType.isComplex(varType) && Check.nullOrEmpty(iDesc.getField())) {
-			err.addError(MISSING_FIELD_SET, iDesc.getVariable(), varType);
+		if (DataType.isComplex(varType) && Check.nullOrEmpty(d.getField())) {
+			err.addError(MISSING_FIELD_SET, d.getVariable(), varType);
 			return new NoopInstruction();
 		} else if (DataType.isPrimitive(varType)
-				&& !Check.nullOrEmpty(iDesc.getField())) {
-			err.addError(INVALID_FIELD_PRIMITIVE, iDesc.getVariable());
+				&& !Check.nullOrEmpty(d.getField())) {
+			err.addError(INVALID_FIELD_PRIMITIVE, d.getVariable());
 		}
 
 		// Check value
-		if (iDesc.getValue() == null) {
+		if (d.getValue() == null) {
 			err.addError(MISSING_EXPRESSION);
 			return new NoopInstruction();
 		}
 		// Check if the current set instruction is taking data from a parameter
 		// coming from the script caller. If so, add the current attribute to
 		// the collection of attributes which are 'set' by this script
-		extractAttributes(iDesc.getValue(), ctx, err);
+		extractAttributes(d.getValue(), ctx, err);
 
 		if (DataType.isPrimitive(varType)) {
 			DataType type = DataType.valueOf(varType.toUpperCase());
-			return new SetPrimitiveInstruction(iDesc.getVariable(),
-					type.getJavaClass(), iDesc.getValue());
+			return new SetPrimitiveInstruction(d.getVariable(),
+					type.getJavaClass(), d.getValue());
 
 		} else {
-			Mapper mapper = ctx.mapperMap.get(varType);
-			FieldDescriptor field = mapper.getFieldDescriptor(iDesc.getField());
+			Mapper mapper = ctx.mappers.get(varType);
+			FieldDescriptor field = mapper.getFieldDescriptor(d.getField());
 			if (field == null) {
-				err.addError(INVALID_FIELD, iDesc.getField(),
-						iDesc.getVariable(), varType);
+				err.addError(INVALID_FIELD, d.getField(),
+						d.getVariable(), varType);
 				return new NoopInstruction();
 			}
 			// Extract field type
@@ -437,8 +438,8 @@ public class Compiler {
 			} else {
 				fieldType = List.class;
 			}
-			return new SetComplexInstruction(iDesc.getVariable(),
-					iDesc.getField(), fieldType, iDesc.getValue());
+			return new SetComplexInstruction(d.getVariable(),
+					d.getField(), fieldType, d.getValue());
 		}
 	}
 
@@ -451,7 +452,7 @@ public class Compiler {
 		AttributeDescriptor att;
 		Scanner sc = new Scanner(value);
 		for (String s; (s = sc.findWithinHorizon("(?<=\\[').*?(?=\\'])", 0)) != null;) {
-			att = ctx.attributeMap.get(s);
+			att = ctx.atts.get(s);
 			if (att == null) {
 				err.addError(UNDECLARED_ATTRIBUTE, s);
 				continue;
@@ -470,73 +471,72 @@ public class Compiler {
 	}
 
 	private static Instruction parseSubmitInstruction(
-			SubmitInstructionDescriptor iDesc, CompilerContext ctx, Errors err) {
+			SubmitInstructionDescriptor d, CompilerContext ctx, Errors err) {
 		boolean errorFound = false;
 
 		// Check request
-		if (Check.nullOrEmpty(iDesc.getRequest())) {
+		if (Check.nullOrEmpty(d.getRequest())) {
 			err.addError(MISSING_REQUEST_SUBMIT);
 			errorFound = true;
 		}
-		IORequestBuilder builder = ctx.requestBuilderMap
-				.get(iDesc.getRequest());
-		if (builder == null) {
-			err.addError(INVALID_REQUEST_SUBMIT, iDesc.getRequest());
+		IORequestBuilder bldr = ctx.requests.get(d.getRequest());
+		if (bldr == null) {
+			err.addError(INVALID_REQUEST_SUBMIT, d.getRequest());
 			// Return immediately, parsing cannot continue if builder is null
 			return new NoopInstruction();
 		}
 
-		RequestParameter[] parameterArray = createRequestParameterArray(iDesc,
-				ctx, err, builder);
+		RequestParameter[] parameterArray = createRequestParameterArray(d,
+				ctx, err, bldr);
 		if (parameterArray == null) {
 			errorFound = true;
 		}
 
-		Channel channel = ctx.channelMap.get(iDesc.getChannel());
+		Channel channel = ctx.channels.get(d.getChannel());
 		if (channel == null) {
 			err.addError(INVALID_CHANNEL_ID_SUBMIT);
 			errorFound = true;
 		}
 
 		Mapper returnHandler = null;
-		if (Check.nullOrEmpty(iDesc.getVariable())
-				&& !Check.nullOrEmpty(iDesc.getType())) {
+		if (Check.nullOrEmpty(d.getVariable())
+				&& !Check.nullOrEmpty(d.getType())) {
 			err.addError(MISSING_RETURN_VARIABLE_NAME);
 			errorFound = true;
 
-		} else if (!Check.nullOrEmpty(iDesc.getVariable())
-				&& Check.nullOrEmpty(iDesc.getType())) {
+		} else if (!Check.nullOrEmpty(d.getVariable())
+				&& Check.nullOrEmpty(d.getType())) {
 			err.addError(MISSING_RETURN_MESSAGE_TYPE);
 			errorFound = true;
 
-		} else if (!Check.nullOrEmpty(iDesc.getType())
-				&& DataType.isPrimitive(iDesc.getType())) {
-			err.addError(PRIMITIVE_TYPE_NOT_ALLOWED, iDesc.getType());
+		} else if (!Check.nullOrEmpty(d.getType())
+				&& DataType.isPrimitive(d.getType())) {
+			err.addError(PRIMITIVE_TYPE_NOT_ALLOWED, d.getType());
 			errorFound = true;
 
-		} else if (!Check.nullOrEmpty(iDesc.getVariable())
-				&& !Check.nullOrEmpty(iDesc.getType())) {
-			ctx.variableTypeMap.put(iDesc.getVariable(), iDesc.getType());
-			returnHandler = ctx.mapperMap.get(iDesc.getType());
+		} else if (!Check.nullOrEmpty(d.getVariable())
+				&& !Check.nullOrEmpty(d.getType())) {
+			ctx.variableTypeMap.put(d.getVariable(), d.getType());
+			returnHandler = ctx.mappers.get(d.getType());
 		}
 
 		if (errorFound) {
 			return new NoopInstruction();
 		}
 
-		return new SubmitInstruction(builder, channel, parameterArray,
-				iDesc.getVariable(), returnHandler);
+		return new SubmitInstruction(bldr, channel, parameterArray,
+				d.getVariable(), returnHandler);
 	}
 
 	private static RequestParameter[] createRequestParameterArray(
-			SubmitInstructionDescriptor desc, CompilerContext ctx, Errors err,
-			IORequestBuilder builder) {
+			SubmitInstructionDescriptor d, CompilerContext ctx, Errors err,
+			IORequestBuilder bldr) {
 		boolean errorFound = false;
 
-		// Map the variable-parameter bindings declared in the descriptor by
+		// Map the variable-parameter bindings declared in the driptor by
 		// parameter name, and check binding fields for basic errors
 		Map<String, ParameterBinding> paramBindingMap = new HashMap<>();
-		for (ParameterBinding binding : desc.getParameterList()) {
+		for (ParameterBinding binding : d.getParameterList()) {
 			if (Check.nullOrEmpty(binding.getName())) {
 				err.addError(MISSING_PARAM_NAME_SUBMIT);
 				errorFound = true;
@@ -552,10 +552,10 @@ public class Compiler {
 
 		// Create RequestParameter objects needed to execute the submit
 		// instruction
-		RequestParameter parameterArray[] = new RequestParameter[desc
+		RequestParameter parameterArray[] = new RequestParameter[d
 				.getParameterList().size()];
 		int i = 0;
-		for (IORequestParameter param : builder.getParameterList()) {
+		for (IORequestParameter param : bldr.getParameterList()) {
 
 			ParameterBinding binding = paramBindingMap.get(param.getName());
 			if (!param.isMandatory() && binding == null) {
@@ -579,7 +579,7 @@ public class Compiler {
 		// treated as errors
 		for (ParameterBinding invalidBinding : paramBindingMap.values()) {
 			err.addError(UNSUPPORTED_PARAMETER_BINDING_SUBMIT,
-					invalidBinding.getName(), desc.getRequest());
+					invalidBinding.getName(), d.getRequest());
 			errorFound = true;
 		}
 
@@ -605,7 +605,7 @@ public class Compiler {
 		}
 
 		return new RequestParameter(binding.getName(), binding.getVariable(),
-				ctx.mapperMap.get(variableType));
+				ctx.mappers.get(variableType));
 	}
 
 	/**
@@ -617,10 +617,10 @@ public class Compiler {
 	 */
 	private static class CompilerContext {
 
-		private final Map<String, AttributeDescriptor> attributeMap;
-		private final Map<String, Mapper> mapperMap;
-		private final Map<String, IORequestBuilder> requestBuilderMap;
-		private final Map<String, Channel> channelMap;
+		private final Map<String, AttributeDescriptor> atts;
+		private final Map<String, Mapper> mappers;
+		private final Map<String, IORequestBuilder> requests;
+		private final Map<String, Channel> channels;
 
 		private final Set<Attribute> emitSet = new HashSet<>();
 		private final Set<Attribute> setSet = new HashSet<>();
@@ -628,14 +628,14 @@ public class Compiler {
 
 		private final Map<String, String> variableTypeMap = new HashMap<>();
 
-		private CompilerContext(Map<String, AttributeDescriptor> attributeMap,
-				Map<String, Mapper> mapperMap,
-				Map<String, IORequestBuilder> requestBuilderMap,
-				Map<String, Channel> channelMap) {
-			this.attributeMap = attributeMap;
-			this.mapperMap = mapperMap;
-			this.requestBuilderMap = requestBuilderMap;
-			this.channelMap = channelMap;
+		private CompilerContext(Map<String, AttributeDescriptor> atts,
+				Map<String, Mapper> mappers,
+				Map<String, IORequestBuilder> requests,
+				Map<String, Channel> channels) {
+			this.atts = atts;
+			this.mappers = mappers;
+			this.requests = requests;
+			this.channels = channels;
 		}
 
 	}

@@ -29,39 +29,39 @@ import java.util.*;
 public class BaseFpcFactory implements FpcFactory {
 
     private final Logger logger = Logger.getLogger(BaseFpcFactory.class);
-    private final Map<Class<? extends MessageDescriptor>, MapperFactory> mapperFactoryMap = new HashMap<>();
-    private final Map<Class<? extends ChannelDescriptor>, ChannelFactory> channelFactoryMap = new HashMap<>();
-    private final Map<Class<? extends IORequestDescriptor>, IORequestBuilderFactory> requestBuilderFactoryMap = new HashMap<>();
+    private final Map<Class<? extends MessageDescriptor>, MapperFactory>
+            mapFcts = new HashMap<>();
+    private final Map<Class<? extends ChannelDescriptor>, ChannelFactory>
+            chanFcts = new HashMap<>();
+    private final Map<Class<? extends IORequestDescriptor>, IORequestBuilderFactory>
+            reqFcts = new HashMap<>();
 
-    public BaseFpcFactory(List<MapperFactory> mapperFactoryList,
-            List<ChannelFactory> channelFactoryList,
-            List<IORequestBuilderFactory> requestBuilderFactoryList) {
-        Conditions.checkNotNull(mapperFactoryList, "mapperFactoryList");
-        Conditions.checkNotNull(channelFactoryList, "channelFactoryList");
+    public BaseFpcFactory(List<MapperFactory> mapFcts, List<ChannelFactory> chanFcts,
+            List<IORequestBuilderFactory> reqFcts) {
+        Conditions.checkNotNull(mapFcts, "mapperFactoryList");
+        Conditions.checkNotNull(chanFcts, "channelFactoryList");
+        Conditions.checkNotNull(reqFcts, "requestBuilderFactoryList");
 
-        for (MapperFactory factory : mapperFactoryList) {
-            mapperFactoryMap.put(factory.acceptedMessageDescriptorClass(),
-                    factory);
+        for (MapperFactory f : mapFcts) {
+            this.mapFcts.put(f.acceptedMessageDescriptorClass(), f);
         }
-        for (ChannelFactory factory : channelFactoryList) {
-            channelFactoryMap.put(factory.acceptedChannelDescriptorClass(),
-                    factory);
+        for (ChannelFactory f : chanFcts) {
+            this.chanFcts.put(f.acceptedChannelDescriptorClass(), f);
         }
-        for (IORequestBuilderFactory factory : requestBuilderFactoryList) {
-            requestBuilderFactoryMap.put(factory.acceptedIORequestClass(),
-                    factory);
+        for (IORequestBuilderFactory f : reqFcts) {
+            this.reqFcts.put(f.acceptedIORequestClass(), f);
         }
     }
 
     @Override
-    public Fpc createFpc(DeviceDescriptor descriptor, int id)
+    public Fpc createFpc(DeviceDescriptor desc, int id)
             throws InvalidDeviceDescriptorException {
-        Conditions.checkNotNull(descriptor, "descriptor");
+        Conditions.checkNotNull(desc, "descriptor");
         ParsingContext ctx = new ParsingContext(id);
 
-        Errors err = new Errors("Device descriptor '%s'", descriptor.getType());
+        Errors err = new Errors("Device descriptor '%s'", desc.getType());
         try {
-            parseDescriptor(err, descriptor, ctx);
+            parseDescriptor(err, desc, ctx);
         } catch (Exception e) {
             err.addError(e, "An unknown error has occurred while creating an FPC");
         }
@@ -70,18 +70,18 @@ public class BaseFpcFactory implements FpcFactory {
             throw new InvalidDeviceDescriptorException(err.asString());
         }
 
-        Scheduler scheduler = new Scheduler(ctx.getOpList,
-                ctx.setOpList, ctx.periodicOpList, ctx.asyncOpList);
-        return new BaseFpc(id, descriptor.getType(), ctx.attributeSet,
-                ctx.attValues, ctx.channelMgr, scheduler);
+        Scheduler sched = new Scheduler(ctx.getOpList, ctx.setOpList,
+                ctx.periodicOpList, ctx.asyncOpList);
+        return new BaseFpc(id, desc.getType(), ctx.atts, ctx.attValues,
+                ctx.channelMgr, sched);
     }
 
     /**
      * Parses the device descriptor passed as parameter.
-     * <p>
+     *
      * This method update the ParsingContext data structure with all the
      * information and software components needed to create a new FPC.
-     * <p>
+     *
      * The parsing procedure continues even when errors are found. This allows
      * the parser to catch as many error as possible, and return to the user a
      * clearer pictures of the changes that need to be applied to the Device
@@ -101,34 +101,34 @@ public class BaseFpcFactory implements FpcFactory {
         }
 
         // Parse device attributes
-        List<AttributeDescriptor> attList = desc.getAttributeList();
-        if (attList.size() == 0) {
+        List<AttributeDescriptor> atts = desc.getAttributeList();
+        if (atts.size() == 0) {
             err.addError(MISSING_ATTRIBUTE_DECLARATIONS);
         }
-        parseAttributeList(attList, ctx, err);
+        parseAttributeList(atts, ctx, err);
 
         // Parse device messages
-        List<MessageDescriptor> msgList = desc.getMessageList();
-        if (msgList.size() == 0) {
+        List<MessageDescriptor> msgs = desc.getMessageList();
+        if (msgs.size() == 0) {
             err.addError(MISSING_MESSAGE_DECLARATIONS);
         }
-        parseMessageList(msgList, ctx, err);
+        parseMessageList(msgs, ctx, err);
 
         // Parse device channels
-        List<ChannelDescriptor> chList = desc.getChannelList();
-        if (chList.size() == 0) {
+        List<ChannelDescriptor> chans = desc.getChannelList();
+        if (chans.size() == 0) {
             err.addError(MISSING_CHANNEL_DECLARATIONS);
         }
-        parseChannelList(chList, ctx, err);
+        parseChannelList(chans, ctx, err);
         ctx.channelMgr = new ChannelManager(new ArrayList<>(
-                ctx.channelMap.values()));
+                ctx.channels.values()));
 
         // Parse channel requests
-        List<IORequestDescriptor> reqList = desc.getRequestList();
-        if (reqList.size() == 0) {
+        List<IORequestDescriptor> reqs = desc.getRequestList();
+        if (reqs.size() == 0) {
             err.addError(MISSING_REQUEST_DECLARATIONS);
         }
-        parseRequestList(reqList, ctx, err);
+        parseRequestList(reqs, ctx, err);
 
         if (!err.isEmpty()) {
             // Operation parsing can't be performed properly if there are errors
@@ -137,107 +137,106 @@ public class BaseFpcFactory implements FpcFactory {
         }
 
         // Parse operations
-        List<OperationDescriptor> opList = desc.getOperationList();
-        if (opList.size() == 0) {
+        List<OperationDescriptor> ops = desc.getOperationList();
+        if (ops.size() == 0) {
             err.addError(MISSING_OPERATION_DECLARATIONS);
         }
-        parseOperationList(opList, ctx, err);
+        parseOperationList(ops, ctx, err);
     }
 
-    private void parseAttributeList(List<AttributeDescriptor> attList,
+    private void parseAttributeList(List<AttributeDescriptor> atts,
             ParsingContext ctx, Errors err) {
         boolean hasNativeTimestamp = false;
-        List<String> attIdList = new ArrayList<>();
+        List<String> ids = new ArrayList<>();
 
-        for (AttributeDescriptor att : attList) {
-            String id = att.getId();
+        for (AttributeDescriptor a : atts) {
+            String id = a.getId();
             if (Check.nullOrEmpty(id)) {
                 err.addError(MISSING_ATTRIBUTE_ID);
             }
-            if (attIdList.contains(id)) {
+            if (ids.contains(id)) {
                 err.addError(DUPLICATE_ATTRIBUTE_ID, id);
             }
-            if (att.getType() == DataType.TIMESTAMP) {
+            if (a.getType() == DataType.TIMESTAMP) {
                 hasNativeTimestamp = true;
             }
-            attIdList.add(att.getId());
-            parseAttribute(att, ctx, err.inContext("Attribute '%s'", id));
+            ids.add(a.getId());
+            parseAttribute(a, ctx, err.inContext("Attribute '%s'", id));
         }
 
         if (!hasNativeTimestamp) {
-            ctx.addAttribute(new AttributeDescriptor("timestamp",
+            ctx.add(new AttributeDescriptor("timestamp",
                     DataType.TIMESTAMP, AttributePermission.READ_ONLY));
         }
 
-        ctx.addAttribute(new AttributeDescriptor("id", DataType.ID, ctx.id
-                .toString()));
+        ctx.add(new AttributeDescriptor("id", DataType.ID, ctx.id.toString()));
     }
 
-    private void parseAttribute(AttributeDescriptor att, ParsingContext ctx,
+    private void parseAttribute(AttributeDescriptor a, ParsingContext ctx,
             Errors err) {
         // Check missing attribute type
-        if (att.getType() == null) {
+        if (a.getType() == null) {
             err.addError(MISSING_ATTRIBUTE_TYPE);
         }
 
         // Check attribute access
-        if (att.getAccess() == AttributeAccessType.STATIC
-                && Check.nullOrEmpty(att.getValue())) {
+        if (a.getAccess() == AttributeAccessType.STATIC
+                && Check.nullOrEmpty(a.getValue())) {
             err.addError(MISSING_STATIC_ATTRIBUTE_VALUE);
 
-        } else if (att.getAccess() == AttributeAccessType.STATIC
-                && att.getPermission() != AttributePermission.READ_ONLY) {
-            err.addError(INVALID_STATIC_ATTRIBUTE_PERMISSION, att.getAccess());
+        } else if (a.getAccess() == AttributeAccessType.STATIC
+                && a.getPermission() != AttributePermission.READ_ONLY) {
+            err.addError(INVALID_STATIC_ATTRIBUTE_PERMISSION, a.getAccess());
 
-        } else if (att.getAccess() != AttributeAccessType.STATIC
-                && !Check.nullOrEmpty(att.getValue())) {
+        } else if (a.getAccess() != AttributeAccessType.STATIC
+                && !Check.nullOrEmpty(a.getValue())) {
             err.addError(MISPLACED_ATTRIBUTE_VALUE);
         }
 
         // Check timestamp attribute
-        if (att.getType() == DataType.TIMESTAMP
-                && att.getAccess() == AttributeAccessType.STATIC) {
+        if (a.getType() == DataType.TIMESTAMP
+                && a.getAccess() == AttributeAccessType.STATIC) {
             err.addError(FORBIDDEN_STATIC_ATTRIBUTE);
         }
 
         // Check id attribute
-        if (att.getId().compareToIgnoreCase("id") == 0
-                && att.getType() == DataType.ID) {
+        if (a.getId().compareToIgnoreCase("id") == 0
+                && a.getType() == DataType.ID) {
             err.addError(FORBIDDEN_ID_ATTRIBUTE);
         }
 
-        ctx.addAttribute(att);
+        ctx.add(a);
     }
 
-    private void parseMessageList(List<MessageDescriptor> msgList,
+    private void parseMessageList(List<MessageDescriptor> msgs,
             ParsingContext ctx, Errors err) {
-        Set<String> messageIdSet = new HashSet<>();
+        Set<String> ids = new HashSet<>();
 
-        for (MessageDescriptor msg : msgList) {
-            String id = msg.getId();
+        for (MessageDescriptor m : msgs) {
+            String id = m.getId();
             if (Check.nullOrEmpty(id)) {
                 err.addError(MISSING_MESSAGE_ID);
             }
-            if (messageIdSet.contains(id)) {
+            if (ids.contains(id)) {
                 err.addError(DUPLICATE_MESSAGE_ID, id);
             }
-            messageIdSet.add(id);
-            parseMessage(msg, ctx, err.inContext("Message '%s'", id));
+            ids.add(id);
+            parseMessage(m, ctx, err.inContext("Message '%s'", id));
         }
     }
 
-    private void parseMessage(MessageDescriptor msg, ParsingContext ctx,
+    private void parseMessage(MessageDescriptor m, ParsingContext ctx,
             Errors err) {
-        MapperFactory mapperFactory;
+        MapperFactory mapFct;
 
         // Check fields
-        List<String> fieldNameSet = new ArrayList<>();
-        for (FieldDescriptor field : msg.getFieldList()) {
-            if (fieldNameSet.contains(field.getName())) {
-                err.addError(DUPLICATE_FIELD_NAME, field.getName());
+        List<String> fieldNames = new ArrayList<>();
+        for (FieldDescriptor f : m.getFieldList()) {
+            if (fieldNames.contains(f.getName())) {
+                err.addError(DUPLICATE_FIELD_NAME, f.getName());
             }
-            fieldNameSet.add(field.getName());
-            checkField(field, err.inContext("Field '%s'", field.getName()));
+            fieldNames.add(f.getName());
+            checkField(f, err.inContext("Field '%s'", f.getName()));
         }
 
         if (!err.isEmpty()) {
@@ -246,207 +245,205 @@ public class BaseFpcFactory implements FpcFactory {
         }
 
         // Return immediately without creating the Mapper creation
-        mapperFactory = mapperFactoryMap.get(msg.getClass());
-        if (mapperFactory == null) {
-            err.addError(MISSING_MAPPER_FACTORY, msg.getClass());
+        mapFct = mapFcts.get(m.getClass());
+        if (mapFct == null) {
+            err.addError(MISSING_MAPPER_FACTORY, m.getClass());
             return;
         }
 
-        Mapper mapper = null;
+        Mapper map = null;
         try {
-            mapper = mapperFactory.createMapper(msg, ctx.mapperMap,
-                    ctx.classPool);
+            map = mapFct.createMapper(m, ctx.mappers, ctx.classPool);
         } catch (InvalidDeviceDescriptorException e) {
             err.addError(e, MAPPER_CREATION_ERROR);
             return;
         }
 
-        if (mapper == null) {
+        if (map == null) {
             err.addError(MAPPER_CREATION_ERROR);
             return;
         }
-        ctx.addMapper(mapper);
+        ctx.add(map);
     }
 
-    private void checkField(FieldDescriptor field, Errors err) {
-        String fieldName = field.getName();
-        String value = field.getValue();
+    private void checkField(FieldDescriptor f, Errors err) {
+        String name = f.getName();
+        String value = f.getValue();
 
         // Check field name
-        if (Check.nullOrEmpty(fieldName)) {
+        if (Check.nullOrEmpty(name)) {
             err.addError(MISSING_FIELD_NAME);
         }
 
         // Check field type
-        if (Check.nullOrEmpty(field.getType())) {
+        if (Check.nullOrEmpty(f.getType())) {
             err.addError(MISSING_FIELD_TYPE);
         }
 
         // Check static fields
-        if (field.isStatic() && Check.nullOrEmpty(value)) {
+        if (f.isStatic() && Check.nullOrEmpty(value)) {
             err.addError(MISSING_FIELD_VALUE);
 
-        } else if (!field.isStatic() && !Check.nullOrEmpty(value)) {
+        } else if (!f.isStatic() && !Check.nullOrEmpty(value)) {
             err.addError(MISPLACED_FIELD_VALUE);
         }
 
         // Check Timestamp
-        if (!DataType.TIMESTAMP.is(field.getType())
-                && !Check.nullOrEmpty(field.getFormat())) {
+        if (!DataType.TIMESTAMP.is(f.getType())
+                && !Check.nullOrEmpty(f.getFormat())) {
             err.addError(INVALID_TIMESTMAP_FORMAT);
-        } else if (DataType.TIMESTAMP.is(field.getType())
-                && !Check.nullOrEmpty(field.getFormat())) {
+        } else if (DataType.TIMESTAMP.is(f.getType())
+                && !Check.nullOrEmpty(f.getFormat())) {
             err.addError(MISSING_TIMESTAMP_FORMAT);
         }
     }
 
-    private void parseChannelList(List<ChannelDescriptor> chList,
+    private void parseChannelList(List<ChannelDescriptor> chans,
             ParsingContext ctx, Errors err) {
-        Set<String> channelIdSet = new HashSet<>();
+        Set<String> ids = new HashSet<>();
 
-        for (ChannelDescriptor ch : chList) {
-            String id = ch.getId();
+        for (ChannelDescriptor c : chans) {
+            String id = c.getId();
             if (Check.nullOrEmpty(id)) {
                 err.addError(MISSING_CHANNEL_ID);
             }
-            if (channelIdSet.contains(ch.getId())) {
-                err.addError(DUPLICATE_CHANNEL_ID, ch.getId());
+            if (ids.contains(c.getId())) {
+                err.addError(DUPLICATE_CHANNEL_ID, c.getId());
             }
-            channelIdSet.add(ch.getId());
-            parseChannel(ch, ctx, err.inContext("Channel '%s'", ch.getId()));
+            ids.add(c.getId());
+            parseChannel(c, ctx, err.inContext("Channel '%s'", c.getId()));
         }
     }
 
-    private void parseChannel(ChannelDescriptor chDesc, ParsingContext ctx,
+    private void parseChannel(ChannelDescriptor c, ParsingContext ctx,
             Errors err) {
 
-        ChannelFactory fct = channelFactoryMap.get(chDesc.getClass());
+        ChannelFactory fct = chanFcts.get(c.getClass());
         if (fct == null) {
-            err.addError(MISSING_CHANNEL_FACTORY, chDesc.getClass());
+            err.addError(MISSING_CHANNEL_FACTORY, c.getClass());
         }
 
         try {
-            Channel ch = fct.createChannel(chDesc);
-            ctx.addChannel(chDesc.getId(), ch);
+            Channel ch = fct.createChannel(c);
+            ctx.add(c.getId(), ch);
         } catch (InvalidDeviceDescriptorException e) {
             err.addError(e, CHANNEL_CREATION_ERROR);
         }
     }
 
-    private void parseRequestList(List<IORequestDescriptor> reqList,
+    private void parseRequestList(List<IORequestDescriptor> reqs,
             ParsingContext ctx, Errors err) {
-        Set<String> requestIdSet = new HashSet<>();
+        Set<String> ids = new HashSet<>();
 
-        for (IORequestDescriptor req : reqList) {
-            if (Check.nullOrEmpty(req.getId())) {
+        for (IORequestDescriptor r : reqs) {
+            if (Check.nullOrEmpty(r.getId())) {
                 err.addError(MISSING_REQUEST_ID);
             }
-            if (requestIdSet.contains(req.getId())) {
-                err.addError(DUPLICATE_REQUEST_ID, req.getId());
+            if (ids.contains(r.getId())) {
+                err.addError(DUPLICATE_REQUEST_ID, r.getId());
             }
-            requestIdSet.add(req.getId());
-            parseRequest(req, ctx, err.inContext("Request '%s'", req.getId()));
+            ids.add(r.getId());
+            parseRequest(r, ctx, err.inContext("Request '%s'", r.getId()));
         }
     }
 
-    private void parseRequest(IORequestDescriptor req, ParsingContext ctx,
+    private void parseRequest(IORequestDescriptor r, ParsingContext ctx,
             Errors err) {
-        IORequestBuilderFactory fct = requestBuilderFactoryMap.get(req
-                .getClass());
+        IORequestBuilderFactory fct = reqFcts.get(r.getClass());
         if (fct == null) {
-            err.addError(MISSING_REQUEST_BUILDER_FACTORY, req.getId());
+            err.addError(MISSING_REQUEST_BUILDER_FACTORY, r.getId());
             return;
         }
 
         try {
-            ctx.addRequestBuilder(fct.create(req));
+            ctx.add(fct.create(r));
         } catch (InvalidDeviceDescriptorException e) {
             err.addError(e, REQUEST_BUILDER_CREATION_ERROR);
         }
     }
 
-    private void parseOperationList(List<OperationDescriptor> opList,
+    private void parseOperationList(List<OperationDescriptor> ops,
             ParsingContext ctx, Errors err) {
-        Set<String> opIdSet = new HashSet<>();
+        Set<String> ids = new HashSet<>();
 
-        for (OperationDescriptor op : opList) {
+        for (OperationDescriptor o : ops) {
             // Checks common operation fields
-            if (Check.nullOrEmpty(op.getId())) {
+            if (Check.nullOrEmpty(o.getId())) {
                 err.addError(MISSING_OPERATION_NAME);
             }
-            if (op.getId().startsWith("_")) {
+            if (o.getId().startsWith("_")) {
                 err.addError(INVALID_OPERATION_NAME);
             }
-            if (opIdSet.contains(op.getId())) {
-                err.addError(DUPLICATE_OPERATION_NAME, op.getId());
+            if (ids.contains(o.getId())) {
+                err.addError(DUPLICATE_OPERATION_NAME, o.getId());
             }
-            opIdSet.add(op.getId());
+            ids.add(o.getId());
 
-            if (op instanceof PeriodicOperationDescriptor) {
-                parsePeriodicOperation((PeriodicOperationDescriptor) op, ctx,
-                        err.inContext("Sampling operation '%s'", op.getId()));
+            if (o instanceof PeriodicOperationDescriptor) {
+                parsePeriodicOperation((PeriodicOperationDescriptor) o, ctx,
+                        err.inContext("Sampling operation '%s'", o.getId()));
 
-            } else if (op instanceof AsyncOperationDescriptor) {
-                parseAsyncOperation((AsyncOperationDescriptor) op, ctx,
-                        err.inContext("Async operation '%s'", op.getId()));
+            } else if (o instanceof AsyncOperationDescriptor) {
+                parseAsyncOperation((AsyncOperationDescriptor) o, ctx,
+                        err.inContext("Async operation '%s'", o.getId()));
 
-            } else if (op instanceof GetOperationDescriptor) {
-                parseGetOperation((GetOperationDescriptor) op, ctx,
-                        err.inContext("Get operation '%s'", op.getId()));
+            } else if (o instanceof GetOperationDescriptor) {
+                parseGetOperation((GetOperationDescriptor) o, ctx,
+                        err.inContext("Get operation '%s'", o.getId()));
 
-            } else if (op instanceof SetOperationDescriptor) {
-                parseSetOperation((SetOperationDescriptor) op, ctx,
-                        err.inContext("Set operation '%s'", op.getId()));
+            } else if (o instanceof SetOperationDescriptor) {
+                parseSetOperation((SetOperationDescriptor) o, ctx,
+                        err.inContext("Set operation '%s'", o.getId()));
 
             } else {
-                err.addError(UNSUPPORTED_OPERATION_TYPE, op.getClass());
+                err.addError(UNSUPPORTED_OPERATION_TYPE, o.getClass());
             }
         }
     }
 
-    private void parsePeriodicOperation(PeriodicOperationDescriptor op,
+    private void parsePeriodicOperation(PeriodicOperationDescriptor o,
             ParsingContext ctx, Errors err) {
-        CompiledScript startCScript = null;
-        CompiledScript stopCScript = null;
+        CompiledScript start = null;
+        CompiledScript stop = null;
 
         try {
-            startCScript = compileScript(op.getStartScript(), "_start", ctx);
+            start = compileScript(o.getStartScript(), "_start", ctx);
 
-            stopCScript = compileScript(op.getStopScript(), "_stop", ctx);
+            stop = compileScript(o.getStopScript(), "_stop", ctx);
         } catch (InvalidDeviceDescriptorException e) {
             err.addError(e.getMessage());
             return;
         }
 
-        if (!startCScript.getEmitSet().isEmpty()
-                || !stopCScript.getEmitSet().isEmpty()) {
+        if (!start.getEmitSet().isEmpty()
+                || !stop.getEmitSet().isEmpty()) {
             err.addError(EMIT_NOT_ALLOWED_START_STOP);
             return;
         }
 
-        Set<Attribute> emitAttSet = new HashSet<>();
-        List<PeriodicMessageHandler> handlerList = parsePeriodicOnHandlerDescriptor(
-                op, ctx, err.inContext("sampling 'on' clause"), emitAttSet);
+        Set<Attribute> emitAtts = new HashSet<>();
+        List<PeriodicMessageHandler> handlers = parsePeriodicOnHandlerDescriptor(o, ctx,
+                        err.inContext("sampling 'on' clause"), emitAtts);
 
-        if (handlerList == null) {
+        if (handlers == null) {
             return;
         }
 
-        ctx.periodicOpList.add(new NativePeriodicOperation(op.getId(),
-                emitAttSet, startCScript.getScript(), stopCScript.getScript(),
-                handlerList, ctx.channelMgr));
+        ctx.periodicOpList.add(new NativePeriodicOperation(o.getId(),
+                emitAtts, start.getScript(), stop.getScript(),
+                handlers, ctx.channelMgr));
     }
 
     private List<PeriodicMessageHandler> parsePeriodicOnHandlerDescriptor(
-            PeriodicOperationDescriptor op, ParsingContext ctx, Errors err,
-            Set<Attribute> emitAttSet) {
+            PeriodicOperationDescriptor o, ParsingContext ctx, Errors err,
+            Set<Attribute> emitAtts) {
         boolean errorFound = false;
         boolean syncFound = false;
 
-        List<PeriodicMessageHandler> handlerList = new ArrayList<>();
-        for (OnReceiveDescriptor onRecvDesc : op.getOnReceiveList()) {
-            Mapper mapper = ctx.mapperMap.get(onRecvDesc.getMessage());
-            if (mapper == null) {
+        List<PeriodicMessageHandler> handlers = new ArrayList<>();
+        for (OnReceiveDescriptor onRecvDesc : o.getOnReceiveList()) {
+            Mapper map = ctx.mappers.get(onRecvDesc.getMessage());
+            if (map == null) {
                 err.addError(MISSING_MESSAGE_TYPE);
                 errorFound = true;
             }
@@ -463,10 +460,10 @@ public class BaseFpcFactory implements FpcFactory {
 
             // Preload the variableTypeMap with the variable corresponding to
             // the message that triggers this 'on' clause being parsed
-            Map<String, String> variableTypeMap = new HashMap<>();
-            variableTypeMap.put(onRecvDesc.getVariable(),
+            Map<String, String> varTypes = new HashMap<>();
+            varTypes.put(onRecvDesc.getVariable(),
                     onRecvDesc.getMessage());
-            String scriptName = "_" + op.getId() + "_on_"
+            String scriptName = "_" + o.getId() + "_on_"
                     + onRecvDesc.getMessage();
 
             // Compile the script
@@ -479,17 +476,17 @@ public class BaseFpcFactory implements FpcFactory {
                 return null;
             }
 
-            emitAttSet.addAll(cScript.getEmitSet());
+            emitAtts.addAll(cScript.getEmitSet());
             if (syncFound && onRecvDesc.isSync()) {
                 err.addError(MULTIPLE_ON_SYNC);
                 errorFound = true;
             }
             syncFound |= onRecvDesc.isSync();
-            handlerList.add(new PeriodicMessageHandler(onRecvDesc.isSync(),
-                    mapper, onRecvDesc.getVariable(), cScript.getScript()));
+            handlers.add(new PeriodicMessageHandler(onRecvDesc.isSync(),
+                    map, onRecvDesc.getVariable(), cScript.getScript()));
         }
 
-        if (syncFound == false && handlerList.size() > 1) {
+        if (syncFound == false && handlers.size() > 1) {
             err.addError(MISSING_ON_SYNC);
             errorFound = true;
         }
@@ -498,126 +495,126 @@ public class BaseFpcFactory implements FpcFactory {
             return null;
         }
 
-        return handlerList;
+        return handlers;
     }
 
-    private void parseAsyncOperation(AsyncOperationDescriptor op,
+    private void parseAsyncOperation(AsyncOperationDescriptor o,
             ParsingContext ctx, Errors err) {
-        CompiledScript startScript = null;
+        CompiledScript start= null;
 
-        Set<Attribute> emitAttSet = new HashSet<>();
-        AsyncMessageHandler handler = parseAsyncOnHandlerDescriptor(op, ctx,
-                err.inContext("async 'on' clause"), emitAttSet);
+        Set<Attribute> emitAtts = new HashSet<>();
+        AsyncMessageHandler handler = parseAsyncOnHandlerDescriptor(o, ctx,
+                err.inContext("async 'on' clause"), emitAtts);
         if (handler == null) {
             return;
         }
 
-        if (!op.getStartScript().isEmpty()) {
+        if (!o.getStartScript().isEmpty()) {
             try {
-                startScript = compileScript(op.getStartScript(), "_start", ctx);
+                start= compileScript(o.getStartScript(), "_start", ctx);
             } catch (InvalidDeviceDescriptorException e) {
                 err.addError(e.getMessage());
                 return;
             }
         }
 
-        if (startScript != null && !startScript.getEmitSet().isEmpty()) {
+        if (start!= null && !start.getEmitSet().isEmpty()) {
             err.addError(EMIT_NOT_ALLOWED_START_STOP);
         }
 
-        AsyncOperation asyncOp = new AsyncOperation(op.getId(), emitAttSet,
-                startScript.getScript(), handler, ctx.channelMgr);
+        AsyncOperation asyncOp = new AsyncOperation(o.getId(), emitAtts,
+                start.getScript(), handler, ctx.channelMgr);
         ctx.asyncOpList.add(asyncOp);
         ctx.getOpList.add(asyncOp.getAsyncOneoffOperation());
         ctx.periodicOpList.add(asyncOp.getAsyncPeriodicOperation());
     }
 
     private AsyncMessageHandler parseAsyncOnHandlerDescriptor(
-            AsyncOperationDescriptor op, ParsingContext ctx, Errors err,
-            Set<Attribute> emitAttSet) {
-        boolean errorFound = false;
-        OnReceiveDescriptor onRecvDesc = op.getOnReceive();
+            AsyncOperationDescriptor o, ParsingContext ctx, Errors err,
+            Set<Attribute> emitAtts) {
+        boolean hasErr = false;
+        OnReceiveDescriptor onRecv= o.getOnReceive();
 
-        Mapper mapper = ctx.mapperMap.get(onRecvDesc.getMessage());
-        if (mapper == null) {
+        Mapper map = ctx.mappers.get(onRecv.getMessage());
+        if (map == null) {
             err.addError(MISSING_MESSAGE_TYPE);
-            errorFound = true;
+            hasErr = true;
         }
-        if (ctx.onMsgHandlerList.contains(onRecvDesc.getMessage())) {
-            err.addError(DUPLICATE_ON_HANDLER_SAMPLE, onRecvDesc.getMessage());
-            errorFound = true;
+        if (ctx.onMsgHandlerList.contains(onRecv.getMessage())) {
+            err.addError(DUPLICATE_ON_HANDLER_SAMPLE, onRecv.getMessage());
+            hasErr = true;
         }
-        if (Check.nullOrEmpty(onRecvDesc.getVariable())) {
+        if (Check.nullOrEmpty(onRecv.getVariable())) {
             err.addError(MISSING_VARIABLE_NAME);
-            errorFound = true;
+            hasErr = true;
         }
-        ctx.onMsgHandlerList.add(onRecvDesc.getMessage());
+        ctx.onMsgHandlerList.add(onRecv.getMessage());
 
         // Preload the variableTypeMap with the variable corresponding to
         // the message that triggers this 'on' clause being parsed
         Map<String, String> variableTypeMap = new HashMap<>();
-        variableTypeMap.put(onRecvDesc.getVariable(), op.getOnReceive()
+        variableTypeMap.put(onRecv.getVariable(), o.getOnReceive()
                 .getMessage());
-        String scriptName = "_" + op.getId() + "_on_" + onRecvDesc.getMessage();
+        String scriptName = "_" + o.getId() + "_on_" + onRecv.getMessage();
 
         CompiledScript cScript = null;
         try {
-            cScript = compileScript(onRecvDesc.getInstructionList(),
+            cScript = compileScript(onRecv.getInstructionList(),
                     scriptName, ctx);
         } catch (InvalidDeviceDescriptorException e) {
             err.addError(e.getMessage());
             return null;
         }
 
-        if (errorFound) {
+        if (hasErr) {
             return null;
         }
 
-        emitAttSet.addAll(cScript.getEmitSet());
-        return new AsyncMessageHandler(mapper, cScript.getScript(),
-                onRecvDesc.getVariable());
+        emitAtts.addAll(cScript.getEmitSet());
+        return new AsyncMessageHandler(map, cScript.getScript(),
+                onRecv.getVariable());
     }
 
-    private void parseGetOperation(GetOperationDescriptor op,
+    private void parseGetOperation(GetOperationDescriptor o,
             ParsingContext ctx, Errors err) {
-        CompiledScript cScript = null;
+        CompiledScript script = null;
         try {
-            cScript = compileScript(op.getInstructionList(), op.getId(), ctx);
+            script = compileScript(o.getInstructionList(), o.getId(), ctx);
         } catch (InvalidDeviceDescriptorException e) {
             err.addError(e.getMessage());
             return;
         }
 
-        ctx.getOpList.add(new OneoffOperation(op.getId(), cScript.getEmitSet(),
-                cScript.getScript()));
-        ctx.periodicOpList.add(new SimulatedPeriodicOperation("_" + op.getId()
-                + "_sim", cScript.getEmitSet(), cScript.getScript()));
+        ctx.getOpList.add(new OneoffOperation(o.getId(), script.getEmitSet(),
+                script.getScript()));
+        ctx.periodicOpList.add(new SimulatedPeriodicOperation("_" + o.getId()
+                + "_sim", script.getEmitSet(), script.getScript()));
     }
 
-    private void parseSetOperation(SetOperationDescriptor op,
+    private void parseSetOperation(SetOperationDescriptor o,
             ParsingContext ctx, Errors err) {
-        CompiledScript cScript = null;
+        CompiledScript script = null;
         try {
-            cScript = compileScript(op.getInstructionList(), op.getId(), ctx);
+            script = compileScript(o.getInstructionList(), o.getId(), ctx);
         } catch (InvalidDeviceDescriptorException e) {
             err.addError(e.getMessage());
             return;
         }
 
-        if (!cScript.getEmitSet().isEmpty()) {
+        if (!script.getEmitSet().isEmpty()) {
             err.addError(EMIT_NOT_ALLOWED_SET);
             return;
         }
 
-        ctx.setOpList.add(new OneoffOperation(op.getId(), cScript.getSetSet(),
-                cScript.getScript()));
+        ctx.setOpList.add(new OneoffOperation(o.getId(), script.getSetSet(),
+                script.getScript()));
     }
 
-    private CompiledScript compileScript(
-            List<InstructionDescriptor> instructionList, String scriptName,
-            ParsingContext ctx) throws InvalidDeviceDescriptorException {
-        return Compiler.compile(instructionList, scriptName, ctx.attDescMap,
-                ctx.mapperMap, ctx.reqBuilderMap, ctx.channelMap);
+    private CompiledScript compileScript(List<InstructionDescriptor> insts,
+            String name, ParsingContext ctx)
+            throws InvalidDeviceDescriptorException {
+        return Compiler.compile(insts, name, ctx.attDescMap,
+                ctx.mappers, ctx.requests, ctx.channels);
     }
 
     /**
@@ -634,12 +631,12 @@ public class BaseFpcFactory implements FpcFactory {
 
         // Attributes
         private final Map<String, AttributeDescriptor> attDescMap = new HashMap<>();
-        private final Set<Attribute> attributeSet = new HashSet<>();
+        private final Set<Attribute> atts = new HashSet<>();
         private final Map<Attribute, Object> attValues = new HashMap<>();
 
-        private final Map<String, Mapper> mapperMap = new HashMap<>();
-        private final Map<String, Channel> channelMap = new HashMap<>();
-        private final Map<String, IORequestBuilder> reqBuilderMap = new HashMap<>();
+        private final Map<String, Mapper> mappers = new HashMap<>();
+        private final Map<String, Channel> channels = new HashMap<>();
+        private final Map<String, IORequestBuilder> requests = new HashMap<>();
 
         private ChannelManager channelMgr;
 
@@ -661,26 +658,26 @@ public class BaseFpcFactory implements FpcFactory {
             this.id = id;
         }
 
-        protected void addAttribute(AttributeDescriptor desc) {
+        protected void add(AttributeDescriptor desc) {
             attDescMap.put(desc.getId(), desc);
             Attribute a = Attribute.create(desc);
-            attributeSet.add(a);
+            atts.add(a);
             if (desc.getAccess() == AttributeAccessType.STATIC) {
                 Object v = DataType.parse(a.getType(), desc.getValue());
                 attValues.put(a, v);
             }
         }
 
-        protected void addMapper(Mapper mapper) {
-            mapperMap.put(mapper.getMessageId(), mapper);
+        protected void add(Mapper mapper) {
+            mappers.put(mapper.getMessageId(), mapper);
         }
 
-        protected void addChannel(String id, Channel channel) {
-            channelMap.put(id, channel);
+        protected void add(String id, Channel channel) {
+            channels.put(id, channel);
         }
 
-        protected void addRequestBuilder(IORequestBuilder builder) {
-            reqBuilderMap.put(builder.getRequestId(), builder);
+        protected void add(IORequestBuilder builder) {
+            requests.put(builder.getRequestId(), builder);
         }
 
     }

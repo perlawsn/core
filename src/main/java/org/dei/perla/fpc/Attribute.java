@@ -50,12 +50,10 @@ public class Attribute implements Comparable<Attribute> {
 			return false;
 		}
 
+        // Direct reference comparison. This can be performed since all
+        // attributes are cached and interned.
 		Attribute att = (Attribute) obj;
-		if (!id.equals(att.id) || type != att.type) {
-			return false;
-		}
-
-		return true;
+        return this == att;
 	}
 
 	@Override
