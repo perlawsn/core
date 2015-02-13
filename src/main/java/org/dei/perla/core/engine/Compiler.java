@@ -48,38 +48,41 @@ public class Compiler {
 	 *             If the sequence of {@link InstructionDescriptor}s does not
 	 *             correspond to a valid {@link Script}
 	 */
-	public static CompiledScript compile(
-			List<InstructionDescriptor> inst, String name,
-			Map<String, AttributeDescriptor> atts,
+	public static Script compile(
+            List<InstructionDescriptor> inst,
+            String name, Map<String, AttributeDescriptor> atts,
 			Map<String, Mapper> mappers,
-			Map<String, IORequestBuilder> requests,
+            Map<String, IORequestBuilder> requests,
 			Map<String, Channel> channels)
-			throws InvalidDeviceDescriptorException {
+            throws InvalidDeviceDescriptorException {
 		CompilerContext ctx = new CompilerContext(atts, mappers,
 				requests, channels);
 		Errors err = new Errors("Script '%s'", name);
 
-		ScriptBuilder bldr = parseInstList(inst, ctx, err);
+        ScriptBuilder b = parseScript(inst, ctx, err);
+        if (!(b.last instanceof StopInstruction)) {
+            b.add(new StopInstruction());
+        }
 		if (err.getErrorCount() != 0) {
 			throw new InvalidDeviceDescriptorException(err.asString());
 		}
-		return new CompiledScript(bldr.buildScript(name), ctx.emitSet,
-				ctx.setSet);
+
+        return new Script(name, b.first, ctx.emit, ctx.set);
 	}
 
-	private static ScriptBuilder parseInstList(
+	private static ScriptBuilder parseScript(
             List<InstructionDescriptor> descs,
             CompilerContext ctx, Errors err) {
-		ScriptBuilder builder = ScriptBuilder.newScript();
+        ScriptBuilder b = new ScriptBuilder();
 
 		for (InstructionDescriptor d : descs) {
-			Instruction i = parseInstruction(d, ctx,
-					err.inContext("Instruction nr. " + ctx.instCount));
-			builder.add(i);
+            Errors ierr = err.inContext("Instruction nr. " + ctx.instCount);
+			Instruction i = parseInstruction(d, ctx, ierr);
+            b.add(i);
 			ctx.instCount += 1;
 		}
 
-		return builder;
+		return b;
 	}
 
 	private static Instruction parseInstruction(InstructionDescriptor d,
@@ -292,7 +295,7 @@ public class Compiler {
 			err.addError(MISSING_FOREACH_BODY);
 			return new NoopInstruction();
 		}
-		ScriptBuilder body = parseInstList(d.getBody(), ctx, err);
+		Instruction body = parseScript(d.getBody(), ctx, err).first;
 
 		if (errorFound == true) {
 			return new NoopInstruction();
@@ -300,18 +303,18 @@ public class Compiler {
 
 		if (Check.nullOrEmpty(d.getIndex())) {
 			return new ForeachInstruction(d.getItemsVar(),
-					d.getItemsField(), d.getVariable(), body.getCode());
+					d.getItemsField(), d.getVariable(), body);
 		} else {
 			return new ForeachInstruction(d.getItemsVar(),
 					d.getItemsField(), d.getVariable(),
-					d.getIndex(), body.getCode());
+					d.getIndex(), body);
 		}
 	}
 
 	private static Instruction parseIfInstruction(
 			IfInstructionDescriptor d, CompilerContext ctx, Errors err) {
-		ScriptBuilder thenBlock = null;
-		ScriptBuilder elseBlock = null;
+		Instruction thenBlock = null;
+		Instruction elseBlock = null;
 		boolean errorFound = false;
 
 		// Check condition
@@ -321,20 +324,19 @@ public class Compiler {
 		}
 
 		// Parse then and else instruction lists
-		thenBlock = parseInstList(d.getThenInstructionList(), ctx, err);
+		thenBlock = parseScript(d.getThenBlock(), ctx, err).first;
 		if (thenBlock == null) {
 			err.addError(MISSING_THEN_IF);
 			errorFound = true;
 		}
-		if (!Check.nullOrEmpty(d.getElseInstructionList())) {
-			elseBlock = parseInstList(d.getElseInstructionList(), ctx, err);
+		if (!Check.nullOrEmpty(d.getElseBlock())) {
+			elseBlock = parseScript(d.getElseBlock(), ctx, err).first;
 		}
 
 		if (errorFound) {
 			return new NoopInstruction();
 		}
-		return new IfInstruction(d.getCondition(), thenBlock.getCode(),
-				elseBlock.getCode());
+		return new IfInstruction(d.getCondition(), thenBlock, elseBlock);
 	}
 
 	private static Instruction parsePutInstruction(
@@ -365,7 +367,7 @@ public class Compiler {
 			return new NoopInstruction();
 		}
 
-        ctx.emitSet.add(Attribute.create(att));
+        ctx.emit.add(Attribute.create(att));
 		return new PutInstruction(d.getExpression(), att);
 	}
 
@@ -448,7 +450,7 @@ public class Compiler {
 				err.addError(READ_ONLY_ATTRIBUTE, s);
 				continue;
 			}
-            ctx.setSet.add(Attribute.create(att));
+            ctx.set.add(Attribute.create(att));
 		}
 		sc.close();
 	}
@@ -591,6 +593,27 @@ public class Compiler {
 				ctx.mappers.get(variableType));
 	}
 
+    public static class ScriptBuilder {
+
+        private Instruction first = null;
+        private Instruction last = null;
+
+        public ScriptBuilder add(Instruction i) {
+            if (first == null) {
+                first = last = i;
+            } else {
+                last.setNext(i);
+                last = i;
+            }
+            return this;
+        }
+
+        public Instruction getFirst() {
+            return first;
+        }
+
+    }
+
 	/**
 	 * Convenience class for storing common information related to the
 	 * <code>Script</code> being parsed.
@@ -605,8 +628,8 @@ public class Compiler {
 		private final Map<String, IORequestBuilder> requests;
 		private final Map<String, Channel> channels;
 
-		private final Set<Attribute> emitSet = new HashSet<>();
-		private final Set<Attribute> setSet = new HashSet<>();
+		private final Set<Attribute> emit = new HashSet<>();
+		private final Set<Attribute> set = new HashSet<>();
 		private int instCount = 0;
 
 		private final Map<String, String> variableTypeMap = new HashMap<>();

@@ -105,7 +105,7 @@ public class CompilerTest {
 		iList.add(new AppendInstructionDescriptor("var", "list", "5"));
 
 		script = Compiler.compile(iList, "append", attributeMap, mapperMap,
-				requestBuilderMap, channelMap).getScript();
+				requestBuilderMap, channelMap);
 		i = script.getCode();
 		assertTrue(i instanceof CreateComplexVarInstruction);
 		i = i.next();
@@ -124,7 +124,7 @@ public class CompilerTest {
 		iList.add(new BreakpointInstructionDescriptor());
 
 		script = Compiler.compile(iList, "breakpoint", attributeMap, mapperMap,
-				requestBuilderMap, channelMap).getScript();
+				requestBuilderMap, channelMap);
 		assertThat(script, notNullValue());
 		i = script.getCode();
 		assertTrue(i instanceof BreakpointInstruction);
@@ -138,7 +138,7 @@ public class CompilerTest {
 		iList.add(new StopInstructionDescriptor());
 
 		script = Compiler.compile(iList, "stop", attributeMap, mapperMap,
-				requestBuilderMap, channelMap).getScript();
+				requestBuilderMap, channelMap);
 		assertThat(script, notNullValue());
 		i = script.getCode();
 		assertTrue(i instanceof StopInstruction);
@@ -153,7 +153,7 @@ public class CompilerTest {
 		iList.add(new CreateVarInstructionDescriptor("var2", "string"));
 
 		script = Compiler.compile(iList, "create", attributeMap, mapperMap,
-				requestBuilderMap, channelMap).getScript();
+				requestBuilderMap, channelMap);
 		assertThat(script, notNullValue());
 
 		i = script.getCode();
@@ -180,7 +180,7 @@ public class CompilerTest {
 		iList.add(new SetInstructionDescriptor("var2", "10"));
 
 		script = Compiler.compile(iList, "set", attributeMap, mapperMap,
-				requestBuilderMap, channelMap).getScript();
+				requestBuilderMap, channelMap);
 		assertThat(script, notNullValue());
 		i = script.getCode();
 		assertTrue(i instanceof CreateComplexVarInstruction);
@@ -213,7 +213,7 @@ public class CompilerTest {
 		iList.add(new PutInstructionDescriptor("${var.integer}", "integer"));
 
 		script = Compiler.compile(iList, "put", attributeMap, mapperMap,
-				requestBuilderMap, channelMap).getScript();
+				requestBuilderMap, channelMap);
 		assertThat(script, notNullValue());
 		i = script.getCode();
 		assertTrue(i instanceof CreateComplexVarInstruction);
@@ -237,7 +237,7 @@ public class CompilerTest {
 		iList.add(new EmitInstructionDescriptor());
 
 		script = Compiler.compile(iList, "emit", attributeMap, mapperMap,
-				requestBuilderMap, channelMap).getScript();
+				requestBuilderMap, channelMap);
 		assertThat(script, notNullValue());
 		i = script.getCode();
 		assertTrue(i instanceof CreateComplexVarInstruction);
@@ -260,7 +260,7 @@ public class CompilerTest {
 				"result", "message2"));
 
 		script = Compiler.compile(iList, "emit", attributeMap, mapperMap,
-				requestBuilderMap, channelMap).getScript();
+				requestBuilderMap, channelMap);
 		assertThat(script, notNullValue());
 		i = script.getCode();
 		assertTrue(i instanceof CreateComplexVarInstruction);
@@ -293,7 +293,7 @@ public class CompilerTest {
 		iList.add(new EmitInstructionDescriptor());
 
 		script = Compiler.compile(iList, "if", attributeMap, mapperMap,
-				requestBuilderMap, channelMap).getScript();
+				requestBuilderMap, channelMap);
 		assertThat(script, notNullValue());
 		i = script.getCode();
 		assertTrue(i instanceof CreateComplexVarInstruction);
@@ -322,7 +322,7 @@ public class CompilerTest {
 
 	@Test
 	public void testEmitSet() throws Exception {
-		CompiledScript cScript;
+		Script script;
 		List<InstructionDescriptor> iList = new ArrayList<>();
 		iList.add(new CreateVarInstructionDescriptor("var", "message1"));
 		iList.add(new SetInstructionDescriptor("var", "integer", "5"));
@@ -331,19 +331,19 @@ public class CompilerTest {
 		iList.add(new PutInstructionDescriptor("${var.string}", "string"));
 		iList.add(new EmitInstructionDescriptor());
 
-		cScript = Compiler.compile(iList, "emit", attributeMap, mapperMap,
+		script = Compiler.compile(iList, "emit", attributeMap, mapperMap,
 				requestBuilderMap, channelMap);
-		assertThat(cScript, notNullValue());
-		assertFalse(cScript.getEmitSet().isEmpty());
-		assertTrue(cScript.getEmitSet().contains(Attribute.create(integer)));
-		assertTrue(cScript.getEmitSet().contains(Attribute.create(string)));
-		assertFalse(cScript.getEmitSet().contains(Attribute.create(bool)));
-		assertTrue(cScript.getSetSet().isEmpty());
+		assertThat(script, notNullValue());
+		assertFalse(script.getEmit().isEmpty());
+		assertTrue(script.getEmit().contains(Attribute.create(integer)));
+		assertTrue(script.getEmit().contains(Attribute.create(string)));
+		assertFalse(script.getEmit().contains(Attribute.create(bool)));
+		assertTrue(script.getSet().isEmpty());
 	}
 
 	@Test
 	public void testSetSet() throws Exception {
-		CompiledScript cScript;
+		Script script;
 		List<InstructionDescriptor> iList = new ArrayList<>();
 		iList.add(new CreateVarInstructionDescriptor("var", "message1"));
 		iList.add(new SetInstructionDescriptor("var", "integer",
@@ -351,26 +351,26 @@ public class CompilerTest {
 		iList.add(new SetInstructionDescriptor("var", "string",
 				"${param['string']}"));
 
-		cScript = Compiler.compile(iList, "emit", attributeMap, mapperMap,
+		script = Compiler.compile(iList, "emit", attributeMap, mapperMap,
 				requestBuilderMap, channelMap);
-		assertThat(cScript, notNullValue());
-		assertTrue(cScript.getEmitSet().isEmpty());
-		assertFalse(cScript.getSetSet().isEmpty());
-		assertTrue(cScript.getSetSet().contains(Attribute.create(integer)));
-		assertTrue(cScript.getSetSet().contains(Attribute.create(string)));
-		assertFalse(cScript.getSetSet().contains(Attribute.create(bool)));
+		assertThat(script, notNullValue());
+		assertTrue(script.getEmit().isEmpty());
+		assertFalse(script.getSet().isEmpty());
+		assertTrue(script.getSet().contains(Attribute.create(integer)));
+		assertTrue(script.getSet().contains(Attribute.create(string)));
+		assertFalse(script.getSet().contains(Attribute.create(bool)));
 	}
 
 	@Test
 	public void testError() throws Exception {
-		CompiledScript cScript;
+		Script script;
 		List<InstructionDescriptor> iList = new ArrayList<>();
 		iList.add(new ErrorInstructionDescriptor("error"));
 
-		cScript = Compiler.compile(iList, "error", attributeMap, mapperMap,
+		script = Compiler.compile(iList, "error", attributeMap, mapperMap,
 				requestBuilderMap, channelMap);
-		assertThat(cScript, notNullValue());
-		Instruction i = cScript.getScript().getCode();
+		assertThat(script, notNullValue());
+		Instruction i = script.getCode();
 		assertThat(i, notNullValue());
 		assertTrue(i instanceof ErrorInstruction);
 		ErrorInstruction err = (ErrorInstruction) i;

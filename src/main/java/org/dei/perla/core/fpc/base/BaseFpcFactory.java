@@ -7,6 +7,7 @@ import org.dei.perla.core.channel.Channel;
 import org.dei.perla.core.channel.ChannelFactory;
 import org.dei.perla.core.channel.IORequestBuilder;
 import org.dei.perla.core.channel.IORequestBuilderFactory;
+import org.dei.perla.core.engine.Script;
 import org.dei.perla.core.fpc.Attribute;
 import org.dei.perla.core.fpc.Fpc;
 import org.dei.perla.core.fpc.FpcFactory;
@@ -16,7 +17,6 @@ import org.dei.perla.core.descriptor.*;
 import org.dei.perla.core.descriptor.AttributeDescriptor.AttributeAccessType;
 import org.dei.perla.core.descriptor.AttributeDescriptor.AttributePermission;
 import org.dei.perla.core.descriptor.instructions.InstructionDescriptor;
-import org.dei.perla.core.engine.CompiledScript;
 import org.dei.perla.core.engine.Compiler;
 import org.dei.perla.core.message.Mapper;
 import org.dei.perla.core.message.MapperFactory;
@@ -403,20 +403,19 @@ public class BaseFpcFactory implements FpcFactory {
 
     private void parsePeriodicOperation(PeriodicOperationDescriptor o,
             ParsingContext ctx, Errors err) {
-        CompiledScript start = null;
-        CompiledScript stop = null;
+        Script start = null;
+        Script stop = null;
 
         try {
             start = compileScript(o.getStartScript(), "_start", ctx);
-
             stop = compileScript(o.getStopScript(), "_stop", ctx);
         } catch (InvalidDeviceDescriptorException e) {
             err.addError(e.getMessage());
             return;
         }
 
-        if (!start.getEmitSet().isEmpty()
-                || !stop.getEmitSet().isEmpty()) {
+        if (!start.getEmit().isEmpty()
+                || !stop.getEmit().isEmpty()) {
             err.addError(EMIT_NOT_ALLOWED_START_STOP);
             return;
         }
@@ -430,7 +429,7 @@ public class BaseFpcFactory implements FpcFactory {
         }
 
         ctx.periodicOpList.add(new NativePeriodicOperation(o.getId(),
-                emitAtts, start.getScript(), stop.getScript(),
+                emitAtts, start, stop,
                 handlers, ctx.channelMgr));
     }
 
@@ -465,22 +464,22 @@ public class BaseFpcFactory implements FpcFactory {
             String scriptName = "_" + o.getId() + "_on_" + on.getMessage();
 
             // Compile the script
-            CompiledScript cScript = null;
+            Script script = null;
             try {
-                cScript = compileScript(on.getInstructionList(), scriptName, ctx);
+                script = compileScript(on.getInstructionList(), scriptName, ctx);
             } catch (InvalidDeviceDescriptorException e) {
                 err.addError(e.getMessage());
                 return null;
             }
 
-            emitAtts.addAll(cScript.getEmitSet());
+            emitAtts.addAll(script.getEmit());
             if (hasSync && on.isSync()) {
                 err.addError(MULTIPLE_ON_SYNC);
                 hasErr = true;
             }
             hasSync |= on.isSync();
             handlers.add(new PeriodicMessageHandler(on.isSync(),
-                    map, on.getVariable(), cScript.getScript()));
+                    map, on.getVariable(), script));
         }
 
         if (hasSync == false && handlers.size() > 1) {
@@ -497,7 +496,7 @@ public class BaseFpcFactory implements FpcFactory {
 
     private void parseAsyncOperation(AsyncOperationDescriptor o,
             ParsingContext ctx, Errors err) {
-        CompiledScript start= null;
+        Script start = null;
 
         Set<Attribute> emitAtts = new HashSet<>();
         AsyncMessageHandler handler = parseAsyncOnHandlerDescriptor(o, ctx,
@@ -508,19 +507,19 @@ public class BaseFpcFactory implements FpcFactory {
 
         if (!o.getStartScript().isEmpty()) {
             try {
-                start= compileScript(o.getStartScript(), "_start", ctx);
+                start = compileScript(o.getStartScript(), "_start", ctx);
             } catch (InvalidDeviceDescriptorException e) {
                 err.addError(e.getMessage());
                 return;
             }
         }
 
-        if (start!= null && !start.getEmitSet().isEmpty()) {
+        if (start!= null && !start.getEmit().isEmpty()) {
             err.addError(EMIT_NOT_ALLOWED_START_STOP);
         }
 
         AsyncOperation asyncOp = new AsyncOperation(o.getId(), emitAtts,
-                start.getScript(), handler, ctx.channelMgr);
+                start, handler, ctx.channelMgr);
         ctx.asyncOpList.add(asyncOp);
         ctx.getOpList.add(asyncOp.getAsyncOneoffOperation());
         ctx.periodicOpList.add(asyncOp.getAsyncPeriodicOperation());
@@ -554,9 +553,9 @@ public class BaseFpcFactory implements FpcFactory {
                 .getMessage());
         String scriptName = "_" + o.getId() + "_on_" + onRecv.getMessage();
 
-        CompiledScript cScript = null;
+        Script script = null;
         try {
-            cScript = compileScript(onRecv.getInstructionList(),
+            script = compileScript(onRecv.getInstructionList(),
                     scriptName, ctx);
         } catch (InvalidDeviceDescriptorException e) {
             err.addError(e.getMessage());
@@ -567,14 +566,15 @@ public class BaseFpcFactory implements FpcFactory {
             return null;
         }
 
-        emitAtts.addAll(cScript.getEmitSet());
-        return new AsyncMessageHandler(map, cScript.getScript(),
-                onRecv.getVariable());
+        // TODO: change the operation constructor so that only the script
+        // is required for its creation.
+        emitAtts.addAll(script.getEmit());
+        return new AsyncMessageHandler(map, script, onRecv.getVariable());
     }
 
     private void parseGetOperation(GetOperationDescriptor o,
             ParsingContext ctx, Errors err) {
-        CompiledScript script = null;
+        Script script = null;
         try {
             script = compileScript(o.getScript(), o.getId(), ctx);
         } catch (InvalidDeviceDescriptorException e) {
@@ -582,15 +582,17 @@ public class BaseFpcFactory implements FpcFactory {
             return;
         }
 
-        ctx.getOpList.add(new OneoffOperation(o.getId(), script.getEmitSet(),
-                script.getScript()));
+        // TODO: change the operation constructor so that only the script
+        // is required for its creation.
+        ctx.getOpList.add(new OneoffOperation(o.getId(), script.getEmit(),
+                script));
         ctx.periodicOpList.add(new SimulatedPeriodicOperation("_" + o.getId()
-                + "_sim", script.getEmitSet(), script.getScript()));
+                + "_sim", script.getEmit(), script));
     }
 
     private void parseSetOperation(SetOperationDescriptor o,
             ParsingContext ctx, Errors err) {
-        CompiledScript script = null;
+        Script script = null;
         try {
             script = compileScript(o.getInstructionList(), o.getId(), ctx);
         } catch (InvalidDeviceDescriptorException e) {
@@ -598,16 +600,18 @@ public class BaseFpcFactory implements FpcFactory {
             return;
         }
 
-        if (!script.getEmitSet().isEmpty()) {
+        if (!script.getEmit().isEmpty()) {
             err.addError(EMIT_NOT_ALLOWED_SET);
             return;
         }
 
-        ctx.setOpList.add(new OneoffOperation(o.getId(), script.getSetSet(),
-                script.getScript()));
+        // TODO: change the operation constructor so that only the script
+        // is required for its creation.
+        ctx.setOpList.add(new OneoffOperation(o.getId(), script.getSet(),
+                script));
     }
 
-    private CompiledScript compileScript(List<InstructionDescriptor> insts,
+    private Script compileScript(List<InstructionDescriptor> insts,
             String name, ParsingContext ctx)
             throws InvalidDeviceDescriptorException {
         return Compiler.compile(insts, name, ctx.attDescMap,

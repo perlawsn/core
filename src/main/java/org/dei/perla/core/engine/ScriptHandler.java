@@ -3,16 +3,12 @@ package org.dei.perla.core.engine;
 import java.util.List;
 
 /**
- * <p>
  * A general handler interface for collecting the result of an asynchronous
  * <code>Script</code>.
- * </p>
  *
- * <p>
  * The implementations of the {@code complete} and {@code error} methods should
  * terminate quickly so as to avoid blocking the invoking thread from continuing
  * normally.
- * </p>
  *
  * @author Guido Rota (2014)
  *

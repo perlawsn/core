@@ -1,6 +1,10 @@
 package org.dei.perla.core.engine;
 
+import org.dei.perla.core.fpc.Attribute;
 import org.dei.perla.core.utils.Conditions;
+
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * A <code>Script</code> that can be executed by the Fpc execution engine. Each
@@ -14,10 +18,15 @@ public class Script {
 
 	private final String name;
 	private final Instruction start;
+    private final Set<Attribute> emit;
+    private final Set<Attribute> set;
 
-	public Script(String name, Instruction start) {
+	public Script(String name, Instruction start, Set<Attribute> emit,
+            Set<Attribute> set) {
 		this.name = Conditions.checkNotNull(name, "name");
 		this.start = Conditions.checkNotNull(start, "start");
+        this.emit = Collections.unmodifiableSet(emit);
+        this.set = Collections.unmodifiableSet(set);
 	}
 
 	/**
@@ -37,5 +46,13 @@ public class Script {
 	public Instruction getCode() {
 		return start;
 	}
+
+    public Set<Attribute> getEmit() {
+        return emit;
+    }
+
+    public Set<Attribute> getSet() {
+        return set;
+    }
 
 }

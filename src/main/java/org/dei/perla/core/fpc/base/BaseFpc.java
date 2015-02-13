@@ -26,10 +26,12 @@ public class BaseFpc implements Fpc {
 	private static final Operation emptyRecordOperation;
 
 	static {
-		Script doNothing = ScriptBuilder.newScript().add(new EmitInstruction())
-				.add(new StopInstruction()).buildScript("empty");
+        Instruction start = new EmitInstruction();
+        start.setNext(new StopInstruction());
+        Script empty = new Script("_empty", start, Collections.emptySet(),
+                Collections.emptySet());
 		emptyRecordOperation = new SimulatedPeriodicOperation("_empty",
-				Collections.emptySet(), doNothing);
+				Collections.emptySet(), empty);
 	}
 
 	protected BaseFpc(int id, String type, Set<Attribute> atts,

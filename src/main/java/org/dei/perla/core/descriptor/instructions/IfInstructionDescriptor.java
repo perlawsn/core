@@ -50,33 +50,33 @@ public class IfInstructionDescriptor extends InstructionDescriptor {
 
 	@XmlElementWrapper(name = "then", required = true)
 	@XmlElementRef(name = "instruction")
-	private List<InstructionDescriptor> thenInstructionList = new ArrayList<>();
+	private List<InstructionDescriptor> thenBlock = new ArrayList<>();
 
 	@XmlElementWrapper(name = "else", required = false)
 	@XmlElementRef(name = "instruction")
-	private List<InstructionDescriptor> elseInstructionList = new ArrayList<>();
+	private List<InstructionDescriptor> elseBlock = new ArrayList<>();
 
 	public IfInstructionDescriptor() {
 	}
 
 	public IfInstructionDescriptor(String condition,
-			List<InstructionDescriptor> thenInstructionList,
-			List<InstructionDescriptor> elseInstructionList) {
+			List<InstructionDescriptor> thenBlock,
+			List<InstructionDescriptor> elseBlock) {
 		this.condition = condition;
-		this.thenInstructionList = thenInstructionList;
-		this.elseInstructionList = elseInstructionList;
+		this.thenBlock = thenBlock;
+		this.elseBlock = elseBlock;
 	}
 
 	public String getCondition() {
 		return condition;
 	}
 
-	public List<InstructionDescriptor> getThenInstructionList() {
-		return thenInstructionList;
+	public List<InstructionDescriptor> getThenBlock() {
+		return thenBlock;
 	}
 
-	public List<InstructionDescriptor> getElseInstructionList() {
-		return elseInstructionList;
+	public List<InstructionDescriptor> getElseBlock() {
+		return elseBlock;
 	}
 
 }
