@@ -29,7 +29,7 @@ public class BaseFpc implements Fpc {
         Instruction start = new EmitInstruction();
         start.setNext(new StopInstruction());
         Script empty = new Script("_empty", start, Collections.emptySet(),
-                Collections.emptySet());
+                Collections.emptySet(), Collections.emptyMap());
 		emptyRecordOperation = new SimulatedPeriodicOperation("_empty",
 				Collections.emptySet(), empty);
 	}

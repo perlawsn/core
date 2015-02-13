@@ -1,9 +1,9 @@
 package org.dei.perla.core.engine;
 
 import org.dei.perla.core.fpc.Attribute;
-import org.dei.perla.core.utils.Conditions;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -17,16 +17,18 @@ import java.util.Set;
 public class Script {
 
 	private final String name;
-	private final Instruction start;
+	private final Instruction first;
     private final Set<Attribute> emit;
     private final Set<Attribute> set;
+    private final Map<Attribute, Integer> attIdx;
 
-	public Script(String name, Instruction start, Set<Attribute> emit,
-            Set<Attribute> set) {
-		this.name = Conditions.checkNotNull(name, "name");
-		this.start = Conditions.checkNotNull(start, "start");
+	public Script(String name, Instruction first, Set<Attribute> emit,
+            Set<Attribute> set, Map<Attribute, Integer> attIdx) {
+		this.name = name;
+		this.first = first;
         this.emit = Collections.unmodifiableSet(emit);
         this.set = Collections.unmodifiableSet(set);
+        this.attIdx = Collections.unmodifiableMap(attIdx);
 	}
 
 	/**
@@ -41,18 +43,41 @@ public class Script {
 	/**
 	 * Returns the first instruction of the <code>Script</code>
 	 *
-	 * @return First <code>Script</code> instruction
+	 * @return First {@code Script} instruction
 	 */
 	public Instruction getCode() {
-		return start;
+		return first;
 	}
 
+    /**
+     * Returns the list of {@link Attribute}s that the {@code Script} gathers
+     * from the remote device.
+     *
+     * @return {@link Attribute}s emitted by the {@code Script}
+     */
     public Set<Attribute> getEmit() {
         return emit;
     }
 
+    /**
+     * Returns the list of {@link Attribute}s that the {@code Script} sends
+     * to the remote device.
+     *
+     * @return {@link Attribute}s set by the {@code Script}
+     */
     public Set<Attribute> getSet() {
         return set;
+    }
+
+    /**
+     * Returns a {@link Map} containing the position that every emitted
+     * {@link Attribute} will occupy in the output records created by the
+     * {@code Script}.
+     *
+     * @return {@link Attribute} position in the output record
+     */
+    public Map<Attribute, Integer> getIndexes() {
+        return attIdx;
     }
 
 }

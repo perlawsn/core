@@ -67,7 +67,7 @@ public class Compiler {
 			throw new InvalidDeviceDescriptorException(err.asString());
 		}
 
-        return new Script(name, b.first, ctx.emit, ctx.set);
+        return new Script(name, b.first, ctx.emit, ctx.set, ctx.attIdx);
 	}
 
 	private static ScriptBuilder parseScript(
@@ -367,7 +367,9 @@ public class Compiler {
 			return new NoopInstruction();
 		}
 
-        ctx.emit.add(Attribute.create(att));
+        Attribute a = Attribute.create(att);
+        ctx.emit.add(a);
+        ctx.attIdx.put(a, ctx.idx++);
 		return new PutInstruction(d.getExpression(), att);
 	}
 
@@ -593,6 +595,11 @@ public class Compiler {
 				ctx.mappers.get(variableType));
 	}
 
+    /**
+     * Convenience class for the incremental composition of PerLa Scripts.
+     *
+     * @author Guido Rota (2015)
+     */
     public static class ScriptBuilder {
 
         private Instruction first = null;
@@ -628,7 +635,16 @@ public class Compiler {
 		private final Map<String, IORequestBuilder> requests;
 		private final Map<String, Channel> channels;
 
+        // Attribute-index association. Every attribute is associated at
+        // compile-time with a unique index, which is later used at script
+        // runtime to ensure that attributes are always added to the
+        // output record in the same location.
+        private final Map<Attribute, Integer> attIdx = new HashMap<>();
+        private int idx = 0;
+
+        // Set of attributes emitted by the Script
 		private final Set<Attribute> emit = new HashSet<>();
+        // Set of attributes set by the Script
 		private final Set<Attribute> set = new HashSet<>();
 		private int instCount = 0;
 

@@ -39,7 +39,7 @@ public class ScriptBuilder {
 			this.add(new StopInstruction());
 		}
 		return new Script(name, first, Collections.emptySet(),
-                Collections.emptySet());
+                Collections.emptySet(), Collections.emptyMap());
 	}
 
     public Instruction getCode() {
