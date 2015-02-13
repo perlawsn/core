@@ -94,7 +94,7 @@ public abstract class AbstractOperation<T extends AbstractTask> implements
 		lk.lock();
 		try {
 
-			// Wrapping the invocation inside a lockensures that the scheduling
+			// Wrapping the invocation inside a lock ensures that the scheduling
 			// operations are run in mutual exclusion with all other methods
 			// that may modify the internal task list or the operating status of
 			// this operation
@@ -325,6 +325,8 @@ public abstract class AbstractOperation<T extends AbstractTask> implements
 	 *            Operation to execute
 	 */
 	public final void forEachTask(Consumer<T> op) {
+        // No synchronization needed on read-only operation, since the task
+        // list has a copy-on-write semantics
 		tasks.forEach(op);
 	}
 

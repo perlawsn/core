@@ -437,61 +437,58 @@ public class BaseFpcFactory implements FpcFactory {
     private List<PeriodicMessageHandler> parsePeriodicOnHandlerDescriptor(
             PeriodicOperationDescriptor o, ParsingContext ctx, Errors err,
             Set<Attribute> emitAtts) {
-        boolean errorFound = false;
-        boolean syncFound = false;
+        boolean hasErr = false;
+        boolean hasSync = false;
 
         List<PeriodicMessageHandler> handlers = new ArrayList<>();
-        for (OnReceiveDescriptor onRecvDesc : o.getOnReceiveList()) {
-            Mapper map = ctx.mappers.get(onRecvDesc.getMessage());
+        for (OnReceiveDescriptor on : o.getOnReceiveList()) {
+            Mapper map = ctx.mappers.get(on.getMessage());
             if (map == null) {
                 err.addError(MISSING_MESSAGE_TYPE);
-                errorFound = true;
+                hasErr = true;
             }
-            if (ctx.onMsgHandlerList.contains(onRecvDesc.getMessage())) {
+            if (ctx.onMsgHandlerList.contains(on.getMessage())) {
                 err.addError(DUPLICATE_ON_HANDLER_SAMPLE,
-                        onRecvDesc.getMessage());
-                errorFound = true;
+                        on.getMessage());
+                hasErr = true;
             }
-            if (Check.nullOrEmpty(onRecvDesc.getVariable())) {
+            if (Check.nullOrEmpty(on.getVariable())) {
                 err.addError(MISSING_VARIABLE_NAME);
-                errorFound = true;
+                hasErr = true;
             }
-            ctx.onMsgHandlerList.add(onRecvDesc.getMessage());
+            ctx.onMsgHandlerList.add(on.getMessage());
 
             // Preload the variableTypeMap with the variable corresponding to
             // the message that triggers this 'on' clause being parsed
             Map<String, String> varTypes = new HashMap<>();
-            varTypes.put(onRecvDesc.getVariable(),
-                    onRecvDesc.getMessage());
-            String scriptName = "_" + o.getId() + "_on_"
-                    + onRecvDesc.getMessage();
+            varTypes.put(on.getVariable(), on.getMessage());
+            String scriptName = "_" + o.getId() + "_on_" + on.getMessage();
 
             // Compile the script
             CompiledScript cScript = null;
             try {
-                cScript = compileScript(onRecvDesc.getInstructionList(),
-                        scriptName, ctx);
+                cScript = compileScript(on.getInstructionList(), scriptName, ctx);
             } catch (InvalidDeviceDescriptorException e) {
                 err.addError(e.getMessage());
                 return null;
             }
 
             emitAtts.addAll(cScript.getEmitSet());
-            if (syncFound && onRecvDesc.isSync()) {
+            if (hasSync && on.isSync()) {
                 err.addError(MULTIPLE_ON_SYNC);
-                errorFound = true;
+                hasErr = true;
             }
-            syncFound |= onRecvDesc.isSync();
-            handlers.add(new PeriodicMessageHandler(onRecvDesc.isSync(),
-                    map, onRecvDesc.getVariable(), cScript.getScript()));
+            hasSync |= on.isSync();
+            handlers.add(new PeriodicMessageHandler(on.isSync(),
+                    map, on.getVariable(), cScript.getScript()));
         }
 
-        if (syncFound == false && handlers.size() > 1) {
+        if (hasSync == false && handlers.size() > 1) {
             err.addError(MISSING_ON_SYNC);
-            errorFound = true;
+            hasErr = true;
         }
 
-        if (errorFound) {
+        if (hasErr) {
             return null;
         }
 
@@ -579,7 +576,7 @@ public class BaseFpcFactory implements FpcFactory {
             ParsingContext ctx, Errors err) {
         CompiledScript script = null;
         try {
-            script = compileScript(o.getInstructionList(), o.getId(), ctx);
+            script = compileScript(o.getScript(), o.getId(), ctx);
         } catch (InvalidDeviceDescriptorException e) {
             err.addError(e.getMessage());
             return;

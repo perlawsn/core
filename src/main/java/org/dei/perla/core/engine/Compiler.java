@@ -94,9 +94,9 @@ public class Compiler {
 		} else if (d instanceof BreakpointInstructionDescriptor) {
 			return new BreakpointInstruction();
 
-		} else if (d instanceof CreateInstructionDescriptor) {
+		} else if (d instanceof CreateVarInstructionDescriptor) {
 			iErr = err.inContext("Create instruction");
-			return parseCreateInstruction((CreateInstructionDescriptor) d,
+			return parseCreateInstruction((CreateVarInstructionDescriptor) d,
 					ctx, iErr);
 
 		} else if (d instanceof EmitInstructionDescriptor) {
@@ -193,7 +193,7 @@ public class Compiler {
 	}
 
 	private static Instruction parseCreateInstruction(
-			CreateInstructionDescriptor d, CompilerContext ctx, Errors err) {
+			CreateVarInstructionDescriptor d, CompilerContext ctx, Errors err) {
 		boolean errorFound = false;
 
 		// Check variable field

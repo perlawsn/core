@@ -1,7 +1,7 @@
 AppendInstructionDescriptor
 ForeachInstructionDescriptor
 InstructionDescriptor
-CreateInstructionDescriptor
+CreateVarInstructionDescriptor
 EmitInstructionDescriptor
 ErrorInstructionDescriptor
 IfInstructionDescriptor

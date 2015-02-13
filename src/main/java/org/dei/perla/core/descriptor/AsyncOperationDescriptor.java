@@ -15,19 +15,19 @@ import org.dei.perla.core.descriptor.instructions.InstructionDescriptor;
 @XmlRootElement(name = "async")
 public class AsyncOperationDescriptor extends OperationDescriptor {
 
-	@XmlElementWrapper(name = "start", required = false)
+	@XmlElementWrapper(required = false)
 	@XmlElementRef(name = "instruction")
-	private List<InstructionDescriptor> startScript = new ArrayList<>();
+	private List<InstructionDescriptor> start = new ArrayList<>();
 
-	@XmlElementRef(name = "on")
-	private OnReceiveDescriptor onReceive;
+	@XmlElementRef
+	private OnReceiveDescriptor on;
 
 	public List<InstructionDescriptor> getStartScript() {
-		return startScript;
+		return start;
 	}
 
 	public OnReceiveDescriptor getOnReceive() {
-		return onReceive;
+		return on;
 	}
 
 }

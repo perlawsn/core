@@ -6,7 +6,7 @@ import org.dei.perla.core.descriptor.DataType;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Attribute implements Comparable<Attribute> {
+public final class Attribute implements Comparable<Attribute> {
 
     private static Map<String, Attribute> cache = new HashMap<>();
 

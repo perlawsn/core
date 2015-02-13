@@ -24,7 +24,7 @@ import org.dei.perla.core.descriptor.DataType;
 import org.dei.perla.core.descriptor.FieldDescriptor.FieldQualifier;
 import org.dei.perla.core.descriptor.instructions.AppendInstructionDescriptor;
 import org.dei.perla.core.descriptor.instructions.BreakpointInstructionDescriptor;
-import org.dei.perla.core.descriptor.instructions.CreateInstructionDescriptor;
+import org.dei.perla.core.descriptor.instructions.CreateVarInstructionDescriptor;
 import org.dei.perla.core.descriptor.instructions.EmitInstructionDescriptor;
 import org.dei.perla.core.descriptor.instructions.ErrorInstructionDescriptor;
 import org.dei.perla.core.descriptor.instructions.IfInstructionDescriptor;
@@ -101,7 +101,7 @@ public class CompilerTest {
 		Script script;
 		Instruction i;
 		List<InstructionDescriptor> iList = new ArrayList<>();
-		iList.add(new CreateInstructionDescriptor("var", "message2"));
+		iList.add(new CreateVarInstructionDescriptor("var", "message2"));
 		iList.add(new AppendInstructionDescriptor("var", "list", "5"));
 
 		script = Compiler.compile(iList, "append", attributeMap, mapperMap,
@@ -149,8 +149,8 @@ public class CompilerTest {
 		Script script;
 		Instruction i;
 		List<InstructionDescriptor> iList = new ArrayList<>();
-		iList.add(new CreateInstructionDescriptor("var1", "message1"));
-		iList.add(new CreateInstructionDescriptor("var2", "string"));
+		iList.add(new CreateVarInstructionDescriptor("var1", "message1"));
+		iList.add(new CreateVarInstructionDescriptor("var2", "string"));
 
 		script = Compiler.compile(iList, "create", attributeMap, mapperMap,
 				requestBuilderMap, channelMap).getScript();
@@ -174,9 +174,9 @@ public class CompilerTest {
 		Script script;
 		Instruction i;
 		List<InstructionDescriptor> iList = new ArrayList<>();
-		iList.add(new CreateInstructionDescriptor("var1", "message1"));
+		iList.add(new CreateVarInstructionDescriptor("var1", "message1"));
 		iList.add(new SetInstructionDescriptor("var1", "integer", "5"));
-		iList.add(new CreateInstructionDescriptor("var2", "integer"));
+		iList.add(new CreateVarInstructionDescriptor("var2", "integer"));
 		iList.add(new SetInstructionDescriptor("var2", "10"));
 
 		script = Compiler.compile(iList, "set", attributeMap, mapperMap,
@@ -208,7 +208,7 @@ public class CompilerTest {
 		Script script;
 		Instruction i;
 		List<InstructionDescriptor> iList = new ArrayList<>();
-		iList.add(new CreateInstructionDescriptor("var", "message1"));
+		iList.add(new CreateVarInstructionDescriptor("var", "message1"));
 		iList.add(new SetInstructionDescriptor("var", "integer", "5"));
 		iList.add(new PutInstructionDescriptor("${var.integer}", "integer"));
 
@@ -231,7 +231,7 @@ public class CompilerTest {
 		Script script;
 		Instruction i;
 		List<InstructionDescriptor> iList = new ArrayList<>();
-		iList.add(new CreateInstructionDescriptor("var", "message1"));
+		iList.add(new CreateVarInstructionDescriptor("var", "message1"));
 		iList.add(new SetInstructionDescriptor("var", "integer", "5"));
 		iList.add(new PutInstructionDescriptor("${var.integer}", "integer"));
 		iList.add(new EmitInstructionDescriptor());
@@ -254,7 +254,7 @@ public class CompilerTest {
 		Script script;
 		Instruction i;
 		List<InstructionDescriptor> iList = new ArrayList<>();
-		iList.add(new CreateInstructionDescriptor("var", "message1"));
+		iList.add(new CreateVarInstructionDescriptor("var", "message1"));
 		iList.add(new SetInstructionDescriptor("var", "integer", "5"));
 		iList.add(new SubmitInstructionDescriptor("request1", "loopback",
 				"result", "message2"));
@@ -287,7 +287,7 @@ public class CompilerTest {
 		elseList.add(new SetInstructionDescriptor("var", "integer", "1"));
 
 		List<InstructionDescriptor> iList = new ArrayList<>();
-		iList.add(new CreateInstructionDescriptor("var", "message1"));
+		iList.add(new CreateVarInstructionDescriptor("var", "message1"));
 		iList.add(new IfInstructionDescriptor("true", thenList, elseList));
 		iList.add(new PutInstructionDescriptor("${var.integer}", "integer"));
 		iList.add(new EmitInstructionDescriptor());
@@ -324,7 +324,7 @@ public class CompilerTest {
 	public void testEmitSet() throws Exception {
 		CompiledScript cScript;
 		List<InstructionDescriptor> iList = new ArrayList<>();
-		iList.add(new CreateInstructionDescriptor("var", "message1"));
+		iList.add(new CreateVarInstructionDescriptor("var", "message1"));
 		iList.add(new SetInstructionDescriptor("var", "integer", "5"));
 		iList.add(new SetInstructionDescriptor("var", "string", "test"));
 		iList.add(new PutInstructionDescriptor("${var.integer}", "integer"));
@@ -345,7 +345,7 @@ public class CompilerTest {
 	public void testSetSet() throws Exception {
 		CompiledScript cScript;
 		List<InstructionDescriptor> iList = new ArrayList<>();
-		iList.add(new CreateInstructionDescriptor("var", "message1"));
+		iList.add(new CreateVarInstructionDescriptor("var", "message1"));
 		iList.add(new SetInstructionDescriptor("var", "integer",
 				"${param['integer']}"));
 		iList.add(new SetInstructionDescriptor("var", "string",

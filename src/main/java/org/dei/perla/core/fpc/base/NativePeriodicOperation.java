@@ -24,12 +24,13 @@ public class NativePeriodicOperation extends PeriodicOperation {
 	private static final int STARTING = 1;
 	private static final int RUNNING = 2;
 
-	private final Script startScript;
-	private final Script stopScript;
+	private final Script start;
+	private final Script stop;
 
-	private final ChannelManager channelMgr;
-	private final List<PeriodicMessageHandler> asyncHandlerList;
-	private final Map<String, PeriodicMessageHandler> asyncHandlerMap = new HashMap<>();
+	private final ChannelManager chanMgr;
+	private final List<PeriodicMessageHandler> handlers;
+	private final Map<String, PeriodicMessageHandler> handlerMap =
+            new HashMap<>();
 
 	// Operation state
 	private volatile int state = 0;
@@ -37,27 +38,27 @@ public class NativePeriodicOperation extends PeriodicOperation {
 	// Current record, used to merge the results from different async messages
 	private volatile Record currentRecord = Record.EMPTY;
 
-	public NativePeriodicOperation(String id, Set<Attribute> attributeSet,
-			Script startScript, Script stopScript,
-			List<PeriodicMessageHandler> handlerList, ChannelManager channelMgr) {
-		super(id, attributeSet);
-		this.startScript = startScript;
-		this.stopScript = stopScript;
-		this.channelMgr = channelMgr;
+	public NativePeriodicOperation(String id, Set<Attribute> atts,
+			Script start, Script stop, List<PeriodicMessageHandler> handlers,
+            ChannelManager chanMgr) {
+		super(id, atts);
+		this.start = start;
+		this.stop = stop;
+		this.chanMgr = chanMgr;
 
-		asyncHandlerList = handlerList;
-		for (PeriodicMessageHandler handler : handlerList) {
-			asyncHandlerMap.put(handler.mapper.getMessageId(), handler);
-			handler.onHandler = new OnScriptHandler(handler.sync);
+		this.handlers = handlers;
+		for (PeriodicMessageHandler h : handlers) {
+			handlerMap.put(h.mapper.getMessageId(), h);
+			h.onHandler = new OnScriptHandler(h.sync);
 		}
 	}
 
 	public Script getStartScript() {
-		return startScript;
+		return start;
 	}
 
 	public Script getStopScript() {
-		return stopScript;
+		return stop;
 	}
 
 	/**
@@ -108,40 +109,40 @@ public class NativePeriodicOperation extends PeriodicOperation {
 
 	@Override
 	protected void doStop(org.dei.perla.core.utils.StopHandler<Operation> handler) {
-		Executor.execute(stopScript, new StopScriptHandler(handler));
+		Executor.execute(stop, new StopScriptHandler(handler));
 	}
 
 	// Convenience method for running the start script
 	private void runStartScript(long period) {
 		ScriptParameter[] paramArray = new ScriptParameter[1];
 		paramArray[0] = new ScriptParameter("period", period);
-		Executor.execute(startScript, paramArray, new StartScriptHandler(period));
+		Executor.execute(start, paramArray, new StartScriptHandler(period));
 	}
 
 	// Convenience method for running the stop script
 	private void runStopScript() {
-		Executor.execute(stopScript, new StopScriptHandler());
+		Executor.execute(stop, new StopScriptHandler());
 	}
 
 	private void addAsyncCallback() {
-		for (PeriodicMessageHandler asyncHandler : asyncHandlerList) {
-			channelMgr.addCallback(asyncHandler.mapper, this::handleMessage);
+		for (PeriodicMessageHandler h : handlers) {
+			chanMgr.addCallback(h.mapper, this::handleMessage);
 		}
 	}
 
 	private void removeAsyncCallback() {
-		for (PeriodicMessageHandler asyncHandler : asyncHandlerList) {
-			channelMgr.removeCallback(asyncHandler.mapper);
+		for (PeriodicMessageHandler h : handlers) {
+			chanMgr.removeCallback(h.mapper);
 		}
 	}
 
 	public void handleMessage(FpcMessage message) {
-		PeriodicMessageHandler handler = asyncHandlerMap.get(message.getId());
+		PeriodicMessageHandler h = handlerMap.get(message.getId());
 
 		ScriptParameter paramArray[] = new ScriptParameter[1];
-		paramArray[0] = new ScriptParameter(handler.variable, message);
+		paramArray[0] = new ScriptParameter(h.variable, message);
 
-		Executor.execute(handler.script, paramArray, handler.onHandler);
+		Executor.execute(h.script, paramArray, h.onHandler);
 	}
 
 	/**
@@ -268,7 +269,7 @@ public class NativePeriodicOperation extends PeriodicOperation {
 				return;
 			}
 
-			if (asyncHandlerList.size() == 1) {
+			if (handlers.size() == 1) {
 				// Distribute immediately to the Tasks if the operation only
 				// receives one message type. Doing so avoids the cost of
 				// merging with the currentRecord

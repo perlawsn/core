@@ -15,27 +15,27 @@ import org.dei.perla.core.descriptor.instructions.InstructionDescriptor;
 @XmlRootElement(name = "periodic")
 public class PeriodicOperationDescriptor extends OperationDescriptor {
 
-	@XmlElementWrapper(name = "start", required = true)
+	@XmlElementWrapper(required = true)
 	@XmlElementRef(name = "instruction")
-	private List<InstructionDescriptor> startScript = new ArrayList<>();
+	private List<InstructionDescriptor> start = new ArrayList<>();
 
-	@XmlElementWrapper(name = "stop", required = true)
+	@XmlElementWrapper(required = true)
 	@XmlElementRef(name = "instruction")
-	private List<InstructionDescriptor> stopScript = new ArrayList<>();
+	private List<InstructionDescriptor> stop = new ArrayList<>();
 
-	@XmlElementRef(name = "on")
-	private List<OnReceiveDescriptor> onReceiveList = new ArrayList<>();
+	@XmlElementRef
+	private List<OnReceiveDescriptor> on = new ArrayList<>();
 
 	public List<InstructionDescriptor> getStartScript() {
-		return startScript;
+		return start;
 	}
 
 	public List<InstructionDescriptor> getStopScript() {
-		return stopScript;
+		return stop;
 	}
 
 	public List<OnReceiveDescriptor> getOnReceiveList() {
-		return onReceiveList;
+		return on;
 	}
 
 }

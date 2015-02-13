@@ -14,11 +14,11 @@ import org.dei.perla.core.descriptor.instructions.InstructionDescriptor;
 @XmlRootElement(name = "get")
 public class GetOperationDescriptor extends OperationDescriptor {
 
-	@XmlElementRef(name = "instruction")
-	private List<InstructionDescriptor> instructionList = new ArrayList<>();
+    @XmlElementRef(name = "instruction")
+	private List<InstructionDescriptor> script = new ArrayList<>();
 
-	public List<InstructionDescriptor> getInstructionList() {
-		return instructionList;
+	public List<InstructionDescriptor> getScript() {
+		return script;
 	}
 
 }

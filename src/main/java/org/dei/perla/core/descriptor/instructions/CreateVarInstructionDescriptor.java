@@ -31,7 +31,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "var")
-public class CreateInstructionDescriptor extends InstructionDescriptor {
+public class CreateVarInstructionDescriptor extends InstructionDescriptor {
 
 	@XmlAttribute(required = true)
 	private String name;
@@ -39,10 +39,10 @@ public class CreateInstructionDescriptor extends InstructionDescriptor {
 	@XmlAttribute(required = true)
 	private String type;
 
-	public CreateInstructionDescriptor() {
+	public CreateVarInstructionDescriptor() {
 	}
 
-	public CreateInstructionDescriptor(String name, String type) {
+	public CreateVarInstructionDescriptor(String name, String type) {
 		this.name = name;
 		this.type = type;
 	}

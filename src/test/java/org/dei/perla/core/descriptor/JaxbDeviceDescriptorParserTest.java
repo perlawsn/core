@@ -176,8 +176,8 @@ public class JaxbDeviceDescriptorParserTest {
 			case "get":
 				assertTrue(operation instanceof GetOperationDescriptor);
 				GetOperationDescriptor get = (GetOperationDescriptor) operation;
-				assertThat(get.getInstructionList(), notNullValue());
-				assertThat(get.getInstructionList().size(), equalTo(2));
+				assertThat(get.getScript(), notNullValue());
+				assertThat(get.getScript().size(), equalTo(2));
 				break;
 
 			case "set":
