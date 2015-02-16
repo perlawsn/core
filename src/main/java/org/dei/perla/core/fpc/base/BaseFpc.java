@@ -157,14 +157,6 @@ public class BaseFpc implements Fpc {
         }
 
         /**
-         * dynamicOnly returns true if the request contains only dynamic
-         * attributes.
-         */
-        private boolean dynamicOnly() {
-            return !dynAtts.isEmpty() && statAtts.isEmpty();
-        }
-
-        /**
          * mixed returns true if the request contains both static and dynamic
          * attributes.
          */

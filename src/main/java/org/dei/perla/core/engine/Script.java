@@ -50,6 +50,16 @@ public class Script {
 	}
 
     /**
+     * Returns the number of {@link Attribute}s that the {@code Script}
+     * retrieves from the remote device.
+     *
+     * @return Number of {@Attribute}s emitted by the {@code Script}
+     */
+    public int getEmitCount() {
+        return emit.size();
+    }
+
+    /**
      * Returns the list of {@link Attribute}s that the {@code Script} gathers
      * from the remote device.
      *

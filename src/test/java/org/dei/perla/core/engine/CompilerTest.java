@@ -341,6 +341,29 @@ public class CompilerTest {
 		assertTrue(script.getSet().isEmpty());
 	}
 
+    @Test
+    public void testAttIdx() throws Exception {
+        Script script;
+        List<InstructionDescriptor> iList = new ArrayList<>();
+        iList.add(new CreateVarInstructionDescriptor("var", "message1"));
+        iList.add(new PutInstructionDescriptor("${var.integer}", "integer"));
+        iList.add(new PutInstructionDescriptor("${var.string}", "string"));
+        iList.add(new EmitInstructionDescriptor());
+
+        script = Compiler.compile(iList, "attidx", attributeMap, mapperMap,
+                requestBuilderMap, channelMap);
+        assertThat(script, notNullValue());
+        assertFalse(script.getEmit().isEmpty());
+        assertFalse(script.getIndexes().isEmpty());
+        assertThat(script.getIndexes().size(), equalTo(2));
+
+        Integer idx1 = script.getIndexes().get(Attribute.create(integer));
+        assertThat(idx1, equalTo(0));
+
+        Integer idx2 = script.getIndexes().get(Attribute.create(string));
+        assertThat(idx2, equalTo(1));
+    }
+
 	@Test
 	public void testSetSet() throws Exception {
 		Script script;
