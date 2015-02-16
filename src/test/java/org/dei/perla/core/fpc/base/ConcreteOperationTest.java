@@ -135,9 +135,12 @@ public class ConcreteOperationTest {
 				.buildScript("stop_script");
 
 		Script perOnScript = ScriptBuilder.newScript()
-				.add(new PutInstruction("${result.integer}", attributeMap.get("integer")))
-				.add(new PutInstruction("${result.float}", attributeMap.get("float")))
-				.add(new PutInstruction("${result.string}", attributeMap.get("string")))
+				.add(new PutInstruction("${result.integer}",
+                        attributeMap.get("integer"), 0))
+				.add(new PutInstruction("${result.float}",
+                        attributeMap.get("float"), 1))
+				.add(new PutInstruction("${result.string}",
+                        attributeMap.get("string"), 2))
 				.add(new EmitInstruction()).buildScript("on_script");
 		List<PeriodicMessageHandler> perHandlerList = new ArrayList<>();
 		perHandlerList.add(new PeriodicMessageHandler(true, mmMap
@@ -163,7 +166,8 @@ public class ConcreteOperationTest {
 				.buildScript("start_script");
 
 		Script asyncOnScript = ScriptBuilder.newScript()
-				.add(new PutInstruction("${result.event}", attributeMap.get("event")))
+				.add(new PutInstruction("${result.event}",
+                        attributeMap.get("event"), 0))
 				.add(new EmitInstruction()).buildScript("on_script");
 		AsyncMessageHandler handler = new AsyncMessageHandler(
 				mmMap.get("event-msg"), asyncOnScript, "result");
@@ -187,10 +191,14 @@ public class ConcreteOperationTest {
 				.add(new SubmitInstruction(builMap.get("request1"), chMap
 						.get("loopback-channel"), getParameterArray, "res",
 						mmMap.get("message1")))
-				.add(new PutInstruction("${res.integer}", attributeMap.get("integer")))
-				.add(new PutInstruction("${res.float}", attributeMap.get("float")))
-				.add(new PutInstruction("${res.boolean}", attributeMap.get("boolean")))
-				.add(new PutInstruction("${res.string}", attributeMap.get("string")))
+				.add(new PutInstruction("${res.integer}",
+                        attributeMap.get("integer"), 0))
+				.add(new PutInstruction("${res.float}",
+                        attributeMap.get("float"), 1))
+				.add(new PutInstruction("${res.boolean}",
+                        attributeMap.get("boolean"), 2))
+				.add(new PutInstruction("${res.string}",
+                        attributeMap.get("string"), 3))
 				.add(new EmitInstruction()).add(new StopInstruction())
 				.buildScript("test");
 		getOp = new OneoffOperation("test", Collections.emptySet(), getScript);

@@ -220,7 +220,7 @@ public class ScriptInstructionsTest {
 	@Test
 	public void testForeachInstruction0() throws Exception {
 		Instruction body = ScriptBuilder.newScript()
-				.add(new PutInstruction("${element}", integer))
+				.add(new PutInstruction("${element}", integer, 0))
 				.add(new EmitInstruction())
 				.getCode();
 		Script script = ScriptBuilder.newScript()
@@ -245,7 +245,7 @@ public class ScriptInstructionsTest {
 	@Test
 	public void testForeachInstruction1() throws Exception {
 		Instruction body = ScriptBuilder.newScript()
-				.add(new PutInstruction("${element * index}", integer))
+				.add(new PutInstruction("${element * index}", integer, 0))
 				.add(new EmitInstruction())
 				.getCode();
 		Script script = ScriptBuilder.newScript()
@@ -453,9 +453,9 @@ public class ScriptInstructionsTest {
 						"test"))
 				.add(new SetComplexInstruction("var", "bool", Boolean.class,
 						"false"))
-				.add(new PutInstruction("${var.integer}", integer))
-				.add(new PutInstruction("${var.string}", string))
-				.add(new PutInstruction("${!var.bool}", bool))
+				.add(new PutInstruction("${var.integer}", integer, 0))
+				.add(new PutInstruction("${var.string}", string, 1))
+				.add(new PutInstruction("${!var.bool}", bool, 2))
 				.add(new EmitInstruction()).add(new StopInstruction())
 				.buildScript("testPutEmitInstructions");
 
@@ -503,9 +503,9 @@ public class ScriptInstructionsTest {
 						"false"))
 				.add(new SetComplexInstruction("var2", "var1",
 						FpcMessage.class, "${var1}"))
-				.add(new PutInstruction("${var2.var1.integer}", integer))
-				.add(new PutInstruction("${var2.var1.string}", string))
-				.add(new PutInstruction("${!var2.var1.bool}", bool))
+				.add(new PutInstruction("${var2.var1.integer}", integer, 0))
+				.add(new PutInstruction("${var2.var1.string}", string, 1))
+				.add(new PutInstruction("${!var2.var1.bool}", bool, 2))
 				.add(new EmitInstruction()).add(new StopInstruction())
 				.buildScript("testPutEmitInstructions");
 
@@ -548,22 +548,22 @@ public class ScriptInstructionsTest {
 						"4"))
 				.add(new SetComplexInstruction("var", "string", String.class,
 						"test"))
-				.add(new PutInstruction("${var.integer}", integer))
-				.add(new PutInstruction("${var.string}", string))
+				.add(new PutInstruction("${var.integer}", integer, 0))
+				.add(new PutInstruction("${var.string}", string, 1))
 				.add(new EmitInstruction())
 				.add(new SetComplexInstruction("var", "integer", Integer.class,
 						"5"))
 				.add(new SetComplexInstruction("var", "string", String.class,
 						"test"))
-				.add(new PutInstruction("${var.integer}", integer))
-				.add(new PutInstruction("${var.string}", string))
+				.add(new PutInstruction("${var.integer}", integer, 2))
+				.add(new PutInstruction("${var.string}", string, 3))
 				.add(new EmitInstruction())
 				.add(new SetComplexInstruction("var", "integer", Integer.class,
 						"6"))
 				.add(new SetComplexInstruction("var", "string", String.class,
 						"test"))
-				.add(new PutInstruction("${var.integer}", integer))
-				.add(new PutInstruction("${var.string}", string))
+				.add(new PutInstruction("${var.integer}", integer, 4))
+				.add(new PutInstruction("${var.string}", string, 5))
 				.add(new EmitInstruction()).add(new StopInstruction())
 				.buildScript("testMultiplePutEmitInstructions");
 
@@ -662,8 +662,8 @@ public class ScriptInstructionsTest {
 						Integer.class, "5"))
 				.add(new SetComplexInstruction("param", "string", String.class,
 						"test")).add(submit)
-				.add(new PutInstruction("${output.integer}", integer))
-				.add(new PutInstruction("${output.string}", string))
+				.add(new PutInstruction("${output.integer}", integer, 0))
+				.add(new PutInstruction("${output.string}", string, 1))
 				.add(new EmitInstruction()).add(new StopInstruction())
 				.buildScript("testSubmitInstruction");
 

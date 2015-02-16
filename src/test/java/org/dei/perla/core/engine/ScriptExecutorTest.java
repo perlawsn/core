@@ -37,8 +37,8 @@ public class ScriptExecutorTest {
 				.add(new CreateComplexVarInstruction("var", mapper1))
 				.add(new SetComplexInstruction("var", "integer", Integer.class, "4"))
 				.add(new SetComplexInstruction("var", "string", String.class, "test"))
-				.add(new PutInstruction("${var.integer}", integer))
-				.add(new PutInstruction("${var.string}", string))
+				.add(new PutInstruction("${var.integer}", integer, 0))
+				.add(new PutInstruction("${var.string}", string, 1))
 				.add(new EmitInstruction()).add(new StopInstruction())
 				.buildScript("testPutEmitInstructions");
 	}
@@ -86,8 +86,8 @@ public class ScriptExecutorTest {
 				.add(new CreateComplexVarInstruction("var", mapper1))
 				.add(new SetComplexInstruction("var", "integer", Integer.class, "4"))
 				.add(new SetComplexInstruction("var", "string", String.class, "test"))
-				.add(new PutInstruction("${var.integer}", integer))
-				.add(new PutInstruction("${var.string}", string))
+				.add(new PutInstruction("${var.integer}", integer, 0))
+				.add(new PutInstruction("${var.string}", string, 1))
 				.add(new EmitInstruction()).add(pauseInstruction)
 				.add(new StopInstruction())
 				.buildScript("testScriptCancellation");
@@ -119,8 +119,8 @@ public class ScriptExecutorTest {
 						"${param['intParam']}"))
 				.add(new SetComplexInstruction("var", "string", String.class,
 						"${param['stringParam']}"))
-				.add(new PutInstruction("${var.integer}", integer))
-				.add(new PutInstruction("${var.string}", string))
+				.add(new PutInstruction("${var.integer}", integer, 0))
+				.add(new PutInstruction("${var.string}", string, 1))
 				.add(new EmitInstruction()).add(new StopInstruction())
 				.buildScript("testParameterPassing");
 		ScriptParameter[] paramArray = new ScriptParameter[2];
@@ -146,8 +146,8 @@ public class ScriptExecutorTest {
 				.add(new CreateComplexVarInstruction("var", mapper1))
 				.add(new SetComplexInstruction("var", "integer", Integer.class, "4"))
 				.add(new SetComplexInstruction("var", "string", String.class, "test"))
-				.add(new PutInstruction("${var.integer}", integer))
-				.add(new PutInstruction("${var.string}", string))
+				.add(new PutInstruction("${var.integer}", integer, 0))
+				.add(new PutInstruction("${var.string}", string, 1))
 				.add(new EmitInstruction()).add(suspendInstruction)
 				.add(new StopInstruction()).buildScript("testSuspension");
 

@@ -342,6 +342,8 @@ public class Compiler {
 	private static Instruction parsePutInstruction(
 			PutInstructionDescriptor d, CompilerContext ctx, Errors err) {
 		boolean errorFound = false;
+        int idx;
+        Attribute a;
 
 		// Check value
 		if (Check.nullOrEmpty(d.getExpression())) {
@@ -367,10 +369,11 @@ public class Compiler {
 			return new NoopInstruction();
 		}
 
-        Attribute a = Attribute.create(att);
+        a = Attribute.create(att);
+        idx = ctx.idx++;
         ctx.emit.add(a);
-        ctx.attIdx.put(a, ctx.idx++);
-		return new PutInstruction(d.getExpression(), att);
+        ctx.attIdx.put(a, idx);
+		return new PutInstruction(d.getExpression(), att, idx);
 	}
 
 	private static Instruction parseSetInstruction(

@@ -207,10 +207,12 @@ public class CompilerTest {
 	public void testPutInstructionParse() throws Exception {
 		Script script;
 		Instruction i;
+        PutInstruction put;
 		List<InstructionDescriptor> iList = new ArrayList<>();
 		iList.add(new CreateVarInstructionDescriptor("var", "message1"));
 		iList.add(new SetInstructionDescriptor("var", "integer", "5"));
 		iList.add(new PutInstructionDescriptor("${var.integer}", "integer"));
+        iList.add(new PutInstructionDescriptor("${var.string}", "string"));
 
 		script = Compiler.compile(iList, "put", attributeMap, mapperMap,
 				requestBuilderMap, channelMap);
@@ -219,11 +221,20 @@ public class CompilerTest {
 		assertTrue(i instanceof CreateComplexVarInstruction);
 		i = i.next();
 		assertTrue(i instanceof SetComplexInstruction);
+
 		i = i.next();
 		assertTrue(i instanceof PutInstruction);
-		PutInstruction put = (PutInstruction) i;
+		put = (PutInstruction) i;
 		assertThat(put.getExpression(), equalTo("${var.integer}"));
 		assertThat(put.getAttribute(), equalTo(integer));
+        assertThat(put.getIndex(), equalTo(0));
+
+        i = i.next();
+        assertTrue(i instanceof PutInstruction);
+        put = (PutInstruction) i;
+        assertThat(put.getExpression(), equalTo("${var.string}"));
+        assertThat(put.getAttribute(), equalTo(string));
+        assertThat(put.getIndex(), equalTo(1));
 	}
 
 	@Test
