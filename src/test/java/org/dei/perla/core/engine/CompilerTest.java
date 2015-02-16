@@ -365,13 +365,12 @@ public class CompilerTest {
                 requestBuilderMap, channelMap);
         assertThat(script, notNullValue());
         assertFalse(script.getEmit().isEmpty());
-        assertFalse(script.getIndexes().isEmpty());
-        assertThat(script.getIndexes().size(), equalTo(2));
+        assertThat(script.getEmit().size(), equalTo(2));
 
-        Integer idx1 = script.getIndexes().get(Attribute.create(integer));
+        Integer idx1 = script.getEmit().indexOf(Attribute.create(integer));
         assertThat(idx1, equalTo(0));
 
-        Integer idx2 = script.getIndexes().get(Attribute.create(string));
+        Integer idx2 = script.getEmit().indexOf(Attribute.create(string));
         assertThat(idx2, equalTo(1));
     }
 

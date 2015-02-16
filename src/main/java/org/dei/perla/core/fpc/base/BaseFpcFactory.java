@@ -587,7 +587,7 @@ public class BaseFpcFactory implements FpcFactory {
         ctx.getOpList.add(new OneoffOperation(o.getId(), script.getEmit(),
                 script));
         ctx.periodicOpList.add(new SimulatedPeriodicOperation("_" + o.getId()
-                + "_sim", script.getEmit(), script));
+                + "_sim", script));
     }
 
     private void parseSetOperation(SetOperationDescriptor o,

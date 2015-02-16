@@ -202,8 +202,7 @@ public class ConcreteOperationTest {
 				.add(new EmitInstruction()).add(new StopInstruction())
 				.buildScript("test");
 		getOp = new OneoffOperation("test", Collections.emptySet(), getScript);
-		simPeriodicOp = new SimulatedPeriodicOperation("test_sim",
-				Collections.emptySet(), getScript);
+		simPeriodicOp = new SimulatedPeriodicOperation("test_sim", getScript);
 
 		// Set operation
 		RequestParameter setParameterArray[] = new RequestParameter[] { new RequestParameter(

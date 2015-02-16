@@ -3,8 +3,7 @@ package org.dei.perla.core.engine;
 import org.dei.perla.core.fpc.Attribute;
 
 import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
+import java.util.List;
 
 /**
  * A <code>Script</code> that can be executed by the Fpc execution engine. Each
@@ -18,17 +17,18 @@ public class Script {
 
 	private final String name;
 	private final Instruction first;
-    private final Set<Attribute> emit;
-    private final Set<Attribute> set;
-    private final Map<Attribute, Integer> attIdx;
 
-	public Script(String name, Instruction first, Set<Attribute> emit,
-            Set<Attribute> set, Map<Attribute, Integer> attIdx) {
+    // The attribute order in the emit list is important, as it will
+    // correspond to the attribute order in every record created by this script
+    private final List<Attribute> set;
+    private final List<Attribute> emit;
+
+	public Script(String name, Instruction first, List<Attribute> emit,
+            List<Attribute> set) {
 		this.name = name;
 		this.first = first;
-        this.emit = Collections.unmodifiableSet(emit);
-        this.set = Collections.unmodifiableSet(set);
-        this.attIdx = Collections.unmodifiableMap(attIdx);
+        this.emit = Collections.unmodifiableList(emit);
+        this.set = Collections.unmodifiableList(set);
 	}
 
 	/**
@@ -50,22 +50,16 @@ public class Script {
 	}
 
     /**
-     * Returns the number of {@link Attribute}s that the {@code Script}
-     * retrieves from the remote device.
-     *
-     * @return Number of {@Attribute}s emitted by the {@code Script}
-     */
-    public int getEmitCount() {
-        return emit.size();
-    }
-
-    /**
      * Returns the list of {@link Attribute}s that the {@code Script} gathers
      * from the remote device.
      *
+     * It is important to note that the order of the {@link Atttibute}s in
+     * this list is guaranteed to be the same as the {@link Attribute} order in
+     * the records produced by the {@code Script}.
+     *
      * @return {@link Attribute}s emitted by the {@code Script}
      */
-    public Set<Attribute> getEmit() {
+    public List<Attribute> getEmit() {
         return emit;
     }
 
@@ -75,19 +69,8 @@ public class Script {
      *
      * @return {@link Attribute}s set by the {@code Script}
      */
-    public Set<Attribute> getSet() {
+    public List<Attribute> getSet() {
         return set;
-    }
-
-    /**
-     * Returns a {@link Map} containing the position that every emitted
-     * {@link Attribute} will occupy in the output records created by the
-     * {@code Script}.
-     *
-     * @return {@link Attribute} position in the output record
-     */
-    public Map<Attribute, Integer> getIndexes() {
-        return attIdx;
     }
 
 }

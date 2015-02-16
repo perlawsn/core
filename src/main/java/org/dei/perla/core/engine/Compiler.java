@@ -67,7 +67,7 @@ public class Compiler {
 			throw new InvalidDeviceDescriptorException(err.asString());
 		}
 
-        return new Script(name, b.first, ctx.emit, ctx.set, ctx.attIdx);
+        return new Script(name, b.first, ctx.emit, ctx.set);
 	}
 
 	private static ScriptBuilder parseScript(
@@ -372,7 +372,6 @@ public class Compiler {
         a = Attribute.create(att);
         idx = ctx.idx++;
         ctx.emit.add(a);
-        ctx.attIdx.put(a, idx);
 		return new PutInstruction(d.getExpression(), att, idx);
 	}
 
@@ -638,17 +637,12 @@ public class Compiler {
 		private final Map<String, IORequestBuilder> requests;
 		private final Map<String, Channel> channels;
 
-        // Attribute-index association. Every attribute is associated at
-        // compile-time with a unique index, which is later used at script
-        // runtime to ensure that attributes are always added to the
-        // output record in the same location.
-        private final Map<Attribute, Integer> attIdx = new HashMap<>();
         private int idx = 0;
 
         // Set of attributes emitted by the Script
-		private final Set<Attribute> emit = new HashSet<>();
+		private final List<Attribute> emit = new ArrayList<>();
         // Set of attributes set by the Script
-		private final Set<Attribute> set = new HashSet<>();
+		private final List<Attribute> set = new ArrayList<>();
 		private int instCount = 0;
 
 		private final Map<String, String> variableTypeMap = new HashMap<>();

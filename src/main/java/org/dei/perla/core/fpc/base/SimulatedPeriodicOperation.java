@@ -1,18 +1,16 @@
 package org.dei.perla.core.fpc.base;
 
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
-import org.dei.perla.core.fpc.Attribute;
-import org.dei.perla.core.fpc.FpcException;
 import org.dei.perla.core.engine.Executor;
 import org.dei.perla.core.engine.Record;
 import org.dei.perla.core.engine.Script;
 import org.dei.perla.core.engine.ScriptHandler;
+import org.dei.perla.core.fpc.FpcException;
 import org.dei.perla.core.utils.StopHandler;
+
+import java.util.List;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class SimulatedPeriodicOperation extends PeriodicOperation {
 
@@ -28,9 +26,8 @@ public class SimulatedPeriodicOperation extends PeriodicOperation {
 	private ScheduledFuture<?> timerFuture = null;
 	private final ScriptHandler timerScriptHandler;
 
-	public SimulatedPeriodicOperation(String id, Set<Attribute> attributeSet,
-			Script script) {
-		super(id, attributeSet);
+	public SimulatedPeriodicOperation(String id, Script script) {
+		super(id, script.getEmit());
 		this.script = script;
 
 		timerFuture = null;

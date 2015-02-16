@@ -1,19 +1,20 @@
 package org.dei.perla.core.fpc.base;
 
-import java.util.Map;
-import java.util.Set;
-
+import org.dei.perla.core.engine.Script;
 import org.dei.perla.core.fpc.Attribute;
 import org.dei.perla.core.fpc.TaskHandler;
-import org.dei.perla.core.engine.Script;
 import org.dei.perla.core.utils.StopHandler;
+
+import java.util.Collection;
+import java.util.Map;
 
 public class OneoffOperation extends AbstractOperation<AbstractTask> {
 
 	private final Script script;
 
-	public OneoffOperation(String id, Set<Attribute> attributeSet, Script script) {
-		super(id, attributeSet);
+	public OneoffOperation(String id, Collection<Attribute> atts,
+            Script script) {
+		super(id, atts);
 		this.script = script;
 	}
 

@@ -28,10 +28,9 @@ public class BaseFpc implements Fpc {
 	static {
         Instruction start = new EmitInstruction();
         start.setNext(new StopInstruction());
-        Script empty = new Script("_empty", start, Collections.emptySet(),
-                Collections.emptySet(), Collections.emptyMap());
-		emptyRecordOperation = new SimulatedPeriodicOperation("_empty",
-				Collections.emptySet(), empty);
+        Script empty = new Script("_empty", start, Collections.emptyList(),
+                Collections.emptyList());
+		emptyRecordOperation = new SimulatedPeriodicOperation("_empty", empty);
 	}
 
 	protected BaseFpc(int id, String type, Set<Attribute> atts,

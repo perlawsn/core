@@ -38,8 +38,8 @@ public class ScriptBuilder {
 		if (!(last instanceof StopInstruction)) {
 			this.add(new StopInstruction());
 		}
-		return new Script(name, first, Collections.emptySet(),
-                Collections.emptySet(), Collections.emptyMap());
+		return new Script(name, first, Collections.emptyList(),
+                Collections.emptyList());
 	}
 
     public Instruction getCode() {
