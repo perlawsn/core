@@ -1,7 +1,6 @@
 package org.dei.perla.core.engine;
 
 import org.dei.perla.core.descriptor.DataType;
-import org.dei.perla.core.fpc.Attribute;
 import org.junit.Test;
 
 import java.time.ZonedDateTime;

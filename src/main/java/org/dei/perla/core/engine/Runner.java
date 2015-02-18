@@ -186,7 +186,6 @@ public class Runner {
 		}
 
 		try {
-
 			do {
 				if (instruction == null) {
 					state.set(CANCELLED);
@@ -200,16 +199,15 @@ public class Runner {
 					debugger.breakpoint(this, script, instruction);
 				}
 				instruction = instruction.run(this);
-
 			} while (state.get() == RUNNING);
-
-
-		} catch (Exception e) {
+		} catch (Throwable t) {
+            // Catching Throwable, since we don't want any error in the
+            // user's scripts to bring down the entire system
 			state.set(CANCELLED);
 			relinquishContext(ctx);
 			handler.error(new ScriptException("Unexpected error in script '"
 					+ script.getName() + "', instruction '"
-					+ instruction.getClass().getSimpleName() + "'", e));
+					+ instruction.getClass().getSimpleName() + "'", t));
 		}
 	}
 

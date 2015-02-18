@@ -17,7 +17,6 @@ import org.dei.perla.core.channel.loopback.LoopbackChannel;
 import org.dei.perla.core.channel.loopback.LoopbackIORequestBuilder;
 import org.dei.perla.core.channel.loopback.TestFieldDescriptor;
 import org.dei.perla.core.channel.loopback.TestMapper;
-import org.dei.perla.core.fpc.Attribute;
 import org.dei.perla.core.descriptor.AttributeDescriptor;
 import org.dei.perla.core.descriptor.AttributeDescriptor.AttributePermission;
 import org.dei.perla.core.descriptor.DataType;

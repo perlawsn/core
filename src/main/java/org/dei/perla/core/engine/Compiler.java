@@ -3,7 +3,6 @@ package org.dei.perla.core.engine;
 import org.dei.perla.core.channel.Channel;
 import org.dei.perla.core.channel.IORequestBuilder;
 import org.dei.perla.core.channel.IORequestBuilder.IORequestParameter;
-import org.dei.perla.core.fpc.Attribute;
 import org.dei.perla.core.descriptor.AttributeDescriptor;
 import org.dei.perla.core.descriptor.AttributeDescriptor.AttributeAccessType;
 import org.dei.perla.core.descriptor.AttributeDescriptor.AttributePermission;

@@ -5,7 +5,6 @@ import org.dei.perla.core.descriptor.AttributeDescriptor;
 import org.dei.perla.core.descriptor.AttributeDescriptor.AttributePermission;
 import org.dei.perla.core.descriptor.DataType;
 import org.dei.perla.core.engine.ExecutionContext.InstructionLocal;
-import org.dei.perla.core.fpc.Attribute;
 import org.dei.perla.core.message.Mapper;
 import org.junit.BeforeClass;
 import org.junit.Test;

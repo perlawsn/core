@@ -1,14 +1,13 @@
 package org.dei.perla.core.fpc.base;
 
 import org.apache.log4j.Logger;
-import org.dei.perla.core.fpc.Attribute;
+import org.dei.perla.core.engine.Attribute;
 import org.dei.perla.core.fpc.FpcException;
 import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.TaskHandler;
 import org.dei.perla.core.utils.Conditions;
 import org.dei.perla.core.utils.StopHandler;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;

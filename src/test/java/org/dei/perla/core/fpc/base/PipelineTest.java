@@ -2,7 +2,7 @@ package org.dei.perla.core.fpc.base;
 
 import org.dei.perla.core.descriptor.DataType;
 import org.dei.perla.core.engine.Record;
-import org.dei.perla.core.fpc.Attribute;
+import org.dei.perla.core.engine.Attribute;
 import org.dei.perla.core.fpc.base.RecordPipeline.PipelineBuilder;
 import org.junit.Test;
 

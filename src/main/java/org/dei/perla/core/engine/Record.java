@@ -1,7 +1,5 @@
 package org.dei.perla.core.engine;
 
-import org.dei.perla.core.fpc.Attribute;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -65,6 +63,12 @@ public class Record {
         return getIndex(name) != -1;
     }
 
+    /**
+     * Returns the list of {@link Attribute} objects associated with the
+     * {@code Record}. The implementation of the PerLa Middleware ensures
+     * the consistency between the order of the {@link Attributes} returned
+     * in this list and their respective values in the field array.
+     */
     public List<Attribute> getAttributes() {
         return atts;
     }

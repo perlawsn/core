@@ -8,7 +8,7 @@ import org.dei.perla.core.channel.ChannelFactory;
 import org.dei.perla.core.channel.IORequestBuilder;
 import org.dei.perla.core.channel.IORequestBuilderFactory;
 import org.dei.perla.core.engine.Script;
-import org.dei.perla.core.fpc.Attribute;
+import org.dei.perla.core.engine.Attribute;
 import org.dei.perla.core.fpc.Fpc;
 import org.dei.perla.core.fpc.FpcFactory;
 import org.dei.perla.core.fpc.base.AsyncOperation.AsyncMessageHandler;

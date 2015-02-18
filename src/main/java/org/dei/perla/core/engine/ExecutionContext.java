@@ -1,21 +1,12 @@
 package org.dei.perla.core.engine;
 
+import org.dei.perla.core.message.FpcMessage;
+import org.dei.perla.core.utils.Check;
+
+import javax.el.*;
 import java.beans.FeatureDescriptor;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.el.CompositeELResolver;
-import javax.el.ELContext;
-import javax.el.ELResolver;
-import javax.el.FunctionMapper;
-import javax.el.ListELResolver;
-import javax.el.MapELResolver;
-import javax.el.ValueExpression;
-import javax.el.VariableMapper;
-
-import org.dei.perla.core.fpc.Attribute;
-import org.dei.perla.core.message.FpcMessage;
-import org.dei.perla.core.utils.Check;
 
 /**
  * <p>

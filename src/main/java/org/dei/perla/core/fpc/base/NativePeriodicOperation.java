@@ -3,11 +3,10 @@ package org.dei.perla.core.fpc.base;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.dei.perla.core.fpc.Attribute;
+import org.dei.perla.core.engine.Attribute;
 import org.dei.perla.core.fpc.FpcException;
 import org.dei.perla.core.engine.Executor;
 import org.dei.perla.core.engine.Record;
