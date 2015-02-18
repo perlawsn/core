@@ -1,17 +1,10 @@
 package org.dei.perla.core.fpc.base;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.dei.perla.core.fpc.Attribute;
 import org.dei.perla.core.engine.Record;
+import org.dei.perla.core.fpc.Attribute;
 import org.dei.perla.core.utils.Check;
+
+import java.util.*;
 
 /**
  * An immutable pipeline of {@link RecordModifier}s for adding new fields to an
@@ -24,13 +17,17 @@ import org.dei.perla.core.utils.Check;
  * @author Guido Rota (2014)
  *
  */
-public abstract class RecordPipeline {
+public class RecordPipeline {
 
 	/**
 	 * An empty {@code RecordPipeline}. Does not alter the {@link Record}
 	 * content.
 	 */
-	public static final RecordPipeline EMPTY = new EmptyPipeline();
+	public static final RecordPipeline EMPTY =
+            new RecordPipeline(Collections.emptyList());
+
+    public final List<RecordModifier> mods;
+    public final List<Attribute> atts;
 
 	/**
 	 * Returns a new {@code PipelineBuilder} instance for creating new
@@ -42,13 +39,28 @@ public abstract class RecordPipeline {
 		return new PipelineBuilder();
 	}
 
+    /**
+     * Private {@code RecordPipeline} constructor, new isntances must be
+     * buiilt using the {@link PipelineBuilder} class.
+     *
+     * @param mods {@link RecordModifier} used by the pipeline
+     */
+    private RecordPipeline(List<RecordModifier> mods) {
+        List<Attribute> atts = new ArrayList<>();
+        mods.forEach(m -> atts.addAll(m.getAttributes()));
+        this.atts = Collections.unmodifiableList(atts);
+        this.mods = Collections.unmodifiableList(mods);
+    }
+
 	/**
 	 * Returns a collection of all {@link Attribute}s that this
 	 * {@code RecordPipeline} adds to the processed {@link Record}
 	 *
 	 * @return {@link Attribute}s added to the processed {@link Record}
 	 */
-	public abstract Collection<Attribute> attributes();
+	public Collection<Attribute> attributes() {
+        return atts;
+    }
 
 	/**
 	 * Runs a {@link Record} through the {@code RecordPipeline}.
@@ -57,8 +69,25 @@ public abstract class RecordPipeline {
 	 *            {@link Record} to be processed
 	 * @return New {@link Record} produced by the pipeline
 	 */
-	public abstract Record run(Record source);
+	public Record run(Record source) {
+        if (mods.isEmpty()) {
+            return source;
+        }
 
+        Object[] s = source.getFields();
+        Object[] r = Arrays.copyOf(s, s.length + mods.size());
+        int i = s.length;
+        for (RecordModifier m : mods) {
+            m.process(r, i);
+            i += m.getAttributes().size();
+        }
+
+        List<Attribute> sa = source.getAttributes();
+        List<Attribute> al = new ArrayList<>(atts.size() + sa.size());
+        al.addAll(sa);
+        al.addAll(atts);
+        return new Record(al, r);
+    }
 	/**
 	 * A builder class for creating new {@code RecordPipeline} objects.
 	 *
@@ -67,10 +96,15 @@ public abstract class RecordPipeline {
 	 */
 	public static class PipelineBuilder {
 
-		private List<RecordModifier> mods = null;
+        private Set<Attribute> atts = new HashSet<>();
+		private List<RecordModifier> mods = new ArrayList<>();
 
-		private PipelineBuilder() {
-		}
+        /**
+         * Private constructur, {@code PipelineBuilder} instances are
+         * supposed to be built using the static newBuilder method available
+         * in the {@link RecordPipeline} class.
+         */
+		private PipelineBuilder() {}
 
 		/**
 		 * Appends a new {@link RecordModifier} to the end of the
@@ -80,47 +114,12 @@ public abstract class RecordPipeline {
 		 *            {@link RecordModifier} to be added
 		 */
 		public void add(RecordModifier mod) {
-			if (mods == null) {
-				mods = new ArrayList<>();
-			}
-
+            if (!Collections.disjoint(atts, mod.getAttributes())) {
+                throw new RuntimeException("Record modifier is attempting to " +
+                        "overwrite an existing field");
+            }
+            atts.addAll(mod.getAttributes());
 			mods.add(mod);
-		}
-
-		/**
-		 * Appends all the {@link RecordModifier}s contained in the pipeline
-		 * passed as parameter to the end of the {@code RecordPipeline} being
-		 * built.
-		 *
-		 * @param pipeline
-		 *            Pipeline containing the {@link RecordModifier}s to add
-		 */
-		public void add(RecordPipeline p) {
-			if (p instanceof EmptyPipeline) {
-				return;
-			}
-
-			if (mods == null) {
-				mods = new ArrayList<>();
-			}
-
-			ModifierPipeline mp = (ModifierPipeline) p;
-			mods.addAll(mp.mods);
-		}
-
-		/**
-		 * Appends all the {@link RecordModifier}s passed as parameter to the
-		 * end of the {@code RecordPipeline} being built.
-		 *
-		 * @param modifiers
-		 *            Collection of {@link RecordModifier}s to be added
-		 */
-		public void addAll(Collection<RecordModifier> newMods) {
-			if (mods == null) {
-				mods = new ArrayList<>();
-			}
-
-			mods.addAll(newMods);
 		}
 
 		/**
@@ -134,65 +133,9 @@ public abstract class RecordPipeline {
 				return RecordPipeline.EMPTY;
 			}
 
-			Set<Attribute> atts = new HashSet<>();
-            mods.forEach(m -> atts.addAll(m.attributes()));
-			return new ModifierPipeline(mods, atts);
+			return new RecordPipeline(mods);
 		}
 
-	}
-
-	/**
-	 * An empty {@code RecordPipeline}. This pipeline does not apply any
-	 * modifications to the {@link Record}s that run through it.
-	 *
-	 * @author Guido Rota (2014)
-	 *
-	 */
-	private static class EmptyPipeline extends RecordPipeline {
-
-		@Override
-		public Set<Attribute> attributes() {
-			return Collections.emptySet();
-		}
-
-		@Override
-		public Record run(Record source) {
-			return source;
-		}
-
-	}
-
-	/**
-	 * A pipeline of {@link RecordModifier}s that are applied sequentially to
-	 * add new {@link Record} fields.
-	 *
-	 * @author Guido Rota (2014)
-	 *
-	 */
-	private static class ModifierPipeline extends RecordPipeline {
-
-		private final List<RecordModifier> mods;
-		private final Set<Attribute> atts;
-
-		private ModifierPipeline(List<RecordModifier> mods, Set<Attribute> atts) {
-			this.mods = mods;
-			this.atts = atts;
-		}
-
-		@Override
-		public Set<Attribute> attributes() {
-			return atts;
-		}
-
-		@Override
-		public Record run(Record source) {
-			Map<String, Object> rm = new HashMap<>();
-			for (RecordModifier m : mods) {
-				m.process(source, rm);
-			}
-			Record computed = Record.from(rm);
-			return Record.merge(computed, source);
-		}
 	}
 
 }

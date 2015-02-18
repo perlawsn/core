@@ -39,7 +39,7 @@ public class PutInstruction extends BasicInstruction {
 	protected void runBasic(Runner runner) throws ScriptException {
 		Class<?> type = DataType.getClass(att.getType());
 		Object result = Executor.evaluateExpression(runner.ctx, exp, type);
-		runner.ctx.putAttribute(att.getId(), result);
+		runner.ctx.putAttribute(idx, result);
 	}
 
 }

@@ -1,12 +1,7 @@
 package org.dei.perla.core.engine;
 
 import java.beans.FeatureDescriptor;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.el.CompositeELResolver;
@@ -18,6 +13,7 @@ import javax.el.MapELResolver;
 import javax.el.ValueExpression;
 import javax.el.VariableMapper;
 
+import org.dei.perla.core.fpc.Attribute;
 import org.dei.perla.core.message.FpcMessage;
 import org.dei.perla.core.utils.Check;
 
@@ -59,23 +55,31 @@ public class ExecutionContext {
 	private final Map<String, Object> variableMap = new HashMap<>();
 	private final ScriptEngineELContext elContext;
 	private final FpcEngineVariableMapper elVariableMapper = new FpcEngineVariableMapper();
-	private final Map<String, Object> resultMap = new HashMap<>();
-	private List<Record> recordList = new ArrayList<>();
+
+	private Object[] record;
+    private List<Attribute> atts;
+	private List<Record> recordList;
 
 	protected ExecutionContext() {
 		elContext = new ScriptEngineELContext(elVariableMapper);
 	}
 
-	protected void setParameterArray(ScriptParameter[] paramArray) {
+    protected void init(List<Attribute> atts, ScriptParameter[] params) {
+        record = new Object[atts.size()];
+        this.atts = atts;
+        setParameters(params);
+    }
+
+	private void setParameters(ScriptParameter[] params) {
 		// Register FpcMessage parameters as variables
-		for (ScriptParameter param : paramArray) {
-			if (param.getValue() instanceof FpcMessage) {
-				setVariable(param.getName(), (FpcMessage) param.getValue());
+		for (ScriptParameter p : params) {
+			if (p.getValue() instanceof FpcMessage) {
+				setVariable(p.getName(), (FpcMessage) p.getValue());
 			}
 		}
 		// Set the param array in the elContext, so that all parameters are
 		// available in EL expressions as well
-		elContext.setParameterArray(paramArray);
+		elContext.setParameterArray(params);
 	}
 
 	/**
@@ -102,7 +106,7 @@ public class ExecutionContext {
 	protected void setVariable(String name, Object value) {
 		variableMap.put(name, value);
 		elVariableMapper.setVariable(name,
-				Executor.createValueExpression(value, value.getClass()));
+                Executor.createValueExpression(value, value.getClass()));
 	}
 
 	/**
@@ -121,13 +125,13 @@ public class ExecutionContext {
 	 * Adds an attribute to the current record. Invoking this method on an
 	 * attribute previously set will overwrite the old value with the new one.
 	 *
-	 * @param id
-	 *            Name of the attribute
+	 * @param idx
+	 *            Attribute index
 	 * @param value
 	 *            Attribute value
 	 */
-	protected void putAttribute(String id, Object value) {
-		resultMap.put(id, value);
+	protected void putAttribute(int idx, Object value) {
+        record[idx] = value;
 	}
 
 	/**
@@ -136,7 +140,8 @@ public class ExecutionContext {
 	 * <code>getRecordList()</code> method.
 	 */
 	protected void emitRecord() {
-		recordList.add(Record.from(resultMap));
+        Object[] rc = Arrays.copyOf(record, record.length);
+		recordList.add(new Record(atts, rc));
 	}
 
 	/**
@@ -150,8 +155,9 @@ public class ExecutionContext {
 			return Collections.emptyList();
 		}
 
-		List<Record> copy = new ArrayList<>(recordList);
-		return Collections.unmodifiableList(copy);
+        List<Record> res = recordList;
+        recordList = new ArrayList<>(res.size());
+		return Collections.unmodifiableList(res);
 	}
 
 	/**
@@ -163,7 +169,7 @@ public class ExecutionContext {
 		instructionLocalMap.clear();
 		variableMap.clear();
 		elVariableMapper.clear();
-		resultMap.clear();
+        recordList = new ArrayList<>();
 		elContext.clearParameterMap();
 		if (!recordList.isEmpty()) {
 			recordList.clear();

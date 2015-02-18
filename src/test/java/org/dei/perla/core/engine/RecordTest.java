@@ -1,15 +1,17 @@
 package org.dei.perla.core.engine;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import org.dei.perla.core.descriptor.DataType;
+import org.dei.perla.core.fpc.Attribute;
+import org.junit.Test;
 
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.dei.perla.core.engine.Record.Field;
-import org.junit.Test;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.*;
 
 public class RecordTest {
 
@@ -18,20 +20,22 @@ public class RecordTest {
 		Record empty = Record.EMPTY;
 		assertThat(empty, notNullValue());
 		assertTrue(empty.isEmpty());
-		assertTrue(empty.fields().isEmpty());
+		assertTrue(empty.getAttributes().isEmpty());
+        assertThat(empty.getFields().length, equalTo(0));
 
 		Record fromEmpty = Record.from(Collections.emptyMap());
 		assertThat(fromEmpty, notNullValue());
 		assertTrue(fromEmpty.isEmpty());
-		assertTrue(fromEmpty.fields().isEmpty());
+		assertTrue(fromEmpty.getAttributes().isEmpty());
+        assertThat(fromEmpty.getFields().length, equalTo(0));
 
-		Map<String, Object> fieldMap = new HashMap<>();
-		fieldMap.put("field1", "value1");
-		fieldMap.put("field2", "value2");
+		Map<Attribute, Object> fieldMap = new HashMap<>();
+		fieldMap.put(Attribute.create("field1", DataType.STRING), "value1");
+        fieldMap.put(Attribute.create("field2", DataType.STRING), "value2");
 		Record fromMap = Record.from(fieldMap);
 		assertThat(fromMap, notNullValue());
 		assertFalse(fromMap.isEmpty());
-		assertFalse(fromMap.fields().isEmpty());
+		assertFalse(fromMap.getAttributes().isEmpty());
 		assertTrue(fromMap.hasField("field1"));
 		assertThat(fromMap.get("field1"), notNullValue());
 		assertTrue(fromMap.get("field1") instanceof String);
@@ -43,69 +47,53 @@ public class RecordTest {
 	}
 
 	@Test
-	public void recordMergeTest() {
-		Map<String, Object> map1 = new HashMap<>();
-		map1.put("fieldA", "A");
-		map1.put("fieldB", "B");
-		Record r1 = Record.from(map1);
-
-		Map<String, Object> map2 = new HashMap<>();
-		map2.put("fieldB", "BB");
-		map2.put("fieldC", "C");
-		Record r2 = Record.from(map2);
-
-		Record merged = Record.merge(r1, r2);
-		assertThat(merged, notNullValue());
-		assertTrue(merged.hasField("fieldA"));
-		assertTrue(merged.hasField("fieldB"));
-		assertTrue(merged.hasField("fieldC"));
-
-		assertThat(merged.get("fieldA"), equalTo(r1.get("fieldA")));
-		assertThat(merged.get("fieldB"), equalTo(r2.get("fieldB")));
-		assertThat(merged.get("fieldC"), equalTo(r2.get("fieldC")));
-	}
-
-	@Test
 	public void fieldEnumerationTest() {
-		Map<String, Object> map = new HashMap<>();
-		map.put("integer", 1);
-		map.put("float", 5f);
-		map.put("boolean", false);
-		map.put("string", "test");
-		map.put("id", 9);
-		map.put("timestamp", ZonedDateTime.now());
+		Map<Attribute, Object> map = new HashMap<>();
+		map.put(Attribute.create("integer", DataType.INTEGER), 1);
+		map.put(Attribute.create("float", DataType.FLOAT), 5f);
+		map.put(Attribute.create("boolean", DataType.BOOLEAN), false);
+		map.put(Attribute.create("string", DataType.STRING), "test");
+		map.put(Attribute.create("id", DataType.ID), 9);
+		map.put(Attribute.create("timestamp", DataType.TIMESTAMP),
+                ZonedDateTime.now());
 		Record r = Record.from(map);
 
-		for (Field f : r.fields()) {
+		for (Attribute a : r.getAttributes()) {
+            Object f = r.get(a.getId());
 			assertThat(f, notNullValue());
-			assertThat(f.getValue(), notNullValue());
-			switch (f.getName()) {
+			switch (a.getId()) {
 			case "integer":
-				assertTrue(f.getValue() instanceof Integer);
-				assertThat(f.getIntValue(), equalTo(1));
+                assertThat(a.getType(), equalTo(DataType.INTEGER));
+				assertTrue(f instanceof Integer);
+				assertThat(f, equalTo(1));
 				break;
 			case "float":
-				assertTrue(f.getValue() instanceof Float);
-				assertThat(f.getFloatValue(), equalTo(5f));
+                assertThat(a.getType(), equalTo(DataType.FLOAT));
+				assertTrue(f instanceof Float);
+				assertThat(f, equalTo(5f));
 				break;
 			case "boolean":
-				assertTrue(f.getValue() instanceof Boolean);
-				assertThat(f.getBooleanValue(), equalTo(false));
+                assertThat(a.getType(), equalTo(DataType.BOOLEAN));
+				assertTrue(f instanceof Boolean);
+				assertThat(f, equalTo(false));
 				break;
 			case "string":
-				assertTrue(f.getValue() instanceof String);
-				assertThat(f.getStringValue(), equalTo("test"));
+                assertThat(a.getType(), equalTo(DataType.STRING));
+				assertTrue(f instanceof String);
+				assertThat(f, equalTo("test"));
 				break;
 			case "id":
-				assertTrue(f.getValue() instanceof Integer);
-				assertThat(f.getIdValue(), equalTo(9));
+                assertThat(a.getType(), equalTo(DataType.ID));
+				assertTrue(f instanceof Integer);
+				assertThat(f, equalTo(9));
 				break;
 			case "timestamp":
-				assertTrue(f.getValue() instanceof ZonedDateTime);
-				assertThat(f.getTimestampValue(), notNullValue());
+                assertThat(a.getType(), equalTo(DataType.TIMESTAMP));
+				assertTrue(f instanceof ZonedDateTime);
+				assertThat(f, notNullValue());
 				break;
 			default:
-				throw new RuntimeException("Unexpected field " + f.getName());
+				throw new RuntimeException("Unexpected field " + a.getId());
 			}
 		}
 	}

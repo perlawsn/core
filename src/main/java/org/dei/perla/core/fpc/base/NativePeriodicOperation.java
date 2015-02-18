@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.dei.perla.core.fpc.Attribute;
 import org.dei.perla.core.fpc.FpcException;
@@ -28,29 +30,34 @@ public class NativePeriodicOperation extends PeriodicOperation {
 	private final Script stop;
 
 	private final ChannelManager chanMgr;
-	private final List<PeriodicMessageHandler> handlers;
-	private final Map<String, PeriodicMessageHandler> handlerMap =
+	private final Map<String, PeriodicMessageHandler> handlers =
             new HashMap<>();
 
 	// Operation state
 	private volatile int state = 0;
 
-	// Current record, used to merge the results from different async messages
-	private volatile Record currentRecord = Record.EMPTY;
+    private final List<Attribute> atts;
 
-	public NativePeriodicOperation(String id, Set<Attribute> atts,
+	// Current record, used to merge the results from different async messages
+    Lock rlk = new ReentrantLock();
+	private Object[] currentRecord;
+
+	public NativePeriodicOperation(String id, List<Attribute> atts,
 			Script start, Script stop, List<PeriodicMessageHandler> handlers,
             ChannelManager chanMgr) {
 		super(id, atts);
 		this.start = start;
 		this.stop = stop;
 		this.chanMgr = chanMgr;
+        this.atts = atts;
 
-		this.handlers = handlers;
+        int nAtt = 0;
 		for (PeriodicMessageHandler h : handlers) {
-			handlerMap.put(h.mapper.getMessageId(), h);
-			h.onHandler = new OnScriptHandler(h.sync);
+			this.handlers.put(h.mapper.getMessageId(), h);
+			h.onHandler = new OnScriptHandler(h.sync, nAtt);
+            nAtt += h.script.getEmit().size();
 		}
+        currentRecord = new Object[nAtt];
 	}
 
 	public Script getStartScript() {
@@ -125,19 +132,19 @@ public class NativePeriodicOperation extends PeriodicOperation {
 	}
 
 	private void addAsyncCallback() {
-		for (PeriodicMessageHandler h : handlers) {
+		for (PeriodicMessageHandler h : handlers.values()) {
 			chanMgr.addCallback(h.mapper, this::handleMessage);
 		}
 	}
 
 	private void removeAsyncCallback() {
-		for (PeriodicMessageHandler h : handlers) {
+		for (PeriodicMessageHandler h : handlers.values()) {
 			chanMgr.removeCallback(h.mapper);
 		}
 	}
 
 	public void handleMessage(FpcMessage message) {
-		PeriodicMessageHandler h = handlerMap.get(message.getId());
+		PeriodicMessageHandler h = handlers.get(message.getId());
 
 		ScriptParameter paramArray[] = new ScriptParameter[1];
 		paramArray[0] = new ScriptParameter(h.variable, message);
@@ -257,10 +264,12 @@ public class NativePeriodicOperation extends PeriodicOperation {
 	 */
 	private class OnScriptHandler implements ScriptHandler {
 
+        private final int base;
 		private final boolean sync;
 
-		private OnScriptHandler(boolean sync) {
+		private OnScriptHandler(boolean sync, int base) {
 			this.sync = sync;
+            this.base = base;
 		}
 
 		@Override
@@ -273,32 +282,38 @@ public class NativePeriodicOperation extends PeriodicOperation {
 				// Distribute immediately to the Tasks if the operation only
 				// receives one message type. Doing so avoids the cost of
 				// merging with the currentRecord
-				distributeImmediately(recordList);
+                for (Record r : recordList) {
+                    forEachTask(t -> t.newRecord(r));
+                }
 
 			} else if (sync == true) {
 				// Merge with the current record and distribute
-				mergeAndDistribute(recordList);
+                for (Record r : recordList) {
+                    Record m = merge(r);
+                    forEachTask(t -> t.newRecord(m));
+                }
 
 			} else {
 				// We only care about the last record if we only have to merge
 				int lastIndex = recordList.size() - 1;
 				Record last = recordList.get(lastIndex);
-				currentRecord = currentRecord.merge(last);
+				merge(last);
 			}
 		}
 
-		private void distributeImmediately(List<Record> recordList) {
-			for (Record record : recordList) {
-				forEachTask(t -> t.newRecord(record));
-			}
-		}
+        private Record merge(Record r) {
+            Object[] values = r.getFields();
 
-		private void mergeAndDistribute(List<Record> recordList) {
-			for (Record record : recordList) {
-				currentRecord = Record.merge(currentRecord, record);
-				forEachTask(t -> t.newRecord(currentRecord));
-			}
-		}
+            rlk.lock();
+            try {
+                for (int i = 0; i < r.getAttributes().size(); i++) {
+                    currentRecord[base + i] = values[i];
+                }
+                return new Record(atts, currentRecord);
+            } finally {
+                rlk.unlock();
+            }
+        }
 
 		@Override
 		public void error(Throwable cause) {

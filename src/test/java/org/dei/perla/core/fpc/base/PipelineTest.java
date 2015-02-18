@@ -1,21 +1,20 @@
 package org.dei.perla.core.fpc.base;
 
-import org.dei.perla.core.fpc.Attribute;
-import org.dei.perla.core.fpc.base.RecordPipeline.PipelineBuilder;
 import org.dei.perla.core.descriptor.DataType;
 import org.dei.perla.core.engine.Record;
+import org.dei.perla.core.fpc.Attribute;
+import org.dei.perla.core.fpc.base.RecordPipeline.PipelineBuilder;
 import org.junit.Test;
 
-import java.util.Collections;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 public class PipelineTest {
-
-	private static final Record emptyRecord = Record.from(Collections.emptyMap());
 
     private static final Attribute a1 =
             Attribute.create("a1", DataType.INTEGER);
@@ -29,36 +28,38 @@ public class PipelineTest {
 	@Test
 	public void testTimestampAppender() {
 		RecordModifier tsAppend = new RecordModifier.TimestampAppender();
-		assertTrue(tsAppend.attributes().contains(
+		assertTrue(tsAppend.getAttributes().contains(
 				Attribute.TIMESTAMP_ATTRIBUTE));
 
-		Map<String, Object> fieldMap = new HashMap<>();
-		tsAppend.process(emptyRecord, fieldMap);
-		assertTrue(fieldMap.containsKey("timestamp"));
+        Object[] r = new Object[1];
+        assertThat(r[0], nullValue());
+		tsAppend.process(r, 0);
+        assertThat(r[0], notNullValue());
+        assertTrue(r[0] instanceof ZonedDateTime);
 	}
 
 	@Test
 	public void testStaticAppender() {
-        Map<Attribute, Object> st = new HashMap<>();
+        LinkedHashMap<Attribute, Object> st = new LinkedHashMap<>();
         st.put(a1, v1);
         st.put(a2, v2);
 
 		// Multiple static attributes appender
 		RecordModifier allAppender = new RecordModifier.StaticAppender(st);
-		assertTrue(allAppender.attributes().contains(a1));
-		assertTrue(allAppender.attributes().contains(a2));
+		assertTrue(allAppender.getAttributes().contains(a1));
+		assertTrue(allAppender.getAttributes().contains(a2));
 
-		Map<String, Object> allFieldMap = new HashMap<>();
-		allAppender.process(emptyRecord, allFieldMap);
-		assertTrue(allFieldMap.containsKey("a1"));
-		assertThat(allFieldMap.get("a1"), equalTo(1));
-		assertTrue(allFieldMap.containsKey("a2"));
-		assertThat(allFieldMap.get("a2"), equalTo("test"));
+        Object[] r = new Object[2];
+        assertThat(r[0], nullValue());
+        assertThat(r[1], nullValue());
+		allAppender.process(r, 0);
+		assertThat(r[0], equalTo(1));
+		assertThat(r[1], equalTo("test"));
 	}
 
 	@Test
 	public void pipelineTest() {
-        Map<Attribute, Object> st = new HashMap<>();
+        LinkedHashMap<Attribute, Object> st = new LinkedHashMap<>();
         st.put(a1, v1);
 
 		PipelineBuilder b = RecordPipeline.newBuilder();
@@ -71,9 +72,9 @@ public class PipelineTest {
 		assertTrue(p.attributes().contains(a1));
 		assertFalse(p.attributes().contains(a2));
 
-		Map<String, Object> fieldMap = new HashMap<>();
-		fieldMap.put("source1", "source1");
-		fieldMap.put("source2", "source2");
+		Map<Attribute, Object> fieldMap = new HashMap<>();
+		fieldMap.put(Attribute.create("source1", DataType.STRING), "source1");
+        fieldMap.put(Attribute.create("source2", DataType.STRING), "source2");
 		Record source = Record.from(fieldMap);
 		assertThat(source.get("source1"), notNullValue());
 		assertThat(source.get("source2"), notNullValue());
@@ -92,9 +93,9 @@ public class PipelineTest {
 
 	@Test
 	public void emptyPipelineTest() {
-		Map<String, Object> fieldMap = new HashMap<>();
-		fieldMap.put("source1", "source1");
-		fieldMap.put("source2", "source2");
+		Map<Attribute, Object> fieldMap = new HashMap<>();
+        fieldMap.put(Attribute.create("source1", DataType.STRING), "source1");
+        fieldMap.put(Attribute.create("source2", DataType.STRING), "source2");
 		Record source = Record.from(fieldMap);
 		assertThat(source.get("source1"), notNullValue());
 		assertThat(source.get("source2"), notNullValue());

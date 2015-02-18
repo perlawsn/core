@@ -1,11 +1,11 @@
 package org.dei.perla.core.fpc.base;
 
+import org.dei.perla.core.engine.*;
 import org.dei.perla.core.fpc.Attribute;
 import org.dei.perla.core.fpc.Fpc;
 import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.TaskHandler;
 import org.dei.perla.core.fpc.base.RecordPipeline.PipelineBuilder;
-import org.dei.perla.core.engine.*;
 import org.dei.perla.core.utils.StopHandler;
 
 import java.time.ZonedDateTime;
@@ -167,14 +167,19 @@ public class BaseFpc implements Fpc {
          * staticRecord returns a new Record composed only of static values.
          */
         private Record staticRecord() {
-            Map<String, Object> av = new HashMap<>();
-            statAtts.forEach(a -> av.put(a.getId(), attValues.get(a)));
-            av.put(Attribute.TIMESTAMP_ATTRIBUTE.getId(), ZonedDateTime.now());
-            return Record.from(av);
+            Object[] values = new Object[atts.size() + 1];
+            int i = 0;
+            for (Attribute a : statAtts) {
+                values[i] = attValues.get(a);
+                i++;
+            }
+            statAtts.add(Attribute.TIMESTAMP_ATTRIBUTE);
+            values[i] = ZonedDateTime.now();
+            return new Record(Collections.unmodifiableList(statAtts), values);
         }
 
-        private Map<Attribute, Object> staticValues() {
-            Map<Attribute, Object> av = new HashMap<>();
+        private LinkedHashMap<Attribute, Object> staticValues() {
+            LinkedHashMap<Attribute, Object> av = new LinkedHashMap<>();
             statAtts.forEach(a -> av.put(a, attValues.get(a)));
             return av;
         }

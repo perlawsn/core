@@ -1,14 +1,5 @@
 package org.dei.perla.core.engine;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.dei.perla.core.channel.Channel;
 import org.dei.perla.core.channel.IORequestBuilder;
 import org.dei.perla.core.channel.loopback.LoopbackChannel;
@@ -18,12 +9,22 @@ import org.dei.perla.core.channel.loopback.TestMessage;
 import org.dei.perla.core.descriptor.AttributeDescriptor;
 import org.dei.perla.core.descriptor.AttributeDescriptor.AttributePermission;
 import org.dei.perla.core.descriptor.DataType;
-import org.dei.perla.core.engine.Record.Field;
 import org.dei.perla.core.engine.SubmitInstruction.RequestParameter;
+import org.dei.perla.core.fpc.Attribute;
 import org.dei.perla.core.message.FpcMessage;
 import org.dei.perla.core.message.Mapper;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class ScriptInstructionsTest {
 
@@ -219,16 +220,17 @@ public class ScriptInstructionsTest {
 
 	@Test
 	public void testForeachInstruction0() throws Exception {
-		Instruction body = ScriptBuilder.newScript()
-				.add(new PutInstruction("${element}", integer, 0))
-				.add(new EmitInstruction())
-				.getCode();
+        Instruction body = new PutInstruction("${element}", integer, 0);
+        body.setNext(new EmitInstruction());
+        List<Attribute> emit = new ArrayList<>();
+        emit.add(Attribute.create(integer));
 		Script script = ScriptBuilder.newScript()
 				.add(new CreateComplexVarInstruction("var", mapper1))
 				.add(new AppendInstruction("var", "list", Integer.class, "1"))
 				.add(new AppendInstruction("var", "list", Integer.class, "2"))
 				.add(new AppendInstruction("var", "list", Integer.class, "3"))
 				.add(new ForeachInstruction("var", "list", "element", body))
+                .extraEmit(emit)
 				.buildScript("testForeachInstruction0");
 		SynchronizerScriptHandler syncHandler = new SynchronizerScriptHandler();
 
@@ -244,16 +246,18 @@ public class ScriptInstructionsTest {
 
 	@Test
 	public void testForeachInstruction1() throws Exception {
-		Instruction body = ScriptBuilder.newScript()
-				.add(new PutInstruction("${element * index}", integer, 0))
-				.add(new EmitInstruction())
-				.getCode();
+        Instruction body = new PutInstruction("${element * index}", integer, 0);
+        body.setNext(new EmitInstruction());
+        List<Attribute> emit = new ArrayList<>();
+        emit.add(Attribute.create(integer));
 		Script script = ScriptBuilder.newScript()
 				.add(new CreateComplexVarInstruction("var", mapper1))
 				.add(new AppendInstruction("var", "list", Integer.class, "1"))
 				.add(new AppendInstruction("var", "list", Integer.class, "2"))
 				.add(new AppendInstruction("var", "list", Integer.class, "3"))
-				.add(new ForeachInstruction("var", "list", "element", "index", body))
+				.add(new ForeachInstruction("var", "list", "element",
+                        "index", body))
+                .extraEmit(emit)
 				.buildScript("testForeachInstruction0");
 		SynchronizerScriptHandler syncHandler = new SynchronizerScriptHandler();
 
@@ -465,26 +469,29 @@ public class ScriptInstructionsTest {
 		assertThat(recordList, notNullValue());
 		assertThat(recordList.size(), equalTo(1));
 
-		Record record = recordList.get(0);
-		for (Field f : record.fields()) {
+		Record r = recordList.get(0);
+		for (Attribute a : r.getAttributes()) {
+            Object f = r.get(a.getId());
 			assertThat(f, notNullValue());
-			assertThat(f.getValue(), notNullValue());
-			switch (f.getName()) {
+			switch (a.getId()) {
 			case "integer":
-				assertTrue(f.getValue() instanceof Integer);
-				assertThat(f.getIntValue(), equalTo(4));
+                assertThat(a.getType(), equalTo(DataType.INTEGER));
+				assertTrue(f instanceof Integer);
+				assertThat(f, equalTo(4));
 				break;
 			case "string":
-				assertTrue(f.getValue() instanceof String);
-				assertThat(f.getStringValue(), equalTo("test"));
+                assertThat(a.getType(), equalTo(DataType.STRING));
+				assertTrue(f instanceof String);
+				assertThat(f, equalTo("test"));
 				break;
 			case "bool":
-				assertTrue(f.getValue() instanceof Boolean);
-				assertThat(f.getBooleanValue(), equalTo(true));
+                assertThat(a.getType(), equalTo(DataType.BOOLEAN));
+				assertTrue(f instanceof Boolean);
+				assertThat(f, equalTo(true));
 				break;
 			default:
 				throw new RuntimeException("Unexpected attribute '"
-						+ f.getName() + "'.");
+						+ a.getId() + "'.");
 			}
 		}
 	}
@@ -515,26 +522,29 @@ public class ScriptInstructionsTest {
 		assertThat(recordList, notNullValue());
 		assertThat(recordList.size(), equalTo(1));
 
-		Record record = recordList.get(0);
-		for (Field f : record.fields()) {
+		Record r = recordList.get(0);
+		for (Attribute a : r.getAttributes()) {
+            Object f = r.get(a.getId());
 			assertThat(f, notNullValue());
-			assertThat(f.getValue(), notNullValue());
-			switch (f.getName()) {
+			switch (a.getId()) {
 			case "integer":
-				assertTrue(f.getValue() instanceof Integer);
-				assertThat(f.getIntValue(), equalTo(4));
+                assertThat(a.getType(), equalTo(DataType.INTEGER));
+				assertTrue(f instanceof Integer);
+				assertThat(f, equalTo(4));
 				break;
 			case "string":
-				assertTrue(f.getValue() instanceof String);
-				assertThat(f.getStringValue(), equalTo("test"));
+                assertThat(a.getType(), equalTo(DataType.STRING));
+				assertTrue(f instanceof String);
+				assertThat(f, equalTo("test"));
 				break;
 			case "bool":
-				assertTrue(f.getValue() instanceof Boolean);
-				assertThat(f.getBooleanValue(), equalTo(true));
+                assertThat(a.getType(), equalTo(DataType.BOOLEAN));
+				assertTrue(f instanceof Boolean);
+				assertThat(f, equalTo(true));
 				break;
 			default:
 				throw new RuntimeException("Unexpected attribute '"
-						+ f.getName() + "'.");
+						+ a.getId() + "'.");
 			}
 		}
 	}
@@ -555,15 +565,15 @@ public class ScriptInstructionsTest {
 						"5"))
 				.add(new SetComplexInstruction("var", "string", String.class,
 						"test"))
-				.add(new PutInstruction("${var.integer}", integer, 2))
-				.add(new PutInstruction("${var.string}", string, 3))
+				.add(new PutInstruction("${var.integer}", integer, 0))
+				.add(new PutInstruction("${var.string}", string, 1))
 				.add(new EmitInstruction())
 				.add(new SetComplexInstruction("var", "integer", Integer.class,
 						"6"))
 				.add(new SetComplexInstruction("var", "string", String.class,
 						"test"))
-				.add(new PutInstruction("${var.integer}", integer, 4))
-				.add(new PutInstruction("${var.string}", string, 5))
+				.add(new PutInstruction("${var.integer}", integer, 0))
+				.add(new PutInstruction("${var.string}", string, 1))
 				.add(new EmitInstruction()).add(new StopInstruction())
 				.buildScript("testMultiplePutEmitInstructions");
 
@@ -573,60 +583,66 @@ public class ScriptInstructionsTest {
 		assertThat(recordList, notNullValue());
 		assertThat(recordList.size(), equalTo(3));
 
-		Record record = recordList.get(0);
-		for (Field f : record.fields()) {
+		Record r = recordList.get(0);
+		for (Attribute a : r.getAttributes()) {
+            Object f = r.get(a.getId());
 			assertThat(f, notNullValue());
-			assertThat(f.getValue(), notNullValue());
-			switch (f.getName()) {
+			switch (a.getId()) {
 			case "integer":
-				assertTrue(f.getValue() instanceof Integer);
-				assertThat(f.getIntValue(), equalTo(4));
+                assertThat(a.getType(), equalTo(DataType.INTEGER));
+				assertTrue(f instanceof Integer);
+				assertThat(f, equalTo(4));
 				break;
 			case "string":
-				assertTrue(f.getValue() instanceof String);
-				assertThat(f.getStringValue(), equalTo("test"));
+                assertThat(a.getType(), equalTo(DataType.STRING));
+				assertTrue(f instanceof String);
+				assertThat(f, equalTo("test"));
 				break;
 			default:
 				throw new RuntimeException("Unexpected attribute '"
-						+ f.getName() + "'.");
+						+ a.getId() + "'.");
 			}
 		}
 
-		record = recordList.get(1);
-		for (Field f : record.fields()) {
+		r = recordList.get(1);
+		for (Attribute a : r.getAttributes()) {
+            Object f = r.get(a.getId());
 			assertThat(f, notNullValue());
-			assertThat(f.getValue(), notNullValue());
-			switch (f.getName()) {
+			switch (a.getId()) {
 			case "integer":
-				assertTrue(f.getValue() instanceof Integer);
-				assertThat(f.getIntValue(), equalTo(5));
+                assertThat(a.getType(), equalTo(DataType.INTEGER));
+				assertTrue(f instanceof Integer);
+				assertThat(f, equalTo(5));
 				break;
 			case "string":
-				assertTrue(f.getValue() instanceof String);
-				assertThat(f.getStringValue(), equalTo("test"));
+                assertThat(a.getType(), equalTo(DataType.STRING));
+				assertTrue(f instanceof String);
+				assertThat(f, equalTo("test"));
 				break;
 			default:
 				throw new RuntimeException("Unexpected attribute '"
-						+ f.getName() + "'.");
+						+ a.getId() + "'.");
 			}
 		}
 
-		record = recordList.get(2);
-		for (Field f : record.fields()) {
+		r = recordList.get(2);
+		for (Attribute a : r.getAttributes()) {
+            Object f = r.get(a.getId());
 			assertThat(f, notNullValue());
-			assertThat(f.getValue(), notNullValue());
-			switch (f.getName()) {
+			switch (a.getId()) {
 			case "integer":
-				assertTrue(f.getValue() instanceof Integer);
-				assertThat(f.getIntValue(), equalTo(6));
+                assertThat(a.getType(), equalTo(DataType.INTEGER));
+				assertTrue(f instanceof Integer);
+				assertThat(f, equalTo(6));
 				break;
 			case "string":
-				assertTrue(f.getValue() instanceof String);
-				assertThat(f.getStringValue(), equalTo("test"));
+                assertThat(a.getType(), equalTo(DataType.STRING));
+				assertTrue(f instanceof String);
+				assertThat(f, equalTo("test"));
 				break;
 			default:
 				throw new RuntimeException("Unexpected attribute '"
-						+ f.getName() + "'.");
+						+ a.getId() + "'.");
 			}
 		}
 	}

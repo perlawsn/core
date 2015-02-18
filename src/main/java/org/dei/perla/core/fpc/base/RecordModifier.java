@@ -1,15 +1,9 @@
 package org.dei.perla.core.fpc.base;
 
-import java.time.ZonedDateTime;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.dei.perla.core.fpc.Attribute;
-import org.dei.perla.core.engine.Record;
+
+import java.time.ZonedDateTime;
+import java.util.*;
 
 /**
  * A class implementing a single processing operation to be performed on a
@@ -27,19 +21,16 @@ public interface RecordModifier {
 	 *
 	 * @return Collection of {@link Attribute}s
 	 */
-	public Collection<? extends Attribute> attributes();
+	public List<Attribute> getAttributes();
 
 	/**
 	 * Function for processing a {@code Record}. New fields must be added to the
 	 * {@code Map} passed as parameter.
 	 *
-	 * @param original
-	 *            Original source {@link Record}
-	 * @param recordMap
-	 *            {@code Map} where to add new fields created by this
-	 *            {@code RecordModifier}
+	 * @param record
+	 *            record to modify
 	 */
-	public void process(Record source, Map<String, Object> recordMap);
+	public void process(Object[] record, int idx);
 
 	/**
 	 * {@code RecordModifier} for adding a Timestamp field
@@ -49,22 +40,21 @@ public interface RecordModifier {
 	 */
 	public static class TimestampAppender implements RecordModifier {
 
-		private static final Set<Attribute> attributeSet;
+		private static final List<Attribute> atts;
 
 		static {
-			Set<Attribute> tsAttSet = new HashSet<>();
-			tsAttSet.add(Attribute.TIMESTAMP_ATTRIBUTE);
-			attributeSet = Collections.unmodifiableSet(tsAttSet);
+            Attribute[] a = new Attribute[]{Attribute.TIMESTAMP_ATTRIBUTE};
+            atts = Arrays.asList(a);
 		}
 
 		@Override
-		public Collection<? extends Attribute> attributes() {
-			return attributeSet;
+		public List<Attribute> getAttributes() {
+			return atts;
 		}
 
 		@Override
-		public void process(Record source, Map<String, Object> recordMap) {
-			recordMap.put("timestamp", ZonedDateTime.now());
+		public void process(Object[] record, int idx) {
+            record[idx] = ZonedDateTime.now();
 		}
 
 	}
@@ -77,23 +67,30 @@ public interface RecordModifier {
 	 */
 	public static class StaticAppender implements RecordModifier {
 
-		private final Collection<Attribute> attributes;
-		private final Map<String, Object> attributeMap;
+		private final List<Attribute> atts;
+        private final Object[] values;
 
-		public StaticAppender(Map<Attribute, Object> am) {
-			attributes = am.keySet();
-			attributeMap = new HashMap<>();
-            am.forEach((a, v) -> attributeMap.put(a.getId(), v));
+		public StaticAppender(LinkedHashMap<Attribute, Object> am) {
+			atts = new ArrayList<>(am.size());
+            values = new Object[am.size()];
+            int i = 0;
+            for (Map.Entry<Attribute, Object> e : am.entrySet()) {
+                atts.add(e.getKey());
+                values[i] = e.getValue();
+                i++;
+            }
 		}
 
 		@Override
-		public Collection<? extends Attribute> attributes() {
-			return attributes;
+		public List<Attribute> getAttributes() {
+			return atts;
 		}
 
 		@Override
-		public void process(Record source, Map<String, Object> recordMap) {
-			recordMap.putAll(attributeMap);
+		public void process(Object[] record, int idx) {
+            for (int i = 0; i < values.length; i++) {
+                record[idx + i] = values[i];
+            }
 		}
 
 	}

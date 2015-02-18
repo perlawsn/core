@@ -1,6 +1,10 @@
 package org.dei.perla.core.engine;
 
+import org.dei.perla.core.fpc.Attribute;
+
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * A convenience class for creating new <code>Script</code> objects. Supports
@@ -12,6 +16,7 @@ import java.util.Collections;
  */
 public class ScriptBuilder {
 
+    private final List<Attribute> emit = new ArrayList<>();
 	private Instruction first = null;
 	private Instruction last = null;
 
@@ -24,22 +29,40 @@ public class ScriptBuilder {
 	private ScriptBuilder() {
 	}
 
-	public ScriptBuilder add(Instruction instruction) {
+	public ScriptBuilder add(Instruction in) {
 		if (first == null) {
-			first = last = instruction;
+			first = last = in;
 		} else {
-			last.setNext(instruction);
-			last = instruction;
+			last.setNext(in);
+			last = in;
 		}
+
+        if (in instanceof PutInstruction) {
+            PutInstruction put = (PutInstruction) in;
+            Attribute a = Attribute.create(put.getAttribute());
+            if (!emit.contains(a)) {
+                emit.add(a);
+            }
+        }
+
 		return this;
 	}
+
+    public ScriptBuilder extraEmit(List<Attribute> atts) {
+        for (Attribute a : atts) {
+            if (emit.contains(a)) {
+                continue;
+            }
+            emit.add(a);
+        }
+        return this;
+    }
 
 	public Script buildScript(String name) {
 		if (!(last instanceof StopInstruction)) {
 			this.add(new StopInstruction());
 		}
-		return new Script(name, first, Collections.emptyList(),
-                Collections.emptyList());
+		return new Script(name, first, emit, Collections.emptyList());
 	}
 
     public Instruction getCode() {

@@ -46,7 +46,7 @@ public class Runner {
 	private boolean breakpoint;
 	private AtomicInteger state;
 
-	protected Runner(Script script, ScriptParameter[] paramArray,
+	protected Runner(Script script, ScriptParameter[] params,
 			ScriptHandler handler, ScriptDebugger debugger) {
 		this.script = script;
 		this.handler = handler;
@@ -55,7 +55,7 @@ public class Runner {
 		this.breakpoint = false;
 		this.state = new AtomicInteger(NEW);
 		this.ctx = getContext();
-		this.ctx.setParameterArray(paramArray);
+		this.ctx.init(script.getEmit(), params);
 	}
 
 	/**

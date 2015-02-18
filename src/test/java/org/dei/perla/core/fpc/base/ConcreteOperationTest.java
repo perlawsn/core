@@ -147,7 +147,7 @@ public class ConcreteOperationTest {
 				.get("all-msg"), "result", perOnScript));
 
 		natPeriodicOp = new NativePeriodicOperation("periodic_operation",
-				Collections.emptySet(), perStartScript, perStopScript,
+				perOnScript.getEmit(), perStartScript, perStopScript,
 				perHandlerList, chMgr);
 
 		// Asynchronous operation

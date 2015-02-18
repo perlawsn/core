@@ -420,7 +420,7 @@ public class BaseFpcFactory implements FpcFactory {
             return;
         }
 
-        Set<Attribute> emitAtts = new HashSet<>();
+        List<Attribute> emitAtts = new ArrayList<>();
         List<PeriodicMessageHandler> handlers = parsePeriodicOnHandlerDescriptor(o, ctx,
                         err.inContext("sampling 'on' clause"), emitAtts);
 
@@ -435,7 +435,7 @@ public class BaseFpcFactory implements FpcFactory {
 
     private List<PeriodicMessageHandler> parsePeriodicOnHandlerDescriptor(
             PeriodicOperationDescriptor o, ParsingContext ctx, Errors err,
-            Set<Attribute> emitAtts) {
+            List<Attribute> emitAtts) {
         boolean hasErr = false;
         boolean hasSync = false;
 
@@ -472,6 +472,10 @@ public class BaseFpcFactory implements FpcFactory {
                 return null;
             }
 
+            if (!Collections.disjoint(emitAtts, script.getEmit())) {
+                err.addError(HANDLER_COLLISION);
+                hasErr = true;
+            }
             emitAtts.addAll(script.getEmit());
             if (hasSync && on.isSync()) {
                 err.addError(MULTIPLE_ON_SYNC);
@@ -724,6 +728,7 @@ public class BaseFpcFactory implements FpcFactory {
     private static final String DUPLICATE_OPERATION_NAME = "Duplicate operation name %s";
     private static final String MISSING_MESSAGE_TYPE = "Empty or missing message type";
     private static final String MISSING_VARIABLE_NAME = "Missing or empty variable name";
+    private static final String HANDLER_COLLISION = "Single attribute set by multiple handlers belonging to a single periodic operation";
     private static final String MULTIPLE_ON_SYNC = "Multiple synchronizing event set";
     private static final String MISSING_ON_SYNC = "No synchronizing event set";
     private static final String DUPLICATE_ON_HANDLER_SAMPLE = "Duplicate 'on' handler for message '%s'";
