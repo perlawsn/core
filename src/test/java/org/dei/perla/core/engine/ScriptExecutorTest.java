@@ -5,6 +5,7 @@ import org.dei.perla.core.descriptor.AttributeDescriptor;
 import org.dei.perla.core.descriptor.AttributeDescriptor.AttributePermission;
 import org.dei.perla.core.descriptor.DataType;
 import org.dei.perla.core.engine.ExecutionContext.InstructionLocal;
+import org.dei.perla.core.fpc.Attribute;
 import org.dei.perla.core.message.Mapper;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -137,6 +138,40 @@ public class ScriptExecutorTest {
 		assertThat((Integer) record.get("integer"), equalTo(5));
 		assertThat((String) record.get("string"), equalTo("test"));
 	}
+
+    @Test
+    public void testAttributeOrder() throws InterruptedException,
+            ScriptException, ExecutionException {
+        Script script = ScriptBuilder
+                .newScript()
+                .add(new CreateComplexVarInstruction("var", mapper1))
+                .add(new SetComplexInstruction("var", "integer", Integer.class, "12"))
+                .add(new SetComplexInstruction("var", "string", String.class, "test_order"))
+                .add(new PutInstruction("${var.integer}", integer, 0))
+                .add(new PutInstruction("${var.integer}", integer, 0))
+                .add(new PutInstruction("${var.string}", string, 1))
+                .add(new EmitInstruction())
+                .add(new StopInstruction())
+                .buildScript("testOrder");
+
+        SynchronizerScriptHandler handler = new SynchronizerScriptHandler();
+        Runner runner = Executor.execute(script, handler);
+
+        List<Record> res = handler.getResult();
+        assertTrue(runner.isDone());
+        assertThat(res.size(), equalTo(1));
+
+        Record r = res.get(0);
+        List<Attribute> atts = r.getAttributes();
+        assertThat(atts.size(), equalTo(2));
+        assertThat(atts.get(0), equalTo(Attribute.create(integer)));
+        assertThat(atts.get(1), equalTo(Attribute.create(string)));
+
+        Object[] values = r.getFields();
+        assertThat(values.length, equalTo(2));
+        assertThat(values[0], equalTo(12));
+        assertThat(values[1], equalTo("test_order"));
+    }
 
 	@Test
 	public void testSuspension() throws InterruptedException, ScriptException,

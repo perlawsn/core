@@ -358,6 +358,7 @@ public class CompilerTest {
         List<InstructionDescriptor> iList = new ArrayList<>();
         iList.add(new CreateVarInstructionDescriptor("var", "message1"));
         iList.add(new PutInstructionDescriptor("${var.integer}", "integer"));
+        iList.add(new PutInstructionDescriptor("${var.integer}", "integer"));
         iList.add(new PutInstructionDescriptor("${var.string}", "string"));
         iList.add(new EmitInstructionDescriptor());
 
@@ -372,6 +373,28 @@ public class CompilerTest {
 
         Integer idx2 = script.getEmit().indexOf(Attribute.create(string));
         assertThat(idx2, equalTo(1));
+
+        Instruction in = script.getCode();
+        assertThat(in, notNullValue());
+        assertTrue(in instanceof CreateComplexVarInstruction);
+
+        in = in.next();
+        assertThat(in, notNullValue());
+        assertTrue(in instanceof PutInstruction);
+        PutInstruction put = (PutInstruction) in;
+        assertThat(put.getIndex(), equalTo(0));
+
+        in = in.next();
+        assertThat(in, notNullValue());
+        assertTrue(in instanceof PutInstruction);
+        put = (PutInstruction) in;
+        assertThat(put.getIndex(), equalTo(0));
+
+        in = in.next();
+        assertThat(in, notNullValue());
+        assertTrue(in instanceof PutInstruction);
+        put = (PutInstruction) in;
+        assertThat(put.getIndex(), equalTo(1));
     }
 
 	@Test

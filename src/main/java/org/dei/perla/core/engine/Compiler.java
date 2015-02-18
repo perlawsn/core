@@ -370,8 +370,7 @@ public class Compiler {
 		}
 
         a = Attribute.create(att);
-        idx = ctx.idx++;
-        ctx.emit.add(a);
+        idx = ctx.emitIndex(a);
 		return new PutInstruction(d.getExpression(), att, idx);
 	}
 
@@ -637,8 +636,6 @@ public class Compiler {
 		private final Map<String, IORequestBuilder> requests;
 		private final Map<String, Channel> channels;
 
-        private int idx = 0;
-
         // Set of attributes emitted by the Script
 		private final List<Attribute> emit = new ArrayList<>();
         // Set of attributes set by the Script
@@ -656,6 +653,14 @@ public class Compiler {
 			this.requests = requests;
 			this.channels = channels;
 		}
+
+        private int emitIndex(Attribute a) {
+            int i = emit.indexOf(a);
+            if (i == -1) {
+                emit.add(a);
+            }
+            return emit.size() - 1;
+        }
 
 	}
 
