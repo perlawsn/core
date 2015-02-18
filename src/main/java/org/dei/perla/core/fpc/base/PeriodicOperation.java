@@ -15,8 +15,8 @@ public abstract class PeriodicOperation extends AbstractOperation<PeriodicTask> 
 	// Global sampling period expressed in milliseconds
 	protected volatile long currentPeriod;
 
-	public PeriodicOperation(String id, Collection<Attribute> attributes) {
-		super(id, attributes);
+	public PeriodicOperation(String id, List<Attribute> atts) {
+		super(id, atts);
 		this.currentPeriod = 0;
 	}
 

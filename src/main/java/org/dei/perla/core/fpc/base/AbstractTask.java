@@ -1,9 +1,6 @@
 package org.dei.perla.core.fpc.base;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.dei.perla.core.fpc.Attribute;
@@ -23,15 +20,15 @@ import org.dei.perla.core.engine.Record;
 public abstract class AbstractTask implements Task {
 
 	private AtomicBoolean running = new AtomicBoolean(true);
-	private final AbstractOperation<? extends AbstractTask> operation;
+	private final AbstractOperation<? extends AbstractTask> op;
 	private final RecordPipeline pipeline;
-	private final Collection<Attribute> attributes;
+	private final List<Attribute> atts;
 	private final TaskHandler handler;
 
 	/**
 	 * Instantiates a new {@code AbstractTask}.
 	 *
-	 * @param operation
+	 * @param op
 	 *            {@link AbstractOperation} from which this {@code AbstractTask}
 	 *            was scheduled
 	 * @param handler
@@ -41,23 +38,23 @@ public abstract class AbstractTask implements Task {
 	 *            {@link RecordPipeline} used to process new {@link Record}
 	 *            prior to notifying them to the {@link TaskHandler}.
 	 */
-	public AbstractTask(AbstractOperation<? extends AbstractTask> operation,
+	public AbstractTask(AbstractOperation<? extends AbstractTask> op,
 			TaskHandler handler, RecordPipeline pipeline) {
-		this.operation = operation;
+		this.op = op;
 		this.handler = handler;
 		this.pipeline = pipeline == RecordPipeline.EMPTY ? null : pipeline;
 
 		// Enrich the attribute set with all attributes added by the Pipeline
-		Set<Attribute> atts = new HashSet<>(operation.getAttributes());
+		List<Attribute> atts = new ArrayList<>(op.getAttributes());
 		if (pipeline != null) {
 			atts.addAll(pipeline.attributes());
 		}
-		this.attributes = Collections.unmodifiableSet(atts);
+		this.atts = Collections.unmodifiableList(atts);
 	}
 
 	@Override
-	public final Collection<Attribute> getAttributes() {
-		return attributes;
+	public final List<Attribute> getAttributes() {
+		return atts;
 	}
 
 	@Override
@@ -71,7 +68,7 @@ public abstract class AbstractTask implements Task {
 	 * @return {@link Operation} that scheduled this {@link Task}
 	 */
 	protected final Operation getOperation() {
-		return operation;
+		return op;
 	}
 
 	/**
@@ -88,7 +85,7 @@ public abstract class AbstractTask implements Task {
 			return;
 		}
 		doStop();
-		operation.remove(this);
+		op.remove(this);
 		handler.complete(this);
 	}
 
@@ -186,7 +183,7 @@ public abstract class AbstractTask implements Task {
 		if (!running.compareAndSet(true, false)) {
 			return;
 		}
-		operation.remove(this);
+		op.remove(this);
 		handler.complete(this);
 	}
 
@@ -210,7 +207,7 @@ public abstract class AbstractTask implements Task {
 		}
 
 		if (stop && running.compareAndSet(true, false)) {
-			operation.remove(this);
+			op.remove(this);
 		} else {
 			return;
 		}

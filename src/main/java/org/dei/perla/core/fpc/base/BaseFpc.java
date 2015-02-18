@@ -196,10 +196,10 @@ public class BaseFpc implements Fpc {
 	 */
 	private class CompletedTask implements Task {
 
-		private final Collection<? extends Attribute> attributes;
+		private final List<Attribute> atts;
 
-		public CompletedTask(Collection<? extends Attribute> attributes) {
-			this.attributes = attributes;
+		public CompletedTask(List<Attribute> atts) {
+			this.atts = atts;
 		}
 
 		@Override
@@ -208,8 +208,8 @@ public class BaseFpc implements Fpc {
 		}
 
 		@Override
-		public Collection<? extends Attribute> getAttributes() {
-			return attributes;
+		public List<Attribute> getAttributes() {
+			return atts;
 		}
 
 		@Override

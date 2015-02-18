@@ -1,22 +1,17 @@
 package org.dei.perla.core.fpc.base;
 
-import java.util.Collection;
+import org.dei.perla.core.engine.*;
+import org.dei.perla.core.fpc.Attribute;
+import org.dei.perla.core.fpc.TaskHandler;
+import org.dei.perla.core.message.FpcMessage;
+import org.dei.perla.core.message.Mapper;
+import org.dei.perla.core.utils.StopHandler;
+
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
-import org.dei.perla.core.fpc.Attribute;
-import org.dei.perla.core.fpc.TaskHandler;
-import org.dei.perla.core.engine.Executor;
-import org.dei.perla.core.engine.Record;
-import org.dei.perla.core.engine.Script;
-import org.dei.perla.core.engine.ScriptHandler;
-import org.dei.perla.core.engine.ScriptParameter;
-import org.dei.perla.core.message.FpcMessage;
-import org.dei.perla.core.message.Mapper;
-import org.dei.perla.core.utils.StopHandler;
 
 public class AsyncOperation extends AbstractOperation<AsyncOperation.AsyncTask> {
 
@@ -44,15 +39,15 @@ public class AsyncOperation extends AbstractOperation<AsyncOperation.AsyncTask> 
 
 	private volatile Record record = Record.EMPTY;
 
-	protected AsyncOperation(String id, Collection<Attribute> attributes,
+	protected AsyncOperation(String id, List<Attribute> atts,
 			Script startScript, AsyncMessageHandler handler,
 			ChannelManager channelMgr) {
-		super(id, attributes);
+		super(id, atts);
 		this.startScript = startScript;
 		this.asyncHandler = handler;
 
-		asyncPeriodicOp = new AsyncPeriodicOperation(id, attributes);
-		asyncOneoffOp = new AsyncOneoffOperation(id, attributes);
+		asyncPeriodicOp = new AsyncPeriodicOperation(id, atts);
+		asyncOneoffOp = new AsyncOneoffOperation(id, atts);
 
 		state = STARTED;
 		runStartScript();
@@ -168,9 +163,8 @@ public class AsyncOperation extends AbstractOperation<AsyncOperation.AsyncTask> 
 
 		private ScheduledFuture<?> timerFuture;
 
-		public AsyncPeriodicOperation(String id,
-				Collection<Attribute> attributes) {
-			super(id, attributes);
+		public AsyncPeriodicOperation(String id, List<Attribute> atts) {
+			super(id, atts);
 		}
 
 		@Override
@@ -208,8 +202,8 @@ public class AsyncOperation extends AbstractOperation<AsyncOperation.AsyncTask> 
 
 	private class AsyncOneoffOperation extends AbstractOperation<AsyncTask> {
 
-		public AsyncOneoffOperation(String id, Collection<Attribute> attributes) {
-			super(id, attributes);
+		public AsyncOneoffOperation(String id, List<Attribute> atts) {
+			super(id, atts);
 		}
 
 		@Override

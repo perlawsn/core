@@ -172,7 +172,7 @@ public class ConcreteOperationTest {
 		AsyncMessageHandler handler = new AsyncMessageHandler(
 				mmMap.get("event-msg"), asyncOnScript, "result");
 
-		asyncOp = new AsyncOperation("async_operation", Collections.emptySet(),
+		asyncOp = new AsyncOperation("async_operation", asyncOnScript.getEmit(),
 				asyncStartScript, handler, chMgr);
 
 		// Get operation and simulated periodic operation
@@ -201,7 +201,7 @@ public class ConcreteOperationTest {
                         attributeMap.get("string"), 3))
 				.add(new EmitInstruction()).add(new StopInstruction())
 				.buildScript("test");
-		getOp = new OneoffOperation("test", Collections.emptySet(), getScript);
+		getOp = new OneoffOperation("test", getScript.getEmit(), getScript);
 		simPeriodicOp = new SimulatedPeriodicOperation("test_sim", getScript);
 
 		// Set operation
@@ -222,7 +222,7 @@ public class ConcreteOperationTest {
 						mmMap.get("message1"))).add(new StopInstruction())
 				.buildScript("test");
 
-		setOp = new OneoffOperation("test", Collections.emptySet(), script);
+		setOp = new OneoffOperation("test", script.getEmit(), script);
 	}
 
 	@Test

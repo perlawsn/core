@@ -5,15 +5,14 @@ import org.dei.perla.core.fpc.Attribute;
 import org.dei.perla.core.fpc.TaskHandler;
 import org.dei.perla.core.utils.StopHandler;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 public class OneoffOperation extends AbstractOperation<AbstractTask> {
 
 	private final Script script;
 
-	public OneoffOperation(String id, Collection<Attribute> atts,
-            Script script) {
+	public OneoffOperation(String id, List<Attribute> atts, Script script) {
 		super(id, atts);
 		this.script = script;
 	}

@@ -502,7 +502,7 @@ public class BaseFpcFactory implements FpcFactory {
             ParsingContext ctx, Errors err) {
         Script start = null;
 
-        Set<Attribute> emitAtts = new HashSet<>();
+        List<Attribute> emitAtts = new ArrayList<>();
         AsyncMessageHandler handler = parseAsyncOnHandlerDescriptor(o, ctx,
                 err.inContext("async 'on' clause"), emitAtts);
         if (handler == null) {
@@ -531,7 +531,7 @@ public class BaseFpcFactory implements FpcFactory {
 
     private AsyncMessageHandler parseAsyncOnHandlerDescriptor(
             AsyncOperationDescriptor o, ParsingContext ctx, Errors err,
-            Set<Attribute> emitAtts) {
+            List<Attribute> emitAtts) {
         boolean hasErr = false;
         OnReceiveDescriptor onRecv= o.getOnReceive();
 
