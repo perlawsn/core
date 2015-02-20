@@ -1,13 +1,11 @@
 package org.dei.perla.core.descriptor;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
-import java.time.ZonedDateTime;
-
 import org.junit.Test;
+
+import java.time.Instant;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.*;
 
 public class DataTypeTest {
 
@@ -18,14 +16,14 @@ public class DataTypeTest {
 		assertTrue(DataType.getClass(DataType.BOOLEAN) == Boolean.class);
 		assertTrue(DataType.getClass(DataType.STRING) == String.class);
 		assertTrue(DataType.getClass(DataType.ID) == Integer.class);
-		assertTrue(DataType.getClass(DataType.TIMESTAMP) == ZonedDateTime.class);
+		assertTrue(DataType.getClass(DataType.TIMESTAMP) == Instant.class);
 
 		assertTrue(DataType.getJavaClass(DataType.INTEGER.getId()) == Integer.class);
 		assertTrue(DataType.getJavaClass(DataType.FLOAT.getId()) == Float.class);
 		assertTrue(DataType.getJavaClass(DataType.BOOLEAN.getId()) == Boolean.class);
 		assertTrue(DataType.getJavaClass(DataType.STRING.getId()) == String.class);
 		assertTrue(DataType.getJavaClass(DataType.ID.getId()) == Integer.class);
-		assertTrue(DataType.getJavaClass(DataType.TIMESTAMP.getId()) == ZonedDateTime.class);
+		assertTrue(DataType.getJavaClass(DataType.TIMESTAMP.getId()) == Instant.class);
 	}
 
 	@Test

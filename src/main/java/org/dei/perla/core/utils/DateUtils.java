@@ -1,5 +1,7 @@
 package org.dei.perla.core.utils;
 
+import org.dei.perla.core.message.Mapper;
+
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -7,8 +9,6 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
-
-import org.dei.perla.core.message.Mapper;
 
 public class DateUtils {
 
@@ -23,8 +23,8 @@ public class DateUtils {
 	 *            Source String
 	 * @return {@link Instant} object parsed from the string passed as parameter
 	 */
-	public static ZonedDateTime parse(DateTimeFormatter formatter, String string) {
-		ZonedDateTime now = null;
+	public static Instant parse(DateTimeFormatter formatter, String string) {
+		Instant now = null;
 		int year = 0;
 		int month = 0;
 		int dayOfMonth = 0;
@@ -38,44 +38,44 @@ public class DateUtils {
 		if (a.isSupported(ChronoField.YEAR)) {
 			year = a.get(ChronoField.YEAR);
 		} else {
-			now = ZonedDateTime.now();
-			year = now.getMonthValue();
+			now = Instant.now();
+            year = now.get(ChronoField.YEAR);
 		}
 
 		if (a.isSupported(ChronoField.MONTH_OF_YEAR)) {
 			month = a.get(ChronoField.MONTH_OF_YEAR);
 		} else {
 			if (now == null) {
-				now = ZonedDateTime.now();
+				now = Instant.now();
 			}
-			month = now.getMonthValue();
+            month = now.get(ChronoField.MONTH_OF_YEAR);
 		}
 
 		if (a.isSupported(ChronoField.DAY_OF_MONTH)) {
 			dayOfMonth = a.get(ChronoField.DAY_OF_MONTH);
 		} else {
 			if (now == null) {
-				now = ZonedDateTime.now();
+				now = Instant.now();
 			}
-			dayOfMonth = now.getDayOfMonth();
+            dayOfMonth = now.get(ChronoField.DAY_OF_MONTH);
 		}
 
 		if (a.isSupported(ChronoField.HOUR_OF_DAY)) {
 			hour = a.get(ChronoField.HOUR_OF_DAY);
 		} else {
 			if (now == null) {
-				now = ZonedDateTime.now();
+				now = Instant.now();
 			}
-			hour = now.getHour();
+            hour = now.get(ChronoField.HOUR_OF_DAY);
 		}
 
 		if (a.isSupported(ChronoField.MINUTE_OF_HOUR)) {
 			minute = a.get(ChronoField.MINUTE_OF_HOUR);
 		} else {
 			if (now == null) {
-				now = ZonedDateTime.now();
+				now = Instant.now();
 			}
-			minute = now.getMinute();
+            minute = now.get(ChronoField.MINUTE_OF_HOUR);
 		}
 
 		if (a.isSupported(ChronoField.SECOND_OF_MINUTE)) {
@@ -94,13 +94,13 @@ public class DateUtils {
 			ZoneId.ofOffset("UTC", ZoneOffset.from(a));
 		} else {
 			if (now == null) {
-				now = ZonedDateTime.now();
+				now = Instant.now();
 			}
-			zone = ZoneId.from(now);
+			zone = ZoneId.systemDefault();
 		}
 
 		return ZonedDateTime.of(year, month, dayOfMonth, hour,
-				minute, second, nanoOfSecond, zone);
+				minute, second, nanoOfSecond, zone).toInstant();
 	}
 
 	/**

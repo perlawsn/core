@@ -1,14 +1,17 @@
 package org.dei.perla.core.utils;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import org.junit.Test;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 
-import org.junit.Test;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertThat;
 
 public class DateUtilsTest {
 
@@ -18,16 +21,16 @@ public class DateUtilsTest {
 	public void testParse() {
 		String value = "3 Jun 2014 14:35";
 
-		ZonedDateTime d = DateUtils.parse(fmt, value);
-		assertThat(d, notNullValue());
-		assertThat(d.get(ChronoField.YEAR), equalTo(2014));
-		assertThat(d.get(ChronoField.MONTH_OF_YEAR), equalTo(6));
-		assertThat(d.get(ChronoField.DAY_OF_MONTH), equalTo(3));
-		assertThat(d.get(ChronoField.HOUR_OF_DAY), equalTo(14));
-		assertThat(d.get(ChronoField.MINUTE_OF_HOUR), equalTo(35));
-		assertThat(d.get(ChronoField.SECOND_OF_MINUTE), equalTo(0));
-		assertThat(d.get(ChronoField.NANO_OF_SECOND), equalTo(0));
-		assertThat(d.getZone(), equalTo(ZoneId.systemDefault()));
+		Instant d = DateUtils.parse(fmt, value);
+        assertThat(d, notNullValue());
+        ZonedDateTime zd = d.atZone(ZoneId.systemDefault());
+		assertThat(zd.get(ChronoField.YEAR), equalTo(2014));
+		assertThat(zd.get(ChronoField.MONTH_OF_YEAR), equalTo(6));
+		assertThat(zd.get(ChronoField.DAY_OF_MONTH), equalTo(3));
+		assertThat(zd.get(ChronoField.HOUR_OF_DAY), equalTo(14));
+		assertThat(zd.get(ChronoField.MINUTE_OF_HOUR), equalTo(35));
+		assertThat(zd.get(ChronoField.SECOND_OF_MINUTE), equalTo(0));
+		assertThat(zd.get(ChronoField.NANO_OF_SECOND), equalTo(0));
 	}
 
 	@Test

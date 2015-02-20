@@ -1,11 +1,10 @@
 package org.dei.perla.core.descriptor;
 
-import java.time.ZonedDateTime;
+import org.dei.perla.core.message.FpcMessage;
 
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
-
-import org.dei.perla.core.message.FpcMessage;
+import java.time.Instant;
 
 @XmlEnum
 public enum DataType {
@@ -127,7 +126,7 @@ public enum DataType {
 		case "id":
 			return Integer.class;
 		case "timestamp":
-			return ZonedDateTime.class;
+			return Instant.class;
 		default:
 			return FpcMessage.class;
 		}
@@ -156,7 +155,7 @@ public enum DataType {
 		case ID:
 			return Integer.class;
 		case TIMESTAMP:
-			return ZonedDateTime.class;
+			return Instant.class;
 		default:
 			throw new IllegalArgumentException("Unexpected PerLa type " + type);
 		}

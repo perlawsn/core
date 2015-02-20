@@ -8,6 +8,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 
 import java.io.File;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
 import java.util.ArrayList;
@@ -217,8 +219,8 @@ public class JsonMessageTest {
 
 		Object time = room.getField("time");
 		assertThat(time, notNullValue());
-		assertTrue(time instanceof ZonedDateTime);
-		ZonedDateTime t = (ZonedDateTime) time;
+		assertTrue(time instanceof Instant);
+		ZonedDateTime t = ((Instant) time).atZone(ZoneId.systemDefault());
 		assertThat(t.get(ChronoField.YEAR), equalTo(2014));
 		assertThat(t.get(ChronoField.MONTH_OF_YEAR), equalTo(6));
 		assertThat(t.get(ChronoField.DAY_OF_MONTH), equalTo(3));
