@@ -1,13 +1,16 @@
 package org.dei.perla.core.fpc.base;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.dei.perla.core.engine.Attribute;
 import org.dei.perla.core.fpc.FpcException;
 import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.TaskHandler;
-import org.dei.perla.core.engine.Record;
+import org.dei.perla.core.record.Attribute;
+import org.dei.perla.core.record.Record;
+import org.dei.perla.core.record.RecordPipeline;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * An abstract implementation of the {@link Task} interface. It is the base

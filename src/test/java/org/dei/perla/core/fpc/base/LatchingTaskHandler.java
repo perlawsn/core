@@ -4,7 +4,7 @@ import java.util.concurrent.CountDownLatch;
 
 import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.TaskHandler;
-import org.dei.perla.core.engine.Record;
+import org.dei.perla.core.record.Record;
 
 public class LatchingTaskHandler implements TaskHandler {
 

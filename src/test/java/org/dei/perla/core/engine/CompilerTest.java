@@ -33,6 +33,7 @@ import org.dei.perla.core.descriptor.instructions.SetInstructionDescriptor;
 import org.dei.perla.core.descriptor.instructions.StopInstructionDescriptor;
 import org.dei.perla.core.descriptor.instructions.SubmitInstructionDescriptor;
 import org.dei.perla.core.message.Mapper;
+import org.dei.perla.core.record.Attribute;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

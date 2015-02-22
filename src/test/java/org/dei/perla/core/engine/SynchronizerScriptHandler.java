@@ -1,5 +1,7 @@
 package org.dei.perla.core.engine;
 
+import org.dei.perla.core.record.Record;
+
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.locks.Condition;

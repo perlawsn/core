@@ -1,11 +1,17 @@
 package org.dei.perla.core.fpc.base;
 
-import org.dei.perla.core.engine.*;
-import org.dei.perla.core.engine.Attribute;
+import org.dei.perla.core.engine.EmitInstruction;
+import org.dei.perla.core.engine.Instruction;
+import org.dei.perla.core.engine.Script;
+import org.dei.perla.core.engine.StopInstruction;
 import org.dei.perla.core.fpc.Fpc;
 import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.TaskHandler;
-import org.dei.perla.core.fpc.base.RecordPipeline.PipelineBuilder;
+import org.dei.perla.core.record.Attribute;
+import org.dei.perla.core.record.Record;
+import org.dei.perla.core.record.RecordModifier;
+import org.dei.perla.core.record.RecordPipeline;
+import org.dei.perla.core.record.RecordPipeline.PipelineBuilder;
 import org.dei.perla.core.utils.StopHandler;
 
 import java.time.ZonedDateTime;

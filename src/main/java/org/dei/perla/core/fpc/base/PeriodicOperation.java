@@ -1,11 +1,12 @@
 package org.dei.perla.core.fpc.base;
 
+import org.dei.perla.core.fpc.TaskHandler;
+import org.dei.perla.core.record.Attribute;
+import org.dei.perla.core.record.RecordPipeline;
+import org.dei.perla.core.utils.Conditions;
+
 import java.util.List;
 import java.util.Map;
-
-import org.dei.perla.core.engine.Attribute;
-import org.dei.perla.core.fpc.TaskHandler;
-import org.dei.perla.core.utils.Conditions;
 
 public abstract class PeriodicOperation extends AbstractOperation<PeriodicTask> {
 

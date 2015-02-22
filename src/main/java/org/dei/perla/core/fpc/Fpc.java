@@ -3,7 +3,7 @@ package org.dei.perla.core.fpc;
 import java.util.Collection;
 import java.util.Map;
 
-import org.dei.perla.core.engine.Attribute;
+import org.dei.perla.core.record.Attribute;
 import org.dei.perla.core.utils.StopHandler;
 
 public interface Fpc {
@@ -25,9 +25,9 @@ public interface Fpc {
     public String getType();
 
     /**
-     * Returns the list of {@link org.dei.perla.core.engine.Attribute} managed by this {@code Fpc}
+     * Returns the list of {@link org.dei.perla.core.record.Attribute} managed by this {@code Fpc}
      *
-     * @return {@link org.dei.perla.core.engine.Attribute} managed by the {@code Fpc}
+     * @return {@link org.dei.perla.core.record.Attribute} managed by the {@code Fpc}
      */
     public Collection<Attribute> getAttributes();
 

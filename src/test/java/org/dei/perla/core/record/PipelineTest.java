@@ -1,9 +1,11 @@
-package org.dei.perla.core.fpc.base;
+package org.dei.perla.core.record;
 
 import org.dei.perla.core.descriptor.DataType;
-import org.dei.perla.core.engine.Record;
-import org.dei.perla.core.engine.Attribute;
-import org.dei.perla.core.fpc.base.RecordPipeline.PipelineBuilder;
+import org.dei.perla.core.record.Record;
+import org.dei.perla.core.record.Attribute;
+import org.dei.perla.core.record.RecordModifier;
+import org.dei.perla.core.record.RecordPipeline;
+import org.dei.perla.core.record.RecordPipeline.PipelineBuilder;
 import org.junit.Test;
 
 import java.time.ZonedDateTime;

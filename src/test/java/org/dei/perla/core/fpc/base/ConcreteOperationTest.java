@@ -41,7 +41,7 @@ import org.dei.perla.core.descriptor.MessageDescriptor;
 import org.dei.perla.core.engine.CreateComplexVarInstruction;
 import org.dei.perla.core.engine.EmitInstruction;
 import org.dei.perla.core.engine.PutInstruction;
-import org.dei.perla.core.engine.Record;
+import org.dei.perla.core.record.Record;
 import org.dei.perla.core.engine.Script;
 import org.dei.perla.core.engine.ScriptBuilder;
 import org.dei.perla.core.engine.SetComplexInstruction;
@@ -50,6 +50,7 @@ import org.dei.perla.core.engine.SubmitInstruction;
 import org.dei.perla.core.engine.SubmitInstruction.RequestParameter;
 import org.dei.perla.core.message.Mapper;
 import org.dei.perla.core.message.MapperFactory;
+import org.dei.perla.core.record.RecordPipeline;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

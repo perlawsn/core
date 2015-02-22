@@ -1,4 +1,4 @@
-package org.dei.perla.core.engine;
+package org.dei.perla.core.record;
 
 import java.util.Arrays;
 import java.util.Collections;

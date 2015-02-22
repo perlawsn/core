@@ -1,4 +1,4 @@
-package org.dei.perla.core.engine;
+package org.dei.perla.core.record;
 
 import org.dei.perla.core.descriptor.AttributeDescriptor;
 import org.dei.perla.core.descriptor.DataType;

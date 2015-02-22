@@ -2,7 +2,7 @@ package org.dei.perla.core.registry;
 
 import java.util.Collection;
 
-import org.dei.perla.core.engine.Attribute;
+import org.dei.perla.core.record.Attribute;
 import org.dei.perla.core.fpc.Fpc;
 
 public interface Registry {

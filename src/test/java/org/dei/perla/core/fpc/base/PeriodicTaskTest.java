@@ -12,7 +12,8 @@ import java.util.Collections;
 
 import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.TaskHandler;
-import org.dei.perla.core.engine.Record;
+import org.dei.perla.core.record.Record;
+import org.dei.perla.core.record.RecordPipeline;
 import org.dei.perla.core.utils.StopHandler;
 import org.junit.Test;
 

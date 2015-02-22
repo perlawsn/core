@@ -1,9 +1,11 @@
 package org.dei.perla.core.fpc.base;
 
-import org.dei.perla.core.engine.Attribute;
-import org.dei.perla.core.fpc.TaskHandler;
-import org.dei.perla.core.fpc.base.RecordPipeline.PipelineBuilder;
 import org.dei.perla.core.descriptor.DataType;
+import org.dei.perla.core.fpc.TaskHandler;
+import org.dei.perla.core.record.Attribute;
+import org.dei.perla.core.record.RecordModifier;
+import org.dei.perla.core.record.RecordPipeline;
+import org.dei.perla.core.record.RecordPipeline.PipelineBuilder;
 import org.dei.perla.core.utils.StopHandler;
 
 import java.util.*;

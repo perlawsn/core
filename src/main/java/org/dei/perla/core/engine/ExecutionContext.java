@@ -1,6 +1,8 @@
 package org.dei.perla.core.engine;
 
 import org.dei.perla.core.message.FpcMessage;
+import org.dei.perla.core.record.Attribute;
+import org.dei.perla.core.record.Record;
 import org.dei.perla.core.utils.Check;
 
 import javax.el.*;

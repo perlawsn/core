@@ -1,6 +1,4 @@
-package org.dei.perla.core.fpc.base;
-
-import org.dei.perla.core.engine.Attribute;
+package org.dei.perla.core.record;
 
 import java.time.ZonedDateTime;
 import java.util.*;

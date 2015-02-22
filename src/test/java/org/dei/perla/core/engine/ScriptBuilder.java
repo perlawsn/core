@@ -1,5 +1,7 @@
 package org.dei.perla.core.engine;
 
+import org.dei.perla.core.record.Attribute;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
