@@ -52,8 +52,7 @@ public final class Attribute implements Comparable<Attribute> {
 
         // Direct reference comparison. This can be performed since all
         // attributes are cached and interned.
-		Attribute att = (Attribute) obj;
-        return this == att;
+        return this == (Attribute) obj;
 	}
 
 	@Override
