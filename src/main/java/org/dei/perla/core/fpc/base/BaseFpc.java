@@ -179,7 +179,7 @@ public class BaseFpc implements Fpc {
                 values[i] = attValues.get(a);
                 i++;
             }
-            statAtts.add(Attribute.TIMESTAMP_ATTRIBUTE);
+            statAtts.add(Attribute.TIMESTAMP);
             values[i] = ZonedDateTime.now();
             return new Record(Collections.unmodifiableList(statAtts), values);
         }

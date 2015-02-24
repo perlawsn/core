@@ -1,10 +1,6 @@
 package org.dei.perla.core.record;
 
 import org.dei.perla.core.descriptor.DataType;
-import org.dei.perla.core.record.Record;
-import org.dei.perla.core.record.Attribute;
-import org.dei.perla.core.record.RecordModifier;
-import org.dei.perla.core.record.RecordPipeline;
 import org.dei.perla.core.record.RecordPipeline.PipelineBuilder;
 import org.junit.Test;
 
@@ -31,7 +27,7 @@ public class PipelineTest {
 	public void testTimestampAppender() {
 		RecordModifier tsAppend = new RecordModifier.TimestampAppender();
 		assertTrue(tsAppend.getAttributes().contains(
-				Attribute.TIMESTAMP_ATTRIBUTE));
+				Attribute.TIMESTAMP));
 
         Object[] r = new Object[1];
         assertThat(r[0], nullValue());
@@ -70,7 +66,7 @@ public class PipelineTest {
 
 		RecordPipeline p = b.create();
 		assertThat(p, notNullValue());
-		assertTrue(p.attributes().contains(Attribute.TIMESTAMP_ATTRIBUTE));
+		assertTrue(p.attributes().contains(Attribute.TIMESTAMP));
 		assertTrue(p.attributes().contains(a1));
 		assertFalse(p.attributes().contains(a2));
 

@@ -52,7 +52,7 @@ public class Scheduler {
 
 	private RecordPipeline createTimestampedPipeline(Operation op,
 			PipelineBuilder pBuilder) {
-		if (op.getAttributes().contains(Attribute.TIMESTAMP_ATTRIBUTE)) {
+		if (op.getAttributes().contains(Attribute.TIMESTAMP)) {
 			return pBuilder.create();
 		}
 
@@ -145,7 +145,7 @@ public class Scheduler {
 			// operation does not provide it natively (see method
 			// createTimestampedPipeline)
 			if (a.getId().compareToIgnoreCase(
-					Attribute.TIMESTAMP_ATTRIBUTE.getId()) == 0
+					Attribute.TIMESTAMP.getId()) == 0
 					&& a.getType() == DataType.TIMESTAMP) {
 				continue;
 			}

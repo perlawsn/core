@@ -41,7 +41,7 @@ public interface RecordModifier {
 		private static final List<Attribute> atts;
 
 		static {
-            Attribute[] a = new Attribute[]{Attribute.TIMESTAMP_ATTRIBUTE};
+            Attribute[] a = new Attribute[]{Attribute.TIMESTAMP};
             atts = Arrays.asList(a);
 		}
 
