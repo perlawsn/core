@@ -21,14 +21,14 @@ public class RecordTest {
 		Record empty = Record.EMPTY;
 		assertThat(empty, notNullValue());
 		assertTrue(empty.isEmpty());
-		assertTrue(empty.getAttributes().isEmpty());
-        assertThat(empty.getFields().length, equalTo(0));
+		assertTrue(empty.fields().isEmpty());
+        assertThat(empty.values().length, equalTo(0));
 
 		Record fromEmpty = Record.from(Collections.emptyMap());
 		assertThat(fromEmpty, notNullValue());
 		assertTrue(fromEmpty.isEmpty());
-		assertTrue(fromEmpty.getAttributes().isEmpty());
-        assertThat(fromEmpty.getFields().length, equalTo(0));
+		assertTrue(fromEmpty.fields().isEmpty());
+        assertThat(fromEmpty.values().length, equalTo(0));
 
 		Map<Attribute, Object> fieldMap = new HashMap<>();
 		fieldMap.put(Attribute.create("field1", DataType.STRING), "value1");
@@ -36,15 +36,15 @@ public class RecordTest {
 		Record fromMap = Record.from(fieldMap);
 		assertThat(fromMap, notNullValue());
 		assertFalse(fromMap.isEmpty());
-		assertFalse(fromMap.getAttributes().isEmpty());
+		assertFalse(fromMap.fields().isEmpty());
 		assertTrue(fromMap.hasField("field1"));
-		assertThat(fromMap.get("field1"), notNullValue());
-		assertTrue(fromMap.get("field1") instanceof String);
-		assertThat(fromMap.get("field1"), equalTo("value1"));
+		assertThat(fromMap.getValue("field1"), notNullValue());
+		assertTrue(fromMap.getValue("field1") instanceof String);
+		assertThat(fromMap.getValue("field1"), equalTo("value1"));
 		assertTrue(fromMap.hasField("field2"));
-		assertThat(fromMap.get("field2"), notNullValue());
-		assertTrue(fromMap.get("field2") instanceof String);
-		assertThat(fromMap.get("field2"), equalTo("value2"));
+		assertThat(fromMap.getValue("field2"), notNullValue());
+		assertTrue(fromMap.getValue("field2") instanceof String);
+		assertThat(fromMap.getValue("field2"), equalTo("value2"));
 	}
 
 	@Test
@@ -59,8 +59,8 @@ public class RecordTest {
                 ZonedDateTime.now());
 		Record r = Record.from(map);
 
-		for (Attribute a : r.getAttributes()) {
-            Object f = r.get(a.getId());
+		for (Attribute a : r.fields()) {
+            Object f = r.getValue(a.getId());
 			assertThat(f, notNullValue());
 			switch (a.getId()) {
 			case "integer":

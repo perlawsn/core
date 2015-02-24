@@ -1,5 +1,7 @@
 package org.dei.perla.core.record;
 
+import org.dei.perla.core.descriptor.DataType;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -19,31 +21,31 @@ public class Record {
 	public static final Record EMPTY =
             new Record(Collections.emptyList(), new Object[0]);
 
-    private final List<Attribute> atts;
-    private final Object[] fields;
+    private final List<Attribute> fields;
+    private final Object[] values;
 
-    public Record(List<Attribute> atts, Object[] fields) {
-        this.atts = Collections.unmodifiableList(atts);
-        this.fields = fields;
+    public Record(List<Attribute> fields, Object[] values) {
+        this.fields = Collections.unmodifiableList(fields);
+        this.values = values;
     }
 
     public static Record from(Map<Attribute, Object> entries) {
-        Attribute[] atts = new Attribute[entries.size()];
+        Attribute[] fields = new Attribute[entries.size()];
         Object[] values = new Object[entries.size()];
 
         int i = 0;
         for (Map.Entry<Attribute, Object> e : entries.entrySet()) {
-            atts[i] = e.getKey();
+            fields[i] = e.getKey();
             values[i] = e.getValue();
             i++;
         }
 
-        return new Record(Arrays.asList(atts), values);
+        return new Record(Arrays.asList(fields), values);
     }
 
     private int getIndex(String name) {
         int idx = 0;
-        for (Attribute a : atts) {
+        for (Attribute a : fields) {
             if (a.getId().equals(name)) {
                 return idx;
             }
@@ -64,13 +66,14 @@ public class Record {
     }
 
     /**
-     * Returns the list of {@link Attribute} objects associated with the
-     * {@code Record}. The implementation of the PerLa Middleware ensures
-     * the consistency between the order of the {@link Attributes} returned
-     * in this list and their respective values in the field array.
+     * Returns the list of fields contained within the {@code Record}.
+     *
+     * The implementation of the PerLa Middleware ensures the consistency
+     * between the order of the {@link Attributes} returned in this list and
+     * their respective values in the field array.
      */
-    public List<Attribute> getAttributes() {
-        return atts;
+    public List<Attribute> fields() {
+        return fields;
     }
 
 	/**
@@ -79,23 +82,30 @@ public class Record {
 	 *
 	 * @return Set of fields in the <code>Record</code>
 	 */
-	public Object[] getFields() {
-        return fields;
+	public Object[] values() {
+        return values;
     }
 
 	/**
 	 * Returns the value of a field contained in the {@code Record}.
      *
-	 * @param name
-	 *            {@link Attribute} name
+	 * @param name field name
 	 * @return Field value
 	 */
-	public Object get(String name) {
+	public Object getValue(String name) {
         int idx = getIndex(name);
         if (idx == -1) {
             return null;
         }
-        return fields[idx];
+        return values[idx];
+    }
+
+    public DataType getType(String name) {
+        int idx = getIndex(name);
+        if (idx == -1) {
+            return null;
+        }
+        return fields.get(idx).getType();
     }
 
 	/**
@@ -105,7 +115,7 @@ public class Record {
 	 *         otherwise
 	 */
 	public boolean isEmpty() {
-        return atts.isEmpty();
+        return fields.isEmpty();
     }
 
 }

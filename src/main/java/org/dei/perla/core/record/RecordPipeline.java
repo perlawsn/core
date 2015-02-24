@@ -72,7 +72,7 @@ public class RecordPipeline {
             return source;
         }
 
-        Object[] s = source.getFields();
+        Object[] s = source.values();
         Object[] r = Arrays.copyOf(s, s.length + mods.size());
         int i = s.length;
         for (RecordModifier m : mods) {
@@ -80,7 +80,7 @@ public class RecordPipeline {
             i += m.getAttributes().size();
         }
 
-        List<Attribute> sa = source.getAttributes();
+        List<Attribute> sa = source.fields();
         List<Attribute> al = new ArrayList<>(atts.size() + sa.size());
         al.addAll(sa);
         al.addAll(atts);

@@ -78,19 +78,19 @@ public class PipelineTest {
 		fieldMap.put(Attribute.create("source1", DataType.STRING), "source1");
         fieldMap.put(Attribute.create("source2", DataType.STRING), "source2");
 		Record source = Record.from(fieldMap);
-		assertThat(source.get("source1"), notNullValue());
-		assertThat(source.get("source2"), notNullValue());
-		assertThat(source.get("timestamp"), nullValue());
-		assertThat(source.get("a1"), nullValue());
-		assertThat(source.get("a2"), nullValue());
+		assertThat(source.getValue("source1"), notNullValue());
+		assertThat(source.getValue("source2"), notNullValue());
+		assertThat(source.getValue("timestamp"), nullValue());
+		assertThat(source.getValue("a1"), nullValue());
+		assertThat(source.getValue("a2"), nullValue());
 
 		Record output = p.run(source);
 		assertThat(output, notNullValue());
-		assertThat(output.get("source1"), notNullValue());
-		assertThat(output.get("source2"), notNullValue());
-		assertThat(output.get("timestamp"), notNullValue());
-		assertThat(output.get("a1"), notNullValue());
-		assertThat(output.get("a2"), nullValue());
+		assertThat(output.getValue("source1"), notNullValue());
+		assertThat(output.getValue("source2"), notNullValue());
+		assertThat(output.getValue("timestamp"), notNullValue());
+		assertThat(output.getValue("a1"), notNullValue());
+		assertThat(output.getValue("a2"), nullValue());
 	}
 
 	@Test
@@ -99,20 +99,20 @@ public class PipelineTest {
         fieldMap.put(Attribute.create("source1", DataType.STRING), "source1");
         fieldMap.put(Attribute.create("source2", DataType.STRING), "source2");
 		Record source = Record.from(fieldMap);
-		assertThat(source.get("source1"), notNullValue());
-		assertThat(source.get("source2"), notNullValue());
-		assertThat(source.get("timestamp"), nullValue());
-		assertThat(source.get("a1"), nullValue());
-		assertThat(source.get("a2"), nullValue());
+		assertThat(source.getValue("source1"), notNullValue());
+		assertThat(source.getValue("source2"), notNullValue());
+		assertThat(source.getValue("timestamp"), nullValue());
+		assertThat(source.getValue("a1"), nullValue());
+		assertThat(source.getValue("a2"), nullValue());
 
 		assertTrue(RecordPipeline.EMPTY.attributes().isEmpty());
 		Record output = RecordPipeline.EMPTY.run(source);
 		assertThat(output, notNullValue());
-		assertThat(output.get("source1"), notNullValue());
-		assertThat(output.get("source2"), notNullValue());
-		assertThat(output.get("timestamp"), nullValue());
-		assertThat(output.get("a1"), nullValue());
-		assertThat(output.get("a2"), nullValue());
+		assertThat(output.getValue("source1"), notNullValue());
+		assertThat(output.getValue("source2"), notNullValue());
+		assertThat(output.getValue("timestamp"), nullValue());
+		assertThat(output.getValue("a1"), nullValue());
+		assertThat(output.getValue("a2"), nullValue());
 	}
 
 }

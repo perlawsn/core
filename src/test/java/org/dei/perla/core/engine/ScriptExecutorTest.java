@@ -136,8 +136,8 @@ public class ScriptExecutorTest {
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(1));
 		Record record = result.get(0);
-		assertThat((Integer) record.get("integer"), equalTo(5));
-		assertThat((String) record.get("string"), equalTo("test"));
+		assertThat((Integer) record.getValue("integer"), equalTo(5));
+		assertThat((String) record.getValue("string"), equalTo("test"));
 	}
 
     @Test
@@ -163,12 +163,12 @@ public class ScriptExecutorTest {
         assertThat(res.size(), equalTo(1));
 
         Record r = res.get(0);
-        List<Attribute> atts = r.getAttributes();
-        assertThat(atts.size(), equalTo(2));
-        assertThat(atts.get(0), equalTo(Attribute.create(integer)));
-        assertThat(atts.get(1), equalTo(Attribute.create(string)));
+        List<Attribute> fields = r.fields();
+        assertThat(fields.size(), equalTo(2));
+        assertThat(fields.get(0), equalTo(Attribute.create(integer)));
+        assertThat(fields.get(1), equalTo(Attribute.create(string)));
 
-        Object[] values = r.getFields();
+        Object[] values = r.values();
         assertThat(values.length, equalTo(2));
         assertThat(values[0], equalTo(12));
         assertThat(values[1], equalTo("test_order"));

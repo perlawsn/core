@@ -240,9 +240,9 @@ public class ScriptInstructionsTest {
 		assertThat(recordList, notNullValue());
 		assertThat(recordList.size(), equalTo(3));
 
-		assertThat(recordList.get(0).get("integer"), equalTo(1));
-		assertThat(recordList.get(1).get("integer"), equalTo(2));
-		assertThat(recordList.get(2).get("integer"), equalTo(3));
+		assertThat(recordList.get(0).getValue("integer"), equalTo(1));
+		assertThat(recordList.get(1).getValue("integer"), equalTo(2));
+		assertThat(recordList.get(2).getValue("integer"), equalTo(3));
 	}
 
 	@Test
@@ -267,9 +267,9 @@ public class ScriptInstructionsTest {
 		assertThat(recordList, notNullValue());
 		assertThat(recordList.size(), equalTo(3));
 
-		assertThat(recordList.get(0).get("integer"), equalTo(0));
-		assertThat(recordList.get(1).get("integer"), equalTo(2));
-		assertThat(recordList.get(2).get("integer"), equalTo(6));
+		assertThat(recordList.get(0).getValue("integer"), equalTo(0));
+		assertThat(recordList.get(1).getValue("integer"), equalTo(2));
+		assertThat(recordList.get(2).getValue("integer"), equalTo(6));
 	}
 
 	@Test
@@ -471,8 +471,8 @@ public class ScriptInstructionsTest {
 		assertThat(recordList.size(), equalTo(1));
 
 		Record r = recordList.get(0);
-		for (Attribute a : r.getAttributes()) {
-            Object f = r.get(a.getId());
+		for (Attribute a : r.fields()) {
+            Object f = r.getValue(a.getId());
 			assertThat(f, notNullValue());
 			switch (a.getId()) {
 			case "integer":
@@ -524,8 +524,8 @@ public class ScriptInstructionsTest {
 		assertThat(recordList.size(), equalTo(1));
 
 		Record r = recordList.get(0);
-		for (Attribute a : r.getAttributes()) {
-            Object f = r.get(a.getId());
+		for (Attribute a : r.fields()) {
+            Object f = r.getValue(a.getId());
 			assertThat(f, notNullValue());
 			switch (a.getId()) {
 			case "integer":
@@ -585,8 +585,8 @@ public class ScriptInstructionsTest {
 		assertThat(recordList.size(), equalTo(3));
 
 		Record r = recordList.get(0);
-		for (Attribute a : r.getAttributes()) {
-            Object f = r.get(a.getId());
+		for (Attribute a : r.fields()) {
+            Object f = r.getValue(a.getId());
 			assertThat(f, notNullValue());
 			switch (a.getId()) {
 			case "integer":
@@ -606,8 +606,8 @@ public class ScriptInstructionsTest {
 		}
 
 		r = recordList.get(1);
-		for (Attribute a : r.getAttributes()) {
-            Object f = r.get(a.getId());
+		for (Attribute a : r.fields()) {
+            Object f = r.getValue(a.getId());
 			assertThat(f, notNullValue());
 			switch (a.getId()) {
 			case "integer":
@@ -627,8 +627,8 @@ public class ScriptInstructionsTest {
 		}
 
 		r = recordList.get(2);
-		for (Attribute a : r.getAttributes()) {
-            Object f = r.get(a.getId());
+		for (Attribute a : r.fields()) {
+            Object f = r.getValue(a.getId());
 			assertThat(f, notNullValue());
 			switch (a.getId()) {
 			case "integer":
@@ -692,10 +692,10 @@ public class ScriptInstructionsTest {
 
 		Record record = recordList.get(0);
 		assertThat(record, notNullValue());
-		assertThat(record.get("integer"), notNullValue());
-		assertThat((Integer) record.get("integer"), equalTo(5));
-		assertThat(record.get("string"), notNullValue());
-		assertThat((String) record.get("string"), equalTo("test"));
+		assertThat(record.getValue("integer"), notNullValue());
+		assertThat((Integer) record.getValue("integer"), equalTo(5));
+		assertThat(record.getValue("string"), notNullValue());
+		assertThat((String) record.getValue("string"), equalTo("test"));
 	}
 
 }

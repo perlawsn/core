@@ -238,22 +238,22 @@ public class ConcreteOperationTest {
 		assertFalse(task.isRunning());
 		assertThat(record, notNullValue());
 
-		Object value = record.get("integer");
+		Object value = record.getValue("integer");
 		assertThat(value, notNullValue());
 		assertTrue(value instanceof Integer);
 		assertThat((Integer) value, equalTo(5));
 
-		value = record.get("float");
+		value = record.getValue("float");
 		assertThat(value, notNullValue());
 		assertTrue(value instanceof Float);
 		assertThat((Float) value, equalTo(5.2f));
 
-		value = record.get("boolean");
+		value = record.getValue("boolean");
 		assertThat(value, notNullValue());
 		assertTrue(value instanceof Boolean);
 		assertThat((Boolean) value, equalTo(false));
 
-		value = record.get("string");
+		value = record.getValue("string");
 		assertThat(value, notNullValue());
 		assertTrue(value instanceof String);
 		assertThat((String) value, equalTo("test"));
@@ -500,7 +500,7 @@ public class ConcreteOperationTest {
 		assertTrue(task instanceof PeriodicTask);
 		Record result = handler.getLastRecord();
 		assertThat(result, notNullValue());
-		assertThat(result.get("event"), notNullValue());
+		assertThat(result.getValue("event"), notNullValue());
 	}
 
 	@Test
@@ -511,7 +511,7 @@ public class ConcreteOperationTest {
 		assertThat(task, notNullValue());
 		Record result = handler.getLastRecord();
 		assertThat(result, notNullValue());
-		assertThat(result.get("event"), notNullValue());
+		assertThat(result.getValue("event"), notNullValue());
 	}
 
 	@Test
@@ -530,13 +530,13 @@ public class ConcreteOperationTest {
 
 		Record result1 = handler1.getLastRecord();
 		assertThat(result1, notNullValue());
-		assertThat(result1.get("event"), notNullValue());
+		assertThat(result1.getValue("event"), notNullValue());
 		Record result2 = handler2.getLastRecord();
 		assertThat(result2, notNullValue());
-		assertThat(result2.get("event"), notNullValue());
+		assertThat(result2.getValue("event"), notNullValue());
 		Record result3 = handler3.getLastRecord();
 		assertThat(result3, notNullValue());
-		assertThat(result3.get("event"), notNullValue());
+		assertThat(result3.getValue("event"), notNullValue());
 	}
 
 }

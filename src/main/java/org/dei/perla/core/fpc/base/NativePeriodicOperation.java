@@ -301,11 +301,11 @@ public class NativePeriodicOperation extends PeriodicOperation {
 		}
 
         private Record merge(Record r) {
-            Object[] values = r.getFields();
+            Object[] values = r.values();
 
             rlk.lock();
             try {
-                for (int i = 0; i < r.getAttributes().size(); i++) {
+                for (int i = 0; i < values.length; i++) {
                     currentRecord[base + i] = values[i];
                 }
                 return new Record(atts, currentRecord);
