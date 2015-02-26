@@ -11,6 +11,7 @@ import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
@@ -176,7 +177,7 @@ public class UrlEncodedMessageTest {
 
 		ZonedDateTime now = ZonedDateTime.now();
 		String nowString = now.format(DateTimeFormatter
-				.ofPattern("d MMM uuuu HH:mm"));
+				.ofPattern("d MMM uuuu HH:mm").withLocale(Locale.ENGLISH));
 
 		message.setField("temperature", 45);
 		message.setField("pressure", 874);
