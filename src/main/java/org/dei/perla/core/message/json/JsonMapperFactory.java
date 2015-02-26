@@ -324,7 +324,7 @@ public class JsonMapperFactory extends AbstractMapperFactory {
 			ctx.constructorCode.append("java.time.format.DateTimeFormatter fmt;"
 					+ "fmt = java.time.format.DateTimeFormatter.ofPattern(\""
 					+ field.getFormat()
-					+ "\");"
+					+ "\").withLocale(Locale.ENGLISH);"
 					+ "$0."
 					+ field.getName()
 					+ " = org.dei.perla.core.utils.DateUtils.format(fmt, " + field.getValue() + ");");
