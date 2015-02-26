@@ -3,11 +3,11 @@ package org.dei.perla.core.utils;
 import org.junit.Test;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
+import java.util.Locale;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -15,7 +15,9 @@ import static org.junit.Assert.assertThat;
 
 public class DateUtilsTest {
 
-	DateTimeFormatter fmt = DateTimeFormatter.ofPattern("d MMM uuuu HH:mm");
+	DateTimeFormatter fmt =
+            DateTimeFormatter.ofPattern("d MMM uuuu HH:mm")
+                    .withLocale(Locale.ENGLISH);
 
 	@Test
 	public void testParse() {
