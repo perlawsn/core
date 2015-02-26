@@ -324,7 +324,7 @@ public class JsonMapperFactory extends AbstractMapperFactory {
 			ctx.constructorCode.append("java.time.format.DateTimeFormatter fmt;"
 					+ "fmt = java.time.format.DateTimeFormatter.ofPattern(\""
 					+ field.getFormat()
-					+ "\").withLocale(Locale.ENGLISH);"
+					+ "\").withLocale(java.util.Locale.ENGLISH);"
 					+ "$0."
 					+ field.getName()
 					+ " = org.dei.perla.core.utils.DateUtils.format(fmt, " + field.getValue() + ");");
@@ -362,7 +362,8 @@ public class JsonMapperFactory extends AbstractMapperFactory {
 				+ "\".equals($1)) "
 				+ "{ java.time.format.DateTimeFormatter fmt;"
 				+ "fmt = java.time.format.DateTimeFormatter.ofPattern(\""
-				+ field.getFormat() + "\");"
+				+ field.getFormat() + "\")"
+                + ".withLocale(java.util.Locale.ENGLISH);"
 				+ "return org.dei.perla.core.utils.DateUtils.parse(fmt, $0."
 				+ field.getName() + "); }");
 
@@ -373,7 +374,7 @@ public class JsonMapperFactory extends AbstractMapperFactory {
 							+ "\".equals($1)) { java.time.format.DateTimeFormatter fmt;"
 							+ "fmt = java.time.format.DateTimeFormatter.ofPattern(\""
 							+ field.getFormat()
-							+ "\");"
+							+ "\").withLocale(java.util.Locale.ENGLISH);"
 							+ "$0."
 							+ field.getName()
 							+ " = org.dei.perla.core.utils.DateUtils.format(fmt, $2); return; }");
