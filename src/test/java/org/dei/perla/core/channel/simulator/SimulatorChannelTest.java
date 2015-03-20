@@ -1,34 +1,25 @@
 package org.dei.perla.core.channel.simulator;
 
-import static org.hamcrest.CoreMatchers.both;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.number.OrderingComparison.greaterThanOrEqualTo;
-import static org.hamcrest.number.OrderingComparison.lessThanOrEqualTo;
-import static org.hamcrest.text.IsEmptyString.isEmptyOrNullString;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import org.dei.perla.core.channel.*;
+import org.dei.perla.core.descriptor.DeviceDescriptor;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
-import java.time.ZonedDateTime;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.stream.StreamSource;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.transform.stream.StreamSource;
-
-import org.dei.perla.core.channel.Channel;
-import org.dei.perla.core.channel.IOHandler;
-import org.dei.perla.core.channel.IORequest;
-import org.dei.perla.core.channel.IOTask;
-import org.dei.perla.core.channel.Payload;
-import org.dei.perla.core.channel.SynchronizerIOHandler;
-import org.dei.perla.core.descriptor.DeviceDescriptor;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.number.OrderingComparison.greaterThanOrEqualTo;
+import static org.hamcrest.number.OrderingComparison.lessThanOrEqualTo;
+import static org.hamcrest.text.IsEmptyString.isEmptyOrNullString;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class SimulatorChannelTest {
 
@@ -259,7 +250,7 @@ public class SimulatorChannelTest {
                                     lessThanOrEqualTo(32f + 1)));
                     break;
                 case "timestamp":
-                    assertTrue(entry.getValue() instanceof ZonedDateTime);
+                    assertTrue(entry.getValue() instanceof Instant);
                     break;
                 default:
                     throw new RuntimeException(

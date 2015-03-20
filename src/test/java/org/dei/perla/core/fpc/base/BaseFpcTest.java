@@ -1,32 +1,32 @@
 package org.dei.perla.core.fpc.base;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import org.dei.perla.core.channel.ChannelFactory;
+import org.dei.perla.core.channel.IORequestBuilderFactory;
+import org.dei.perla.core.channel.simulator.SimulatorChannelFactory;
+import org.dei.perla.core.channel.simulator.SimulatorIORequestBuilderFactory;
+import org.dei.perla.core.channel.simulator.SimulatorMapperFactory;
+import org.dei.perla.core.descriptor.DataType;
+import org.dei.perla.core.descriptor.DeviceDescriptor;
+import org.dei.perla.core.descriptor.JaxbDeviceDescriptorParser;
+import org.dei.perla.core.fpc.Fpc;
+import org.dei.perla.core.fpc.FpcFactory;
+import org.dei.perla.core.fpc.Task;
+import org.dei.perla.core.message.MapperFactory;
+import org.dei.perla.core.record.Attribute;
+import org.dei.perla.core.record.Record;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.FileInputStream;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import org.dei.perla.core.channel.ChannelFactory;
-import org.dei.perla.core.channel.IORequestBuilderFactory;
-import org.dei.perla.core.channel.simulator.SimulatorChannelFactory;
-import org.dei.perla.core.channel.simulator.SimulatorIORequestBuilderFactory;
-import org.dei.perla.core.channel.simulator.SimulatorMapperFactory;
-import org.dei.perla.core.record.Attribute;
-import org.dei.perla.core.fpc.Fpc;
-import org.dei.perla.core.fpc.FpcFactory;
-import org.dei.perla.core.fpc.Task;
-import org.dei.perla.core.descriptor.DataType;
-import org.dei.perla.core.descriptor.DeviceDescriptor;
-import org.dei.perla.core.descriptor.JaxbDeviceDescriptorParser;
-import org.dei.perla.core.record.Record;
-import org.dei.perla.core.message.MapperFactory;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 public class BaseFpcTest {
 
@@ -76,7 +76,7 @@ public class BaseFpcTest {
 		assertTrue(record.getValue("integer") instanceof Integer);
 		// Check if the Fpc is adding the timestamp
 		assertThat(record.getValue("timestamp"), notNullValue());
-		assertTrue(record.getValue("timestamp") instanceof ZonedDateTime);
+		assertTrue(record.getValue("timestamp") instanceof Instant);
 
 		// string-get
 		attributeList.clear();
@@ -90,7 +90,7 @@ public class BaseFpcTest {
 		assertTrue(record.getValue("string") instanceof String);
 		// Check if the Fpc is adding the timestamp
 		assertThat(record.getValue("timestamp"), notNullValue());
-		assertTrue(record.getValue("timestamp") instanceof ZonedDateTime);
+		assertTrue(record.getValue("timestamp") instanceof Instant);
 	}
 
 	@Test
@@ -112,7 +112,7 @@ public class BaseFpcTest {
 		assertTrue(record.getValue("integer") instanceof Integer);
 		// Check if the Fpc is adding the timestamp
 		assertThat(record.getValue("timestamp"), notNullValue());
-		assertTrue(record.getValue("timestamp") instanceof ZonedDateTime);
+		assertTrue(record.getValue("timestamp") instanceof Instant);
 		// Check if the Fpc is adding the requested static attribute
 		assertThat(record.getValue("static"), notNullValue());
 		assertTrue(record.getValue("static") instanceof Integer);
@@ -135,7 +135,7 @@ public class BaseFpcTest {
 		assertThat(record, notNullValue());
 		// Check if the Fpc is adding the timestamp
 		assertThat(record.getValue("timestamp"), notNullValue());
-		assertTrue(record.getValue("timestamp") instanceof ZonedDateTime);
+		assertTrue(record.getValue("timestamp") instanceof Instant);
 		// Check if the Fpc is adding the requested static attribute
 		assertThat(record.getValue("static"), notNullValue());
 		assertTrue(record.getValue("static") instanceof Integer);
@@ -168,7 +168,7 @@ public class BaseFpcTest {
 		assertTrue(record.getValue("integer") instanceof Integer);
 		// Check if the Fpc is adding the timestamp
 		assertThat(record.getValue("timestamp"), notNullValue());
-		assertTrue(record.getValue("timestamp") instanceof ZonedDateTime);
+		assertTrue(record.getValue("timestamp") instanceof Instant);
 
 		// Request string and float
 		attributeList = new ArrayList<>();
@@ -191,7 +191,7 @@ public class BaseFpcTest {
 		assertTrue(record.getValue("float") instanceof Float);
 		// Check if the Fpc is adding the timestamp
 		assertThat(record.getValue("timestamp"), notNullValue());
-		assertTrue(record.getValue("timestamp") instanceof ZonedDateTime);
+		assertTrue(record.getValue("timestamp") instanceof Instant);
 
 		// Check if both tasks are backed by the same Operation
 		PeriodicTask pTask1 = (PeriodicTask) task1;
@@ -233,7 +233,7 @@ public class BaseFpcTest {
 		assertTrue(record.getValue("integer") instanceof Integer);
 		// Check if the Fpc is adding the timestamp
 		assertThat(record.getValue("timestamp"), notNullValue());
-		assertTrue(record.getValue("timestamp") instanceof ZonedDateTime);
+		assertTrue(record.getValue("timestamp") instanceof Instant);
 		// Check if the Fpc is adding the requested static attribute
 		assertThat(record.getValue("static"), notNullValue());
 		assertTrue(record.getValue("static") instanceof Integer);
@@ -261,7 +261,7 @@ public class BaseFpcTest {
 		assertThat(record, notNullValue());
 		// Check if the Fpc is adding the timestamp
 		assertThat(record.getValue("timestamp"), notNullValue());
-		assertTrue(record.getValue("timestamp") instanceof ZonedDateTime);
+		assertTrue(record.getValue("timestamp") instanceof Instant);
 		// Check if the Fpc is adding the requested static attribute
 		assertThat(record.getValue("static"), notNullValue());
 		assertTrue(record.getValue("static") instanceof Integer);
@@ -294,7 +294,7 @@ public class BaseFpcTest {
 		assertTrue(record.getValue("integer") instanceof Integer);
 		// Check if the Fpc is adding the timestamp
 		assertThat(record.getValue("timestamp"), notNullValue());
-		assertTrue(record.getValue("timestamp") instanceof ZonedDateTime);
+		assertTrue(record.getValue("timestamp") instanceof Instant);
 	}
 
 	@Test
@@ -330,7 +330,7 @@ public class BaseFpcTest {
 		assertTrue(record.getValue("event") instanceof Boolean);
 		// Check if the Fpc is adding the timestamp
 		assertThat(record.getValue("timestamp"), notNullValue());
-		assertTrue(record.getValue("timestamp") instanceof ZonedDateTime);
+		assertTrue(record.getValue("timestamp") instanceof Instant);
 	}
 
 	@Test
@@ -370,7 +370,7 @@ public class BaseFpcTest {
 		assertTrue(record.getValue("event") instanceof Boolean);
 		// Check if the Fpc is adding the timestamp
 		assertThat(record.getValue("timestamp"), notNullValue());
-		assertTrue(record.getValue("timestamp") instanceof ZonedDateTime);
+		assertTrue(record.getValue("timestamp") instanceof Instant);
 	}
 
 }

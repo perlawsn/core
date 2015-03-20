@@ -14,7 +14,7 @@ import org.dei.perla.core.record.RecordPipeline;
 import org.dei.perla.core.record.RecordPipeline.PipelineBuilder;
 import org.dei.perla.core.utils.StopHandler;
 
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.*;
 
 public class BaseFpc implements Fpc {
@@ -180,7 +180,7 @@ public class BaseFpc implements Fpc {
                 i++;
             }
             statAtts.add(Attribute.TIMESTAMP);
-            values[i] = ZonedDateTime.now();
+            values[i] = Instant.now();
             return new Record(Collections.unmodifiableList(statAtts), values);
         }
 

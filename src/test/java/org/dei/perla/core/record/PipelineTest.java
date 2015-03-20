@@ -4,7 +4,7 @@ import org.dei.perla.core.descriptor.DataType;
 import org.dei.perla.core.record.RecordPipeline.PipelineBuilder;
 import org.junit.Test;
 
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -33,7 +33,7 @@ public class PipelineTest {
         assertThat(r[0], nullValue());
 		tsAppend.process(r, 0);
         assertThat(r[0], notNullValue());
-        assertTrue(r[0] instanceof ZonedDateTime);
+        assertTrue(r[0] instanceof Instant);
 	}
 
 	@Test

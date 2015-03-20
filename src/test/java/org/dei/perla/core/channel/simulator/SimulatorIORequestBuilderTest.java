@@ -1,15 +1,5 @@
 package org.dei.perla.core.channel.simulator;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.transform.stream.StreamSource;
-
 import org.dei.perla.core.channel.IORequest;
 import org.dei.perla.core.channel.IORequestBuilder;
 import org.dei.perla.core.channel.IORequestBuilder.IORequestParameter;
@@ -19,6 +9,14 @@ import org.dei.perla.core.descriptor.IORequestDescriptor;
 import org.dei.perla.core.descriptor.InvalidDeviceDescriptorException;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.stream.StreamSource;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.*;
 
 public class SimulatorIORequestBuilderTest {
 

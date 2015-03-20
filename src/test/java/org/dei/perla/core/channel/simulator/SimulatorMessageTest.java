@@ -1,16 +1,5 @@
 package org.dei.perla.core.channel.simulator;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.transform.stream.StreamSource;
-
 import org.dei.perla.core.channel.Payload;
 import org.dei.perla.core.descriptor.AttributeDescriptor;
 import org.dei.perla.core.descriptor.DeviceDescriptor;
@@ -20,6 +9,17 @@ import org.dei.perla.core.message.Mapper;
 import org.dei.perla.core.message.MapperFactory;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.stream.StreamSource;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.*;
 
 public class SimulatorMessageTest {
 

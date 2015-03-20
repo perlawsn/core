@@ -1,11 +1,9 @@
 package org.dei.perla.core.record;
 
 import org.dei.perla.core.descriptor.DataType;
-import org.dei.perla.core.record.Attribute;
-import org.dei.perla.core.record.Record;
 import org.junit.Test;
 
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -56,7 +54,7 @@ public class RecordTest {
 		map.put(Attribute.create("string", DataType.STRING), "test");
 		map.put(Attribute.create("id", DataType.ID), 9);
 		map.put(Attribute.create("timestamp", DataType.TIMESTAMP),
-                ZonedDateTime.now());
+                Instant.now());
 		Record r = Record.from(map);
 
 		for (Attribute a : r.fields()) {
@@ -90,7 +88,7 @@ public class RecordTest {
 				break;
 			case "timestamp":
                 assertThat(a.getType(), equalTo(DataType.TIMESTAMP));
-				assertTrue(f instanceof ZonedDateTime);
+				assertTrue(f instanceof Instant);
 				assertThat(f, notNullValue());
 				break;
 			default:

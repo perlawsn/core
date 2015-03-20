@@ -1,6 +1,6 @@
 package org.dei.perla.core.record;
 
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.*;
 
 /**
@@ -52,7 +52,7 @@ public interface RecordModifier {
 
 		@Override
 		public void process(Object[] record, int idx) {
-            record[idx] = ZonedDateTime.now();
+            record[idx] = Instant.now();
 		}
 
 	}

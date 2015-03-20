@@ -2,7 +2,7 @@ package org.dei.perla.core.channel.simulator;
 
 import org.dei.perla.core.channel.simulator.GeneratorFieldDescriptor.GeneratorFieldStrategy;
 
-import java.time.ZonedDateTime;
+import java.time.Instant;
 
 /**
  * Abstract class for generating random field values
@@ -120,8 +120,8 @@ public abstract class DynamicFieldGenerator extends FieldGenerator {
         }
 
         @Override
-        public ZonedDateTime generateValue() {
-            return ZonedDateTime.now();
+        public Instant generateValue() {
+            return Instant.now();
         }
 
     }

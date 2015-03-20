@@ -1,11 +1,13 @@
 package org.dei.perla.core.channel.simulator;
 
-import org.dei.perla.core.channel.simulator.FieldGenerator.StaticFieldGenerator;
 import org.dei.perla.core.channel.simulator.DynamicFieldGenerator.*;
+import org.dei.perla.core.channel.simulator.FieldGenerator.StaticFieldGenerator;
 import org.dei.perla.core.channel.simulator.StepFieldGenerator.StepFloatFieldGenerator;
 import org.dei.perla.core.channel.simulator.StepFieldGenerator.StepIntFieldGenerator;
 import org.junit.Test;
 
+import java.time.Instant;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -74,11 +76,12 @@ public class ValueGeneratorTest {
     public void testTimestampFieldGenerator() {
         DynamicTimestampFieldGenerator generator = new DynamicTimestampFieldGenerator("timestamp");
 
-        ZonedDateTime generated = generator.generateValue();
+        Instant i = generator.generateValue();
+        ZonedDateTime gen = ZonedDateTime.ofInstant(i, ZoneId.systemDefault());
         ZonedDateTime now = ZonedDateTime.now();
-        assertThat(generated.getYear(), equalTo(now.getYear()));
-        assertThat(generated.getMonth(), equalTo(now.getMonth()));
-        assertThat(generated.getDayOfMonth(), equalTo(now.getDayOfMonth()));
+        assertThat(gen.getYear(), equalTo(now.getYear()));
+        assertThat(gen.getMonth(), equalTo(now.getMonth()));
+        assertThat(gen.getDayOfMonth(), equalTo(now.getDayOfMonth()));
     }
 
     @Test
