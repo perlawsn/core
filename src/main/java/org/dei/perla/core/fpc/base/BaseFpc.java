@@ -5,6 +5,7 @@ import org.dei.perla.core.engine.Instruction;
 import org.dei.perla.core.engine.Script;
 import org.dei.perla.core.engine.StopInstruction;
 import org.dei.perla.core.fpc.Fpc;
+import org.dei.perla.core.fpc.Period;
 import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.TaskHandler;
 import org.dei.perla.core.record.Attribute;
@@ -91,6 +92,12 @@ public class BaseFpc implements Fpc {
 
 		return sched.get(req.dynAtts, handler, pBuilder);
 	}
+
+    @Override
+    public Task get(Collection<Attribute> atts, Period period,
+            TaskHandler handler) {
+        return get(atts, period.toMillis(), handler);
+    }
 
 	@Override
 	public Task get(Collection<Attribute> atts, long periodMs,

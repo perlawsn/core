@@ -25,7 +25,8 @@ public interface Fpc {
     public String getType();
 
     /**
-     * Returns the list of {@link org.dei.perla.core.record.Attribute} managed by this {@code Fpc}
+     * Returns the list of {@link org.dei.perla.core.record.Attribute} managed
+     * by this {@code Fpc}.
      *
      * @return {@link org.dei.perla.core.record.Attribute} managed by the {@code Fpc}
      */
@@ -35,7 +36,10 @@ public interface Fpc {
 
     public Task get(Collection<Attribute> atts, TaskHandler handler);
 
-    public Task get(Collection<Attribute> attributes, long periodMs,
+    public Task get(Collection<Attribute> atts, Period period,
+            TaskHandler handler);
+
+    public Task get(Collection<Attribute> atts, long periodMs,
             TaskHandler handler);
 
     public Task async(Collection<Attribute> atts, TaskHandler handler);
