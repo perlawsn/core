@@ -1,15 +1,14 @@
 package org.dei.perla.core.registry;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-
-import org.dei.perla.core.fpc.Period;
-import org.dei.perla.core.record.Attribute;
 import org.dei.perla.core.fpc.Fpc;
 import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.TaskHandler;
+import org.dei.perla.core.record.Attribute;
 import org.dei.perla.core.utils.StopHandler;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
 
 public class FakeFpc implements Fpc {
 
@@ -43,12 +42,6 @@ public class FakeFpc implements Fpc {
 	public Task get(Collection<Attribute> attributes, TaskHandler handler) {
 		throw new UnsupportedOperationException();
 	}
-
-    @Override
-    public Task get(Collection<Attribute> attributes, Period period,
-            TaskHandler handler) {
-        throw new UnsupportedOperationException();
-    }
 
 	@Override
 	public Task get(Collection<Attribute> attributes, long periodMs,
