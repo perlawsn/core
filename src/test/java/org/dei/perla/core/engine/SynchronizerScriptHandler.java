@@ -1,7 +1,5 @@
 package org.dei.perla.core.engine;
 
-import org.dei.perla.core.record.Record;
-
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.locks.Condition;
@@ -21,10 +19,11 @@ public class SynchronizerScriptHandler implements ScriptHandler {
 	private final Condition doneCond = lock.newCondition();
 
 	private boolean done = false;
-	private List<Record> result = null;
+	private List<Object[]> samples = null;
 	private Throwable exception = null;
 
-	public List<Record> getResult() throws ExecutionException, InterruptedException {
+	public List<Object[]> getResult() throws ExecutionException,
+			InterruptedException {
 		lock.lock();
 		try {
 
@@ -34,7 +33,7 @@ public class SynchronizerScriptHandler implements ScriptHandler {
 			if (exception != null) {
 				throw new ExecutionException(exception);
 			}
-			return result;
+			return samples;
 
 		} finally {
 			lock.unlock();
@@ -42,10 +41,10 @@ public class SynchronizerScriptHandler implements ScriptHandler {
 	}
 
 	@Override
-	public void complete(Script script, List<Record> result) {
+	public void complete(Script script, List<Object[]> samples) {
 		lock.lock();
 		try {
-			this.result = result;
+			this.samples = samples;
 			done = true;
 			doneCond.signal();
 		} finally {

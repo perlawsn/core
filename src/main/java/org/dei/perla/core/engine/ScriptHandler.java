@@ -1,7 +1,5 @@
 package org.dei.perla.core.engine;
 
-import org.dei.perla.core.record.Record;
-
 import java.util.List;
 
 /**
@@ -23,7 +21,7 @@ public interface ScriptHandler {
 	 * @param result
 	 *            Result of the operation
 	 */
-	public void complete(Script script, List<Record> recordList);
+	public void complete(Script script, List<Object[]> samples);
 
 	/**
 	 * Invoked when an <code>Script</code> completes with an error

@@ -55,7 +55,7 @@ public class Runner {
 		this.breakpoint = false;
 		this.state = new AtomicInteger(NEW);
 		this.ctx = getContext();
-		this.ctx.init(script.getEmit(), params);
+		this.ctx.init(script.getEmit().size(), params);
 	}
 
 	/**
@@ -110,7 +110,7 @@ public class Runner {
 		if (!state.compareAndSet(RUNNING, STOPPED)) {
 			return;
 		}
-		handler.complete(script, ctx.getRecordList());
+		handler.complete(script, ctx.getSamples());
 		relinquishContext(ctx);
 	}
 

@@ -53,9 +53,9 @@ public class ScriptTask extends AbstractTask {
 	private class OneoffScriptHandler implements ScriptHandler {
 
 		@Override
-		public void complete(Script script, List<Record> recordList) {
-			for (Record record : recordList) {
-				processRecord(record);
+		public void complete(Script script, List<Object[]> samples) {
+			for (Object[] s : samples) {
+				processRecord(new Record(script.getEmit(), s));
 			}
 			notifyComplete();
 		}

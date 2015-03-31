@@ -42,7 +42,7 @@ public class AsyncOperation extends AbstractOperation<AsyncOperation.AsyncTask> 
 	private final AsyncPeriodicOperation asyncPeriodicOp;
 	private final AsyncOneoffOperation asyncOneoffOp;
 
-	private volatile Record record = Record.EMPTY;
+	private volatile Record sample = Record.EMPTY;
 
 	protected AsyncOperation(String id, List<Attribute> atts,
 			Script startScript, AsyncMessageHandler handler,
@@ -108,7 +108,7 @@ public class AsyncOperation extends AbstractOperation<AsyncOperation.AsyncTask> 
 	private class StartHandler implements ScriptHandler {
 
 		@Override
-		public void complete(Script script, List<Record> recordList) {
+		public void complete(Script script, List<Object[]> samples) {
 			// Does nothing, AsyncOperation are set as "STARTED" by default
 		}
 
@@ -136,10 +136,13 @@ public class AsyncOperation extends AbstractOperation<AsyncOperation.AsyncTask> 
 	private class OnHandler implements ScriptHandler {
 
 		@Override
-		public void complete(Script script, List<Record> recordList) {
-			recordList.forEach(r -> forEachTask(t -> t.processRecord(r)));
-			int last = recordList.size() - 1;
-			record = recordList.get(last);
+		public void complete(Script script, List<Object[]> samples) {
+			samples.forEach(s -> forEachTask(t -> {
+				Record r = new Record(script.getEmit(), s);
+				t.processRecord(r);
+			}));
+			int last = samples.size() - 1;
+			sample = new Record(script.getEmit(), samples.get(last));
 		}
 
 		@Override
@@ -190,7 +193,7 @@ public class AsyncOperation extends AbstractOperation<AsyncOperation.AsyncTask> 
 				}
 
 				timerFuture = executor.scheduleAtFixedRate(
-						() -> forEachTask(t -> t.newRecord(record)), 0, period,
+						() -> forEachTask(t -> t.newRecord(sample)), 0, period,
 						TimeUnit.MILLISECONDS);
 				currentPeriod = period;
 				forEachTask(t -> t.setInputPeriod(period));
@@ -229,7 +232,7 @@ public class AsyncOperation extends AbstractOperation<AsyncOperation.AsyncTask> 
 				// operation runs asynchronously, we have no way to know when
 				// new data will arrive
 				AsyncTask task = new AsyncTask(this, handler, pipeline);
-				task.processRecord(record);
+				task.processRecord(sample);
 				task.notifyComplete();
 				return task;
 			});

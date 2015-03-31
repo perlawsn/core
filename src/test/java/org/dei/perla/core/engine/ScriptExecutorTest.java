@@ -6,8 +6,6 @@ import org.dei.perla.core.descriptor.AttributeDescriptor.AttributePermission;
 import org.dei.perla.core.descriptor.DataType;
 import org.dei.perla.core.engine.ExecutionContext.InstructionLocal;
 import org.dei.perla.core.message.Mapper;
-import org.dei.perla.core.record.Attribute;
-import org.dei.perla.core.record.Record;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -50,7 +48,7 @@ public class ScriptExecutorTest {
 			ExecutionException, ScriptException {
 		SynchronizerScriptHandler syncHandler = new SynchronizerScriptHandler();
 		Runner runner = Executor.execute(emitScript, syncHandler);
-		List<Record> result = syncHandler.getResult();
+		List<Object[]> result = syncHandler.getResult();
 
 		assertTrue(runner.isDone());
 		assertFalse(runner.isCancelled());
@@ -59,13 +57,14 @@ public class ScriptExecutorTest {
 
 	@Test
 	public void testAsynchronousCallback() throws InterruptedException {
-		final LinkedBlockingQueue<List<Record>> resultQueue = new LinkedBlockingQueue<>();
+		final LinkedBlockingQueue<List<Object[]>> resultQueue = new
+				LinkedBlockingQueue<>();
 
 		Runner runner = Executor.execute(emitScript, new ScriptHandler() {
 			@Override
-			public void complete(Script script, List<Record> result) {
+			public void complete(Script script, List<Object[]> samples) {
 				assertThat(script, equalTo(emitScript));
-				resultQueue.add(result);
+				resultQueue.add(samples);
 			}
 
 			@Override
@@ -74,7 +73,7 @@ public class ScriptExecutorTest {
 			}
 		});
 
-		List<Record> result = resultQueue.take();
+		List<Object[]> result = resultQueue.take();
 
 		assertTrue(runner.isDone());
 		assertFalse(runner.isCancelled());
@@ -133,12 +132,12 @@ public class ScriptExecutorTest {
 		SynchronizerScriptHandler syncHandler = new SynchronizerScriptHandler();
 		Executor.execute(script, paramArray, syncHandler);
 
-		List<Record> result = syncHandler.getResult();
+		List<Object[]> result = syncHandler.getResult();
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(1));
-		Record record = result.get(0);
-		assertThat((Integer) record.getValue("integer"), equalTo(5));
-		assertThat((String) record.getValue("string"), equalTo("test"));
+		Object[] sample = result.get(0);
+		assertThat((Integer) sample[0], equalTo(5));
+		assertThat((String) sample[1], equalTo("test"));
 	}
 
     @Test
@@ -159,20 +158,16 @@ public class ScriptExecutorTest {
         SynchronizerScriptHandler handler = new SynchronizerScriptHandler();
         Runner runner = Executor.execute(script, handler);
 
-        List<Record> res = handler.getResult();
+        List<Object[]> res = handler.getResult();
         assertTrue(runner.isDone());
         assertThat(res.size(), equalTo(1));
 
-        Record r = res.get(0);
-        List<Attribute> fields = r.fields();
-        assertThat(fields.size(), equalTo(2));
-        assertThat(fields.get(0), equalTo(Attribute.create(integer)));
-        assertThat(fields.get(1), equalTo(Attribute.create(string)));
-
-        Object[] values = r.values();
-        assertThat(values.length, equalTo(2));
-        assertThat(values[0], equalTo(12));
-        assertThat(values[1], equalTo("test_order"));
+        Object[] s = res.get(0);
+        assertThat(s.length, equalTo(2));
+		assertTrue(s[0] instanceof Integer);
+		assertThat(s[0], equalTo(12));
+		assertTrue(s[1] instanceof String);
+        assertThat(s[1], equalTo("test_order"));
     }
 
 	@Test
@@ -196,10 +191,10 @@ public class ScriptExecutorTest {
 		assertFalse(runner.isCancelled());
 
 		Executor.resume(runner);
-		List<Record> result = syncHandler.getResult();
+		List<Object[]> samples = syncHandler.getResult();
 		assertTrue(runner.isDone());
 		assertFalse(runner.isCancelled());
-		assertFalse(result.isEmpty());
+		assertFalse(samples.isEmpty());
 	}
 
 	@Test

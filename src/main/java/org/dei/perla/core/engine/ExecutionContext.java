@@ -1,8 +1,6 @@
 package org.dei.perla.core.engine;
 
 import org.dei.perla.core.message.FpcMessage;
-import org.dei.perla.core.record.Attribute;
-import org.dei.perla.core.record.Record;
 import org.dei.perla.core.utils.Check;
 
 import javax.el.*;
@@ -17,19 +15,20 @@ import java.util.concurrent.atomic.AtomicInteger;
  * </p>
  *
  * <p>
- * This class is also used for creating and storing data records, i.e. the
- * results of a <code>Script</code> execution. Each data record is a simple
+ * This class is also used for creating and storing data samples, i.e. the
+ * results of a <code>Script</code> execution. Each data sample is a simple
  * name-value map that is populated through various calls to the
  * <code>putAttribute</code> method. A single <code>Script</code> may create any
- * number of data records. Once all attributes have been put in the record, a
- * <code>Script</code> must invoke the <code>emitRecord</code> method to output
- * the current record content.
+ * number of data samples. Once all attributes have been put in the samples, a
+ * <code>Script</code> must invoke the <code>emitSample</code> method to output
+ * the current sample content.
  * </p>
  *
  * <p>
- * Emitting a record does not clear the current record content. This allows
- * <code>Script</code>s to unroll array messages into different data records
- * while preserving attributes that are constant for each emitted record.
+ * Emitting a sample does not clear the content of the Current Sample. This
+ * allows <code>Script</code>s to unroll array messages into different data
+ * samples while preserving attributes that are constant for each emitted
+ * sample.
  * </p>
  *
  * <p>
@@ -49,17 +48,15 @@ public class ExecutionContext {
 	private final ScriptEngineELContext elContext;
 	private final FpcEngineVariableMapper elVariableMapper = new FpcEngineVariableMapper();
 
-	private Object[] record;
-    private List<Attribute> atts;
-	private List<Record> recordList;
+	private Object[] sample;
+	private List<Object[]> samples;
 
 	protected ExecutionContext() {
 		elContext = new ScriptEngineELContext(elVariableMapper);
 	}
 
-    protected void init(List<Attribute> atts, ScriptParameter[] params) {
-        record = new Object[atts.size()];
-        this.atts = atts;
+    protected void init(int sampleSize, ScriptParameter[] params) {
+        sample = new Object[sampleSize];
         setParameters(params);
     }
 
@@ -115,7 +112,7 @@ public class ExecutionContext {
 	}
 
 	/**
-	 * Adds an attribute to the current record. Invoking this method on an
+	 * Adds an attribute to the current sample. Invoking this method on an
 	 * attribute previously set will overwrite the old value with the new one.
 	 *
 	 * @param idx
@@ -124,32 +121,32 @@ public class ExecutionContext {
 	 *            Attribute value
 	 */
 	protected void putAttribute(int idx, Object value) {
-        record[idx] = value;
+        sample[idx] = value;
 	}
 
 	/**
-	 * Persists the current record in the recordList. All records emitted can be
-	 * collected after <code>Script</code> execution using the
-	 * <code>getRecordList()</code> method.
+	 * Persists the current samples in the main sample {@link List}. All
+	 * samples emitted can be collected after {@code Script} execution
+	 * using the {@code getSamples()} method.
 	 */
-	protected void emitRecord() {
-        Object[] rc = Arrays.copyOf(record, record.length);
-		recordList.add(new Record(atts, rc));
+	protected void emitSample() {
+        Object[] s = Arrays.copyOf(sample, sample.length);
+		samples.add(s);
 	}
 
 	/**
-	 * Retrieves the list of all emitted records by the <code>Script</code>.
-	 * Returns an empty list if the script did not emit any record.
+	 * Retrieves the list of all the samples emitted by the {@link Script}.
+	 * Returns an empty list if the script did not emit any sample.
 	 *
-	 * @return List of emitted records
+	 * @return List of emitted samples
 	 */
-	protected List<Record> getRecordList() {
-		if (recordList.isEmpty()) {
+	protected List<Object[]> getSamples() {
+		if (samples.isEmpty()) {
 			return Collections.emptyList();
 		}
 
-        List<Record> res = recordList;
-        recordList = new ArrayList<>(res.size());
+        List<Object[]> res = samples;
+        samples = new ArrayList<>(res.size());
 		return Collections.unmodifiableList(res);
 	}
 
@@ -162,11 +159,8 @@ public class ExecutionContext {
 		instructionLocalMap.clear();
 		variableMap.clear();
 		elVariableMapper.clear();
-        recordList = new ArrayList<>();
+        samples = new ArrayList<>();
 		elContext.clearParameterMap();
-		if (!recordList.isEmpty()) {
-			recordList.clear();
-		}
 	}
 
 	/**

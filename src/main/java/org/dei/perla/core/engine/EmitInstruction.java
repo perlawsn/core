@@ -12,7 +12,7 @@ public class EmitInstruction extends BasicInstruction {
 
 	@Override
 	protected void runBasic(Runner runner) throws ScriptException {
-		runner.ctx.emitRecord();
+		runner.ctx.emitSample();
 	}
 
 }

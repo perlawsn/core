@@ -170,7 +170,7 @@ public class NativePeriodicOperation extends PeriodicOperation {
 		}
 
 		@Override
-		public void complete(Script script, List<Record> result) {
+		public void complete(Script script, List<Object[]> samples) {
 			runUnderLock(() -> {
 				state = RUNNING;
 
@@ -224,7 +224,7 @@ public class NativePeriodicOperation extends PeriodicOperation {
 		}
 
 		@Override
-		public void complete(Script script, List<Record> result) {
+		public void complete(Script script, List<Object[]> samples) {
 			runUnderLock(() -> {
 				if (currentPeriod != 0) {
 					// Restart the operation if the sampling period changed
@@ -269,8 +269,8 @@ public class NativePeriodicOperation extends PeriodicOperation {
 		}
 
 		@Override
-		public void complete(Script script, List<Record> recordList) {
-			if (Check.nullOrEmpty(recordList)) {
+		public void complete(Script script, List<Object[]> samples) {
+			if (Check.nullOrEmpty(samples)) {
 				return;
 			}
 
@@ -278,34 +278,33 @@ public class NativePeriodicOperation extends PeriodicOperation {
 				// Distribute immediately to the Tasks if the operation only
 				// receives one message type. Doing so avoids the cost of
 				// merging with the currentRecord
-                for (Record r : recordList) {
+                for (Object[] s : samples) {
+					Record r = new Record(atts, s);
                     forEachTask(t -> t.newRecord(r));
                 }
 
 			} else if (msgs.isSync()) {
 				// Merge with the current record and distribute
-                for (Record r : recordList) {
-                    Record m = merge(r);
+                for (Object[] s : samples) {
+                    Record m = new Record(atts, merge(s));
                     forEachTask(t -> t.newRecord(m));
                 }
 
 			} else {
 				// We only care about the last record if we only have to merge
-				int lastIndex = recordList.size() - 1;
-				Record last = recordList.get(lastIndex);
+				int lastIndex = samples.size() - 1;
+				Object[] last = samples.get(lastIndex);
 				merge(last);
 			}
 		}
 
-        private Record merge(Record r) {
-            Object[] values = r.values();
-
+        private Object[] merge(Object[] r) {
             rlk.lock();
             try {
-                for (int i = 0; i < values.length; i++) {
-                    currentRecord[msgs.getBase() + i] = values[i];
+                for (int i = 0; i < r.length; i++) {
+                    currentRecord[msgs.getBase() + i] = r[i];
                 }
-                return new Record(atts, currentRecord);
+				return currentRecord;
             } finally {
                 rlk.unlock();
             }

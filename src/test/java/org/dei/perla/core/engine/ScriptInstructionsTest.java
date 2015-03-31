@@ -236,13 +236,13 @@ public class ScriptInstructionsTest {
 		SynchronizerScriptHandler syncHandler = new SynchronizerScriptHandler();
 
 		Executor.execute(script, syncHandler);
-		List<Record> recordList = syncHandler.getResult();
-		assertThat(recordList, notNullValue());
-		assertThat(recordList.size(), equalTo(3));
+		List<Object[]> samples = syncHandler.getResult();
+		assertThat(samples, notNullValue());
+		assertThat(samples.size(), equalTo(3));
 
-		assertThat(recordList.get(0).getValue("integer"), equalTo(1));
-		assertThat(recordList.get(1).getValue("integer"), equalTo(2));
-		assertThat(recordList.get(2).getValue("integer"), equalTo(3));
+		assertThat(samples.get(0)[0], equalTo(1));
+		assertThat(samples.get(1)[0], equalTo(2));
+		assertThat(samples.get(2)[0], equalTo(3));
 	}
 
 	@Test
@@ -263,13 +263,13 @@ public class ScriptInstructionsTest {
 		SynchronizerScriptHandler syncHandler = new SynchronizerScriptHandler();
 
 		Executor.execute(script, syncHandler);
-		List<Record> recordList = syncHandler.getResult();
-		assertThat(recordList, notNullValue());
-		assertThat(recordList.size(), equalTo(3));
+		List<Object[]> samples = syncHandler.getResult();
+		assertThat(samples, notNullValue());
+		assertThat(samples.size(), equalTo(3));
 
-		assertThat(recordList.get(0).getValue("integer"), equalTo(0));
-		assertThat(recordList.get(1).getValue("integer"), equalTo(2));
-		assertThat(recordList.get(2).getValue("integer"), equalTo(6));
+		assertThat(samples.get(0)[0], equalTo(0));
+		assertThat(samples.get(1)[0], equalTo(2));
+		assertThat(samples.get(2)[0], equalTo(6));
 	}
 
 	@Test
@@ -466,11 +466,11 @@ public class ScriptInstructionsTest {
 
 		SynchronizerScriptHandler syncHandler = new SynchronizerScriptHandler();
 		Executor.execute(script, syncHandler);
-		List<Record> recordList = syncHandler.getResult();
-		assertThat(recordList, notNullValue());
-		assertThat(recordList.size(), equalTo(1));
+		List<Object[]> samples = syncHandler.getResult();
+		assertThat(samples, notNullValue());
+		assertThat(samples.size(), equalTo(1));
 
-		Record r = recordList.get(0);
+		Record r = new Record(script.getEmit(), samples.get(0));
 		for (Attribute a : r.fields()) {
             Object f = r.getValue(a.getId());
 			assertThat(f, notNullValue());
@@ -519,11 +519,11 @@ public class ScriptInstructionsTest {
 
 		SynchronizerScriptHandler syncHandler = new SynchronizerScriptHandler();
 		Executor.execute(script, syncHandler);
-		List<Record> recordList = syncHandler.getResult();
-		assertThat(recordList, notNullValue());
-		assertThat(recordList.size(), equalTo(1));
+		List<Object[]> samples = syncHandler.getResult();
+		assertThat(samples, notNullValue());
+		assertThat(samples.size(), equalTo(1));
 
-		Record r = recordList.get(0);
+		Record r = new Record(script.getEmit(), samples.get(0));
 		for (Attribute a : r.fields()) {
             Object f = r.getValue(a.getId());
 			assertThat(f, notNullValue());
@@ -580,11 +580,11 @@ public class ScriptInstructionsTest {
 
 		SynchronizerScriptHandler syncHandler = new SynchronizerScriptHandler();
 		Executor.execute(script, syncHandler);
-		List<Record> recordList = syncHandler.getResult();
-		assertThat(recordList, notNullValue());
-		assertThat(recordList.size(), equalTo(3));
+		List<Object[]> samples = syncHandler.getResult();
+		assertThat(samples, notNullValue());
+		assertThat(samples.size(), equalTo(3));
 
-		Record r = recordList.get(0);
+		Record r = new Record(script.getEmit(), samples.get(0));
 		for (Attribute a : r.fields()) {
             Object f = r.getValue(a.getId());
 			assertThat(f, notNullValue());
@@ -605,7 +605,7 @@ public class ScriptInstructionsTest {
 			}
 		}
 
-		r = recordList.get(1);
+		r = new Record(script.getEmit(), samples.get(1));
 		for (Attribute a : r.fields()) {
             Object f = r.getValue(a.getId());
 			assertThat(f, notNullValue());
@@ -626,7 +626,7 @@ public class ScriptInstructionsTest {
 			}
 		}
 
-		r = recordList.get(2);
+		r = new Record(script.getEmit(), samples.get(2));
 		for (Attribute a : r.fields()) {
             Object f = r.getValue(a.getId());
 			assertThat(f, notNullValue());
@@ -686,16 +686,16 @@ public class ScriptInstructionsTest {
 
 		SynchronizerScriptHandler syncHandler = new SynchronizerScriptHandler();
 		Executor.execute(script, syncHandler);
-		List<Record> recordList = syncHandler.getResult();
-		assertThat(recordList, notNullValue());
-		assertThat(recordList.size(), equalTo(1));
+		List<Object[]> samples = syncHandler.getResult();
+		assertThat(samples, notNullValue());
+		assertThat(samples.size(), equalTo(1));
 
-		Record record = recordList.get(0);
-		assertThat(record, notNullValue());
-		assertThat(record.getValue("integer"), notNullValue());
-		assertThat((Integer) record.getValue("integer"), equalTo(5));
-		assertThat(record.getValue("string"), notNullValue());
-		assertThat((String) record.getValue("string"), equalTo("test"));
+		Object[] s = samples.get(0);
+		assertThat(s, notNullValue());
+		assertThat(s[0], notNullValue());
+		assertThat((Integer) s[0], equalTo(5));
+		assertThat(s[1], notNullValue());
+		assertThat((String) s[1], equalTo("test"));
 	}
 
 }
