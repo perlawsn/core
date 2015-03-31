@@ -160,7 +160,7 @@ public class BaseFpcTest {
 		assertTrue(task1 instanceof PeriodicTask);
 		assertThat(handler1.getAveragePeriod(), greaterThanOrEqualTo(9.9d));
 		assertThat(handler1.getAveragePeriod(), lessThan(11d));
-		record = handler1.getLastRecord();
+		record = handler1.getLastSample();
 		assertThat(record, notNullValue());
 		assertThat(record.getValue("string"), notNullValue());
 		assertTrue(record.getValue("string") instanceof String);
@@ -183,7 +183,7 @@ public class BaseFpcTest {
 		assertThat(handler2.getAveragePeriod(), lessThan(1.1d));
 		assertThat(handler1.getAveragePeriod(), greaterThanOrEqualTo(9.9d));
 		assertThat(handler1.getAveragePeriod(), lessThan(11d));
-		record = handler1.getLastRecord();
+		record = handler1.getLastSample();
 		assertThat(record, notNullValue());
 		assertThat(record.getValue("string"), notNullValue());
 		assertTrue(record.getValue("string") instanceof String);
@@ -225,7 +225,7 @@ public class BaseFpcTest {
 
 		assertThat(task, notNullValue());
 		assertTrue(task instanceof PeriodicTask);
-		record = handler1.getLastRecord();
+		record = handler1.getLastSample();
 		assertThat(record, notNullValue());
 		assertThat(record.getValue("string"), notNullValue());
 		assertTrue(record.getValue("string") instanceof String);
@@ -257,7 +257,7 @@ public class BaseFpcTest {
 		assertTrue(task instanceof PeriodicTask);
 		assertThat(handler.getAveragePeriod(), greaterThanOrEqualTo(9.9d));
 		assertThat(handler.getAveragePeriod(), lessThan(11d));
-		record = handler.getLastRecord();
+		record = handler.getLastSample();
 		assertThat(record, notNullValue());
 		// Check if the Fpc is adding the timestamp
 		assertThat(record.getValue("timestamp"), notNullValue());
@@ -286,7 +286,7 @@ public class BaseFpcTest {
 		assertTrue(task1 instanceof PeriodicTask);
 		assertThat(handler1.getAveragePeriod(), greaterThanOrEqualTo(9.8d));
 		assertThat(handler1.getAveragePeriod(), lessThan(11d));
-		record = handler1.getLastRecord();
+		record = handler1.getLastSample();
 		assertThat(record, notNullValue());
 		assertThat(record.getValue("boolean"), notNullValue());
 		assertTrue(record.getValue("boolean") instanceof Boolean);
@@ -318,16 +318,16 @@ public class BaseFpcTest {
 
 		// Request the async event
 		attributeList = new ArrayList<>();
-		attributeList.add(Attribute.create("event", DataType.BOOLEAN));
+		attributeList.add(Attribute.create("event", DataType.INTEGER));
 		LatchingTaskHandler handler = new LatchingTaskHandler(2);
 		Task task = fpc.get(attributeList, 500, handler);
 
 		assertThat(task, notNullValue());
 		assertTrue(task instanceof PeriodicTask);
-		record = handler.getLastRecord();
+		record = handler.getLastSample();
 		assertThat(record, notNullValue());
 		assertThat(record.getValue("event"), notNullValue());
-		assertTrue(record.getValue("event") instanceof Boolean);
+		assertTrue(record.getValue("event") instanceof Integer);
 		// Check if the Fpc is adding the timestamp
 		assertThat(record.getValue("timestamp"), notNullValue());
 		assertTrue(record.getValue("timestamp") instanceof Instant);
@@ -341,7 +341,7 @@ public class BaseFpcTest {
 
 		// Request the async event
 		attributeList = new ArrayList<>();
-		attributeList.add(Attribute.create("event", DataType.BOOLEAN));
+		attributeList.add(Attribute.create("event", DataType.INTEGER));
 		SynchronizerTaskHandler handler = new SynchronizerTaskHandler();
 		Task task = fpc.get(attributeList, handler);
 
@@ -359,15 +359,15 @@ public class BaseFpcTest {
 
 		// Request the async event
 		attributeList = new ArrayList<>();
-		attributeList.add(Attribute.create("event", DataType.BOOLEAN));
+		attributeList.add(Attribute.create("event", DataType.INTEGER));
 		LatchingTaskHandler handler = new LatchingTaskHandler(5);
 		Task task = fpc.async(attributeList, handler);
 
 		assertThat(task, notNullValue());
-		record = handler.getLastRecord();
+		record = handler.getLastSample();
 		assertThat(record, notNullValue());
 		assertThat(record.getValue("event"), notNullValue());
-		assertTrue(record.getValue("event") instanceof Boolean);
+		assertTrue(record.getValue("event") instanceof Integer);
 		// Check if the Fpc is adding the timestamp
 		assertThat(record.getValue("timestamp"), notNullValue());
 		assertTrue(record.getValue("timestamp") instanceof Instant);

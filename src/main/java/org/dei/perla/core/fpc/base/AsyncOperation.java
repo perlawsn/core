@@ -42,7 +42,7 @@ public class AsyncOperation extends AbstractOperation<AsyncOperation.AsyncTask> 
 	private final AsyncPeriodicOperation asyncPeriodicOp;
 	private final AsyncOneoffOperation asyncOneoffOp;
 
-	private volatile Record sample = Record.EMPTY;
+	private volatile Record sample;
 
 	protected AsyncOperation(String id, List<Attribute> atts,
 			Script startScript, AsyncMessageHandler handler,
@@ -53,6 +53,8 @@ public class AsyncOperation extends AbstractOperation<AsyncOperation.AsyncTask> 
 
 		asyncPeriodicOp = new AsyncPeriodicOperation(id, atts);
 		asyncOneoffOp = new AsyncOneoffOperation(id, atts);
+
+		sample = new Record(atts, new Object[atts.size()]);
 
 		state = STARTED;
 		runStartScript();

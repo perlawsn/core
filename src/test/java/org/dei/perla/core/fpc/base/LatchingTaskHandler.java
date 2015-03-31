@@ -1,10 +1,13 @@
 package org.dei.perla.core.fpc.base;
 
-import java.util.concurrent.CountDownLatch;
-
 import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.TaskHandler;
 import org.dei.perla.core.record.Record;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 public class LatchingTaskHandler implements TaskHandler {
 
@@ -16,7 +19,7 @@ public class LatchingTaskHandler implements TaskHandler {
 	private final CountDownLatch latch;
 	private volatile Throwable error;
 
-	private volatile Record lastRecord = null;
+	private final List<Record> samples = new ArrayList<>();
 
 	public LatchingTaskHandler(int waitCount) {
 		latch = new CountDownLatch(waitCount);
@@ -38,12 +41,20 @@ public class LatchingTaskHandler implements TaskHandler {
 		return avgPeriod;
 	}
 
-	public Record getLastRecord() throws InterruptedException {
+	public List<Record> getSamples() throws InterruptedException {
 		latch.await();
 		if (error != null) {
 			throw new RuntimeException(error);
 		}
-		return lastRecord;
+		return samples;
+	}
+
+	public Record getLastSample() throws InterruptedException {
+		latch.await();
+		if (error != null) {
+			throw new RuntimeException(error);
+		}
+		return samples.get(samples.size() - 1);
 	}
 
 	@Override
@@ -52,7 +63,7 @@ public class LatchingTaskHandler implements TaskHandler {
 
 	@Override
 	public void newRecord(Task task, Record record) {
-		lastRecord = record;
+		samples.add(record);
 
 		if (previousTime == 0) {
 			previousTime = System.currentTimeMillis();

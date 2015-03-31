@@ -465,18 +465,24 @@ public class ConcreteOperationTest {
 
 	@Test
 	public void asyncSimulatedPeriodicOperation() throws Exception {
-		LatchingTaskHandler handler = new LatchingTaskHandler(5);
+		LatchingTaskHandler handler = new LatchingTaskHandler(3);
 
 		Map<String, Object> paramMap = new HashMap<>();
-		paramMap.put("period", 100);
+		paramMap.put("period", 500);
 		Task task = asyncOp.getAsyncPeriodicOperation()
 				.schedule(paramMap, handler);
 
 		assertThat(task, notNullValue());
 		assertTrue(task instanceof PeriodicTask);
-		Record result = handler.getLastRecord();
-		assertThat(result, notNullValue());
-		assertThat(result.getValue("event"), notNullValue());
+		List<Record> res = handler.getSamples();
+		Object current;
+		Object previous = -1;
+		for (Record s : res) {
+			assertThat(s, notNullValue());
+			current = s.getValue("event");
+			assertThat(previous, not(equalTo(current)));
+			previous = current;
+		}
 	}
 
 	@Test
@@ -485,9 +491,16 @@ public class ConcreteOperationTest {
 
 		Task task = asyncOp.schedule(Collections.emptyMap(), handler);
 		assertThat(task, notNullValue());
-		Record result = handler.getLastRecord();
-		assertThat(result, notNullValue());
-		assertThat(result.getValue("event"), notNullValue());
+
+		List<Record> res = handler.getSamples();
+		int current;
+		int previous = (int) -1;
+		for (Record s : res) {
+			assertThat(s, notNullValue());
+			current = (int) s.getValue("event");
+			assertThat(previous, not(equalTo(current)));
+			previous = current;
+		}
 	}
 
 	@Test
@@ -504,13 +517,13 @@ public class ConcreteOperationTest {
 		assertThat(task2, notNullValue());
 		assertThat(task3, notNullValue());
 
-		Record result1 = handler1.getLastRecord();
+		Record result1 = handler1.getLastSample();
 		assertThat(result1, notNullValue());
 		assertThat(result1.getValue("event"), notNullValue());
-		Record result2 = handler2.getLastRecord();
+		Record result2 = handler2.getLastSample();
 		assertThat(result2, notNullValue());
 		assertThat(result2.getValue("event"), notNullValue());
-		Record result3 = handler3.getLastRecord();
+		Record result3 = handler3.getLastSample();
 		assertThat(result3, notNullValue());
 		assertThat(result3.getValue("event"), notNullValue());
 	}

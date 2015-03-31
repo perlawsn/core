@@ -9,7 +9,7 @@
 		<attribute id="float" type="float" permission="read-write"/>
 		<attribute id="boolean" type="boolean" permission="read-write"/>
 		<attribute id="string" type="string" permission="read-write"/>
-		<attribute id="event" type="boolean" permission="read-only"/>
+		<attribute id="event" type="integer" permission="read-only"/>
 		<attribute id="period" type="integer" permission="write-only"/>
 		<attribute id="static" type="integer" access="static" value="5"/>
 	</attributes>
@@ -41,7 +41,8 @@
 			</sim:generator>
 			<sim:generator id="event">
 				<sim:field name="type" strategy="static" value="event"/>
-				<sim:field name="event" strategy="dynamic" type="boolean"/>
+				<sim:field name="event" strategy="step"
+									 type="integer" min="0" max="1000"/>
 			</sim:generator>
 		</sim:channel>
 	</channels>
@@ -73,7 +74,7 @@
 		</sim:message>
 		<sim:message id="event-msg">
 			<sim:field name="type" type="string" qualifier="static" value="event"/>
-			<sim:field name="event" type="boolean"/>
+			<sim:field name="event" type="integer"/>
 		</sim:message>
 	</messages>
 
