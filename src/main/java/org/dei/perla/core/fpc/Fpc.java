@@ -2,6 +2,7 @@ package org.dei.perla.core.fpc;
 
 import java.time.Duration;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import org.dei.perla.core.record.Attribute;
@@ -35,17 +36,17 @@ public interface Fpc {
 
     public Task set(Map<Attribute, Object> values, TaskHandler handler);
 
-    public Task get(Collection<Attribute> atts, TaskHandler handler);
+    public Task get(List<Attribute> atts, TaskHandler handler);
 
-    public default Task get(Collection<Attribute> atts, Duration period,
+    public default Task get(List<Attribute> atts, Duration period,
             TaskHandler handler) {
         return get(atts, period.toMillis(), handler);
     }
 
-    public Task get(Collection<Attribute> atts, long periodMs,
+    public Task get(List<Attribute> atts, long periodMs,
             TaskHandler handler);
 
-    public Task async(Collection<Attribute> atts, TaskHandler handler);
+    public Task async(List<Attribute> atts, TaskHandler handler);
 
     public void stop(StopHandler<Fpc> handler);
 

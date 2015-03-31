@@ -75,7 +75,7 @@ public class BaseFpc implements Fpc {
 	}
 
 	@Override
-	public Task get(Collection<Attribute> atts, TaskHandler handler) {
+	public Task get(List<Attribute> atts, TaskHandler handler) {
 		PipelineBuilder pBuilder = RecordPipeline.newBuilder();
         Request req = new Request(atts);
 
@@ -93,7 +93,7 @@ public class BaseFpc implements Fpc {
 	}
 
 	@Override
-	public Task get(Collection<Attribute> atts, long periodMs,
+	public Task get(List<Attribute> atts, long periodMs,
 			TaskHandler handler) {
 		PipelineBuilder pBuilder = RecordPipeline.newBuilder();
         Request req = new Request(atts);
@@ -115,7 +115,7 @@ public class BaseFpc implements Fpc {
 	}
 
 	@Override
-	public Task async(Collection<Attribute> atts, TaskHandler handler) {
+	public Task async(List<Attribute> atts, TaskHandler handler) {
 		PipelineBuilder pBuilder = RecordPipeline.newBuilder();
         Request req = new Request(atts);
 

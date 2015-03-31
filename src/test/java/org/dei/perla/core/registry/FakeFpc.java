@@ -8,6 +8,7 @@ import org.dei.perla.core.utils.StopHandler;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 public class FakeFpc implements Fpc {
@@ -39,18 +40,18 @@ public class FakeFpc implements Fpc {
 	}
 
 	@Override
-	public Task get(Collection<Attribute> attributes, TaskHandler handler) {
+	public Task get(List<Attribute> attributes, TaskHandler handler) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Task get(Collection<Attribute> attributes, long periodMs,
+	public Task get(List<Attribute> attributes, long periodMs,
 			TaskHandler handler) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Task async(Collection<Attribute> attributes, TaskHandler handler) {
+	public Task async(List<Attribute> attributes, TaskHandler handler) {
 		throw new UnsupportedOperationException();
 	}
 
