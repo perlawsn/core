@@ -53,7 +53,7 @@ public class ScriptTask extends AbstractTask {
 	private class OneoffScriptHandler implements ScriptHandler {
 
 		@Override
-		public void complete(List<Record> recordList) {
+		public void complete(Script script, List<Record> recordList) {
 			for (Record record : recordList) {
 				processRecord(record);
 			}

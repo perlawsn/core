@@ -108,7 +108,7 @@ public class AsyncOperation extends AbstractOperation<AsyncOperation.AsyncTask> 
 	private class StartHandler implements ScriptHandler {
 
 		@Override
-		public void complete(List<Record> recordList) {
+		public void complete(Script script, List<Record> recordList) {
 			// Does nothing, AsyncOperation are set as "STARTED" by default
 		}
 
@@ -136,7 +136,7 @@ public class AsyncOperation extends AbstractOperation<AsyncOperation.AsyncTask> 
 	private class OnHandler implements ScriptHandler {
 
 		@Override
-		public void complete(List<Record> recordList) {
+		public void complete(Script script, List<Record> recordList) {
 			recordList.forEach(r -> forEachTask(t -> t.processRecord(r)));
 			int last = recordList.size() - 1;
 			record = recordList.get(last);

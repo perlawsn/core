@@ -60,7 +60,7 @@ public class SimulatedPeriodicOperation extends PeriodicOperation {
 	private class TimerScriptHandler implements ScriptHandler {
 
 		@Override
-		public void complete(List<Record> recordList) {
+		public void complete(Script script, List<Record> recordList) {
 			for (Record record : recordList) {
 				forEachTask(t -> t.newRecord(record));
 			}

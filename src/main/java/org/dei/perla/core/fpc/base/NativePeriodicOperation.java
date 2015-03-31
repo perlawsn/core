@@ -170,7 +170,7 @@ public class NativePeriodicOperation extends PeriodicOperation {
 		}
 
 		@Override
-		public void complete(List<Record> result) {
+		public void complete(Script script, List<Record> result) {
 			runUnderLock(() -> {
 				state = RUNNING;
 
@@ -224,7 +224,7 @@ public class NativePeriodicOperation extends PeriodicOperation {
 		}
 
 		@Override
-		public void complete(List<Record> result) {
+		public void complete(Script script, List<Record> result) {
 			runUnderLock(() -> {
 				if (currentPeriod != 0) {
 					// Restart the operation if the sampling period changed
@@ -269,7 +269,7 @@ public class NativePeriodicOperation extends PeriodicOperation {
 		}
 
 		@Override
-		public void complete(List<Record> recordList) {
+		public void complete(Script script, List<Record> recordList) {
 			if (Check.nullOrEmpty(recordList)) {
 				return;
 			}

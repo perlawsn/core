@@ -110,7 +110,7 @@ public class Runner {
 		if (!state.compareAndSet(RUNNING, STOPPED)) {
 			return;
 		}
-		handler.complete(ctx.getRecordList());
+		handler.complete(script, ctx.getRecordList());
 		relinquishContext(ctx);
 	}
 

@@ -42,7 +42,7 @@ public class SynchronizerScriptHandler implements ScriptHandler {
 	}
 
 	@Override
-	public void complete(List<Record> result) {
+	public void complete(Script script, List<Record> result) {
 		lock.lock();
 		try {
 			this.result = result;

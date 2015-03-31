@@ -63,7 +63,8 @@ public class ScriptExecutorTest {
 
 		Runner runner = Executor.execute(emitScript, new ScriptHandler() {
 			@Override
-			public void complete(List<Record> result) {
+			public void complete(Script script, List<Record> result) {
+				assertThat(script, equalTo(emitScript));
 				resultQueue.add(result);
 			}
 

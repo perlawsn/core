@@ -23,7 +23,7 @@ public interface ScriptHandler {
 	 * @param result
 	 *            Result of the operation
 	 */
-	public void complete(List<Record> recordList);
+	public void complete(Script script, List<Record> recordList);
 
 	/**
 	 * Invoked when an <code>Script</code> completes with an error
