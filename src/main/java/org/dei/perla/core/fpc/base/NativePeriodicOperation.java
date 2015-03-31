@@ -6,7 +6,6 @@ import org.dei.perla.core.engine.ScriptHandler;
 import org.dei.perla.core.engine.ScriptParameter;
 import org.dei.perla.core.fpc.FpcException;
 import org.dei.perla.core.message.FpcMessage;
-import org.dei.perla.core.message.Mapper;
 import org.dei.perla.core.record.Attribute;
 import org.dei.perla.core.record.Record;
 import org.dei.perla.core.utils.Check;
@@ -29,8 +28,7 @@ public class NativePeriodicOperation extends PeriodicOperation {
 	private final Script stop;
 
 	private final ChannelManager chanMgr;
-	private final Map<String, PeriodicMessageHandler> handlers =
-            new HashMap<>();
+	private final Map<String, OnScriptHandler> handlers = new HashMap<>();
 
 	// Operation state
 	private volatile int state = 0;
@@ -42,7 +40,7 @@ public class NativePeriodicOperation extends PeriodicOperation {
 	private Object[] currentRecord;
 
 	public NativePeriodicOperation(String id, List<Attribute> atts,
-			Script start, Script stop, List<PeriodicMessageHandler> handlers,
+			Script start, Script stop, List<MessageScript> msgs,
             ChannelManager chanMgr) {
 		super(id, atts);
 		this.start = start;
@@ -50,11 +48,11 @@ public class NativePeriodicOperation extends PeriodicOperation {
 		this.chanMgr = chanMgr;
         this.atts = atts;
 
-        int nAtt = 0;
-		for (PeriodicMessageHandler h : handlers) {
-			this.handlers.put(h.mapper.getMessageId(), h);
-			h.onHandler = new OnScriptHandler(h.sync, nAtt);
-            nAtt += h.script.getEmit().size();
+		int nAtt = 0;
+		for (MessageScript m : msgs) {
+			OnScriptHandler osh = new OnScriptHandler(m);
+			handlers.put(m.getMapper().getMessageId(), osh);
+			nAtt += m.getScript().getEmit().size();
 		}
         currentRecord = new Object[nAtt];
 	}
@@ -131,24 +129,25 @@ public class NativePeriodicOperation extends PeriodicOperation {
 	}
 
 	private void addAsyncCallback() {
-		for (PeriodicMessageHandler h : handlers.values()) {
-			chanMgr.addCallback(h.mapper, this::handleMessage);
+		for (OnScriptHandler h : handlers.values()) {
+			chanMgr.addCallback(h.msgs.getMapper(), this::handleMessage);
 		}
 	}
 
 	private void removeAsyncCallback() {
-		for (PeriodicMessageHandler h : handlers.values()) {
-			chanMgr.removeCallback(h.mapper);
+		for (OnScriptHandler h : handlers.values()) {
+			chanMgr.removeCallback(h.msgs.getMapper());
 		}
 	}
 
 	public void handleMessage(FpcMessage message) {
-		PeriodicMessageHandler h = handlers.get(message.getId());
+		OnScriptHandler h = handlers.get(message.getId());
+		MessageScript ms = h.msgs;
 
 		ScriptParameter paramArray[] = new ScriptParameter[1];
-		paramArray[0] = new ScriptParameter(h.variable, message);
+		paramArray[0] = new ScriptParameter(ms.getVariable(), message);
 
-		Executor.execute(h.script, paramArray, h.onHandler);
+		Executor.execute(ms.getScript(), paramArray, h);
 	}
 
 	/**
@@ -263,12 +262,10 @@ public class NativePeriodicOperation extends PeriodicOperation {
 	 */
 	private class OnScriptHandler implements ScriptHandler {
 
-        private final int base;
-		private final boolean sync;
+		private final MessageScript msgs;
 
-		private OnScriptHandler(boolean sync, int base) {
-			this.sync = sync;
-            this.base = base;
+		private OnScriptHandler(MessageScript msgs) {
+			this.msgs = msgs;
 		}
 
 		@Override
@@ -285,7 +282,7 @@ public class NativePeriodicOperation extends PeriodicOperation {
                     forEachTask(t -> t.newRecord(r));
                 }
 
-			} else if (sync == true) {
+			} else if (msgs.isSync()) {
 				// Merge with the current record and distribute
                 for (Record r : recordList) {
                     Record m = merge(r);
@@ -306,7 +303,7 @@ public class NativePeriodicOperation extends PeriodicOperation {
             rlk.lock();
             try {
                 for (int i = 0; i < values.length; i++) {
-                    currentRecord[base + i] = values[i];
+                    currentRecord[msgs.getBase() + i] = values[i];
                 }
                 return new Record(atts, currentRecord);
             } finally {
@@ -318,25 +315,6 @@ public class NativePeriodicOperation extends PeriodicOperation {
 		public void error(Throwable cause) {
 			Exception e = new FpcException(cause);
 			forEachTask(t -> error(e));
-		}
-
-	}
-
-	public static class PeriodicMessageHandler {
-
-		private final Mapper mapper;
-		private final boolean sync;
-		private final String variable;
-		private final Script script;
-
-		private OnScriptHandler onHandler;
-
-		public PeriodicMessageHandler(boolean sync, Mapper mapper,
-				String variable, Script script) {
-			this.mapper = mapper;
-			this.sync = sync;
-			this.variable = variable;
-			this.script = script;
 		}
 
 	}

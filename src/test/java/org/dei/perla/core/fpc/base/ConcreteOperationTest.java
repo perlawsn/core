@@ -1,25 +1,5 @@
 package org.dei.perla.core.fpc.base;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.transform.stream.StreamSource;
-
 import org.dei.perla.core.channel.Channel;
 import org.dei.perla.core.channel.ChannelFactory;
 import org.dei.perla.core.channel.IORequestBuilder;
@@ -30,29 +10,25 @@ import org.dei.perla.core.channel.loopback.TestMapper;
 import org.dei.perla.core.channel.simulator.SimulatorChannelFactory;
 import org.dei.perla.core.channel.simulator.SimulatorIORequestBuilderFactory;
 import org.dei.perla.core.channel.simulator.SimulatorMapperFactory;
+import org.dei.perla.core.descriptor.*;
+import org.dei.perla.core.engine.*;
+import org.dei.perla.core.engine.SubmitInstruction.RequestParameter;
 import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.base.AsyncOperation.AsyncMessageHandler;
-import org.dei.perla.core.fpc.base.NativePeriodicOperation.PeriodicMessageHandler;
-import org.dei.perla.core.descriptor.AttributeDescriptor;
-import org.dei.perla.core.descriptor.ChannelDescriptor;
-import org.dei.perla.core.descriptor.DeviceDescriptor;
-import org.dei.perla.core.descriptor.IORequestDescriptor;
-import org.dei.perla.core.descriptor.MessageDescriptor;
-import org.dei.perla.core.engine.CreateComplexVarInstruction;
-import org.dei.perla.core.engine.EmitInstruction;
-import org.dei.perla.core.engine.PutInstruction;
-import org.dei.perla.core.record.Record;
-import org.dei.perla.core.engine.Script;
-import org.dei.perla.core.engine.ScriptBuilder;
-import org.dei.perla.core.engine.SetComplexInstruction;
-import org.dei.perla.core.engine.StopInstruction;
-import org.dei.perla.core.engine.SubmitInstruction;
-import org.dei.perla.core.engine.SubmitInstruction.RequestParameter;
 import org.dei.perla.core.message.Mapper;
 import org.dei.perla.core.message.MapperFactory;
+import org.dei.perla.core.record.Record;
 import org.dei.perla.core.record.RecordPipeline;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.stream.StreamSource;
+import java.util.*;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 public class ConcreteOperationTest {
 
@@ -143,9 +119,9 @@ public class ConcreteOperationTest {
 				.add(new PutInstruction("${result.string}",
                         attributeMap.get("string"), 2))
 				.add(new EmitInstruction()).buildScript("on_script");
-		List<PeriodicMessageHandler> perHandlerList = new ArrayList<>();
-		perHandlerList.add(new PeriodicMessageHandler(true, mmMap
-				.get("all-msg"), "result", perOnScript));
+		List<MessageScript> perHandlerList = new ArrayList<>();
+		perHandlerList.add(new MessageScript(perOnScript, mmMap.get("all-msg"),
+				true, "result", 0));
 
 		natPeriodicOp = new NativePeriodicOperation("periodic_operation",
 				perOnScript.getEmit(), perStartScript, perStopScript,

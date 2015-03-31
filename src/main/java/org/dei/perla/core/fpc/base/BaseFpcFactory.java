@@ -16,7 +16,6 @@ import org.dei.perla.core.engine.Script;
 import org.dei.perla.core.fpc.Fpc;
 import org.dei.perla.core.fpc.FpcFactory;
 import org.dei.perla.core.fpc.base.AsyncOperation.AsyncMessageHandler;
-import org.dei.perla.core.fpc.base.NativePeriodicOperation.PeriodicMessageHandler;
 import org.dei.perla.core.message.Mapper;
 import org.dei.perla.core.message.MapperFactory;
 import org.dei.perla.core.record.Attribute;
@@ -421,25 +420,26 @@ public class BaseFpcFactory implements FpcFactory {
         }
 
         List<Attribute> emitAtts = new ArrayList<>();
-        List<PeriodicMessageHandler> handlers = parsePeriodicOnHandlerDescriptor(o, ctx,
+        List<MessageScript> msgs = parsePeriodicOnHandlerDescriptor(o, ctx,
                         err.inContext("sampling 'on' clause"), emitAtts);
 
-        if (handlers == null) {
+        if (msgs == null) {
             return;
         }
 
         ctx.periodicOpList.add(new NativePeriodicOperation(o.getId(),
                 emitAtts, start, stop,
-                handlers, ctx.channelMgr));
+                msgs, ctx.channelMgr));
     }
 
-    private List<PeriodicMessageHandler> parsePeriodicOnHandlerDescriptor(
+    private List<MessageScript> parsePeriodicOnHandlerDescriptor(
             PeriodicOperationDescriptor o, ParsingContext ctx, Errors err,
             List<Attribute> emitAtts) {
+        int base = 0;
         boolean hasErr = false;
         boolean hasSync = false;
 
-        List<PeriodicMessageHandler> handlers = new ArrayList<>();
+        List<MessageScript> msgs = new ArrayList<>();
         for (OnReceiveDescriptor on : o.getOnReceiveList()) {
             Mapper map = ctx.mappers.get(on.getMessage());
             if (map == null) {
@@ -482,11 +482,12 @@ public class BaseFpcFactory implements FpcFactory {
                 hasErr = true;
             }
             hasSync |= on.isSync();
-            handlers.add(new PeriodicMessageHandler(on.isSync(),
-                    map, on.getVariable(), script));
+            msgs.add(new MessageScript(script, map, on.isSync(),
+                    on.getVariable(), base));
+            base += script.getEmit().size();
         }
 
-        if (hasSync == false && handlers.size() > 1) {
+        if (hasSync == false && msgs.size() > 1) {
             err.addError(MISSING_ON_SYNC);
             hasErr = true;
         }
@@ -495,7 +496,7 @@ public class BaseFpcFactory implements FpcFactory {
             return null;
         }
 
-        return handlers;
+        return msgs;
     }
 
     private void parseAsyncOperation(AsyncOperationDescriptor o,
