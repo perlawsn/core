@@ -9,9 +9,8 @@ import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.TaskHandler;
 import org.dei.perla.core.record.Attribute;
 import org.dei.perla.core.record.Record;
-import org.dei.perla.core.record.RecordModifier;
-import org.dei.perla.core.record.RecordPipeline;
-import org.dei.perla.core.record.RecordPipeline.PipelineBuilder;
+import org.dei.perla.core.record.SamplePipeline;
+import org.dei.perla.core.record.SamplePipeline.PipelineBuilder;
 import org.dei.perla.core.utils.StopHandler;
 
 import java.time.Instant;
@@ -70,13 +69,20 @@ public class BaseFpc implements Fpc {
 	}
 
 	@Override
-	public Task set(Map<Attribute, Object> valueMap, TaskHandler handler) {
-		return sched.set(valueMap, handler);
+	public Task set(Map<Attribute, Object> values, TaskHandler handler) {
+		Operation op = sched.set(values.keySet());
+		if (op == null) {
+			return null;
+		}
+
+		Map<String, Object> pm = new HashMap<>();
+		values.entrySet().forEach(
+				e -> pm.put(e.getKey().getId(), e.getValue()));
+		return op.schedule(pm, handler);
 	}
 
 	@Override
 	public Task get(List<Attribute> atts, TaskHandler handler) {
-		PipelineBuilder pBuilder = RecordPipeline.newBuilder();
         Request req = new Request(atts);
 
 		if (req.staticOnly()) {
@@ -85,45 +91,79 @@ public class BaseFpc implements Fpc {
             handler.complete(t);
             return t;
 
-		} else if (req.mixed()) {
-			pBuilder.add(new RecordModifier.StaticAppender(req.staticValues()));
 		}
 
-		return sched.get(req.dynAtts, handler, pBuilder);
+		Operation op = sched.get(req.dynAtts);
+		if (op == null) {
+			return null;
+		}
+
+		PipelineBuilder pb = SamplePipeline.newBuilder(op.getAttributes());
+        if (req.mixed()) {
+			pb.addStatic(req.staticValues());
+		}
+		if (!op.getAttributes().contains(Attribute.TIMESTAMP)) {
+			pb.addTimestamp();
+		}
+		pb.reorder(atts);
+
+		return op.schedule(Collections.emptyMap(), handler, pb.create());
 	}
 
 	@Override
-	public Task get(List<Attribute> atts, long periodMs,
-			TaskHandler handler) {
-		PipelineBuilder pBuilder = RecordPipeline.newBuilder();
+	public Task get(List<Attribute> atts, long ms, TaskHandler handler) {
+		PipelineBuilder pb;
         Request req = new Request(atts);
 
-		if (!req.statAtts.isEmpty()) {
-			pBuilder.add(new RecordModifier.StaticAppender(req.staticValues()));
+		if (req.staticOnly()) {
+			pb = SamplePipeline.newBuilder(Collections.emptyList());
+			pb.addStatic(req.staticValues());
+			pb.addTimestamp();
+			Map<String, Object> paramMap = new HashMap<>();
+			paramMap.put("period", ms);
+			pb.reorder(atts);
+			return emptyRecordOperation.schedule(paramMap, handler,
+					pb.create());
 		}
 
-        if (req.staticOnly()) {
-            pBuilder.add(new RecordModifier.TimestampAppender());
-            Map<String, Object> paramMap = new HashMap<>();
-            paramMap.put("period", periodMs);
-            return emptyRecordOperation.schedule(paramMap, handler,
-                    pBuilder.create());
-        } else {
-            return sched.periodic(req.dynAtts, periodMs, handler,
-                    pBuilder);
-        }
+		Operation op = sched.get(atts);
+		if (op == null) {
+			return null;
+		}
+
+		Map<String, Object> pm = new HashMap<>();
+		pm.put("period", ms);
+
+		pb = SamplePipeline.newBuilder(op.getAttributes());
+		if (!req.statAtts.isEmpty()) {
+			pb = SamplePipeline.newBuilder(Collections.emptyList());
+			pb.addStatic(req.staticValues());
+		}
+		if (!op.getAttributes().contains(Attribute.TIMESTAMP)) {
+			pb.addTimestamp();
+		}
+		pb.reorder(atts);
+		return op.schedule(pm, handler, pb.create());
 	}
 
 	@Override
 	public Task async(List<Attribute> atts, TaskHandler handler) {
-		PipelineBuilder pBuilder = RecordPipeline.newBuilder();
         Request req = new Request(atts);
 
 		if (!req.statAtts.isEmpty()) {
 			return null;
 		}
 
-		return sched.async(req.dynAtts, handler, pBuilder);
+		Operation op = sched.async(atts);
+		PipelineBuilder pb = SamplePipeline.newBuilder(op.getAttributes());
+		if (op == null) {
+			return null;
+		}
+
+		if (!op.getAttributes().contains(Attribute.TIMESTAMP)) {
+			pb.addTimestamp();
+		}
+		return op.schedule(Collections.emptyMap(), handler, pb.create());
 	}
 
 	@Override

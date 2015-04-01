@@ -1,11 +1,7 @@
 package org.dei.perla.core.fpc.base;
 
 import org.dei.perla.core.descriptor.DataType;
-import org.dei.perla.core.fpc.TaskHandler;
 import org.dei.perla.core.record.Attribute;
-import org.dei.perla.core.record.RecordModifier;
-import org.dei.perla.core.record.RecordPipeline;
-import org.dei.perla.core.record.RecordPipeline.PipelineBuilder;
 import org.dei.perla.core.utils.StopHandler;
 
 import java.util.*;
@@ -50,84 +46,31 @@ public class Scheduler {
 		Collections.sort(this.async, attComp);
 	}
 
-	private RecordPipeline createTimestampedPipeline(Operation op,
-			PipelineBuilder pBuilder) {
-		if (op.getAttributes().contains(Attribute.TIMESTAMP)) {
-			return pBuilder.create();
-		}
-
-		pBuilder.add(new RecordModifier.TimestampAppender());
-		return pBuilder.create();
-	}
-
-	protected AbstractTask set(Map<Attribute, Object> values, TaskHandler h)
-            throws IllegalStateException {
-		if (!schedulable) {
-			throw new IllegalStateException("Scheduler has been stopped.");
-		}
-
-		Operation op = bestFit(set, values.keySet());
-		if (op == null) {
-			return null;
-		}
-
-		Map<String, Object> pm = new HashMap<>();
-		values.entrySet().forEach(
-				e -> pm.put(e.getKey().getId(), e.getValue()));
-		return op.schedule(pm, h);
-	}
-
-	protected AbstractTask get(Collection<Attribute> atts, TaskHandler h,
-            PipelineBuilder b) throws IllegalStateException {
-		if (!schedulable) {
-			throw new IllegalStateException("Scheduler has been stopped.");
-		}
-
-		Operation op = bestFit(get, atts);
-		if (op == null) {
-			return null;
-		}
-
-		RecordPipeline p = createTimestampedPipeline(op, b);
-		return op.schedule(Collections.emptyMap(), h, p);
-	}
-
-	protected AbstractTask periodic(Collection<Attribute> atts, long ms,
-            TaskHandler h, PipelineBuilder b) throws IllegalStateException {
-		if (!schedulable) {
-			throw new IllegalStateException("Scheduler has been stopped.");
-		}
-
-		Operation op = bestFit(periodic, atts);
-		if (op == null) {
-			return null;
-		}
-
-		Map<String, Object> pm = new HashMap<>();
-		pm.put("period", ms);
-
-		RecordPipeline p = createTimestampedPipeline(op, b);
-		return op.schedule(pm, h, p);
-	}
-
-	protected AbstractTask async(Collection<Attribute> atts,
-            TaskHandler h, PipelineBuilder b)
+	protected Operation set(Collection<Attribute> atts)
 			throws IllegalStateException {
-		if (!schedulable) {
-			throw new IllegalStateException("Scheduler has been stopped.");
-		}
+		return bestFit(set, atts);
+	}
 
-		Operation op = bestFit(async, atts);
-		if (op == null) {
-			return null;
-		}
+	protected Operation get(List<Attribute> atts) throws IllegalStateException {
+		return bestFit(get, atts);
+	}
 
-		RecordPipeline p = createTimestampedPipeline(op, b);
-		return op.schedule(Collections.emptyMap(), h, p);
+	protected Operation periodic(List<Attribute> atts)
+			throws IllegalStateException {
+		return bestFit(periodic, atts);
+	}
+
+	protected Operation async(List<Attribute> atts)
+			throws IllegalStateException {
+		return bestFit(async, atts);
 	}
 
 	private Operation bestFit(List<? extends Operation> ops,
-			Collection<Attribute> atts) {
+			Collection<Attribute> atts) throws IllegalStateException {
+		if (!schedulable) {
+			throw new IllegalStateException("Scheduler has been stopped.");
+		}
+
 		for (Operation op : ops) {
 			if (!hasAttributes(op, atts)) {
 				continue;

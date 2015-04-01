@@ -5,7 +5,7 @@ import org.dei.perla.core.fpc.FpcException;
 import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.TaskHandler;
 import org.dei.perla.core.record.Attribute;
-import org.dei.perla.core.record.RecordPipeline;
+import org.dei.perla.core.record.SamplePipeline;
 import org.dei.perla.core.utils.Conditions;
 import org.dei.perla.core.utils.StopHandler;
 
@@ -84,7 +84,7 @@ public abstract class AbstractOperation<T extends AbstractTask> implements
 
 	@Override
 	public final AbstractTask schedule(Map<String, Object> params, TaskHandler h,
-            RecordPipeline p) throws IllegalArgumentException, IllegalStateException {
+            SamplePipeline p) throws IllegalArgumentException, IllegalStateException {
 		Conditions.checkNotNull(h, "handler");
 		if (!schedulable) {
 			throw new IllegalStateException("Operation '" + id
@@ -127,7 +127,7 @@ public abstract class AbstractOperation<T extends AbstractTask> implements
 	 *             {@code Operation} is not running
 	 */
 	protected abstract T doSchedule(Map<String, Object> params, TaskHandler h,
-            RecordPipeline p) throws IllegalArgumentException;
+            SamplePipeline p) throws IllegalArgumentException;
 
 	@Override
 	public final void stop(StopHandler<Operation> h) {

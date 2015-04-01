@@ -13,7 +13,7 @@ import java.util.Collections;
 import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.TaskHandler;
 import org.dei.perla.core.record.Record;
-import org.dei.perla.core.record.RecordPipeline;
+import org.dei.perla.core.record.SamplePipeline;
 import org.dei.perla.core.utils.StopHandler;
 import org.junit.Test;
 
@@ -25,13 +25,13 @@ public class PeriodicTaskTest {
 	public void testDirect() {
 		CountingHandler countHandler = new CountingHandler();
 		PeriodicTask task = new PeriodicTask(FAKE_OP, countHandler, 1,
-				RecordPipeline.EMPTY);
+				SamplePipeline.EMPTY);
 		task.setInputPeriod(1);
 
 		assertThat(task.errorPercent(), equalTo(0));
 
 		for (int i = 0; i < 10; i++) {
-			task.newRecord(null);
+			task.newSample(null);
 		}
 		assertThat(countHandler.getCount(), equalTo(10l));
 	}
@@ -42,14 +42,14 @@ public class PeriodicTaskTest {
 		int outputPeriod = 10;
 		CountingHandler countHandler = new CountingHandler();
 		PeriodicTask task = new PeriodicTask(FAKE_OP, countHandler,
-				outputPeriod, RecordPipeline.EMPTY);
+				outputPeriod, SamplePipeline.EMPTY);
 		task.setInputPeriod(inputPeriod);
 
 		assertThat(task.errorPercent(), equalTo(0));
 
 		int samples = 10000;
 		for (int i = 0; i < samples; i++) {
-			task.newRecord(null);
+			task.newSample(null);
 		}
 
 		long ratio = outputPeriod / inputPeriod;
@@ -62,7 +62,7 @@ public class PeriodicTaskTest {
 		int outputPeriod = 11;
 		CountingHandler countHandler = new CountingHandler();
 		PeriodicTask task = new PeriodicTask(FAKE_OP, countHandler,
-				outputPeriod, RecordPipeline.EMPTY);
+				outputPeriod, SamplePipeline.EMPTY);
 		task.setInputPeriod(inputPeriod);
 
 		assertThat(task.errorPercent(), not(equalTo(0)));
@@ -73,7 +73,7 @@ public class PeriodicTaskTest {
 		long ratio = opBig.divide(ipBig, RoundingMode.HALF_EVEN).longValue();
 		long samples = 10000 * ratio;
 		for (long i = 0; i < samples; i++) {
-			task.newRecord(null);
+			task.newSample(null);
 		}
 
 		assertThat(countHandler.getCount(), equalTo(samples / ratio));
@@ -85,7 +85,7 @@ public class PeriodicTaskTest {
 		int outputPeriod = 11;
 		CountingHandler countHandler = new CountingHandler();
 		PeriodicTask task = new PeriodicTask(FAKE_OP, countHandler,
-				outputPeriod, RecordPipeline.EMPTY);
+				outputPeriod, SamplePipeline.EMPTY);
 		task.setInputPeriod(inputPeriod);
 
 		assertThat(task.errorPercent(), not(equalTo(0)));
@@ -96,7 +96,7 @@ public class PeriodicTaskTest {
 		long ratio = opBig.divide(ipBig, RoundingMode.HALF_EVEN).longValue();
 		long samples = 10000 * ratio;
 		for (long i = 0; i < samples; i++) {
-			task.newRecord(null);
+			task.newSample(null);
 		}
 
 		assertThat(countHandler.getCount(), equalTo(samples / ratio));

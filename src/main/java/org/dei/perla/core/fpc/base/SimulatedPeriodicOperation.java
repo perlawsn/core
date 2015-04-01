@@ -4,7 +4,6 @@ import org.dei.perla.core.engine.Executor;
 import org.dei.perla.core.engine.Script;
 import org.dei.perla.core.engine.ScriptHandler;
 import org.dei.perla.core.fpc.FpcException;
-import org.dei.perla.core.record.Record;
 import org.dei.perla.core.utils.StopHandler;
 
 import java.util.List;
@@ -62,8 +61,7 @@ public class SimulatedPeriodicOperation extends PeriodicOperation {
 		@Override
 		public void complete(Script script, List<Object[]> samples) {
 			for (Object[] s : samples) {
-				Record r = new Record(script.getEmit(), s);
-				forEachTask(t -> t.newRecord(r));
+				forEachTask(t -> t.newSample(s));
 			}
 		}
 

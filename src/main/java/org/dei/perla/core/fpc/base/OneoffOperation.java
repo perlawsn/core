@@ -3,7 +3,7 @@ package org.dei.perla.core.fpc.base;
 import org.dei.perla.core.engine.Script;
 import org.dei.perla.core.fpc.TaskHandler;
 import org.dei.perla.core.record.Attribute;
-import org.dei.perla.core.record.RecordPipeline;
+import org.dei.perla.core.record.SamplePipeline;
 import org.dei.perla.core.utils.StopHandler;
 
 import java.util.List;
@@ -24,7 +24,7 @@ public class OneoffOperation extends AbstractOperation<AbstractTask> {
 
 	@Override
 	public AbstractTask doSchedule(Map<String, Object> parameterMap,
-			TaskHandler handler, RecordPipeline pipeline) {
+			TaskHandler handler, SamplePipeline pipeline) {
 		return new ScriptTask(this, handler, pipeline);
 	}
 

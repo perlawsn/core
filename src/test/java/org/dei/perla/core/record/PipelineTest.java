@@ -1,13 +1,15 @@
 package org.dei.perla.core.record;
 
 import org.dei.perla.core.descriptor.DataType;
-import org.dei.perla.core.record.RecordPipeline.PipelineBuilder;
+import org.dei.perla.core.record.SampleModifier.StaticAppender;
+import org.dei.perla.core.record.SampleModifier.TimestampAppender;
+import org.dei.perla.core.record.SamplePipeline.PipelineBuilder;
 import org.junit.Test;
 
 import java.time.Instant;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.List;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -25,32 +27,26 @@ public class PipelineTest {
 
 	@Test
 	public void testTimestampAppender() {
-		RecordModifier tsAppend = new RecordModifier.TimestampAppender();
-		assertTrue(tsAppend.getAttributes().contains(
-				Attribute.TIMESTAMP));
-
+		SampleModifier tsAppend = new TimestampAppender(0);
         Object[] r = new Object[1];
         assertThat(r[0], nullValue());
-		tsAppend.process(r, 0);
+		tsAppend.process(r);
         assertThat(r[0], notNullValue());
         assertTrue(r[0] instanceof Instant);
 	}
 
 	@Test
 	public void testStaticAppender() {
-        LinkedHashMap<Attribute, Object> st = new LinkedHashMap<>();
-        st.put(a1, v1);
-        st.put(a2, v2);
+		Object[] values = new Object[]{v1, v2};
 
 		// Multiple static attributes appender
-		RecordModifier allAppender = new RecordModifier.StaticAppender(st);
-		assertTrue(allAppender.getAttributes().contains(a1));
-		assertTrue(allAppender.getAttributes().contains(a2));
+		SampleModifier allAppender =
+				new StaticAppender(0, values);
 
         Object[] r = new Object[2];
         assertThat(r[0], nullValue());
         assertThat(r[1], nullValue());
-		allAppender.process(r, 0);
+		allAppender.process(r);
 		assertThat(r[0], equalTo(1));
 		assertThat(r[1], equalTo("test"));
 	}
@@ -60,54 +56,27 @@ public class PipelineTest {
         LinkedHashMap<Attribute, Object> st = new LinkedHashMap<>();
         st.put(a1, v1);
 
-		PipelineBuilder b = RecordPipeline.newBuilder();
-		b.add(new RecordModifier.TimestampAppender());
-		b.add(new RecordModifier.StaticAppender(st));
+		List<Attribute> sourceAtt = Arrays.asList(new Attribute[] {
+				Attribute.create("source1", DataType.STRING),
+				Attribute.create("source2", DataType.STRING)
+		});
+		PipelineBuilder b = SamplePipeline.newBuilder(sourceAtt);
+		b.addTimestamp();
+		b.addStatic(st);
 
-		RecordPipeline p = b.create();
+		SamplePipeline p = b.create();
 		assertThat(p, notNullValue());
 		assertTrue(p.attributes().contains(Attribute.TIMESTAMP));
 		assertTrue(p.attributes().contains(a1));
 		assertFalse(p.attributes().contains(a2));
 
-		Map<Attribute, Object> fieldMap = new HashMap<>();
-		fieldMap.put(Attribute.create("source1", DataType.STRING), "source1");
-        fieldMap.put(Attribute.create("source2", DataType.STRING), "source2");
-		Record source = Record.from(fieldMap);
-		assertThat(source.getValue("source1"), notNullValue());
-		assertThat(source.getValue("source2"), notNullValue());
-		assertThat(source.getValue("timestamp"), nullValue());
-		assertThat(source.getValue("a1"), nullValue());
-		assertThat(source.getValue("a2"), nullValue());
-
+		Object[] source = new Object[]{"source1", "source2"};
 		Record output = p.run(source);
 		assertThat(output, notNullValue());
-		assertThat(output.getValue("source1"), notNullValue());
-		assertThat(output.getValue("source2"), notNullValue());
+		assertThat(output.getValue("source1"), equalTo("source1"));
+		assertThat(output.getValue("source2"), equalTo("source2"));
 		assertThat(output.getValue("timestamp"), notNullValue());
-		assertThat(output.getValue("a1"), notNullValue());
-		assertThat(output.getValue("a2"), nullValue());
-	}
-
-	@Test
-	public void emptyPipelineTest() {
-		Map<Attribute, Object> fieldMap = new HashMap<>();
-        fieldMap.put(Attribute.create("source1", DataType.STRING), "source1");
-        fieldMap.put(Attribute.create("source2", DataType.STRING), "source2");
-		Record source = Record.from(fieldMap);
-		assertThat(source.getValue("source1"), notNullValue());
-		assertThat(source.getValue("source2"), notNullValue());
-		assertThat(source.getValue("timestamp"), nullValue());
-		assertThat(source.getValue("a1"), nullValue());
-		assertThat(source.getValue("a2"), nullValue());
-
-		assertTrue(RecordPipeline.EMPTY.attributes().isEmpty());
-		Record output = RecordPipeline.EMPTY.run(source);
-		assertThat(output, notNullValue());
-		assertThat(output.getValue("source1"), notNullValue());
-		assertThat(output.getValue("source2"), notNullValue());
-		assertThat(output.getValue("timestamp"), nullValue());
-		assertThat(output.getValue("a1"), nullValue());
+		assertThat(output.getValue("a1"), equalTo(v1));
 		assertThat(output.getValue("a2"), nullValue());
 	}
 

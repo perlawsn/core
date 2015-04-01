@@ -7,7 +7,6 @@ import org.dei.perla.core.engine.ScriptParameter;
 import org.dei.perla.core.fpc.FpcException;
 import org.dei.perla.core.message.FpcMessage;
 import org.dei.perla.core.record.Attribute;
-import org.dei.perla.core.record.Record;
 import org.dei.perla.core.utils.Check;
 import org.dei.perla.core.utils.StopHandler;
 
@@ -279,15 +278,13 @@ public class NativePeriodicOperation extends PeriodicOperation {
 				// receives one message type. Doing so avoids the cost of
 				// merging with the currentRecord
                 for (Object[] s : samples) {
-					Record r = new Record(atts, s);
-                    forEachTask(t -> t.newRecord(r));
+                    forEachTask(t -> t.newSample(s));
                 }
 
 			} else if (msgs.isSync()) {
 				// Merge with the current record and distribute
                 for (Object[] s : samples) {
-                    Record m = new Record(atts, merge(s));
-                    forEachTask(t -> t.newRecord(m));
+                    forEachTask(t -> t.newSample(s));
                 }
 
 			} else {

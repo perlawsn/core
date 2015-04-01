@@ -5,7 +5,7 @@ import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.TaskHandler;
 import org.dei.perla.core.record.Attribute;
 import org.dei.perla.core.record.Record;
-import org.dei.perla.core.record.RecordPipeline;
+import org.dei.perla.core.record.SamplePipeline;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,7 +24,7 @@ public abstract class AbstractTask implements Task {
 
 	private AtomicBoolean running = new AtomicBoolean(true);
 	private final AbstractOperation<? extends AbstractTask> op;
-	private final RecordPipeline pipeline;
+	private final SamplePipeline pipeline;
 	private final List<Attribute> atts;
 	private final TaskHandler handler;
 
@@ -38,14 +38,14 @@ public abstract class AbstractTask implements Task {
 	 *            {@link TaskHandler} employed to notify the presence of new
 	 *            {@link Record}s to other interested users.
 	 * @param pipeline
-	 *            {@link RecordPipeline} used to process new {@link Record}
+	 *            {@link SamplePipeline} used to process new {@link Record}
 	 *            prior to notifying them to the {@link TaskHandler}.
 	 */
 	public AbstractTask(AbstractOperation<? extends AbstractTask> op,
-			TaskHandler handler, RecordPipeline pipeline) {
+			TaskHandler handler, SamplePipeline pipeline) {
 		this.op = op;
 		this.handler = handler;
-		this.pipeline = pipeline == RecordPipeline.EMPTY ? null : pipeline;
+		this.pipeline = pipeline == SamplePipeline.EMPTY ? null : pipeline;
 
 		// Enrich the attribute set with all attributes added by the Pipeline
 		List<Attribute> atts = new ArrayList<>(op.getAttributes());
@@ -142,7 +142,7 @@ public abstract class AbstractTask implements Task {
 
 	/**
 	 * <p>
-	 * Runs the a new {@link Record} in the {@link RecordPipeline} and handles
+	 * Runs the a new {@link Record} in the {@link SamplePipeline} and handles
 	 * it over to the registered {@link TaskHandler}. This method is intended to
 	 * be invoked by a {@link AbstractOperation} whenever a new record is
 	 * produced by the remote device.
@@ -153,20 +153,15 @@ public abstract class AbstractTask implements Task {
 	 * {@code AbstractTask} is stopped
 	 * </p>
 	 *
-	 * @param record
-	 *            {@link Record} to be processed
+	 * @param sample
+	 *            sample to be processed
 	 */
-	protected final void processRecord(Record record) {
+	protected final void processSample(Object[] sample) {
 		if (!running.get()) {
 			return;
 		}
 
-		Record output;
-		if (pipeline != null) {
-			output = pipeline.run(record);
-		} else {
-			output = record;
-		}
+        Record output = pipeline.run(sample);
 		handler.newRecord(this, output);
 	}
 

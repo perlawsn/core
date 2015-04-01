@@ -4,10 +4,10 @@ import org.dei.perla.core.fpc.Fpc;
 import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.TaskHandler;
 import org.dei.perla.core.record.Attribute;
-import org.dei.perla.core.record.RecordPipeline;
+import org.dei.perla.core.record.SamplePipeline;
 import org.dei.perla.core.utils.StopHandler;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -30,12 +30,13 @@ public interface Operation {
 	public String getId();
 
 	/**
-	 * Returns the set of device {@link Attribute}s that can be sampled or set
-	 * using this operation
+	 * Returns the list of device {@link Attribute}s, that can be
+	 * sampled or set using this operation. For data collection operations,
+	 * the attribute order is maintained in every output {@link Record}.
 	 *
-	 * @return Set of {@link Attribute}s associated with the {@code Operation}
+	 * @return List of {@link Attribute}s associated with the {@code Operation}
 	 */
-	public Collection<Attribute> getAttributes();
+	public List<Attribute> getAttributes();
 
 	/**
 	 * <p>
@@ -87,7 +88,7 @@ public interface Operation {
 	 *
 	 * <p>
 	 * This version of the {@code schedule()} method accepts a
-	 * {@link RecordPipeline} parameter that will be used to modify the raw
+	 * {@link SamplePipeline} parameter that will be used to modify the raw
 	 * records produced by remote device.
 	 * </p>
 	 *
@@ -97,7 +98,7 @@ public interface Operation {
 	 *            {@link TaskHandler} object used to asynchronously collect the
 	 *            {@code Operation} output
 	 * @param pipeline
-	 *            {@link RecordPipeline} object used to modify the records
+	 *            {@link SamplePipeline} object used to modify the records
 	 *            produced by this operation
 	 * @return {@link Task} object for controlling the {@code Operation}
 	 *         execution
@@ -109,7 +110,7 @@ public interface Operation {
 	 *             {@code Operation} is not running
 	 */
 	public AbstractTask schedule(Map<String, Object> parameterMap,
-			TaskHandler handler, RecordPipeline pipeline)
+			TaskHandler handler, SamplePipeline pipeline)
 			throws IllegalArgumentException, IllegalStateException;
 
 	/**

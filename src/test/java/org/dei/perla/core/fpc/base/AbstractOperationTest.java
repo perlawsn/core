@@ -12,7 +12,7 @@ import java.util.Map;
 import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.TaskHandler;
 import org.dei.perla.core.record.Record;
-import org.dei.perla.core.record.RecordPipeline;
+import org.dei.perla.core.record.SamplePipeline;
 import org.dei.perla.core.utils.StopHandler;
 import org.junit.Test;
 
@@ -142,7 +142,7 @@ public class AbstractOperationTest {
 
 		@Override
 		protected TestTask doSchedule(Map<String, Object> parameterMap,
-				TaskHandler handler, RecordPipeline pipeline)
+				TaskHandler handler, SamplePipeline pipeline)
 				throws IllegalArgumentException {
 			TestTask task = new TestTask(this, handler, pipeline);
 			add(task);
@@ -170,7 +170,7 @@ public class AbstractOperationTest {
 	private static class TestTask extends AbstractTask {
 
 		public TestTask(AbstractOperation<? extends AbstractTask> operation,
-				TaskHandler handler, RecordPipeline pipeline) {
+				TaskHandler handler, SamplePipeline pipeline) {
 			super(operation, handler, pipeline);
 		}
 

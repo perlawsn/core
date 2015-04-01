@@ -8,8 +8,7 @@ import org.dei.perla.core.fpc.TaskHandler;
 import org.dei.perla.core.message.FpcMessage;
 import org.dei.perla.core.message.Mapper;
 import org.dei.perla.core.record.Attribute;
-import org.dei.perla.core.record.Record;
-import org.dei.perla.core.record.RecordPipeline;
+import org.dei.perla.core.record.SamplePipeline;
 import org.dei.perla.core.utils.StopHandler;
 
 import java.util.List;
@@ -42,7 +41,7 @@ public class AsyncOperation extends AbstractOperation<AsyncOperation.AsyncTask> 
 	private final AsyncPeriodicOperation asyncPeriodicOp;
 	private final AsyncOneoffOperation asyncOneoffOp;
 
-	private volatile Record sample;
+	private volatile Object[] sample;
 
 	protected AsyncOperation(String id, List<Attribute> atts,
 			Script startScript, AsyncMessageHandler handler,
@@ -54,7 +53,7 @@ public class AsyncOperation extends AbstractOperation<AsyncOperation.AsyncTask> 
 		asyncPeriodicOp = new AsyncPeriodicOperation(id, atts);
 		asyncOneoffOp = new AsyncOneoffOperation(id, atts);
 
-		sample = new Record(atts, new Object[atts.size()]);
+		sample = new Object[atts.size()];
 
 		state = STARTED;
 		runStartScript();
@@ -77,7 +76,7 @@ public class AsyncOperation extends AbstractOperation<AsyncOperation.AsyncTask> 
 
 	@Override
 	public AsyncTask doSchedule(Map<String, Object> parameterMap,
-			TaskHandler handler, RecordPipeline pipeline)
+			TaskHandler handler, SamplePipeline pipeline)
 			throws IllegalArgumentException {
 		AsyncTask task = new AsyncTask(this, handler, pipeline);
 		add(task);
@@ -139,12 +138,9 @@ public class AsyncOperation extends AbstractOperation<AsyncOperation.AsyncTask> 
 
 		@Override
 		public void complete(Script script, List<Object[]> samples) {
-			samples.forEach(s -> forEachTask(t -> {
-				Record r = new Record(script.getEmit(), s);
-				t.processRecord(r);
-			}));
+			samples.forEach(s -> forEachTask(t -> t.processSample(s)));
 			int last = samples.size() - 1;
-			sample = new Record(script.getEmit(), samples.get(last));
+			sample = samples.get(last);
 		}
 
 		@Override
@@ -195,7 +191,7 @@ public class AsyncOperation extends AbstractOperation<AsyncOperation.AsyncTask> 
 				}
 
 				timerFuture = executor.scheduleAtFixedRate(
-						() -> forEachTask(t -> t.newRecord(sample)), 0, period,
+						() -> forEachTask(t -> t.newSample(sample)), 0, period,
 						TimeUnit.MILLISECONDS);
 				currentPeriod = period;
 				forEachTask(t -> t.setInputPeriod(period));
@@ -218,7 +214,7 @@ public class AsyncOperation extends AbstractOperation<AsyncOperation.AsyncTask> 
 
 		@Override
 		public AsyncTask doSchedule(Map<String, Object> parameterMap,
-				TaskHandler handler, RecordPipeline pipeline)
+				TaskHandler handler, SamplePipeline pipeline)
 				throws IllegalArgumentException {
 			return runUnderLock(() -> {
 				if (state == STOPPED) {
@@ -234,7 +230,7 @@ public class AsyncOperation extends AbstractOperation<AsyncOperation.AsyncTask> 
 				// operation runs asynchronously, we have no way to know when
 				// new data will arrive
 				AsyncTask task = new AsyncTask(this, handler, pipeline);
-				task.processRecord(sample);
+				task.processSample(sample);
 				task.notifyComplete();
 				return task;
 			});
@@ -254,7 +250,7 @@ public class AsyncOperation extends AbstractOperation<AsyncOperation.AsyncTask> 
 	protected class AsyncTask extends AbstractTask {
 
 		public AsyncTask(AbstractOperation<?> operation, TaskHandler handler,
-				RecordPipeline pipeline) {
+				SamplePipeline pipeline) {
 			super(operation, handler, pipeline);
 		}
 

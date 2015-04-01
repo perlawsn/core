@@ -2,7 +2,7 @@ package org.dei.perla.core.fpc.base;
 
 import org.dei.perla.core.fpc.TaskHandler;
 import org.dei.perla.core.record.Attribute;
-import org.dei.perla.core.record.RecordPipeline;
+import org.dei.perla.core.record.SamplePipeline;
 import org.dei.perla.core.utils.Conditions;
 
 import java.util.List;
@@ -26,7 +26,7 @@ public abstract class PeriodicOperation extends AbstractOperation<PeriodicTask> 
 
 	@Override
 	protected PeriodicTask doSchedule(Map<String, Object> parameterMap,
-			TaskHandler handler, RecordPipeline pipeline)
+			TaskHandler handler, SamplePipeline pipeline)
 			throws IllegalArgumentException {
 		long periodMs = getPeriodParameter(parameterMap);
 

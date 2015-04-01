@@ -1,8 +1,7 @@
 package org.dei.perla.core.fpc.base;
 
 import org.dei.perla.core.fpc.TaskHandler;
-import org.dei.perla.core.record.Record;
-import org.dei.perla.core.record.RecordPipeline;
+import org.dei.perla.core.record.SamplePipeline;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -17,7 +16,7 @@ public class PeriodicTask extends AbstractTask {
 	private final long outputPeriod;
 
 	protected PeriodicTask(PeriodicOperation operation, TaskHandler handler,
-			long outputPeriod, RecordPipeline pipeline) {
+			long outputPeriod, SamplePipeline pipeline) {
 		super(operation, handler, pipeline);
 		this.outputPeriod = outputPeriod;
 	}
@@ -47,13 +46,13 @@ public class PeriodicTask extends AbstractTask {
 		ratio = 0;
 	}
 
-	protected void newRecord(Record record) {
+	protected void newSample(Object[] sample) {
 		if (ratio == 0) {
 			return;
 		}
 
 		if (count == 0) {
-			processRecord(record);
+			processSample(sample);
 		}
 		count = (count + 1) % ratio;
 	}

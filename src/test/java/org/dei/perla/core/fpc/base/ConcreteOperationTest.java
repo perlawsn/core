@@ -18,7 +18,7 @@ import org.dei.perla.core.fpc.base.AsyncOperation.AsyncMessageHandler;
 import org.dei.perla.core.message.Mapper;
 import org.dei.perla.core.message.MapperFactory;
 import org.dei.perla.core.record.Record;
-import org.dei.perla.core.record.RecordPipeline;
+import org.dei.perla.core.record.SamplePipeline;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -205,7 +205,7 @@ public class ConcreteOperationTest {
 	@Test
 	public void testGetOperation() throws Exception {
 		SynchronizerTaskHandler syncHandler = new SynchronizerTaskHandler();
-		Task task = getOp.schedule(null, syncHandler, RecordPipeline.EMPTY);
+		Task task = getOp.schedule(null, syncHandler, SamplePipeline.EMPTY);
 		assertThat(task, notNullValue());
 		assertTrue(getOp.getAttributes().containsAll(task.getAttributes()));
 		assertTrue(task.getAttributes().containsAll(getOp.getAttributes()));
@@ -238,7 +238,7 @@ public class ConcreteOperationTest {
 	@Test
 	public void testSetOperation() throws Exception {
 		SynchronizerTaskHandler syncHandler = new SynchronizerTaskHandler();
-		Task task = setOp.schedule(null, syncHandler, RecordPipeline.EMPTY);
+		Task task = setOp.schedule(null, syncHandler, SamplePipeline.EMPTY);
 		assertThat(task, notNullValue());
 
 		Record record = syncHandler.getResult();
@@ -253,7 +253,7 @@ public class ConcreteOperationTest {
 		parameterMap.put("period", 1);
 
 		// Start test
-		Task task = natPeriodicOp.schedule(parameterMap, handler, RecordPipeline.EMPTY);
+		Task task = natPeriodicOp.schedule(parameterMap, handler, SamplePipeline.EMPTY);
 		assertTrue(natPeriodicOp.getAttributes().containsAll(
 				task.getAttributes()));
 		assertTrue(task.getAttributes().containsAll(
@@ -283,11 +283,11 @@ public class ConcreteOperationTest {
 		Map<String, Object> paramMap3 = new HashMap<>();
 		paramMap3.put("period", 1);
 
-		Task task1 = natPeriodicOp.schedule(paramMap1, h1, RecordPipeline.EMPTY);
+		Task task1 = natPeriodicOp.schedule(paramMap1, h1, SamplePipeline.EMPTY);
 		assertThat(natPeriodicOp.getSamplingPeriod(), equalTo(100l));
-		Task task2 = natPeriodicOp.schedule(paramMap2, h2, RecordPipeline.EMPTY);
+		Task task2 = natPeriodicOp.schedule(paramMap2, h2, SamplePipeline.EMPTY);
 		assertThat(natPeriodicOp.getSamplingPeriod(), equalTo(10l));
-		Task task3 = natPeriodicOp.schedule(paramMap3, h3, RecordPipeline.EMPTY);
+		Task task3 = natPeriodicOp.schedule(paramMap3, h3, SamplePipeline.EMPTY);
 		assertThat(natPeriodicOp.getSamplingPeriod(), equalTo(1l));
 
 		assertThat(task1, notNullValue());
@@ -358,7 +358,7 @@ public class ConcreteOperationTest {
 		parameterMap.put("period", 1);
 
 		// Start test
-		Task task = simPeriodicOp.schedule(parameterMap, handler, RecordPipeline.EMPTY);
+		Task task = simPeriodicOp.schedule(parameterMap, handler, SamplePipeline.EMPTY);
 		assertThat(task, notNullValue());
 		assertTrue(task.isRunning());
 		assertThat(handler.getAveragePeriod(), greaterThanOrEqualTo(0.9d));
@@ -384,11 +384,11 @@ public class ConcreteOperationTest {
 		Map<String, Object> paramMap3 = new HashMap<>();
 		paramMap3.put("period", 1);
 
-		Task task1 = simPeriodicOp.schedule(paramMap1, h1, RecordPipeline.EMPTY);
+		Task task1 = simPeriodicOp.schedule(paramMap1, h1, SamplePipeline.EMPTY);
 		assertThat(simPeriodicOp.getSamplingPeriod(), equalTo(100l));
-		Task task2 = simPeriodicOp.schedule(paramMap2, h2, RecordPipeline.EMPTY);
+		Task task2 = simPeriodicOp.schedule(paramMap2, h2, SamplePipeline.EMPTY);
 		assertThat(simPeriodicOp.getSamplingPeriod(), equalTo(10l));
-		Task task3 = simPeriodicOp.schedule(paramMap3, h3, RecordPipeline.EMPTY);
+		Task task3 = simPeriodicOp.schedule(paramMap3, h3, SamplePipeline.EMPTY);
 		assertThat(simPeriodicOp.getSamplingPeriod(), equalTo(1l));
 
 		assertThat(task1, notNullValue());

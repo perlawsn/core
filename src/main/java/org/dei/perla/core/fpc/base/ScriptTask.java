@@ -5,8 +5,7 @@ import org.dei.perla.core.engine.Runner;
 import org.dei.perla.core.engine.Script;
 import org.dei.perla.core.engine.ScriptHandler;
 import org.dei.perla.core.fpc.TaskHandler;
-import org.dei.perla.core.record.Record;
-import org.dei.perla.core.record.RecordPipeline;
+import org.dei.perla.core.record.SamplePipeline;
 
 import java.util.List;
 
@@ -31,7 +30,7 @@ public class ScriptTask extends AbstractTask {
 	private final Runner runner;
 
 	protected ScriptTask(OneoffOperation operation, TaskHandler handler,
-			RecordPipeline pipeline) {
+			SamplePipeline pipeline) {
 		super(operation, handler, pipeline);
 		this.runner = Executor.execute(operation.getScript(),
 				new OneoffScriptHandler());
@@ -54,9 +53,7 @@ public class ScriptTask extends AbstractTask {
 
 		@Override
 		public void complete(Script script, List<Object[]> samples) {
-			for (Object[] s : samples) {
-				processRecord(new Record(script.getEmit(), s));
-			}
+			samples.forEach(s -> processSample(s));
 			notifyComplete();
 		}
 
