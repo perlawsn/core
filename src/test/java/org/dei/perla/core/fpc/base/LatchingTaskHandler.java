@@ -5,56 +5,91 @@ import org.dei.perla.core.fpc.TaskHandler;
 import org.dei.perla.core.record.Record;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class LatchingTaskHandler implements TaskHandler {
 
-	private volatile int count = 0;
+	private final Lock lk = new ReentrantLock();
+	private final Condition cond = lk.newCondition();
 
-	private volatile long previousTime = 0;
-	private volatile double avgPeriod = 0;
+	private final int originalCount;
 
-	private final CountDownLatch latch;
-	private volatile Throwable error;
+	private int waitCount;
+	private int count = 0;
+
+	private long previousTime = 0;
+	private double avgPeriod = 0;
+
+	private Throwable error;
 
 	private final List<Record> samples = new ArrayList<>();
 
 	public LatchingTaskHandler(int waitCount) {
-		latch = new CountDownLatch(waitCount);
+		this.waitCount = waitCount;
+		this.originalCount = waitCount;
 	}
 
 	public int getCount() throws InterruptedException {
-		latch.await();
-		if (error != null) {
-			throw new RuntimeException(error);
+		lk.lock();
+		try {
+			if (waitCount > 0) {
+				cond.await();
+			}
+			if (error != null) {
+				throw new RuntimeException(error);
+			}
+			return count;
+		} finally {
+			lk.unlock();
 		}
-		return count;
 	}
 
 	public double getAveragePeriod() throws InterruptedException {
-		latch.await();
-		if (error != null) {
-			throw new RuntimeException(error);
+		lk.lock();
+		try {
+			if (waitCount > 0) {
+				cond.await();
+			}
+			if (error != null) {
+				throw new RuntimeException(error);
+			}
+			return avgPeriod;
+		} finally {
+			lk.unlock();
 		}
-		return avgPeriod;
 	}
 
 	public List<Record> getSamples() throws InterruptedException {
-		latch.await();
-		if (error != null) {
-			throw new RuntimeException(error);
+		lk.lock();
+		try {
+			if (waitCount > 0) {
+				cond.await();
+			}
+			if (error != null) {
+				throw new RuntimeException(error);
+			}
+			return samples;
+		} finally {
+			lk.unlock();
 		}
-		return samples;
 	}
 
 	public Record getLastSample() throws InterruptedException {
-		latch.await();
-		if (error != null) {
-			throw new RuntimeException(error);
+		lk.lock();
+		try {
+			if (waitCount > 0) {
+				cond.await();
+			}
+			if (error != null) {
+				throw new RuntimeException(error);
+			}
+			return samples.get(samples.size() - 1);
+		} finally {
+			lk.unlock();
 		}
-		return samples.get(samples.size() - 1);
 	}
 
 	@Override
@@ -63,24 +98,37 @@ public class LatchingTaskHandler implements TaskHandler {
 
 	@Override
 	public void newRecord(Task task, Record record) {
-		samples.add(record);
-
-		if (previousTime == 0) {
-			previousTime = System.currentTimeMillis();
-			return;
+		lk.lock();
+		try {
+			if (waitCount <= 0) {
+				return;
+			}
+			samples.add(record);
+			waitCount--;
+			count++;
+			if (previousTime == 0) {
+				previousTime = System.currentTimeMillis();
+			} else {
+				avgPeriod = (avgPeriod + (System.currentTimeMillis() - previousTime))
+						/ count;
+			}
+			System.out.println(originalCount + " " + System.currentTimeMillis());
+			if (waitCount == 0) {
+				cond.signalAll();
+			}
+		} finally {
+			lk.unlock();
 		}
-
-		count++;
-		latch.countDown();
-		avgPeriod = (avgPeriod + (System.currentTimeMillis() - previousTime))
-				/ count;
 	}
 
 	@Override
 	public void error(Task task, Throwable cause) {
-		error = cause;
-		while (latch.getCount() > 0) {
-			latch.countDown();
+		lk.lock();
+		try {
+			error = cause;
+			cond.signalAll();
+		} finally {
+			lk.unlock();
 		}
 	}
 
