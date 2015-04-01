@@ -3,7 +3,6 @@ package org.dei.perla.core.record;
 import org.dei.perla.core.record.SampleModifier.Reorder;
 import org.dei.perla.core.record.SampleModifier.StaticAppender;
 import org.dei.perla.core.record.SampleModifier.TimestampAppender;
-import org.dei.perla.core.utils.Check;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -20,13 +19,6 @@ import java.util.Map.Entry;
  *
  */
 public class SamplePipeline {
-
-	/**
-	 * An empty {@code RecordPipeline}. Does not alter the {@link Record}
-	 * content.
-	 */
-	public static final SamplePipeline EMPTY =
-            new SamplePipeline(Collections.emptyList(), Collections.emptyList());
 
     public final List<SampleModifier> mods;
     public final List<Attribute> atts;
@@ -88,7 +80,6 @@ public class SamplePipeline {
 	 */
 	public static class PipelineBuilder {
 
-        private final List<Attribute> original;
         private final List<Attribute> atts = new ArrayList<>();
 		private final List<SampleModifier> mods = new ArrayList<>();
 
@@ -98,7 +89,6 @@ public class SamplePipeline {
          * in the {@link SamplePipeline} class.
          */
 		private PipelineBuilder(List<Attribute> original) {
-            this.original = Collections.unmodifiableList(original);
             atts.addAll(original);
         }
 
@@ -145,9 +135,6 @@ public class SamplePipeline {
          * @param attOrder {@link Attribute}s in the order required by the fpc user
 		 */
 		public SamplePipeline create() {
-			if (Check.nullOrEmpty(mods)) {
-				return SamplePipeline.EMPTY;
-			}
 			return new SamplePipeline(mods, atts);
 		}
 

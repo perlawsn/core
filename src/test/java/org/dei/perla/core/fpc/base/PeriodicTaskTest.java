@@ -1,37 +1,42 @@
 package org.dei.perla.core.fpc.base;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.lessThan;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertThat;
+import org.dei.perla.core.fpc.Task;
+import org.dei.perla.core.fpc.TaskHandler;
+import org.dei.perla.core.record.Record;
+import org.dei.perla.core.record.SamplePipeline;
+import org.dei.perla.core.record.SamplePipeline.PipelineBuilder;
+import org.dei.perla.core.utils.StopHandler;
+import org.junit.Test;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Collections;
 
-import org.dei.perla.core.fpc.Task;
-import org.dei.perla.core.fpc.TaskHandler;
-import org.dei.perla.core.record.Record;
-import org.dei.perla.core.record.SamplePipeline;
-import org.dei.perla.core.utils.StopHandler;
-import org.junit.Test;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertThat;
 
 public class PeriodicTaskTest {
 
 	private static final FakeOperation FAKE_OP = new FakeOperation();
+	private static final Object[] EMPTY_SAMPLE = new Object[0];
+	private static final SamplePipeline EMPTY_PIPELINE;
+	static {
+		PipelineBuilder pb = SamplePipeline.newBuilder(
+				Collections.emptyList());
+		EMPTY_PIPELINE = pb.create();
+	}
 
 	@Test
 	public void testDirect() {
 		CountingHandler countHandler = new CountingHandler();
 		PeriodicTask task = new PeriodicTask(FAKE_OP, countHandler, 1,
-				SamplePipeline.EMPTY);
+				EMPTY_PIPELINE);
 		task.setInputPeriod(1);
 
 		assertThat(task.errorPercent(), equalTo(0));
 
 		for (int i = 0; i < 10; i++) {
-			task.newSample(null);
+			task.newSample(EMPTY_SAMPLE);
 		}
 		assertThat(countHandler.getCount(), equalTo(10l));
 	}
@@ -42,14 +47,14 @@ public class PeriodicTaskTest {
 		int outputPeriod = 10;
 		CountingHandler countHandler = new CountingHandler();
 		PeriodicTask task = new PeriodicTask(FAKE_OP, countHandler,
-				outputPeriod, SamplePipeline.EMPTY);
+				outputPeriod, EMPTY_PIPELINE);
 		task.setInputPeriod(inputPeriod);
 
 		assertThat(task.errorPercent(), equalTo(0));
 
 		int samples = 10000;
 		for (int i = 0; i < samples; i++) {
-			task.newSample(null);
+			task.newSample(EMPTY_SAMPLE);
 		}
 
 		long ratio = outputPeriod / inputPeriod;
@@ -62,7 +67,7 @@ public class PeriodicTaskTest {
 		int outputPeriod = 11;
 		CountingHandler countHandler = new CountingHandler();
 		PeriodicTask task = new PeriodicTask(FAKE_OP, countHandler,
-				outputPeriod, SamplePipeline.EMPTY);
+				outputPeriod, EMPTY_PIPELINE);
 		task.setInputPeriod(inputPeriod);
 
 		assertThat(task.errorPercent(), not(equalTo(0)));
@@ -73,7 +78,7 @@ public class PeriodicTaskTest {
 		long ratio = opBig.divide(ipBig, RoundingMode.HALF_EVEN).longValue();
 		long samples = 10000 * ratio;
 		for (long i = 0; i < samples; i++) {
-			task.newSample(null);
+			task.newSample(EMPTY_SAMPLE);
 		}
 
 		assertThat(countHandler.getCount(), equalTo(samples / ratio));
@@ -85,7 +90,7 @@ public class PeriodicTaskTest {
 		int outputPeriod = 11;
 		CountingHandler countHandler = new CountingHandler();
 		PeriodicTask task = new PeriodicTask(FAKE_OP, countHandler,
-				outputPeriod, SamplePipeline.EMPTY);
+				outputPeriod, EMPTY_PIPELINE);
 		task.setInputPeriod(inputPeriod);
 
 		assertThat(task.errorPercent(), not(equalTo(0)));
@@ -96,7 +101,7 @@ public class PeriodicTaskTest {
 		long ratio = opBig.divide(ipBig, RoundingMode.HALF_EVEN).longValue();
 		long samples = 10000 * ratio;
 		for (long i = 0; i < samples; i++) {
-			task.newSample(null);
+			task.newSample(EMPTY_SAMPLE);
 		}
 
 		assertThat(countHandler.getCount(), equalTo(samples / ratio));

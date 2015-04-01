@@ -45,7 +45,7 @@ public abstract class AbstractTask implements Task {
 			TaskHandler handler, SamplePipeline pipeline) {
 		this.op = op;
 		this.handler = handler;
-		this.pipeline = pipeline == SamplePipeline.EMPTY ? null : pipeline;
+		this.pipeline = pipeline;
 
 		// Enrich the attribute set with all attributes added by the Pipeline
 		List<Attribute> atts = new ArrayList<>(op.getAttributes());
