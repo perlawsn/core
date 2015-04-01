@@ -100,9 +100,6 @@ public class LatchingTaskHandler implements TaskHandler {
 	public void newRecord(Task task, Record record) {
 		lk.lock();
 		try {
-			if (waitCount <= 0) {
-				return;
-			}
 			samples.add(record);
 			waitCount--;
 			count++;
@@ -112,7 +109,6 @@ public class LatchingTaskHandler implements TaskHandler {
 				avgPeriod = (avgPeriod + (System.currentTimeMillis() - previousTime))
 						/ count;
 			}
-			System.out.println(originalCount + " " + System.currentTimeMillis());
 			if (waitCount == 0) {
 				cond.signalAll();
 			}
