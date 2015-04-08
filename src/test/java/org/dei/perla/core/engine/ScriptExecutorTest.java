@@ -6,9 +6,11 @@ import org.dei.perla.core.descriptor.AttributeDescriptor.AttributePermission;
 import org.dei.perla.core.descriptor.DataType;
 import org.dei.perla.core.engine.ExecutionContext.InstructionLocal;
 import org.dei.perla.core.message.Mapper;
+import org.dei.perla.core.record.Attribute;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -18,8 +20,17 @@ import static org.junit.Assert.*;
 
 public class ScriptExecutorTest {
 
-	private static AttributeDescriptor integer;
-	private static AttributeDescriptor string;
+	private static final AttributeDescriptor integer;
+	private static final AttributeDescriptor string;
+	private static final AttributeDescriptor timestamp;
+	static {
+		integer = new AttributeDescriptor("integer", DataType.INTEGER,
+				AttributePermission.READ_WRITE);
+		string = new AttributeDescriptor("string", DataType.STRING,
+				AttributePermission.READ_WRITE);
+		timestamp = new AttributeDescriptor("timestamp", DataType.TIMESTAMP,
+				AttributePermission.WRITE_ONLY);
+	}
 
 	private static Mapper mapper1;
 
@@ -27,10 +38,6 @@ public class ScriptExecutorTest {
 
 	@BeforeClass
 	public static void setup() {
-		integer = new AttributeDescriptor("integer", DataType.INTEGER,
-				AttributePermission.READ_WRITE);
-		string = new AttributeDescriptor("string", DataType.STRING,
-				AttributePermission.READ_WRITE);
 
 		mapper1 = new TestMapper("message1");
 		emitScript = ScriptBuilder.newScript()
@@ -214,6 +221,23 @@ public class ScriptExecutorTest {
 		assertThat(il.getValue(runner1), not(equalTo(il.getValue(runner2))));
 		assertThat(il.getValue(runner1), equalTo(12));
 		assertThat(il.getValue(runner2), equalTo(0));
+	}
+
+	@Test
+	public void testScriptTimestampCreation() throws Exception {
+		Script script = ScriptBuilder.newScript()
+				.add(new PutInstruction("${now()}", timestamp, 0))
+				.add(new EmitInstruction())
+				.add(new StopInstruction())
+				.buildScript("timestamp");
+
+		SynchronizerScriptHandler h = new SynchronizerScriptHandler();
+		Runner run = Executor.execute(script, h);
+		List<Object[]> res = h.getResult();
+		assertThat(res, notNullValue());
+		assertThat(res.size(), equalTo(1));
+		assertTrue(res.get(0)[0] instanceof Instant);
+		assertThat((Instant) res.get(0)[0], lessThanOrEqualTo(Instant.now()));
 	}
 
 }

@@ -5,6 +5,8 @@ import org.dei.perla.core.utils.Check;
 
 import javax.el.*;
 import java.beans.FeatureDescriptor;
+import java.lang.reflect.Method;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -256,11 +258,13 @@ public class ExecutionContext {
 		private final VariableMapper variableMapper;
 		private final CompositeELResolver resolver;
 		private final ParameterELResolver paramResolver;
+		private final FunctionMapper functionMapper;
 
 		public ScriptEngineELContext(VariableMapper variableMapper) {
 			this.variableMapper = variableMapper;
-			resolver = new CompositeELResolver();
 			paramResolver = new ParameterELResolver();
+			functionMapper = new FpcEngineFunctionMapper();
+			resolver = new CompositeELResolver();
 			resolver.add(paramResolver);
 			resolver.add(new MapELResolver(true));
 			resolver.add(new AttributeELResolver());
@@ -293,12 +297,29 @@ public class ExecutionContext {
 
 		@Override
 		public FunctionMapper getFunctionMapper() {
-			return null; // Not used
+			return functionMapper;
 		}
 
 		@Override
 		public VariableMapper getVariableMapper() {
 			return variableMapper;
+		}
+
+	}
+
+	private class FpcEngineFunctionMapper extends FunctionMapper {
+
+		@Override
+		public Method resolveFunction(String prefix, String name) {
+			if (!name.equals("now")) {
+				return null;
+			}
+			try {
+				return Instant.class.getMethod("now");
+			} catch(Exception e) {
+				throw new RuntimeException("fatal failure, check " +
+						"ExecutionContext.FpcEngineFunctionMapper code", e);
+			}
 		}
 
 	}
