@@ -32,8 +32,6 @@ public class NativePeriodicOperation extends PeriodicOperation {
 	// Operation state
 	private volatile int state = 0;
 
-    private final List<Attribute> atts;
-
 	// Current record, used to merge the results from different async messages
     Lock rlk = new ReentrantLock();
 	private Object[] currentRecord;
@@ -45,7 +43,6 @@ public class NativePeriodicOperation extends PeriodicOperation {
 		this.start = start;
 		this.stop = stop;
 		this.chanMgr = chanMgr;
-        this.atts = atts;
 
 		int nAtt = 0;
 		for (MessageScript m : msgs) {

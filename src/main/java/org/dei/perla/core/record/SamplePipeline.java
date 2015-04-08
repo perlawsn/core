@@ -23,16 +23,6 @@ public class SamplePipeline {
     public final List<SampleModifier> mods;
     public final List<Attribute> atts;
 
-	/**
-	 * Returns a new {@code PipelineBuilder} instance for creating new
-	 * {@code RecordPipeline} objects.
-	 *
-	 * @return New {@code PipelineBuilder} object
-	 */
-	public static PipelineBuilder newBuilder(List<Attribute> atts) {
-		return new PipelineBuilder(atts);
-	}
-
     /**
      * Private {@code RecordPipeline} constructor, new isntances must be
      * buiilt using the {@link PipelineBuilder} class.
@@ -44,6 +34,21 @@ public class SamplePipeline {
             List<Attribute> atts) {
         this.mods = mods;
         this.atts = atts;
+    }
+
+    public static SamplePipeline passthrough(List<Attribute> atts) {
+        atts = Collections.unmodifiableList(atts);
+        return new SamplePipeline(Collections.emptyList(), atts);
+    }
+
+    /**
+     * Returns a new {@code PipelineBuilder} instance for creating new
+     * {@code RecordPipeline} objects.
+     *
+     * @return New {@code PipelineBuilder} object
+     */
+    public static PipelineBuilder newBuilder(List<Attribute> atts) {
+        return new PipelineBuilder(atts);
     }
 
 	/**

@@ -2,7 +2,6 @@ package org.dei.perla.core.fpc.base;
 
 import org.apache.log4j.Logger;
 import org.dei.perla.core.fpc.FpcException;
-import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.TaskHandler;
 import org.dei.perla.core.record.Attribute;
 import org.dei.perla.core.record.SamplePipeline;
@@ -42,6 +41,8 @@ public abstract class AbstractOperation<T extends AbstractTask> implements
 	private final String id;
 	private final List<Attribute> atts;
 
+	private final SamplePipeline defPipeline;
+
 	// State
 	private final Lock lk = new ReentrantLock();
 	private volatile boolean schedulable;
@@ -65,6 +66,7 @@ public abstract class AbstractOperation<T extends AbstractTask> implements
 		this.atts = Collections.unmodifiableList(atts);
 		schedulable = true;
 		this.log = Logger.getLogger(this.getClass().getSimpleName() + "_" + id);
+		defPipeline = SamplePipeline.passthrough(atts);
 	}
 
 	@Override
@@ -80,6 +82,12 @@ public abstract class AbstractOperation<T extends AbstractTask> implements
 	@Override
 	public final boolean isSchedulable() {
 		return schedulable;
+	}
+
+	@Override
+	public final AbstractTask schedule(Map<String, Object> params, TaskHandler h)
+			throws IllegalArgumentException, IllegalStateException {
+		return schedule(params, h, defPipeline);
 	}
 
 	@Override
