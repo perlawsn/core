@@ -1,6 +1,7 @@
 package org.dei.perla.core.record;
 
 import org.dei.perla.core.descriptor.DataType;
+import org.dei.perla.core.record.SampleModifier.Reorder;
 import org.dei.perla.core.record.SampleModifier.StaticAppender;
 import org.dei.perla.core.record.SampleModifier.TimestampAppender;
 import org.dei.perla.core.record.SamplePipeline.PipelineBuilder;
@@ -69,6 +70,35 @@ public class PipelineTest {
 		allAppender.process(r);
 		assertThat(r[0], equalTo(1));
 		assertThat(r[1], equalTo("test"));
+	}
+
+	@Test
+	public void testReorder() {
+		List<Attribute> in = Arrays.asList(new Attribute[] {
+				Attribute.create("5", DataType.INTEGER),
+				Attribute.create("3", DataType.INTEGER),
+				Attribute.create("1", DataType.INTEGER),
+				Attribute.create("2", DataType.INTEGER),
+				Attribute.create("4", DataType.INTEGER),
+				Attribute.create("0", DataType.INTEGER)
+		});
+		List<Attribute> out = Arrays.asList(new Attribute[] {
+				Attribute.create("0", DataType.INTEGER),
+				Attribute.create("1", DataType.INTEGER),
+				Attribute.create("2", DataType.INTEGER),
+				Attribute.create("3", DataType.INTEGER),
+				Attribute.create("4", DataType.INTEGER),
+				Attribute.create("5", DataType.INTEGER)
+		});
+		Object[] values = new Object[]{5, 3, 1, 2, 4, 0};
+
+		SampleModifier reorder = new Reorder(in, out);
+		reorder.process(values);
+		for (int i = 0; i < values.length; i++) {
+			Object o = values[i];
+			assertTrue(o instanceof Integer);
+			assertThat((Integer) o, equalTo(i));
+		}
 	}
 
 	@Test

@@ -16,17 +16,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class SimulatedPeriodicOperation extends PeriodicOperation {
 
-	private static final ScheduledThreadPoolExecutor executor;
-	static {
-		// A single executor thread, combined with the synchronous script
-		// execution model (see the sample method), ensures that all script
-		// invocations are executed sequentially. If multiple threads were
-		// used instead the Java scheduler could reorder or aggregate
-		// the single script executions, causing a more or less severe
-		// alteration of the effective sampling period.
-		executor = new ScheduledThreadPoolExecutor(1);
-		executor.setRemoveOnCancelPolicy(true);
-	}
+	private final ScheduledThreadPoolExecutor executor;
 
 	private final Script script;
 
@@ -37,6 +27,15 @@ public class SimulatedPeriodicOperation extends PeriodicOperation {
 		super(id, script.getEmit());
 		this.script = script;
 		timerFuture = null;
+
+		// A single executor thread, combined with the synchronous script
+		// execution model (see the sample method), ensures that all script
+		// invocations are executed sequentially. If multiple threads were
+		// used instead the Java scheduler could reorder or aggregate
+		// the single script executions, causing a more or less severe
+		// alteration of the effective sampling period.
+		executor = new ScheduledThreadPoolExecutor(1);
+		executor.setRemoveOnCancelPolicy(true);
 	}
 
 	@Override

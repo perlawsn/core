@@ -145,7 +145,7 @@ import org.dei.perla.core.channel.Payload;
 public class SimulatorChannel extends AbstractChannel {
 
     private final Generator[] generatorArray;
-    private ScheduledExecutorService exec = new ScheduledThreadPoolExecutor(5);
+    private ScheduledExecutorService exec = new ScheduledThreadPoolExecutor(1);
     private Map<String, ScheduledFuture<?>> runningMap = new HashMap<>();
 
     public SimulatorChannel(String id, Generator[] generatorArray) {

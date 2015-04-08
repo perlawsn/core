@@ -97,8 +97,8 @@ public interface SampleModifier {
 				}
 				order[i] = idx;
 				tmp = inCopy.get(i);
-				inCopy.add(i, inCopy.get(idx));
-				inCopy.add(idx, tmp);
+				inCopy.set(i, inCopy.get(idx));
+				inCopy.set(idx, tmp);
 			}
 		}
 
