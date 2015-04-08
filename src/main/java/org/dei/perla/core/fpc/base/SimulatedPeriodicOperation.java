@@ -1,6 +1,7 @@
 package org.dei.perla.core.fpc.base;
 
 import org.dei.perla.core.engine.Executor;
+import org.dei.perla.core.engine.Runner;
 import org.dei.perla.core.engine.Script;
 import org.dei.perla.core.engine.ScriptHandler;
 import org.dei.perla.core.fpc.FpcException;
@@ -11,19 +12,26 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class SimulatedPeriodicOperation extends PeriodicOperation {
 
 	private static final ScheduledThreadPoolExecutor executor;
 	static {
-		executor = new ScheduledThreadPoolExecutor(10);
+		// A single executor thread, combined with the synchronous script
+		// execution model (see the sample method), ensures that all script
+		// invocations are executed sequentially. If multiple threads were
+		// used instead the Java scheduler could reorder or aggregate
+		// the single script executions, causing a more or less severe
+		// alteration of the effective sampling period.
+		executor = new ScheduledThreadPoolExecutor(1);
 		executor.setRemoveOnCancelPolicy(true);
 	}
 
 	private final Script script;
 
 	private volatile ScheduledFuture<?> timerFuture = null;
-	private final ScriptHandler timerScriptHandler = new TimerScriptHandler();
+	private final ScriptHandler handler = new TimerScriptHandler();
 
 	public SimulatedPeriodicOperation(String id, Script script) {
 		super(id, script.getEmit());
@@ -43,12 +51,21 @@ public class SimulatedPeriodicOperation extends PeriodicOperation {
 
 		currentPeriod = period;
 		forEachTask(t -> t.setInputPeriod(period));
-		timerFuture = executor.scheduleAtFixedRate(() -> {
-					Executor.execute(script,
-							Executor.EMPTY_PARAMETER_ARRAY,
-							timerScriptHandler);
-				},
+		timerFuture = executor.scheduleAtFixedRate(this::sample,
 				period, period, TimeUnit.MILLISECONDS);
+	}
+
+	private void sample() {
+		try {
+			Runner r = Executor.execute(script,
+					Executor.EMPTY_PARAMETER_ARRAY, handler);
+			// The synchronous execution of the sampling script ensures that
+			// all script invocations are performed sequentially.
+			r.await();
+		} catch (Exception e) {
+			handler.error(new RuntimeException("Unexpected error while " +
+					"running simulated periodic operation", e));
+		}
 	}
 
 	@Override
@@ -59,17 +76,19 @@ public class SimulatedPeriodicOperation extends PeriodicOperation {
 
 	private class TimerScriptHandler implements ScriptHandler {
 
+
 		@Override
-		public void complete(Script script, List<Object[]> samples) {
-			for (Object[] s : samples) {
-				forEachTask(t -> t.newSample(s));
-			}
+		public void complete(Script script, List<Object[]>
+				samples) {
+				for (Object[] s : samples) {
+					forEachTask(t -> t.newSample(s));
+				}
 		}
 
 		@Override
 		public void error(Throwable cause) {
-			Exception e = new FpcException(cause);
-			forEachTask(t -> t.notifyError(e, false));
+				Exception e = new FpcException(cause);
+				forEachTask(t -> t.notifyError(e, false));
 		}
 
 	}

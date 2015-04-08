@@ -177,6 +177,8 @@ public class ConcreteOperationTest {
                         attributeMap.get("boolean"), 2))
 				.add(new PutInstruction("${res.string}",
                         attributeMap.get("string"), 3))
+				.add(new PutInstruction("${now()}",
+						attributeMap.get("timestamp"), 4))
 				.add(new EmitInstruction()).add(new StopInstruction())
 				.buildScript("test");
 		getOp = new OneoffOperation("test", getScript.getEmit(), getScript);
@@ -365,11 +367,11 @@ public class ConcreteOperationTest {
 		LatchingTaskHandler handler = new LatchingTaskHandler(100);
 		Map<String, Object> parameterMap = new HashMap<>();
 		parameterMap.put("period", 10);
-		PipelineBuilder pb = SamplePipeline.newBuilder(
+		SamplePipeline p = SamplePipeline.passthrough(
 				simPeriodicOp.getAttributes());
 
 		// Start test
-		Task task = simPeriodicOp.schedule(parameterMap, handler, pb.create());
+		Task task = simPeriodicOp.schedule(parameterMap, handler, p);
 		assertThat(task, notNullValue());
 		assertTrue(task.isRunning());
 		assertThat(handler.getAveragePeriod(), greaterThanOrEqualTo(9d));
@@ -395,10 +397,8 @@ public class ConcreteOperationTest {
 		Map<String, Object> paramMap3 = new HashMap<>();
 		paramMap3.put("period", 1);
 
-		PipelineBuilder pb = SamplePipeline.newBuilder(
+		SamplePipeline p = SamplePipeline.passthrough(
 				simPeriodicOp.getAttributes());
-		pb.addTimestamp();
-		SamplePipeline p = pb.create();
 
 		Task task1 = simPeriodicOp.schedule(paramMap1, h1, p);
 		assertThat(simPeriodicOp.getSamplingPeriod(), equalTo(100l));

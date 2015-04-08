@@ -4,6 +4,7 @@ import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.TaskHandler;
 import org.dei.perla.core.record.Record;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.Condition;
@@ -20,7 +21,7 @@ public class LatchingTaskHandler implements TaskHandler {
 	private int waitCount;
 	private int count = 0;
 
-	private long previousTime = 0;
+	private Instant previousTime = null;
 	private double avgPeriod = 0;
 
 	private Throwable error;
@@ -103,11 +104,18 @@ public class LatchingTaskHandler implements TaskHandler {
 			samples.add(record);
 			waitCount--;
 			count++;
-			if (previousTime == 0) {
-				previousTime = System.currentTimeMillis();
+
+			Instant ts;
+			if (record.hasField("timestamp")) {
+				ts = (Instant) record.getValue("timestamp");
 			} else {
-				avgPeriod = (avgPeriod + (System.currentTimeMillis() - previousTime))
-						/ count;
+				ts = Instant.now();
+			}
+			if (previousTime == null) {
+				previousTime = ts;
+			} else {
+				long diff = ts.toEpochMilli() - previousTime.toEpochMilli();
+				avgPeriod = (avgPeriod + diff) / count;
 			}
 			if (waitCount == 0) {
 				cond.signalAll();

@@ -205,22 +205,24 @@ public class ScriptExecutorTest {
 	}
 
 	@Test
-	public void testInstructionLocalVariable() {
-		Runner runner1 = new Runner(emitScript, Executor.EMPTY_PARAMETER_ARRAY,
-				null, null);
-		Runner runner2 = new Runner(emitScript, Executor.EMPTY_PARAMETER_ARRAY,
-				null, null);
+	public void testAwait() throws Exception {
+		Script script = ScriptBuilder
+				.newScript()
+				.add(new CreateComplexVarInstruction("var", mapper1))
+				.add(new SetComplexInstruction("var", "integer", Integer.class, "12"))
+				.add(new SetComplexInstruction("var", "string", String.class, "test_order"))
+				.add(new PutInstruction("${var.integer}", integer, 0))
+				.add(new PutInstruction("${var.integer}", integer, 0))
+				.add(new PutInstruction("${var.string}", string, 1))
+				.add(new EmitInstruction())
+				.add(new StopInstruction())
+				.buildScript("testOrder");
 
-		InstructionLocal<Integer> il = new InstructionLocal<>(5);
-
-		assertThat(il.getValue(runner1), equalTo(il.getValue(runner2)));
-
-		il.setValue(runner1, 12);
-		il.setValue(runner2, 0);
-
-		assertThat(il.getValue(runner1), not(equalTo(il.getValue(runner2))));
-		assertThat(il.getValue(runner1), equalTo(12));
-		assertThat(il.getValue(runner2), equalTo(0));
+		SynchronizerScriptHandler handler = new SynchronizerScriptHandler();
+		Runner runner = Executor.execute(script, handler);
+		runner.await();
+		assertTrue(runner.isDone());
+		assertFalse(runner.isCancelled());
 	}
 
 	@Test
@@ -238,6 +240,25 @@ public class ScriptExecutorTest {
 		assertThat(res.size(), equalTo(1));
 		assertTrue(res.get(0)[0] instanceof Instant);
 		assertThat((Instant) res.get(0)[0], lessThanOrEqualTo(Instant.now()));
+	}
+
+	@Test
+	public void testInstructionLocalVariable() {
+		Runner runner1 = new Runner(emitScript, Executor.EMPTY_PARAMETER_ARRAY,
+				null, null);
+		Runner runner2 = new Runner(emitScript, Executor.EMPTY_PARAMETER_ARRAY,
+				null, null);
+
+		InstructionLocal<Integer> il = new InstructionLocal<>(5);
+
+		assertThat(il.getValue(runner1), equalTo(il.getValue(runner2)));
+
+		il.setValue(runner1, 12);
+		il.setValue(runner2, 0);
+
+		assertThat(il.getValue(runner1), not(equalTo(il.getValue(runner2))));
+		assertThat(il.getValue(runner1), equalTo(12));
+		assertThat(il.getValue(runner2), equalTo(0));
 	}
 
 }

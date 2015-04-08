@@ -5,6 +5,7 @@
 	xmlns:sim="http://perla.dei.org/channel/simulator">
 
 	<attributes>
+		<attribute id="timestamp" type="timestamp" permission="read-only"/>
 		<attribute id="integer" type="integer" permission="read-write"/>
 		<attribute id="float" type="float" permission="read-write"/>
 		<attribute id="boolean" type="boolean" permission="read-write"/>

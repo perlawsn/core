@@ -190,11 +190,11 @@ public class AsyncOperation extends AbstractOperation<AsyncOperation.AsyncTask> 
 					state = STARTED;
 				}
 
+				forEachTask(t -> t.setInputPeriod(period));
+				currentPeriod = period;
 				timerFuture = executor.scheduleAtFixedRate(
 						() -> forEachTask(t -> t.newSample(sample)), 0, period,
 						TimeUnit.MILLISECONDS);
-				currentPeriod = period;
-				forEachTask(t -> t.setInputPeriod(period));
 			});
 		}
 

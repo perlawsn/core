@@ -3,6 +3,9 @@ package org.dei.perla.core.engine;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * <p>
@@ -45,6 +48,10 @@ public class Runner {
 
 	private boolean breakpoint;
 	private AtomicInteger state;
+
+	// Synchronous termination await lock
+	private final Lock awaitLk = new ReentrantLock();
+	private final Condition awaitCond = awaitLk.newCondition();
 
 	protected Runner(Script script, ScriptParameter[] params,
 			ScriptHandler handler, ScriptDebugger debugger) {
@@ -103,6 +110,15 @@ public class Runner {
 		state.compareAndSet(RUNNING, SUSPENDED);
 	}
 
+	private void signalTermination() {
+		awaitLk.lock();
+		try {
+			awaitCond.signalAll();
+		} finally {
+			awaitLk.unlock();
+		}
+	}
+
 	/**
 	 * Stops the <code>Script</code>.
 	 */
@@ -112,6 +128,21 @@ public class Runner {
 		}
 		handler.complete(script, ctx.getSamples());
 		relinquishContext(ctx);
+		signalTermination();
+	}
+
+	/**
+	 * Waits until the execution is terminated
+	 *
+	 * @throws InterruptedException
+	 */
+	public void await() throws InterruptedException {
+		awaitLk.lock();
+		try {
+			awaitCond.await();
+		} finally {
+			awaitLk.unlock();
+		}
 	}
 
 	/**
@@ -125,6 +156,7 @@ public class Runner {
 			handler.error(new ScriptCancelledException("Script '"
 					+ script.getName() + "' cancelled."));
 		}
+		signalTermination();
 	}
 
 	/**
@@ -192,6 +224,7 @@ public class Runner {
 					handler.error(new ScriptException(
 							"Missing stop instruction in script '"
 									+ script.getName() + "'"));
+					signalTermination();
 				}
 
 				if (debugger != null && breakpoint) {
@@ -208,6 +241,7 @@ public class Runner {
 			handler.error(new ScriptException("Unexpected error in script '"
 					+ script.getName() + "', instruction '"
 					+ instruction.getClass().getSimpleName() + "'", t));
+			signalTermination();
 		}
 	}
 
