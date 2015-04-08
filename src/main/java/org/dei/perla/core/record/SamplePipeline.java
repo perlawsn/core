@@ -36,6 +36,14 @@ public class SamplePipeline {
         this.atts = atts;
     }
 
+    /**
+     * Creates a passthrough {@code SamplePipeline} that creates a new sample
+     * wihtout performing any modification to the source data
+     *
+     * @param atts sample attributes
+     * @return a passthrough {@code SamplePipeline} that does not perform any
+     * operation to the data received as an input.
+     */
     public static SamplePipeline passthrough(List<Attribute> atts) {
         atts = Collections.unmodifiableList(atts);
         return new SamplePipeline(Collections.emptyList(), atts);

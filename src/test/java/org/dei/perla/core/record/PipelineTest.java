@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -24,6 +25,25 @@ public class PipelineTest {
             Attribute.create("a2", DataType.STRING);
     private static final Object v2 = "test";
 
+	@Test
+	public void testPassthrough() {
+		List<Attribute> atts = Arrays.asList(new Attribute[] {
+				a1,
+				a2
+		});
+
+		SamplePipeline p = SamplePipeline.passthrough(atts);
+		assertThat(p, notNullValue());
+		assertTrue(atts.containsAll(p.attributes()));
+		assertThat(p.attributes().size(), equalTo(atts.size()));
+
+		Object[] in = new Object[]{v1, v2};
+		Record out = p.run(in);
+		assertTrue(atts.containsAll(out.fields()));
+		assertThat(out.fields().size(), equalTo(atts.size()));
+		assertThat(out.getValue("a1"), equalTo(v1));
+		assertThat(out.getValue("a2"), equalTo(v2));
+	}
 
 	@Test
 	public void testTimestampAppender() {
