@@ -82,8 +82,7 @@ public interface SampleModifier {
 		public final int[] order;
 
 		protected Reorder(List<Attribute> in, List<Attribute> out) {
-			List<Attribute> inCopy = new ArrayList<>(in);
-			order = new int[in.size()];
+			order = new int[out.size()];
 
 			Attribute a;
 			Attribute tmp;
@@ -91,18 +90,15 @@ public interface SampleModifier {
 			int i;
 			for (i = 0; i < out.size(); i++) {
 				a = out.get(i);
-				int idx = inCopy.indexOf(a);
+				int idx = in.indexOf(a);
 				if (idx == -1) {
 					idx = last++;
-					inCopy.add(null);
+					in.add(a);
 				}
                 order[i] = idx;
-                tmp = inCopy.get(i);
-				inCopy.set(i, inCopy.get(idx));
-				inCopy.set(idx, tmp);
-			}
-			for (; i < in.size(); i++) {
-				order[i] = i;
+                tmp = in.get(i);
+				in.set(i, in.get(idx));
+				in.set(idx, tmp);
 			}
 		}
 

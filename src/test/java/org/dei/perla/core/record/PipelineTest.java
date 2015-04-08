@@ -8,10 +8,7 @@ import org.dei.perla.core.record.SamplePipeline.PipelineBuilder;
 import org.junit.Test;
 
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -74,14 +71,14 @@ public class PipelineTest {
 
 	@Test
 	public void testReorder() {
-		List<Attribute> in = Arrays.asList(new Attribute[] {
-				Attribute.create("5", DataType.INTEGER),
-				Attribute.create("3", DataType.INTEGER),
-				Attribute.create("1", DataType.INTEGER),
-				Attribute.create("2", DataType.INTEGER),
-				Attribute.create("4", DataType.INTEGER),
-				Attribute.create("0", DataType.INTEGER)
-		});
+		List<Attribute> in = new ArrayList<>();
+		in.add(Attribute.create("5", DataType.INTEGER));
+		in.add(Attribute.create("3", DataType.INTEGER));
+		in.add(Attribute.create("1", DataType.INTEGER));
+		in.add(Attribute.create("2", DataType.INTEGER));
+		in.add(Attribute.create("4", DataType.INTEGER));
+		in.add(Attribute.create("0", DataType.INTEGER));
+
 		List<Attribute> out = Arrays.asList(new Attribute[] {
 				Attribute.create("0", DataType.INTEGER),
 				Attribute.create("1", DataType.INTEGER),
@@ -103,14 +100,14 @@ public class PipelineTest {
 
 	@Test
 	public void testPartialReorder() {
-		List<Attribute> in = Arrays.asList(new Attribute[] {
-				Attribute.create("5", DataType.INTEGER),
-				Attribute.create("3", DataType.INTEGER),
-				Attribute.create("1", DataType.INTEGER),
-				Attribute.create("2", DataType.INTEGER),
-				Attribute.create("4", DataType.INTEGER),
-				Attribute.create("0", DataType.INTEGER)
-		});
+		List<Attribute> in = new ArrayList<>();
+		in.add(Attribute.create("5", DataType.INTEGER));
+		in.add(Attribute.create("3", DataType.INTEGER));
+		in.add(Attribute.create("1", DataType.INTEGER));
+		in.add(Attribute.create("2", DataType.INTEGER));
+		in.add(Attribute.create("4", DataType.INTEGER));
+		in.add(Attribute.create("0", DataType.INTEGER));
+
 		List<Attribute> out = Arrays.asList(new Attribute[] {
 				Attribute.create("0", DataType.INTEGER),
 				Attribute.create("1", DataType.INTEGER),
@@ -129,13 +126,13 @@ public class PipelineTest {
 
 	@Test
 	public void testNullReorder() {
-		List<Attribute> in = Arrays.asList(new Attribute[] {
-				Attribute.create("5", DataType.INTEGER),
-				Attribute.create("3", DataType.INTEGER),
-				Attribute.create("2", DataType.INTEGER),
-				Attribute.create("4", DataType.INTEGER),
-				Attribute.create("0", DataType.INTEGER)
-		});
+		List<Attribute> in = new ArrayList<>();
+		in.add(Attribute.create("5", DataType.INTEGER));
+		in.add(Attribute.create("3", DataType.INTEGER));
+		in.add(Attribute.create("2", DataType.INTEGER));
+		in.add(Attribute.create("4", DataType.INTEGER));
+		in.add(Attribute.create("0", DataType.INTEGER));
+
 		List<Attribute> out = Arrays.asList(new Attribute[] {
 				Attribute.create("0", DataType.INTEGER),
 				Attribute.create("1", DataType.INTEGER),
@@ -152,16 +149,23 @@ public class PipelineTest {
 
 	@Test
 	public void pipelineTest() {
+		Attribute s1 = Attribute.create("source1", DataType.STRING);
+		Attribute s2 = Attribute.create("source2", DataType.STRING);
         LinkedHashMap<Attribute, Object> st = new LinkedHashMap<>();
         st.put(a1, v1);
 
-		List<Attribute> sourceAtt = Arrays.asList(new Attribute[] {
-				Attribute.create("source1", DataType.STRING),
-				Attribute.create("source2", DataType.STRING)
-		});
-		PipelineBuilder b = SamplePipeline.newBuilder(sourceAtt);
+		List<Attribute> atts = new ArrayList<>();
+		atts.add(s1);
+		atts.add(s2);
+
+		PipelineBuilder b = SamplePipeline.newBuilder(atts);
 		b.addTimestamp();
 		b.addStatic(st);
+		b.reorder(Arrays.asList(new Attribute[]{
+				Attribute.TIMESTAMP,
+				s2,
+				s1
+		}));
 
 		SamplePipeline p = b.create();
 		assertThat(p, notNullValue());
@@ -177,6 +181,12 @@ public class PipelineTest {
 		assertThat(output.getValue("timestamp"), notNullValue());
 		assertThat(output.getValue("a1"), equalTo(v1));
 		assertThat(output.getValue("a2"), nullValue());
+
+		List<Attribute> ratts = output.fields();
+		assertThat(ratts.get(0), equalTo(Attribute.TIMESTAMP));
+		assertThat(ratts.get(1), equalTo(s2));
+		assertThat(ratts.get(2), equalTo(s1));
+		assertThat(ratts.get(3), equalTo(a1));
 	}
 
 }

@@ -134,10 +134,6 @@ public class SamplePipeline {
         }
 
         public void reorder(List<Attribute> out) {
-            if (!atts.containsAll(out)) {
-                throw new RuntimeException(
-                        "Cannot reorder attributes not contained in sample");
-            }
             mods.add(new Reorder(atts, out));
         }
 

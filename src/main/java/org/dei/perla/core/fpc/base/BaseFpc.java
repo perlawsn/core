@@ -126,7 +126,7 @@ public class BaseFpc implements Fpc {
 					pb.create());
 		}
 
-		Operation op = sched.get(atts);
+		Operation op = sched.periodic(req.dynAtts);
 		if (op == null) {
 			return null;
 		}
@@ -136,7 +136,6 @@ public class BaseFpc implements Fpc {
 
 		pb = SamplePipeline.newBuilder(op.getAttributes());
 		if (!req.statAtts.isEmpty()) {
-			pb = SamplePipeline.newBuilder(Collections.emptyList());
 			pb.addStatic(req.staticValues());
 		}
 		if (!op.getAttributes().contains(Attribute.TIMESTAMP)) {

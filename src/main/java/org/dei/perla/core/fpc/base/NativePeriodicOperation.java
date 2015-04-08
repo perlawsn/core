@@ -280,7 +280,8 @@ public class NativePeriodicOperation extends PeriodicOperation {
 			} else if (msgs.isSync()) {
 				// Merge with the current record and distribute
                 for (Object[] s : samples) {
-                    forEachTask(t -> t.newSample(s));
+					merge(s);
+                    forEachTask(t -> t.newSample(currentRecord));
                 }
 
 			} else {
