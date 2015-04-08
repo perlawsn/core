@@ -10,11 +10,11 @@ import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
 
 public class SimulatedPeriodicOperation extends PeriodicOperation {
 
 	private static final ScheduledThreadPoolExecutor executor;
-
 	static {
 		executor = new ScheduledThreadPoolExecutor(10);
 		executor.setRemoveOnCancelPolicy(true);
@@ -22,32 +22,33 @@ public class SimulatedPeriodicOperation extends PeriodicOperation {
 
 	private final Script script;
 
-	private ScheduledFuture<?> timerFuture = null;
-	private final ScriptHandler timerScriptHandler;
+	private volatile ScheduledFuture<?> timerFuture = null;
+	private final ScriptHandler timerScriptHandler = new TimerScriptHandler();
 
 	public SimulatedPeriodicOperation(String id, Script script) {
 		super(id, script.getEmit());
 		this.script = script;
-
 		timerFuture = null;
-		timerScriptHandler = new TimerScriptHandler();
 	}
 
 	@Override
 	protected void setSamplingPeriod(final long period) {
 		if (timerFuture != null) {
-			timerFuture.cancel(false);
+			timerFuture.cancel(true);
 		}
 		if (period == 0) {
 			currentPeriod = 0;
 			return;
 		}
 
-		timerFuture = executor.scheduleAtFixedRate(() -> Executor.execute(
-				script, Executor.EMPTY_PARAMETER_ARRAY, timerScriptHandler), 0,
-				period, TimeUnit.MILLISECONDS);
 		currentPeriod = period;
 		forEachTask(t -> t.setInputPeriod(period));
+		timerFuture = executor.scheduleAtFixedRate(() -> {
+					Executor.execute(script,
+							Executor.EMPTY_PARAMETER_ARRAY,
+							timerScriptHandler);
+				},
+				period, period, TimeUnit.MILLISECONDS);
 	}
 
 	@Override

@@ -362,9 +362,9 @@ public class ConcreteOperationTest {
 
 	@Test
 	public void singleSimulatedPeriodicOperation() throws InterruptedException {
-		LatchingTaskHandler handler = new LatchingTaskHandler(1000);
+		LatchingTaskHandler handler = new LatchingTaskHandler(100);
 		Map<String, Object> parameterMap = new HashMap<>();
-		parameterMap.put("period", 1);
+		parameterMap.put("period", 10);
 		PipelineBuilder pb = SamplePipeline.newBuilder(
 				simPeriodicOp.getAttributes());
 
@@ -372,8 +372,8 @@ public class ConcreteOperationTest {
 		Task task = simPeriodicOp.schedule(parameterMap, handler, pb.create());
 		assertThat(task, notNullValue());
 		assertTrue(task.isRunning());
-		assertThat(handler.getAveragePeriod(), greaterThanOrEqualTo(0.9d));
-		assertThat(handler.getAveragePeriod(), lessThanOrEqualTo(1.1d));
+		assertThat(handler.getAveragePeriod(), greaterThanOrEqualTo(9d));
+		assertThat(handler.getAveragePeriod(), lessThanOrEqualTo(11d));
 
 		// Stop test
 		task.stop();

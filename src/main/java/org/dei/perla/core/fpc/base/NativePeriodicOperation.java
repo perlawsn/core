@@ -74,7 +74,6 @@ public class NativePeriodicOperation extends PeriodicOperation {
 	 * sampling tasks are requested concurrently.
 	 * </p>
 	 *
-	 *
 	 * @param period
 	 *            sampling period to be set
 	 */

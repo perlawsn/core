@@ -13,7 +13,7 @@ import java.util.List;
  * @author Guido Rota (2014)
  *
  */
-public class Script {
+public final class Script {
 
 	private final String name;
 	private final Instruction first;
