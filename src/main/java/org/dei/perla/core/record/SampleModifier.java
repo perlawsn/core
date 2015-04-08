@@ -85,20 +85,24 @@ public interface SampleModifier {
 			List<Attribute> inCopy = new ArrayList<>(in);
 			order = new int[in.size()];
 
-			int last = out.size();
 			Attribute a;
 			Attribute tmp;
-			for (int i = 0; i < out.size(); i++) {
+			int last = in.size();
+			int i;
+			for (i = 0; i < out.size(); i++) {
 				a = out.get(i);
 				int idx = inCopy.indexOf(a);
 				if (idx == -1) {
-					order[i] = last++;
-					continue;
+					idx = last++;
+					inCopy.add(null);
 				}
-				order[i] = idx;
-				tmp = inCopy.get(i);
+                order[i] = idx;
+                tmp = inCopy.get(i);
 				inCopy.set(i, inCopy.get(idx));
 				inCopy.set(idx, tmp);
+			}
+			for (; i < in.size(); i++) {
+				order[i] = i;
 			}
 		}
 
@@ -108,6 +112,9 @@ public interface SampleModifier {
 			int idx;
 			for (int i = 0; i < order.length; i++) {
 				idx = order[i];
+				if (idx == -1) {
+					continue;
+				}
 				tmp = sample[i];
 				sample[i] = sample[idx];
 				sample[idx] = tmp;

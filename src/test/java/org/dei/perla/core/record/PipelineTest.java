@@ -102,6 +102,55 @@ public class PipelineTest {
 	}
 
 	@Test
+	public void testPartialReorder() {
+		List<Attribute> in = Arrays.asList(new Attribute[] {
+				Attribute.create("5", DataType.INTEGER),
+				Attribute.create("3", DataType.INTEGER),
+				Attribute.create("1", DataType.INTEGER),
+				Attribute.create("2", DataType.INTEGER),
+				Attribute.create("4", DataType.INTEGER),
+				Attribute.create("0", DataType.INTEGER)
+		});
+		List<Attribute> out = Arrays.asList(new Attribute[] {
+				Attribute.create("0", DataType.INTEGER),
+				Attribute.create("1", DataType.INTEGER),
+				Attribute.create("2", DataType.INTEGER),
+		});
+		Object[] values = new Object[]{5, 3, 1, 2, 4, 0};
+
+		SampleModifier reorder = new Reorder(in, out);
+		reorder.process(values);
+		int i;
+		for (i = 0; i < out.size(); i++) {
+			Integer o = (Integer) values[i];
+			assertThat((Integer) o, equalTo(i));
+		}
+	}
+
+	@Test
+	public void testNullReorder() {
+		List<Attribute> in = Arrays.asList(new Attribute[] {
+				Attribute.create("5", DataType.INTEGER),
+				Attribute.create("3", DataType.INTEGER),
+				Attribute.create("2", DataType.INTEGER),
+				Attribute.create("4", DataType.INTEGER),
+				Attribute.create("0", DataType.INTEGER)
+		});
+		List<Attribute> out = Arrays.asList(new Attribute[] {
+				Attribute.create("0", DataType.INTEGER),
+				Attribute.create("1", DataType.INTEGER),
+				Attribute.create("2", DataType.INTEGER),
+		});
+		Object[] values = new Object[]{5, 3, 2, 4, 0, null};
+
+		SampleModifier reorder = new Reorder(in, out);
+		reorder.process(values);
+		assertThat(values[0], equalTo(0));
+		assertThat(values[1], nullValue());
+		assertThat(values[2], equalTo(2));
+	}
+
+	@Test
 	public void pipelineTest() {
         LinkedHashMap<Attribute, Object> st = new LinkedHashMap<>();
         st.put(a1, v1);
