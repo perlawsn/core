@@ -370,7 +370,7 @@ public class BaseFpcTest {
 	}
 
 	@Test
-	public void testSchedulerMatching() throws Exception {
+	public void testSchedulerPolicy() throws Exception {
 		Attribute intAtt = Attribute.create("integer", DataType.INTEGER);
 		Attribute boolAtt = Attribute.create("boolean", DataType.BOOLEAN);
 		List<Attribute> atts = Arrays.asList(new Attribute[] {
@@ -388,6 +388,10 @@ public class BaseFpcTest {
 		assertThat(record.getValue("integer"), notNullValue());
 		assertTrue(record.fields().contains(boolAtt));
 		assertThat(record.getValue("boolean"), nullValue());
+
+		h = new LatchingTaskHandler(1);
+		task = fpc.get(atts, true, h);
+		assertThat(task, nullValue());
 	}
 
 }
