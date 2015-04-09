@@ -45,26 +45,27 @@ public class Scheduler {
 		Collections.sort(this.async, attComp);
 	}
 
-	protected Operation set(Collection<Attribute> atts)
+	protected Operation set(Collection<Attribute> atts, boolean strict)
 			throws IllegalStateException {
-		return bestFit(set, atts);
+		return bestFit(set, strict, atts);
 	}
 
-	protected Operation get(List<Attribute> atts) throws IllegalStateException {
-		return bestFit(get, atts);
-	}
-
-	protected Operation periodic(List<Attribute> atts)
+	protected Operation get(List<Attribute> atts, boolean strict)
 			throws IllegalStateException {
-		return bestFit(periodic, atts);
+		return bestFit(get, strict, atts);
 	}
 
-	protected Operation async(List<Attribute> atts)
+	protected Operation periodic(List<Attribute> atts, boolean strict)
 			throws IllegalStateException {
-		return bestFit(async, atts);
+		return bestFit(periodic, strict, atts);
 	}
 
-	private Operation bestFit(List<? extends Operation> ops,
+	protected Operation async(List<Attribute> atts, boolean strict)
+			throws IllegalStateException {
+		return bestFit(async, strict, atts);
+	}
+
+	private Operation bestFit(List<? extends Operation> ops, boolean strict,
 			Collection<Attribute> atts) throws IllegalStateException {
 		if (!schedulable) {
 			throw new IllegalStateException("Scheduler has been stopped.");
@@ -78,6 +79,13 @@ public class Scheduler {
 				score = s;
 				match = op;
 			}
+		}
+
+		// Return null match when scheduling is strict and the selected
+		// operation cannot fully answer the user's query
+		if (match != null && strict &&
+				!match.getAttributes().containsAll(atts)) {
+			return null;
 		}
 
 		return match;

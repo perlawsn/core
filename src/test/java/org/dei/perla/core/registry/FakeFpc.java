@@ -35,23 +35,26 @@ public class FakeFpc implements Fpc {
 	}
 
 	@Override
-	public Task set(Map<Attribute, Object> valueMap, TaskHandler handler) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public Task get(List<Attribute> attributes, TaskHandler handler) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public Task get(List<Attribute> attributes, long periodMs,
+	public Task set(Map<Attribute, Object> valueMap, boolean strict,
 			TaskHandler handler) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Task async(List<Attribute> attributes, TaskHandler handler) {
+	public Task get(List<Attribute> attributes, boolean strict,
+			TaskHandler handler) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Task get(List<Attribute> attributes, boolean strict, long periodMs,
+			TaskHandler handler) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Task async(List<Attribute> attributes, boolean strict,
+			TaskHandler handler) {
 		throw new UnsupportedOperationException();
 	}
 

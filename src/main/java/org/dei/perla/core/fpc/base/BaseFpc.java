@@ -69,8 +69,9 @@ public class BaseFpc implements Fpc {
 	}
 
 	@Override
-	public Task set(Map<Attribute, Object> values, TaskHandler handler) {
-		Operation op = sched.set(values.keySet());
+	public Task set(Map<Attribute, Object> values, boolean strict,
+			TaskHandler handler) {
+		Operation op = sched.set(values.keySet(), strict);
 		if (op == null) {
 			return null;
 		}
@@ -82,7 +83,8 @@ public class BaseFpc implements Fpc {
 	}
 
 	@Override
-	public Task get(List<Attribute> atts, TaskHandler handler) {
+	public Task get(List<Attribute> atts, boolean strict,
+			TaskHandler handler) {
         Request req = new Request(atts);
 
 		if (req.staticOnly()) {
@@ -93,7 +95,7 @@ public class BaseFpc implements Fpc {
 
 		}
 
-		Operation op = sched.get(req.dynAtts);
+		Operation op = sched.get(req.dynAtts, strict);
 		if (op == null) {
 			return null;
 		}
@@ -111,7 +113,8 @@ public class BaseFpc implements Fpc {
 	}
 
 	@Override
-	public Task get(List<Attribute> atts, long ms, TaskHandler handler) {
+	public Task get(List<Attribute> atts, boolean strict, long ms,
+			TaskHandler handler) {
 		PipelineBuilder pb;
         Request req = new Request(atts);
 
@@ -126,7 +129,7 @@ public class BaseFpc implements Fpc {
 					pb.create());
 		}
 
-		Operation op = sched.periodic(req.dynAtts);
+		Operation op = sched.periodic(req.dynAtts, strict);
 		if (op == null) {
 			return null;
 		}
@@ -146,14 +149,15 @@ public class BaseFpc implements Fpc {
 	}
 
 	@Override
-	public Task async(List<Attribute> atts, TaskHandler handler) {
+	public Task async(List<Attribute> atts, boolean strict,
+			TaskHandler handler) {
         Request req = new Request(atts);
 
 		if (!req.statAtts.isEmpty()) {
 			return null;
 		}
 
-		Operation op = sched.async(atts);
+		Operation op = sched.async(atts, strict);
 		PipelineBuilder pb = SamplePipeline.newBuilder(op.getAttributes());
 		if (op == null) {
 			return null;
