@@ -1,6 +1,5 @@
 package org.dei.perla.core.fpc.base;
 
-import org.dei.perla.core.descriptor.DataType;
 import org.dei.perla.core.record.Attribute;
 import org.dei.perla.core.utils.StopHandler;
 
@@ -71,33 +70,22 @@ public class Scheduler {
 			throw new IllegalStateException("Scheduler has been stopped.");
 		}
 
+		long score = 0;
+		Operation match = null;
 		for (Operation op : ops) {
-			if (!hasAttributes(op, atts)) {
-				continue;
+			long s = getScore(op, atts);
+			if (s > score) {
+				score = s;
+				match = op;
 			}
-			return op;
 		}
-		return null;
+
+		return match;
 	}
 
-	private boolean hasAttributes(Operation o, Collection<Attribute> atts) {
-		Collection<Attribute> ops = o.getAttributes();
-
-		for (Attribute a : atts) {
-			// Ignore timestamp attribute, since it will be added later if the
-			// operation does not provide it natively (see method
-			// createTimestampedPipeline)
-			if (a.getId().compareToIgnoreCase(
-					Attribute.TIMESTAMP.getId()) == 0
-					&& a.getType() == DataType.TIMESTAMP) {
-				continue;
-			}
-			if (!ops.contains(a)) {
-				return false;
-			}
-		}
-
-		return true;
+	private long getScore(Operation o, Collection<Attribute> atts) {
+		Collection<Attribute> opAtts = o.getAttributes();
+		return opAtts.stream().filter(atts::contains).count();
 	}
 
 	protected Operation getGetOperation(String id) {

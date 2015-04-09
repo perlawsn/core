@@ -208,13 +208,13 @@ public class ConcreteOperationTest {
 	@Test
 	public void testGetOperation() throws Exception {
 		PipelineBuilder pb = SamplePipeline.newBuilder(getOp.getAttributes());
-		SynchronizerTaskHandler syncHandler = new SynchronizerTaskHandler();
+		LatchingTaskHandler syncHandler = new LatchingTaskHandler(1);
 		Task task = getOp.schedule(null, syncHandler, pb.create());
 		assertThat(task, notNullValue());
 		assertTrue(getOp.getAttributes().containsAll(task.getAttributes()));
 		assertTrue(task.getAttributes().containsAll(getOp.getAttributes()));
 
-		Record record = syncHandler.getResult();
+		Record record = syncHandler.getLastSample();
 		assertFalse(task.isRunning());
 		assertThat(record, notNullValue());
 
@@ -242,12 +242,11 @@ public class ConcreteOperationTest {
 	@Test
 	public void testSetOperation() throws Exception {
 		PipelineBuilder pb = SamplePipeline.newBuilder(Collections.emptyList());
-		SynchronizerTaskHandler syncHandler = new SynchronizerTaskHandler();
-		Task task = setOp.schedule(null, syncHandler, pb.create());
+		LatchingTaskHandler handler = new LatchingTaskHandler(1);
+		Task task = setOp.schedule(null, handler, pb.create());
 		assertThat(task, notNullValue());
 
-		Record record = syncHandler.getResult();
-		assertThat(record, nullValue());
+		handler.awaitCompletion();
 		assertFalse(task.isRunning());
 	}
 
@@ -464,12 +463,12 @@ public class ConcreteOperationTest {
 
 	@Test
 	public void asyncSimulatedOneoffOperation() throws Exception {
-		SynchronizerTaskHandler handler = new SynchronizerTaskHandler();
+		LatchingTaskHandler handler = new LatchingTaskHandler(1);
 
 		Task task = asyncOp.getAsyncOneoffOperation().schedule(
 				Collections.emptyMap(), handler);
 		assertThat(task, notNullValue());
-		Record record = handler.getResult();
+		Record record = handler.getLastSample();
 		assertThat(record, notNullValue());
 	}
 

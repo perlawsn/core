@@ -93,8 +93,26 @@ public class LatchingTaskHandler implements TaskHandler {
 		}
 	}
 
+	public void awaitCompletion() throws InterruptedException {
+		lk.lock();
+		try {
+			if (waitCount > 0) {
+				cond.await();
+			}
+		} finally {
+			lk.unlock();
+		}
+	}
+
 	@Override
 	public void complete(Task task) {
+		lk.lock();
+		try {
+			waitCount = 0;
+			cond.signalAll();
+		} finally {
+			lk.unlock();
+		}
 	}
 
 	@Override

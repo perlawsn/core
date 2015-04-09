@@ -19,10 +19,7 @@ import org.junit.Test;
 
 import java.io.FileInputStream;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 import static org.hamcrest.Matchers.*;
@@ -61,15 +58,15 @@ public class BaseFpcTest {
 	public void testGetOperation() throws InterruptedException,
 			ExecutionException {
 		List<Attribute> attributeList;
-		SynchronizerTaskHandler handler;
+		LatchingTaskHandler handler;
 		Record record;
 
 		// integer-get
 		attributeList = new ArrayList<>();
 		attributeList.add(Attribute.create("integer", DataType.INTEGER));
-		handler = new SynchronizerTaskHandler();
+		handler = new LatchingTaskHandler(1);
 		fpc.get(attributeList, handler);
-		record = handler.getResult();
+		record = handler.getLastSample();
 
 		assertThat(record, notNullValue());
 		assertThat(record.getValue("integer"), notNullValue());
@@ -81,9 +78,9 @@ public class BaseFpcTest {
 		// string-get
 		attributeList.clear();
 		attributeList.add(Attribute.create("string", DataType.STRING));
-		handler = new SynchronizerTaskHandler();
+		handler = new LatchingTaskHandler(1);
 		fpc.get(attributeList, handler);
-		record = handler.getResult();
+		record = handler.getLastSample();
 
 		assertThat(record, notNullValue());
 		assertThat(record.getValue("string"), notNullValue());
@@ -97,15 +94,15 @@ public class BaseFpcTest {
 	public void testMixedStaticDynamicGet() throws InterruptedException,
 			ExecutionException {
 		List<Attribute> attributeList;
-		SynchronizerTaskHandler handler;
+		LatchingTaskHandler handler;
 		Record record;
 
 		attributeList = new ArrayList<>();
 		attributeList.add(Attribute.create("integer", DataType.INTEGER));
 		attributeList.add(Attribute.create("static", DataType.INTEGER));
-		handler = new SynchronizerTaskHandler();
+		handler = new LatchingTaskHandler(1);
 		fpc.get(attributeList, handler);
-		record = handler.getResult();
+		record = handler.getLastSample();
 
 		assertThat(record, notNullValue());
 		assertThat(record.getValue("integer"), notNullValue());
@@ -123,14 +120,14 @@ public class BaseFpcTest {
 	@Test
 	public void testStaticGet() throws InterruptedException, ExecutionException {
 		List<Attribute> attributeList;
-		SynchronizerTaskHandler handler;
+		LatchingTaskHandler handler;
 		Record record;
 
 		attributeList = new ArrayList<>();
 		attributeList.add(Attribute.create("static", DataType.INTEGER));
-		handler = new SynchronizerTaskHandler();
+		handler = new LatchingTaskHandler(1);
 		fpc.get(attributeList, handler);
-		record = handler.getResult();
+		record = handler.getLastSample();
 
 		assertThat(record, notNullValue());
 		// Check if the Fpc is adding the timestamp
@@ -302,12 +299,11 @@ public class BaseFpcTest {
 			ExecutionException {
 		Map<Attribute, Object> valueMap = new HashMap<>();
 		valueMap.put(Attribute.create("integer", DataType.INTEGER), 8);
-		SynchronizerTaskHandler handler = new SynchronizerTaskHandler();
+		LatchingTaskHandler handler = new LatchingTaskHandler(1);
 		Task task = fpc.set(valueMap, handler);
 		assertThat(task, notNullValue());
 
-		Record result = handler.getResult();
-		assertThat(result, nullValue());
+		handler.awaitCompletion();
 	}
 
 	@Test
@@ -342,12 +338,12 @@ public class BaseFpcTest {
 		// Request the async event
 		attributeList = new ArrayList<>();
 		attributeList.add(Attribute.create("event", DataType.INTEGER));
-		SynchronizerTaskHandler handler = new SynchronizerTaskHandler();
+		LatchingTaskHandler handler = new LatchingTaskHandler(1);
 		Task task = fpc.get(attributeList, handler);
 
 		assertThat(task, notNullValue());
 		assertFalse(task instanceof PeriodicTask);
-		record = handler.getResult();
+		record = handler.getLastSample();
 		assertThat(record, notNullValue());
 	}
 
@@ -371,6 +367,27 @@ public class BaseFpcTest {
 		// Check if the Fpc is adding the timestamp
 		assertThat(record.getValue("timestamp"), notNullValue());
 		assertTrue(record.getValue("timestamp") instanceof Instant);
+	}
+
+	@Test
+	public void testSchedulerMatching() throws Exception {
+		Attribute intAtt = Attribute.create("integer", DataType.INTEGER);
+		Attribute boolAtt = Attribute.create("boolean", DataType.BOOLEAN);
+		List<Attribute> atts = Arrays.asList(new Attribute[] {
+				intAtt,
+				boolAtt
+		});
+		LatchingTaskHandler h = new LatchingTaskHandler(1);
+		Record record;
+
+		Task task = fpc.get(atts, h);
+		assertThat(task, notNullValue());
+		record = h.getLastSample();
+		assertThat(record, notNullValue());
+		assertTrue(record.fields().contains(intAtt));
+		assertThat(record.getValue("integer"), notNullValue());
+		assertTrue(record.fields().contains(boolAtt));
+		assertThat(record.getValue("boolean"), nullValue());
 	}
 
 }
