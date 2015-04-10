@@ -6,7 +6,6 @@ import org.dei.perla.core.fpc.TaskHandler;
 import org.dei.perla.core.record.Attribute;
 import org.dei.perla.core.record.SamplePipeline;
 import org.dei.perla.core.utils.Conditions;
-import org.dei.perla.core.utils.StopHandler;
 
 import java.util.Collections;
 import java.util.List;
@@ -138,7 +137,7 @@ public abstract class AbstractOperation<T extends AbstractTask> implements
             SamplePipeline p) throws IllegalArgumentException;
 
 	@Override
-	public final void stop(StopHandler<Operation> h) {
+	public final void stop(Consumer<Operation> h) {
 		if (!schedulable) {
 			return;
 		}
@@ -177,7 +176,7 @@ public abstract class AbstractOperation<T extends AbstractTask> implements
 	 * @param handler
 	 *            StopHandler invoked when the operation is corectly terminated
 	 */
-	protected abstract void doStop(StopHandler<Operation> handler);
+	protected abstract void doStop(Consumer<Operation> handler);
 
 	/**
 	 * Adds an {@link AbstractTask} to the list of tasks scheduled by this

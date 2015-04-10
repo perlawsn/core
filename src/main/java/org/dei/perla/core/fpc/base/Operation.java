@@ -5,10 +5,10 @@ import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.TaskHandler;
 import org.dei.perla.core.record.Attribute;
 import org.dei.perla.core.record.SamplePipeline;
-import org.dei.perla.core.utils.StopHandler;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * <p>
@@ -124,6 +124,6 @@ public interface Operation {
 	/**
 	 * Permanently stops the {@code Operation}
 	 */
-	public void stop(StopHandler<Operation> handler);
+	public void stop(Consumer<Operation> handler);
 
 }

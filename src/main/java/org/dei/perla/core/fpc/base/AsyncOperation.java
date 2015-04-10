@@ -9,13 +9,13 @@ import org.dei.perla.core.message.FpcMessage;
 import org.dei.perla.core.message.Mapper;
 import org.dei.perla.core.record.Attribute;
 import org.dei.perla.core.record.SamplePipeline;
-import org.dei.perla.core.utils.StopHandler;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 public class AsyncOperation extends AbstractOperation<AsyncOperation.AsyncTask> {
 
@@ -96,9 +96,9 @@ public class AsyncOperation extends AbstractOperation<AsyncOperation.AsyncTask> 
 	}
 
 	@Override
-	public void doStop(StopHandler<Operation> handler) {
+	public void doStop(Consumer<Operation> handler) {
 		doStop();
-		handler.hasStopped(this);
+		handler.accept(this);
 	}
 
 	/**
@@ -199,9 +199,9 @@ public class AsyncOperation extends AbstractOperation<AsyncOperation.AsyncTask> 
 		}
 
 		@Override
-		protected void doStop(StopHandler<Operation> handler) {
+		protected void doStop(Consumer<Operation> handler) {
 			doStop();
-			handler.hasStopped(this);
+			handler.accept(this);
 		}
 
 	}
@@ -241,8 +241,8 @@ public class AsyncOperation extends AbstractOperation<AsyncOperation.AsyncTask> 
 		}
 
 		@Override
-		protected void doStop(StopHandler<Operation> handler) {
-			handler.hasStopped(this);
+		protected void doStop(Consumer<Operation> handler) {
+			handler.accept(this);
 		}
 
 	}

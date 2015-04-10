@@ -1,9 +1,9 @@
 package org.dei.perla.core.fpc.base;
 
 import org.dei.perla.core.record.Attribute;
-import org.dei.perla.core.utils.StopHandler;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 public class Scheduler {
 
@@ -117,8 +117,8 @@ public class Scheduler {
 		return null;
 	}
 
-	protected void stop(StopHandler<Void> h) {
-		StopHandler<Operation> stopHandler = new SchedulerStopHandler(h);
+	protected void stop(Consumer<Void> h) {
+		Consumer<Operation> stopHandler = new SchedulerStopHandler(h);
 
 		get.forEach(op -> op.stop(stopHandler));
 		set.forEach(op -> op.stop(stopHandler));
@@ -131,12 +131,12 @@ public class Scheduler {
 	 * @author Guido Rota (2014)
 	 *
 	 */
-	private class SchedulerStopHandler implements StopHandler<Operation> {
+	private class SchedulerStopHandler implements Consumer<Operation> {
 
-		private final StopHandler<Void> parentStopHandler;
+		private final Consumer<Void> parentStopHandler;
 		private final Collection<Operation> ops;
 
-		private SchedulerStopHandler(StopHandler<Void> parentStopHandler) {
+		private SchedulerStopHandler(Consumer<Void> parentStopHandler) {
 			this.parentStopHandler = parentStopHandler;
 			ops = new HashSet<>();
 			ops.addAll(get);
@@ -146,7 +146,7 @@ public class Scheduler {
 		}
 
 		@Override
-		public void hasStopped(Operation o) {
+		public void accept(Operation o) {
 			synchronized (ops) {
 				if (!schedulable) {
 					return;
@@ -155,7 +155,7 @@ public class Scheduler {
 				ops.remove(o);
 				if (ops.isEmpty()) {
 					schedulable = false;
-					parentStopHandler.hasStopped(null);
+					parentStopHandler.accept(null);
 				}
 			}
 		}

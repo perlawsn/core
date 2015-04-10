@@ -11,10 +11,10 @@ import org.dei.perla.core.record.Attribute;
 import org.dei.perla.core.record.Record;
 import org.dei.perla.core.record.SamplePipeline;
 import org.dei.perla.core.record.SamplePipeline.PipelineBuilder;
-import org.dei.perla.core.utils.StopHandler;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.function.Consumer;
 
 public class BaseFpc implements Fpc {
 
@@ -158,11 +158,11 @@ public class BaseFpc implements Fpc {
 		}
 
 		Operation op = sched.async(atts, strict);
-		PipelineBuilder pb = SamplePipeline.newBuilder(op.getAttributes());
 		if (op == null) {
 			return null;
 		}
 
+		PipelineBuilder pb = SamplePipeline.newBuilder(op.getAttributes());
 		if (!op.getAttributes().contains(Attribute.TIMESTAMP)) {
 			pb.addTimestamp();
 		}
@@ -170,10 +170,10 @@ public class BaseFpc implements Fpc {
 	}
 
 	@Override
-	public void stop(final StopHandler<Fpc> handler) {
+	public void stop(final Consumer<Fpc> handler) {
 		sched.stop((Void) -> {
 			cmgr.stop();
-			handler.hasStopped(this);
+			handler.accept(this);
 		});
 	}
 

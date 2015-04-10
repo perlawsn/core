@@ -8,13 +8,13 @@ import org.dei.perla.core.fpc.FpcException;
 import org.dei.perla.core.message.FpcMessage;
 import org.dei.perla.core.record.Attribute;
 import org.dei.perla.core.utils.Check;
-import org.dei.perla.core.utils.StopHandler;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
 
 public class NativePeriodicOperation extends PeriodicOperation {
 
@@ -107,7 +107,7 @@ public class NativePeriodicOperation extends PeriodicOperation {
 	}
 
 	@Override
-	protected void doStop(org.dei.perla.core.utils.StopHandler<Operation> handler) {
+	protected void doStop(Consumer<Operation> handler) {
 		Executor.execute(stop, new StopScriptHandler(handler));
 	}
 
@@ -208,13 +208,13 @@ public class NativePeriodicOperation extends PeriodicOperation {
 	 */
 	private class StopScriptHandler implements ScriptHandler {
 
-		private final StopHandler<Operation> stopHandler;
+		private final Consumer<Operation> stopHandler;
 
 		private StopScriptHandler() {
 			this(null);
 		}
 
-		private StopScriptHandler(StopHandler<Operation> stopHandler) {
+		private StopScriptHandler(Consumer<Operation> stopHandler) {
 			this.stopHandler = stopHandler;
 		}
 
@@ -231,7 +231,7 @@ public class NativePeriodicOperation extends PeriodicOperation {
 					state = STOPPED;
 					removeAsyncCallback();
 					if (stopHandler != null) {
-						stopHandler.hasStopped(NativePeriodicOperation.this);
+						stopHandler.accept(NativePeriodicOperation.this);
 					}
 				}
 			});
@@ -244,7 +244,7 @@ public class NativePeriodicOperation extends PeriodicOperation {
 			}
 
 			// Force stop
-			stopHandler.hasStopped(NativePeriodicOperation.this);
+			stopHandler.accept(NativePeriodicOperation.this);
 		}
 	}
 

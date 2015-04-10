@@ -4,10 +4,10 @@ import org.dei.perla.core.engine.Script;
 import org.dei.perla.core.fpc.TaskHandler;
 import org.dei.perla.core.record.Attribute;
 import org.dei.perla.core.record.SamplePipeline;
-import org.dei.perla.core.utils.StopHandler;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class OneoffOperation extends AbstractOperation<AbstractTask> {
 
@@ -33,8 +33,8 @@ public class OneoffOperation extends AbstractOperation<AbstractTask> {
 	}
 
 	@Override
-	protected void doStop(StopHandler<Operation> handler) {
-		handler.hasStopped(this);
+	protected void doStop(Consumer<Operation> handler) {
+		handler.accept(this);
 	}
 
 }

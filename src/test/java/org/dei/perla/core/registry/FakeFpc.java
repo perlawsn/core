@@ -4,12 +4,12 @@ import org.dei.perla.core.fpc.Fpc;
 import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.TaskHandler;
 import org.dei.perla.core.record.Attribute;
-import org.dei.perla.core.utils.StopHandler;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class FakeFpc implements Fpc {
 
@@ -59,7 +59,7 @@ public class FakeFpc implements Fpc {
 	}
 
 	@Override
-	public void stop(StopHandler<Fpc> handler) {
+	public void stop(Consumer<Fpc> handler) {
 		throw new UnsupportedOperationException();
 	}
 

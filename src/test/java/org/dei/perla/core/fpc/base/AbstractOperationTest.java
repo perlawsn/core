@@ -1,20 +1,18 @@
 package org.dei.perla.core.fpc.base;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Collections;
-import java.util.Map;
-
 import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.TaskHandler;
 import org.dei.perla.core.record.Record;
 import org.dei.perla.core.record.SamplePipeline;
-import org.dei.perla.core.utils.StopHandler;
 import org.junit.Test;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.function.Consumer;
+
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.*;
 
 public class AbstractOperationTest {
 
@@ -57,7 +55,7 @@ public class AbstractOperationTest {
 		assertFalse(task2.isRunning());
 	}
 
-	private static class TestStopHandler implements StopHandler<Operation> {
+	private static class TestStopHandler implements Consumer<Operation> {
 
 		private boolean done = false;
 
@@ -69,7 +67,7 @@ public class AbstractOperationTest {
 		}
 
 		@Override
-		public synchronized void hasStopped(Operation object) {
+		public synchronized void accept(Operation object) {
 			done = true;
 		}
 
@@ -155,8 +153,8 @@ public class AbstractOperationTest {
 		}
 
 		@Override
-		protected void doStop(StopHandler<Operation> handler) {
-			handler.hasStopped(this);
+		protected void doStop(Consumer<Operation> handler) {
+			handler.accept(this);
 		}
 
 	}

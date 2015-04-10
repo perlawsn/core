@@ -1,12 +1,12 @@
 package org.dei.perla.core.fpc;
 
+import org.dei.perla.core.record.Attribute;
+
 import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
-import org.dei.perla.core.record.Attribute;
-import org.dei.perla.core.utils.StopHandler;
+import java.util.function.Consumer;
 
 public interface Fpc {
 
@@ -201,6 +201,6 @@ public interface Fpc {
      * @param handler completion handler invoked to notify the effective
      *                termination of the {@code Fpc}
      */
-    public void stop(StopHandler<Fpc> handler);
+    public void stop(Consumer<Fpc> handler);
 
 }

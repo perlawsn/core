@@ -5,12 +5,12 @@ import org.dei.perla.core.fpc.TaskHandler;
 import org.dei.perla.core.record.Record;
 import org.dei.perla.core.record.SamplePipeline;
 import org.dei.perla.core.record.SamplePipeline.PipelineBuilder;
-import org.dei.perla.core.utils.StopHandler;
 import org.junit.Test;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Collections;
+import java.util.function.Consumer;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
@@ -119,7 +119,7 @@ public class PeriodicTaskTest {
 		}
 
 		@Override
-		protected void doStop(StopHandler<Operation> handler) {
+		protected void doStop(Consumer<Operation> handler) {
 
 		}
 

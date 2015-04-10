@@ -5,14 +5,12 @@ import org.dei.perla.core.engine.Runner;
 import org.dei.perla.core.engine.Script;
 import org.dei.perla.core.engine.ScriptHandler;
 import org.dei.perla.core.fpc.FpcException;
-import org.dei.perla.core.utils.StopHandler;
 
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
 
 public class SimulatedPeriodicOperation extends PeriodicOperation {
 
@@ -68,9 +66,9 @@ public class SimulatedPeriodicOperation extends PeriodicOperation {
 	}
 
 	@Override
-	protected void doStop(StopHandler<Operation> handler) {
+	protected void doStop(Consumer<Operation> handler) {
 		executor.shutdownNow();
-		handler.hasStopped(this);
+		handler.accept(this);
 	}
 
 	private class TimerScriptHandler implements ScriptHandler {
