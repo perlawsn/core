@@ -77,7 +77,8 @@ public class SamplePipeline {
 	 * @return New {@link Record} produced by the pipeline
 	 */
 	public Record run(Object[] sample) {
-        Object[] r = Arrays.copyOf(sample, atts.size());
+        int size = atts.size() > sample.length ? atts.size() : sample.length;
+        Object[] r = Arrays.copyOf(sample, size);
         for (SampleModifier m : mods) {
             m.process(r);
         }

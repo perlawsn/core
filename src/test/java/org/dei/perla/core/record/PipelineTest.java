@@ -148,7 +148,7 @@ public class PipelineTest {
 	}
 
 	@Test
-	public void pipelineTest() {
+	public void testPipeline() {
 		Attribute s1 = Attribute.create("source1", DataType.STRING);
 		Attribute s2 = Attribute.create("source2", DataType.STRING);
         LinkedHashMap<Attribute, Object> st = new LinkedHashMap<>();
@@ -187,6 +187,28 @@ public class PipelineTest {
 		assertThat(ratts.get(1), equalTo(s2));
 		assertThat(ratts.get(2), equalTo(s1));
 		assertThat(ratts.get(3), equalTo(a1));
+	}
+
+	@Test
+	public void testPipelineShorterSample() {
+		Attribute s1 = Attribute.create("source1", DataType.STRING);
+		Attribute s2 = Attribute.create("source2", DataType.INTEGER);
+		List<Attribute> atts = new ArrayList<>();
+		atts.add(s1);
+		atts.add(s2);
+		Object[] sample = new Object[] {"source1", 2};
+
+		PipelineBuilder b = SamplePipeline.newBuilder(atts);
+		b.reorder(Arrays.asList(new Attribute[] { s2 }));
+
+		SamplePipeline p = b.create();
+		assertThat(p, notNullValue());
+		assertTrue(p.attributes().contains(s2));
+		assertThat(p.attributes().size(), equalTo(2));
+
+		Record r = p.run(sample);
+		assertThat(r.values().length, equalTo(2));
+		assertThat(r.fields().size(), equalTo(2));
 	}
 
 }
