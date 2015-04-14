@@ -1,6 +1,6 @@
 package org.dei.perla.core.engine;
 
-import org.dei.perla.core.record.Attribute;
+import org.dei.perla.core.sample.Attribute;
 
 import java.util.Collections;
 import java.util.List;
@@ -19,7 +19,7 @@ public final class Script {
 	private final Instruction first;
 
     // The attribute order in the emit list is important, as it will
-    // correspond to the attribute order in every record created by this script
+    // correspond to the attribute order in every sample created by this script
     private final List<Attribute> set;
     private final List<Attribute> emit;
 

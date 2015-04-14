@@ -1,7 +1,6 @@
-package org.dei.perla.core.record;
+package org.dei.perla.core.sample;
 
 import org.dei.perla.core.descriptor.DataType;
-import org.dei.perla.core.record.Attribute;
 import org.junit.Test;
 
 import static org.hamcrest.Matchers.*;

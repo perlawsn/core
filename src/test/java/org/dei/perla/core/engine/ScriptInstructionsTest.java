@@ -12,8 +12,8 @@ import org.dei.perla.core.descriptor.DataType;
 import org.dei.perla.core.engine.SubmitInstruction.RequestParameter;
 import org.dei.perla.core.message.FpcMessage;
 import org.dei.perla.core.message.Mapper;
-import org.dei.perla.core.record.Attribute;
-import org.dei.perla.core.record.Record;
+import org.dei.perla.core.sample.Attribute;
+import org.dei.perla.core.sample.Sample;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -470,7 +470,7 @@ public class ScriptInstructionsTest {
 		assertThat(samples, notNullValue());
 		assertThat(samples.size(), equalTo(1));
 
-		Record r = new Record(script.getEmit(), samples.get(0));
+		Sample r = new Sample(script.getEmit(), samples.get(0));
 		for (Attribute a : r.fields()) {
             Object f = r.getValue(a.getId());
 			assertThat(f, notNullValue());
@@ -523,7 +523,7 @@ public class ScriptInstructionsTest {
 		assertThat(samples, notNullValue());
 		assertThat(samples.size(), equalTo(1));
 
-		Record r = new Record(script.getEmit(), samples.get(0));
+		Sample r = new Sample(script.getEmit(), samples.get(0));
 		for (Attribute a : r.fields()) {
             Object f = r.getValue(a.getId());
 			assertThat(f, notNullValue());
@@ -584,7 +584,7 @@ public class ScriptInstructionsTest {
 		assertThat(samples, notNullValue());
 		assertThat(samples.size(), equalTo(3));
 
-		Record r = new Record(script.getEmit(), samples.get(0));
+		Sample r = new Sample(script.getEmit(), samples.get(0));
 		for (Attribute a : r.fields()) {
             Object f = r.getValue(a.getId());
 			assertThat(f, notNullValue());
@@ -605,7 +605,7 @@ public class ScriptInstructionsTest {
 			}
 		}
 
-		r = new Record(script.getEmit(), samples.get(1));
+		r = new Sample(script.getEmit(), samples.get(1));
 		for (Attribute a : r.fields()) {
             Object f = r.getValue(a.getId());
 			assertThat(f, notNullValue());
@@ -626,7 +626,7 @@ public class ScriptInstructionsTest {
 			}
 		}
 
-		r = new Record(script.getEmit(), samples.get(2));
+		r = new Sample(script.getEmit(), samples.get(2));
 		for (Attribute a : r.fields()) {
             Object f = r.getValue(a.getId());
 			assertThat(f, notNullValue());

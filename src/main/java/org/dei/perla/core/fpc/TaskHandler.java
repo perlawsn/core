@@ -1,6 +1,6 @@
 package org.dei.perla.core.fpc;
 
-import org.dei.perla.core.record.Record;
+import org.dei.perla.core.sample.Sample;
 
 /**
  * <p>
@@ -26,23 +26,20 @@ public interface TaskHandler {
 	 * </p>
 	 *
 	 * <p>
-	 * No more records or errors will be produced after this method is invoked.
+	 * No more samples or errors will be produced after this method is invoked.
 	 * </p>
 	 *
-	 * @param task
-	 *            {@link Task} that completed its execution
+	 * @param task {@link Task} that completed its execution
 	 */
 	public void complete(Task task);
 
 	/**
-	 * Invoked when a new {@link Record} is ready
+	 * Invoked when a new {@link Sample} is ready
 	 *
-	 * @param task
-	 *            {@link Task} that produced the new record
-	 * @param result
-	 *            Record
+	 * @param task {@link Task} that produced the new sample
+	 * @param sample new sample
 	 */
-	public void newRecord(Task task, Record record);
+	public void data(Task task, Sample sample);
 
 	/**
 	 * Invoked when error occurs with the Fpc {@link Task}. Invocation of this

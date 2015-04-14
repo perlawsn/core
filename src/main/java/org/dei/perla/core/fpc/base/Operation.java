@@ -1,10 +1,8 @@
 package org.dei.perla.core.fpc.base;
 
-import org.dei.perla.core.fpc.Fpc;
-import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.TaskHandler;
-import org.dei.perla.core.record.Attribute;
-import org.dei.perla.core.record.SamplePipeline;
+import org.dei.perla.core.sample.Attribute;
+import org.dei.perla.core.sample.SamplePipeline;
 
 import java.util.List;
 import java.util.Map;
@@ -32,7 +30,7 @@ public interface Operation {
 	/**
 	 * Returns the list of device {@link Attribute}s, that can be
 	 * sampled or set using this operation. For data collection operations,
-	 * the attribute order is maintained in every output {@link Record}.
+	 * the attribute order is maintained in every output {@link Sample}.
 	 *
 	 * @return List of {@link Attribute}s associated with the {@code Operation}
 	 */
@@ -87,7 +85,7 @@ public interface Operation {
 	 * <p>
 	 * This version of the {@code schedule()} method accepts a
 	 * {@link SamplePipeline} parameter that will be used to modify the raw
-	 * records produced by remote device.
+	 * samples produced by remote device.
 	 * </p>
 	 *
 	 * @param parameterMap
@@ -96,7 +94,7 @@ public interface Operation {
 	 *            {@link TaskHandler} object used to asynchronously collect the
 	 *            {@code Operation} output
 	 * @param pipeline
-	 *            {@link SamplePipeline} object used to modify the records
+	 *            {@link SamplePipeline} object used to modify the samples
 	 *            produced by this operation
 	 * @return {@link Task} object for controlling the {@code Operation}
 	 *         execution

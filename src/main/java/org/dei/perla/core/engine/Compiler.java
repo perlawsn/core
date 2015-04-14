@@ -13,7 +13,7 @@ import org.dei.perla.core.descriptor.instructions.*;
 import org.dei.perla.core.engine.SubmitInstruction.RequestParameter;
 import org.dei.perla.core.message.FpcMessage;
 import org.dei.perla.core.message.Mapper;
-import org.dei.perla.core.record.Attribute;
+import org.dei.perla.core.sample.Attribute;
 import org.dei.perla.core.utils.Check;
 import org.dei.perla.core.utils.Errors;
 

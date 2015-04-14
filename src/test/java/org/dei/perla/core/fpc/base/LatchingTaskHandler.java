@@ -2,7 +2,7 @@ package org.dei.perla.core.fpc.base;
 
 import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.TaskHandler;
-import org.dei.perla.core.record.Record;
+import org.dei.perla.core.sample.Sample;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -16,8 +16,6 @@ public class LatchingTaskHandler implements TaskHandler {
 	private final Lock lk = new ReentrantLock();
 	private final Condition cond = lk.newCondition();
 
-	private final int originalCount;
-
 	private int waitCount;
 	private int count = 0;
 
@@ -26,11 +24,10 @@ public class LatchingTaskHandler implements TaskHandler {
 
 	private Throwable error;
 
-	private final List<Record> samples = new ArrayList<>();
+	private final List<Sample> samples = new ArrayList<>();
 
 	public LatchingTaskHandler(int waitCount) {
 		this.waitCount = waitCount;
-		this.originalCount = waitCount;
 	}
 
 	public int getCount() throws InterruptedException {
@@ -63,7 +60,7 @@ public class LatchingTaskHandler implements TaskHandler {
 		}
 	}
 
-	public List<Record> getSamples() throws InterruptedException {
+	public List<Sample> getSamples() throws InterruptedException {
 		lk.lock();
 		try {
 			if (waitCount > 0) {
@@ -78,7 +75,7 @@ public class LatchingTaskHandler implements TaskHandler {
 		}
 	}
 
-	public Record getLastSample() throws InterruptedException {
+	public Sample getLastSample() throws InterruptedException {
 		lk.lock();
 		try {
 			if (waitCount > 0) {
@@ -116,16 +113,16 @@ public class LatchingTaskHandler implements TaskHandler {
 	}
 
 	@Override
-	public void newRecord(Task task, Record record) {
+	public void data(Task task, Sample sample) {
 		lk.lock();
 		try {
-			samples.add(record);
+			samples.add(sample);
 			waitCount--;
 			count++;
 
 			Instant ts;
-			if (record.hasField("timestamp")) {
-				ts = (Instant) record.getValue("timestamp");
+			if (sample.hasField("timestamp")) {
+				ts = (Instant) sample.getValue("timestamp");
 			} else {
 				ts = Instant.now();
 			}

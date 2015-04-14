@@ -2,8 +2,8 @@ package org.dei.perla.core.fpc.base;
 
 import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.TaskHandler;
-import org.dei.perla.core.record.Record;
-import org.dei.perla.core.record.SamplePipeline;
+import org.dei.perla.core.sample.Sample;
+import org.dei.perla.core.sample.SamplePipeline;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -83,7 +83,7 @@ public class AbstractOperationTest {
 
 		private final int eventCount;
 		private int completionCount = 0;
-		private int recordCount = 0;
+		private int sampleCount = 0;
 		private int errorCount = 0;
 
 		public TestTaskHandler(int eventCount) {
@@ -99,7 +99,7 @@ public class AbstractOperationTest {
 		}
 
 		private synchronized boolean isComplete() {
-			if (completionCount + recordCount + errorCount >= eventCount) {
+			if (completionCount + sampleCount + errorCount >= eventCount) {
 				return true;
 			}
 
@@ -113,8 +113,8 @@ public class AbstractOperationTest {
 		}
 
 		@Override
-		public synchronized void newRecord(Task task, Record record) {
-			recordCount++;
+		public synchronized void data(Task task, Sample sample) {
+			sampleCount++;
 			this.notifyAll();
 		}
 

@@ -6,7 +6,7 @@ import org.dei.perla.core.engine.ScriptHandler;
 import org.dei.perla.core.engine.ScriptParameter;
 import org.dei.perla.core.fpc.FpcException;
 import org.dei.perla.core.message.FpcMessage;
-import org.dei.perla.core.record.Attribute;
+import org.dei.perla.core.sample.Attribute;
 import org.dei.perla.core.utils.Check;
 
 import java.util.HashMap;
@@ -32,9 +32,9 @@ public class NativePeriodicOperation extends PeriodicOperation {
 	// Operation state
 	private volatile int state = 0;
 
-	// Current record, used to merge the results from different async messages
-    Lock rlk = new ReentrantLock();
-	private Object[] currentRecord;
+	// Current sample, used to merge the results from different async messages
+	private Object[] currentSample;
+	Lock rlk = new ReentrantLock();
 
 	public NativePeriodicOperation(String id, List<Attribute> atts,
 			Script start, Script stop, List<MessageScript> msgs,
@@ -50,7 +50,7 @@ public class NativePeriodicOperation extends PeriodicOperation {
 			handlers.put(m.getMapper().getMessageId(), osh);
 			nAtt += m.getScript().getEmit().size();
 		}
-        currentRecord = new Object[nAtt];
+        currentSample = new Object[nAtt];
 	}
 
 	public Script getStartScript() {
@@ -249,7 +249,7 @@ public class NativePeriodicOperation extends PeriodicOperation {
 	}
 
 	/**
-	 * Handler for managing the 'on' <code>Script</code> (record creation from
+	 * Handler for managing the 'on' <code>Script</code> (sample creation from
 	 * asynchronous message)
 	 *
 	 * @author Guido Rota (2014)
@@ -272,20 +272,20 @@ public class NativePeriodicOperation extends PeriodicOperation {
 			if (handlers.size() == 1) {
 				// Distribute immediately to the Tasks if the operation only
 				// receives one message type. Doing so avoids the cost of
-				// merging with the currentRecord
+				// merging with the current sample
                 for (Object[] s : samples) {
                     forEachTask(t -> t.newSample(s));
                 }
 
 			} else if (msgs.isSync()) {
-				// Merge with the current record and distribute
+				// Merge with the current sample and distribute
                 for (Object[] s : samples) {
 					merge(s);
-                    forEachTask(t -> t.newSample(currentRecord));
+                    forEachTask(t -> t.newSample(currentSample));
                 }
 
 			} else {
-				// We only care about the last record if we only have to merge
+				// We only care about the last sample when merging
 				int lastIndex = samples.size() - 1;
 				Object[] last = samples.get(lastIndex);
 				merge(last);
@@ -296,9 +296,9 @@ public class NativePeriodicOperation extends PeriodicOperation {
             rlk.lock();
             try {
                 for (int i = 0; i < r.length; i++) {
-                    currentRecord[msgs.getBase() + i] = r[i];
+                    currentSample[msgs.getBase() + i] = r[i];
                 }
-				return currentRecord;
+				return currentSample;
             } finally {
                 rlk.unlock();
             }

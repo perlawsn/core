@@ -7,8 +7,8 @@ import org.dei.perla.core.engine.ScriptParameter;
 import org.dei.perla.core.fpc.TaskHandler;
 import org.dei.perla.core.message.FpcMessage;
 import org.dei.perla.core.message.Mapper;
-import org.dei.perla.core.record.Attribute;
-import org.dei.perla.core.record.SamplePipeline;
+import org.dei.perla.core.sample.Attribute;
+import org.dei.perla.core.sample.SamplePipeline;
 
 import java.util.List;
 import java.util.Map;
@@ -226,7 +226,7 @@ public class AsyncOperation extends AbstractOperation<AsyncOperation.AsyncTask> 
 					state = STARTED;
 				}
 
-				// We're not waiting for a record to be produced. Since this
+				// We're not waiting for a sample to be produced. Since this
 				// operation runs asynchronously, we have no way to know when
 				// new data will arrive
 				AsyncTask task = new AsyncTask(this, handler, pipeline);

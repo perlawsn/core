@@ -6,7 +6,6 @@ import org.dei.perla.core.descriptor.AttributeDescriptor.AttributePermission;
 import org.dei.perla.core.descriptor.DataType;
 import org.dei.perla.core.engine.ExecutionContext.InstructionLocal;
 import org.dei.perla.core.message.Mapper;
-import org.dei.perla.core.record.Attribute;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -234,7 +233,7 @@ public class ScriptExecutorTest {
 				.buildScript("timestamp");
 
 		SynchronizerScriptHandler h = new SynchronizerScriptHandler();
-		Runner run = Executor.execute(script, h);
+		Executor.execute(script, h);
 		List<Object[]> res = h.getResult();
 		assertThat(res, notNullValue());
 		assertThat(res.size(), equalTo(1));

@@ -12,8 +12,8 @@ import org.dei.perla.core.fpc.Fpc;
 import org.dei.perla.core.fpc.FpcFactory;
 import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.message.MapperFactory;
-import org.dei.perla.core.record.Attribute;
-import org.dei.perla.core.record.Record;
+import org.dei.perla.core.sample.Attribute;
+import org.dei.perla.core.sample.Sample;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -59,35 +59,35 @@ public class BaseFpcTest {
 			ExecutionException {
 		List<Attribute> attributeList;
 		LatchingTaskHandler handler;
-		Record record;
+		Sample sample;
 
 		// integer-get
 		attributeList = new ArrayList<>();
 		attributeList.add(Attribute.create("integer", DataType.INTEGER));
 		handler = new LatchingTaskHandler(1);
 		fpc.get(attributeList, handler);
-		record = handler.getLastSample();
+		sample = handler.getLastSample();
 
-		assertThat(record, notNullValue());
-		assertThat(record.getValue("integer"), notNullValue());
-		assertTrue(record.getValue("integer") instanceof Integer);
+		assertThat(sample, notNullValue());
+		assertThat(sample.getValue("integer"), notNullValue());
+		assertTrue(sample.getValue("integer") instanceof Integer);
 		// Check if the Fpc is adding the timestamp
-		assertThat(record.getValue("timestamp"), notNullValue());
-		assertTrue(record.getValue("timestamp") instanceof Instant);
+		assertThat(sample.getValue("timestamp"), notNullValue());
+		assertTrue(sample.getValue("timestamp") instanceof Instant);
 
 		// string-get
 		attributeList.clear();
 		attributeList.add(Attribute.create("string", DataType.STRING));
 		handler = new LatchingTaskHandler(1);
 		fpc.get(attributeList, handler);
-		record = handler.getLastSample();
+		sample = handler.getLastSample();
 
-		assertThat(record, notNullValue());
-		assertThat(record.getValue("string"), notNullValue());
-		assertTrue(record.getValue("string") instanceof String);
+		assertThat(sample, notNullValue());
+		assertThat(sample.getValue("string"), notNullValue());
+		assertTrue(sample.getValue("string") instanceof String);
 		// Check if the Fpc is adding the timestamp
-		assertThat(record.getValue("timestamp"), notNullValue());
-		assertTrue(record.getValue("timestamp") instanceof Instant);
+		assertThat(sample.getValue("timestamp"), notNullValue());
+		assertTrue(sample.getValue("timestamp") instanceof Instant);
 	}
 
 	@Test
@@ -95,25 +95,25 @@ public class BaseFpcTest {
 			ExecutionException {
 		List<Attribute> attributeList;
 		LatchingTaskHandler handler;
-		Record record;
+		Sample sample;
 
 		attributeList = new ArrayList<>();
 		attributeList.add(Attribute.create("integer", DataType.INTEGER));
 		attributeList.add(Attribute.create("static", DataType.INTEGER));
 		handler = new LatchingTaskHandler(1);
 		fpc.get(attributeList, handler);
-		record = handler.getLastSample();
+		sample = handler.getLastSample();
 
-		assertThat(record, notNullValue());
-		assertThat(record.getValue("integer"), notNullValue());
-		assertTrue(record.getValue("integer") instanceof Integer);
+		assertThat(sample, notNullValue());
+		assertThat(sample.getValue("integer"), notNullValue());
+		assertTrue(sample.getValue("integer") instanceof Integer);
 		// Check if the Fpc is adding the timestamp
-		assertThat(record.getValue("timestamp"), notNullValue());
-		assertTrue(record.getValue("timestamp") instanceof Instant);
+		assertThat(sample.getValue("timestamp"), notNullValue());
+		assertTrue(sample.getValue("timestamp") instanceof Instant);
 		// Check if the Fpc is adding the requested static attribute
-		assertThat(record.getValue("static"), notNullValue());
-		assertTrue(record.getValue("static") instanceof Integer);
-		Integer value = (Integer) record.getValue("static");
+		assertThat(sample.getValue("static"), notNullValue());
+		assertTrue(sample.getValue("static") instanceof Integer);
+		Integer value = (Integer) sample.getValue("static");
 		assertThat(value, equalTo(5));
 	}
 
@@ -121,22 +121,22 @@ public class BaseFpcTest {
 	public void testStaticGet() throws InterruptedException, ExecutionException {
 		List<Attribute> attributeList;
 		LatchingTaskHandler handler;
-		Record record;
+		Sample sample;
 
 		attributeList = new ArrayList<>();
 		attributeList.add(Attribute.create("static", DataType.INTEGER));
 		handler = new LatchingTaskHandler(1);
 		fpc.get(attributeList, handler);
-		record = handler.getLastSample();
+		sample = handler.getLastSample();
 
-		assertThat(record, notNullValue());
+		assertThat(sample, notNullValue());
 		// Check if the Fpc is adding the timestamp
-		assertThat(record.getValue("timestamp"), notNullValue());
-		assertTrue(record.getValue("timestamp") instanceof Instant);
+		assertThat(sample.getValue("timestamp"), notNullValue());
+		assertTrue(sample.getValue("timestamp") instanceof Instant);
 		// Check if the Fpc is adding the requested static attribute
-		assertThat(record.getValue("static"), notNullValue());
-		assertTrue(record.getValue("static") instanceof Integer);
-		Integer value = (Integer) record.getValue("static");
+		assertThat(sample.getValue("static"), notNullValue());
+		assertTrue(sample.getValue("static") instanceof Integer);
+		Integer value = (Integer) sample.getValue("static");
 		assertThat(value, equalTo(5));
 	}
 
@@ -144,7 +144,7 @@ public class BaseFpcTest {
 	public void testPeriodicOperation() throws InterruptedException,
 			ExecutionException {
 		List<Attribute> attributeList;
-		Record record;
+		Sample sample;
 
 		// Request string and integer
 		attributeList = new ArrayList<>();
@@ -157,15 +157,15 @@ public class BaseFpcTest {
 		assertTrue(task1 instanceof PeriodicTask);
 		assertThat(handler1.getAveragePeriod(), greaterThanOrEqualTo(9.9d));
 		assertThat(handler1.getAveragePeriod(), lessThan(11d));
-		record = handler1.getLastSample();
-		assertThat(record, notNullValue());
-		assertThat(record.getValue("string"), notNullValue());
-		assertTrue(record.getValue("string") instanceof String);
-		assertThat(record.getValue("integer"), notNullValue());
-		assertTrue(record.getValue("integer") instanceof Integer);
+		sample = handler1.getLastSample();
+		assertThat(sample, notNullValue());
+		assertThat(sample.getValue("string"), notNullValue());
+		assertTrue(sample.getValue("string") instanceof String);
+		assertThat(sample.getValue("integer"), notNullValue());
+		assertTrue(sample.getValue("integer") instanceof Integer);
 		// Check if the Fpc is adding the timestamp
-		assertThat(record.getValue("timestamp"), notNullValue());
-		assertTrue(record.getValue("timestamp") instanceof Instant);
+		assertThat(sample.getValue("timestamp"), notNullValue());
+		assertTrue(sample.getValue("timestamp") instanceof Instant);
 
 		// Request string and float
 		attributeList = new ArrayList<>();
@@ -180,15 +180,15 @@ public class BaseFpcTest {
 		assertThat(handler2.getAveragePeriod(), lessThan(1.1d));
 		assertThat(handler1.getAveragePeriod(), greaterThanOrEqualTo(9.9d));
 		assertThat(handler1.getAveragePeriod(), lessThan(11d));
-		record = handler1.getLastSample();
-		assertThat(record, notNullValue());
-		assertThat(record.getValue("string"), notNullValue());
-		assertTrue(record.getValue("string") instanceof String);
-		assertThat(record.getValue("float"), notNullValue());
-		assertTrue(record.getValue("float") instanceof Float);
+		sample = handler1.getLastSample();
+		assertThat(sample, notNullValue());
+		assertThat(sample.getValue("string"), notNullValue());
+		assertTrue(sample.getValue("string") instanceof String);
+		assertThat(sample.getValue("float"), notNullValue());
+		assertTrue(sample.getValue("float") instanceof Float);
 		// Check if the Fpc is adding the timestamp
-		assertThat(record.getValue("timestamp"), notNullValue());
-		assertTrue(record.getValue("timestamp") instanceof Instant);
+		assertThat(sample.getValue("timestamp"), notNullValue());
+		assertTrue(sample.getValue("timestamp") instanceof Instant);
 
 		// Check if both tasks are backed by the same Operation
 		PeriodicTask pTask1 = (PeriodicTask) task1;
@@ -210,7 +210,7 @@ public class BaseFpcTest {
 	public void testMixedStaticDynamicPeriodic() throws InterruptedException,
 			ExecutionException {
 		List<Attribute> attributeList;
-		Record record;
+		Sample sample;
 
 		// Request string and integer
 		attributeList = new ArrayList<>();
@@ -222,19 +222,19 @@ public class BaseFpcTest {
 
 		assertThat(task, notNullValue());
 		assertTrue(task instanceof PeriodicTask);
-		record = handler1.getLastSample();
-		assertThat(record, notNullValue());
-		assertThat(record.getValue("string"), notNullValue());
-		assertTrue(record.getValue("string") instanceof String);
-		assertThat(record.getValue("integer"), notNullValue());
-		assertTrue(record.getValue("integer") instanceof Integer);
+		sample = handler1.getLastSample();
+		assertThat(sample, notNullValue());
+		assertThat(sample.getValue("string"), notNullValue());
+		assertTrue(sample.getValue("string") instanceof String);
+		assertThat(sample.getValue("integer"), notNullValue());
+		assertTrue(sample.getValue("integer") instanceof Integer);
 		// Check if the Fpc is adding the timestamp
-		assertThat(record.getValue("timestamp"), notNullValue());
-		assertTrue(record.getValue("timestamp") instanceof Instant);
+		assertThat(sample.getValue("timestamp"), notNullValue());
+		assertTrue(sample.getValue("timestamp") instanceof Instant);
 		// Check if the Fpc is adding the requested static attribute
-		assertThat(record.getValue("static"), notNullValue());
-		assertTrue(record.getValue("static") instanceof Integer);
-		Integer value = (Integer) record.getValue("static");
+		assertThat(sample.getValue("static"), notNullValue());
+		assertTrue(sample.getValue("static") instanceof Integer);
+		Integer value = (Integer) sample.getValue("static");
 		assertThat(value, equalTo(5));
 		task.stop();
 	}
@@ -243,7 +243,7 @@ public class BaseFpcTest {
 	public void testStaticPeriodic() throws InterruptedException,
 			ExecutionException {
 		List<Attribute> attributeList;
-		Record record;
+		Sample sample;
 
 		attributeList = new ArrayList<>();
 		attributeList.add(Attribute.create("static", DataType.INTEGER));
@@ -254,15 +254,15 @@ public class BaseFpcTest {
 		assertTrue(task instanceof PeriodicTask);
 		assertThat(handler.getAveragePeriod(), greaterThanOrEqualTo(9.9d));
 		assertThat(handler.getAveragePeriod(), lessThan(11d));
-		record = handler.getLastSample();
-		assertThat(record, notNullValue());
+		sample = handler.getLastSample();
+		assertThat(sample, notNullValue());
 		// Check if the Fpc is adding the timestamp
-		assertThat(record.getValue("timestamp"), notNullValue());
-		assertTrue(record.getValue("timestamp") instanceof Instant);
+		assertThat(sample.getValue("timestamp"), notNullValue());
+		assertTrue(sample.getValue("timestamp") instanceof Instant);
 		// Check if the Fpc is adding the requested static attribute
-		assertThat(record.getValue("static"), notNullValue());
-		assertTrue(record.getValue("static") instanceof Integer);
-		Integer value = (Integer) record.getValue("static");
+		assertThat(sample.getValue("static"), notNullValue());
+		assertTrue(sample.getValue("static") instanceof Integer);
+		Integer value = (Integer) sample.getValue("static");
 		assertThat(value, equalTo(5));
 	}
 
@@ -270,7 +270,7 @@ public class BaseFpcTest {
 	public void testPeriodicMultipleHandler() throws InterruptedException,
 			ExecutionException {
 		List<Attribute> attributeList;
-		Record record;
+		Sample sample;
 
 		// Request string and integer
 		attributeList = new ArrayList<>();
@@ -283,15 +283,15 @@ public class BaseFpcTest {
 		assertTrue(task1 instanceof PeriodicTask);
 		assertThat(handler1.getAveragePeriod(), greaterThanOrEqualTo(9.8d));
 		assertThat(handler1.getAveragePeriod(), lessThan(11d));
-		record = handler1.getLastSample();
-		assertThat(record, notNullValue());
-		assertThat(record.getValue("boolean"), notNullValue());
-		assertTrue(record.getValue("boolean") instanceof Boolean);
-		assertThat(record.getValue("integer"), notNullValue());
-		assertTrue(record.getValue("integer") instanceof Integer);
+		sample = handler1.getLastSample();
+		assertThat(sample, notNullValue());
+		assertThat(sample.getValue("boolean"), notNullValue());
+		assertTrue(sample.getValue("boolean") instanceof Boolean);
+		assertThat(sample.getValue("integer"), notNullValue());
+		assertTrue(sample.getValue("integer") instanceof Integer);
 		// Check if the Fpc is adding the timestamp
-		assertThat(record.getValue("timestamp"), notNullValue());
-		assertTrue(record.getValue("timestamp") instanceof Instant);
+		assertThat(sample.getValue("timestamp"), notNullValue());
+		assertTrue(sample.getValue("timestamp") instanceof Instant);
 	}
 
 	@Test
@@ -310,7 +310,7 @@ public class BaseFpcTest {
 	public void testPeriodicAsyncOperation() throws InterruptedException,
 			ExecutionException {
 		List<Attribute> attributeList;
-		Record record;
+		Sample sample;
 
 		// Request the async event
 		attributeList = new ArrayList<>();
@@ -320,20 +320,20 @@ public class BaseFpcTest {
 
 		assertThat(task, notNullValue());
 		assertTrue(task instanceof PeriodicTask);
-		record = handler.getLastSample();
-		assertThat(record, notNullValue());
-		assertThat(record.getValue("event"), notNullValue());
-		assertTrue(record.getValue("event") instanceof Integer);
+		sample = handler.getLastSample();
+		assertThat(sample, notNullValue());
+		assertThat(sample.getValue("event"), notNullValue());
+		assertTrue(sample.getValue("event") instanceof Integer);
 		// Check if the Fpc is adding the timestamp
-		assertThat(record.getValue("timestamp"), notNullValue());
-		assertTrue(record.getValue("timestamp") instanceof Instant);
+		assertThat(sample.getValue("timestamp"), notNullValue());
+		assertTrue(sample.getValue("timestamp") instanceof Instant);
 	}
 
 	@Test
 	public void testOneoffAsyncOperation() throws InterruptedException,
 			ExecutionException {
 		List<Attribute> attributeList;
-		Record record;
+		Sample sample;
 
 		// Request the async event
 		attributeList = new ArrayList<>();
@@ -343,15 +343,15 @@ public class BaseFpcTest {
 
 		assertThat(task, notNullValue());
 		assertFalse(task instanceof PeriodicTask);
-		record = handler.getLastSample();
-		assertThat(record, notNullValue());
+		sample = handler.getLastSample();
+		assertThat(sample, notNullValue());
 	}
 
 	@Test
 	public void testAsyncOperation() throws InterruptedException,
 			ExecutionException {
 		List<Attribute> attributeList;
-		Record record;
+		Sample sample;
 
 		// Request the async event
 		attributeList = new ArrayList<>();
@@ -360,13 +360,13 @@ public class BaseFpcTest {
 		Task task = fpc.async(attributeList, handler);
 
 		assertThat(task, notNullValue());
-		record = handler.getLastSample();
-		assertThat(record, notNullValue());
-		assertThat(record.getValue("event"), notNullValue());
-		assertTrue(record.getValue("event") instanceof Integer);
+		sample = handler.getLastSample();
+		assertThat(sample, notNullValue());
+		assertThat(sample.getValue("event"), notNullValue());
+		assertTrue(sample.getValue("event") instanceof Integer);
 		// Check if the Fpc is adding the timestamp
-		assertThat(record.getValue("timestamp"), notNullValue());
-		assertTrue(record.getValue("timestamp") instanceof Instant);
+		assertThat(sample.getValue("timestamp"), notNullValue());
+		assertTrue(sample.getValue("timestamp") instanceof Instant);
 	}
 
 	@Test
@@ -378,16 +378,16 @@ public class BaseFpcTest {
 				boolAtt
 		});
 		LatchingTaskHandler h = new LatchingTaskHandler(1);
-		Record record;
+		Sample sample;
 
 		Task task = fpc.get(atts, h);
 		assertThat(task, notNullValue());
-		record = h.getLastSample();
-		assertThat(record, notNullValue());
-		assertTrue(record.fields().contains(intAtt));
-		assertThat(record.getValue("integer"), notNullValue());
-		assertTrue(record.fields().contains(boolAtt));
-		assertThat(record.getValue("boolean"), nullValue());
+		sample = h.getLastSample();
+		assertThat(sample, notNullValue());
+		assertTrue(sample.fields().contains(intAtt));
+		assertThat(sample.getValue("integer"), notNullValue());
+		assertTrue(sample.fields().contains(boolAtt));
+		assertThat(sample.getValue("boolean"), nullValue());
 
 		h = new LatchingTaskHandler(1);
 		task = fpc.get(atts, true, h);

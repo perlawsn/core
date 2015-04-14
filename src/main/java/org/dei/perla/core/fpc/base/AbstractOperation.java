@@ -3,8 +3,8 @@ package org.dei.perla.core.fpc.base;
 import org.apache.log4j.Logger;
 import org.dei.perla.core.fpc.FpcException;
 import org.dei.perla.core.fpc.TaskHandler;
-import org.dei.perla.core.record.Attribute;
-import org.dei.perla.core.record.SamplePipeline;
+import org.dei.perla.core.sample.Attribute;
+import org.dei.perla.core.sample.SamplePipeline;
 import org.dei.perla.core.utils.Conditions;
 
 import java.util.Collections;
@@ -48,7 +48,7 @@ public abstract class AbstractOperation<T extends AbstractTask> implements
 
 	// Unsynchronized acces to the taskList when reading. Reads on the
 	// taskList will greatly outnumber the writes, since this list is traversed
-	// every time a record is produced by the remote device.
+	// every time a sample is produced by the remote device.
 	private volatile List<T> tasks = new CopyOnWriteArrayList<>();
 
 	/**

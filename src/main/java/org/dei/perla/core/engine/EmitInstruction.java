@@ -1,8 +1,8 @@
 package org.dei.perla.core.engine;
 
 /**
- * Adds the current record in the record list that will be returned upon
- * successful <code>Script</code> completion. For more information about record
+ * Adds the current sample in the sample list that will be returned upon
+ * successful <code>Script</code> completion. For more information about sample
  * management refer to the <code>PutInstruction</code>.
  *
  * @author Guido Rota (2014)

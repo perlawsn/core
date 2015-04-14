@@ -1,10 +1,10 @@
-package org.dei.perla.core.record;
+package org.dei.perla.core.sample;
 
 import org.dei.perla.core.descriptor.DataType;
-import org.dei.perla.core.record.SampleModifier.Reorder;
-import org.dei.perla.core.record.SampleModifier.StaticAppender;
-import org.dei.perla.core.record.SampleModifier.TimestampAppender;
-import org.dei.perla.core.record.SamplePipeline.PipelineBuilder;
+import org.dei.perla.core.sample.SampleModifier.Reorder;
+import org.dei.perla.core.sample.SampleModifier.StaticAppender;
+import org.dei.perla.core.sample.SampleModifier.TimestampAppender;
+import org.dei.perla.core.sample.SamplePipeline.PipelineBuilder;
 import org.junit.Test;
 
 import java.time.Instant;
@@ -36,7 +36,7 @@ public class PipelineTest {
 		assertThat(p.attributes().size(), equalTo(atts.size()));
 
 		Object[] in = new Object[]{v1, v2};
-		Record out = p.run(in);
+		Sample out = p.run(in);
 		assertTrue(atts.containsAll(out.fields()));
 		assertThat(out.fields().size(), equalTo(atts.size()));
 		assertThat(out.getValue("a1"), equalTo(v1));
@@ -174,7 +174,7 @@ public class PipelineTest {
 		assertFalse(p.attributes().contains(a2));
 
 		Object[] source = new Object[]{"source1", "source2"};
-		Record output = p.run(source);
+		Sample output = p.run(source);
 		assertThat(output, notNullValue());
 		assertThat(output.getValue("source1"), equalTo("source1"));
 		assertThat(output.getValue("source2"), equalTo("source2"));
@@ -199,14 +199,14 @@ public class PipelineTest {
 		Object[] sample = new Object[] {"source1", 2};
 
 		PipelineBuilder b = SamplePipeline.newBuilder(atts);
-		b.reorder(Arrays.asList(new Attribute[] { s2 }));
+		b.reorder(Arrays.asList(new Attribute[]{s2}));
 
 		SamplePipeline p = b.create();
 		assertThat(p, notNullValue());
 		assertTrue(p.attributes().contains(s2));
 		assertThat(p.attributes().size(), equalTo(2));
 
-		Record r = p.run(sample);
+		Sample r = p.run(sample);
 		assertThat(r.values().length, equalTo(2));
 		assertThat(r.fields().size(), equalTo(2));
 	}

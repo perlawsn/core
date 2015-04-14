@@ -3,7 +3,7 @@ package org.dei.perla.core.registry;
 import org.dei.perla.core.fpc.Fpc;
 import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.TaskHandler;
-import org.dei.perla.core.record.Attribute;
+import org.dei.perla.core.sample.Attribute;
 
 import java.util.ArrayList;
 import java.util.Collection;

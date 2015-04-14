@@ -1,4 +1,4 @@
-package org.dei.perla.core.record;
+package org.dei.perla.core.sample;
 
 import org.dei.perla.core.descriptor.DataType;
 import org.junit.Test;
@@ -12,17 +12,17 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.*;
 
-public class RecordTest {
+public class SampleTest {
 
 	@Test
-	public void recordCreationTest() {
-		Record empty = Record.EMPTY;
+	public void sampleCreationTest() {
+		Sample empty = Sample.EMPTY;
 		assertThat(empty, notNullValue());
 		assertTrue(empty.isEmpty());
 		assertTrue(empty.fields().isEmpty());
         assertThat(empty.values().length, equalTo(0));
 
-		Record fromEmpty = Record.from(Collections.emptyMap());
+		Sample fromEmpty = Sample.from(Collections.emptyMap());
 		assertThat(fromEmpty, notNullValue());
 		assertTrue(fromEmpty.isEmpty());
 		assertTrue(fromEmpty.fields().isEmpty());
@@ -31,7 +31,7 @@ public class RecordTest {
 		Map<Attribute, Object> fieldMap = new HashMap<>();
 		fieldMap.put(Attribute.create("field1", DataType.STRING), "value1");
         fieldMap.put(Attribute.create("field2", DataType.STRING), "value2");
-		Record fromMap = Record.from(fieldMap);
+		Sample fromMap = Sample.from(fieldMap);
 		assertThat(fromMap, notNullValue());
 		assertFalse(fromMap.isEmpty());
 		assertFalse(fromMap.fields().isEmpty());
@@ -55,7 +55,7 @@ public class RecordTest {
 		map.put(Attribute.create("id", DataType.ID), 9);
 		map.put(Attribute.create("timestamp", DataType.TIMESTAMP),
                 Instant.now());
-		Record r = Record.from(map);
+		Sample r = Sample.from(map);
 
 		for (Attribute a : r.fields()) {
             Object f = r.getValue(a.getId());

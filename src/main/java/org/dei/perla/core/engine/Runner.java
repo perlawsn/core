@@ -146,7 +146,7 @@ public class Runner {
 	}
 
 	/**
-	 * Cancels the <code>Script</code>. No records are emitted upon
+	 * Cancels the <code>Script</code>. No samples are emitted upon
 	 * cancellation.
 	 */
 	public void cancel() {

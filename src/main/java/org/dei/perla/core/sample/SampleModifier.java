@@ -1,13 +1,12 @@
-package org.dei.perla.core.record;
+package org.dei.perla.core.sample;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * A class implementing a single processing operation to be performed on a
- * {@code Record}. {@code RecordModifier} are usually employed to add new fields
- * to an existing {@link Record}.
+ * {@code Sample}. {@code SampleModifier} are usually employed to add new fields
+ * to an existing {@link Sample}.
  *
  * @author Guido Rota (2014)
  *
@@ -23,7 +22,7 @@ public interface SampleModifier {
 	public void process(Object[] sample);
 
 	/**
-	 * {@code RecordModifier} for adding a Timestamp field
+	 * {@code SampleModifier} for adding a Timestamp field
 	 *
 	 * @author Guido Rota (2014)
 	 *
@@ -47,7 +46,7 @@ public interface SampleModifier {
 	}
 
 	/**
-	 * {@code RecordModifier} for adding fields with static values
+	 * {@code SampleModifier} for adding fields with static values
 	 *
 	 * @author Guido Rota (2014)
 	 *

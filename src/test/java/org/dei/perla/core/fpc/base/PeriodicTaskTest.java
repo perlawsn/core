@@ -2,9 +2,9 @@ package org.dei.perla.core.fpc.base;
 
 import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.TaskHandler;
-import org.dei.perla.core.record.Record;
-import org.dei.perla.core.record.SamplePipeline;
-import org.dei.perla.core.record.SamplePipeline.PipelineBuilder;
+import org.dei.perla.core.sample.Sample;
+import org.dei.perla.core.sample.SamplePipeline;
+import org.dei.perla.core.sample.SamplePipeline.PipelineBuilder;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -139,7 +139,7 @@ public class PeriodicTaskTest {
 		}
 
 		@Override
-		public void newRecord(Task task, Record result) {
+		public void data(Task task, Sample result) {
 			count += 1;
 		}
 

@@ -7,10 +7,10 @@ import org.dei.perla.core.engine.StopInstruction;
 import org.dei.perla.core.fpc.Fpc;
 import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.TaskHandler;
-import org.dei.perla.core.record.Attribute;
-import org.dei.perla.core.record.Record;
-import org.dei.perla.core.record.SamplePipeline;
-import org.dei.perla.core.record.SamplePipeline.PipelineBuilder;
+import org.dei.perla.core.sample.Attribute;
+import org.dei.perla.core.sample.Sample;
+import org.dei.perla.core.sample.SamplePipeline;
+import org.dei.perla.core.sample.SamplePipeline.PipelineBuilder;
 
 import java.time.Instant;
 import java.util.*;
@@ -25,17 +25,17 @@ public class BaseFpc implements Fpc {
 	private final ChannelManager cmgr;
 	private final Scheduler sched;
 
-	// This Operation creates an empty record. It is used for scheduling the
-	// periodic creation of empty records, to which additional static fields
+	// This Operation creates an empty sample. It is used for scheduling the
+	// periodic creation of empty samples, to which additional static fields
 	// may be appended, to satisfy a periodic request of static attributes
-	private static final Operation emptyRecordOperation;
+	private static final Operation emptySampleOperation;
 
 	static {
         Instruction start = new EmitInstruction();
         start.setNext(new StopInstruction());
         Script empty = new Script("_empty", start, Collections.emptyList(),
                 Collections.emptyList());
-		emptyRecordOperation = new SimulatedPeriodicOperation("_empty", empty);
+		emptySampleOperation = new SimulatedPeriodicOperation("_empty", empty);
 	}
 
 	protected BaseFpc(int id, String type, Set<Attribute> atts,
@@ -89,7 +89,7 @@ public class BaseFpc implements Fpc {
 
 		if (req.staticOnly()) {
             Task t = new CompletedTask(req.statAtts);
-            handler.newRecord(t, req.staticRecord());
+            handler.data(t, req.staticSample());
             handler.complete(t);
             return t;
 
@@ -125,7 +125,7 @@ public class BaseFpc implements Fpc {
 			Map<String, Object> paramMap = new HashMap<>();
 			paramMap.put("period", ms);
 			pb.reorder(atts);
-			return emptyRecordOperation.schedule(paramMap, handler,
+			return emptySampleOperation.schedule(paramMap, handler,
 					pb.create());
 		}
 
@@ -213,9 +213,9 @@ public class BaseFpc implements Fpc {
         }
 
         /**
-         * staticRecord returns a new Record composed only of static values.
+         * staticSample returns a new sample composed only of static values.
          */
-        private Record staticRecord() {
+        private Sample staticSample() {
             Object[] values = new Object[atts.size() + 1];
             int i = 0;
             for (Attribute a : statAtts) {
@@ -224,7 +224,7 @@ public class BaseFpc implements Fpc {
             }
             statAtts.add(Attribute.TIMESTAMP);
             values[i] = Instant.now();
-            return new Record(Collections.unmodifiableList(statAtts), values);
+            return new Sample(Collections.unmodifiableList(statAtts), values);
         }
 
         private LinkedHashMap<Attribute, Object> staticValues() {

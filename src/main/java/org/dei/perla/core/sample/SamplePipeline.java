@@ -1,19 +1,19 @@
-package org.dei.perla.core.record;
+package org.dei.perla.core.sample;
 
-import org.dei.perla.core.record.SampleModifier.Reorder;
-import org.dei.perla.core.record.SampleModifier.StaticAppender;
-import org.dei.perla.core.record.SampleModifier.TimestampAppender;
+import org.dei.perla.core.sample.SampleModifier.Reorder;
+import org.dei.perla.core.sample.SampleModifier.StaticAppender;
+import org.dei.perla.core.sample.SampleModifier.TimestampAppender;
 
 import java.util.*;
 import java.util.Map.Entry;
 
 /**
  * An immutable pipeline of {@link SampleModifier}s for adding new fields to an
- * existing {@link Record}.
+ * existing {@link Sample}.
  *
- * New {@code RecordPipeline} objects are created using a
+ * New {@code SamplePipeline} objects are created using a
  * {@code PipelineBuilder}, which can be obtained through the
- * {@code RecordPipeline.newBuilder()} method.
+ * {@code SamplePipeline.newBuilder()} method.
  *
  * @author Guido Rota (2014)
  *
@@ -24,7 +24,7 @@ public class SamplePipeline {
     public final List<Attribute> atts;
 
     /**
-     * Private {@code RecordPipeline} constructor, new isntances must be
+     * Private {@code SamplePipeline} constructor, new isntances must be
      * buiilt using the {@link PipelineBuilder} class.
      *
      * @param mods {@link SampleModifier} used by the pipeline
@@ -51,7 +51,7 @@ public class SamplePipeline {
 
     /**
      * Returns a new {@code PipelineBuilder} instance for creating new
-     * {@code RecordPipeline} objects.
+     * {@code SamplePipeline} objects.
      *
      * @return New {@code PipelineBuilder} object
      */
@@ -61,9 +61,9 @@ public class SamplePipeline {
 
 	/**
 	 * Returns a collection of all {@link Attribute}s that this
-	 * {@code RecordPipeline} adds to the processed {@link Record}
+	 * {@code SamplePipeline} adds to the processed {@link Sample}
 	 *
-	 * @return {@link Attribute}s added to the processed {@link Record}
+	 * @return {@link Attribute}s added to the processed {@link Sample}
 	 */
 	public Collection<Attribute> attributes() {
         return atts;
@@ -73,17 +73,17 @@ public class SamplePipeline {
 	 * Runs a sample through the {@code SamplePipeline}.
 	 *
 	 * @param sample
-	 *            {@link Record} to be processed
-	 * @return New {@link Record} produced by the pipeline
+	 *            {@link Sample} to be processed
+	 * @return New {@link Sample} produced by the pipeline
 	 */
-	public Record run(Object[] sample) {
+	public Sample run(Object[] sample) {
         int size = atts.size() > sample.length ? atts.size() : sample.length;
         Object[] r = Arrays.copyOf(sample, size);
         for (SampleModifier m : mods) {
             m.process(r);
         }
 
-        return new Record(atts, r);
+        return new Sample(atts, r);
     }
 
 	/**
@@ -139,7 +139,7 @@ public class SamplePipeline {
         }
 
 		/**
-		 * Creates a new immutable {@code RecordPipeline} containing all
+		 * Creates a new immutable {@code SamplePipeline} containing all
 		 * {@link SampleModifier}s added to the builder
 		 *
          * @param attOrder {@link Attribute}s in the order required by the fpc user

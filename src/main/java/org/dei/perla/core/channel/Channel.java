@@ -21,7 +21,7 @@ package org.dei.perla.core.channel;
  * The <code>Channel</code> is also designed to handle asynchronous data
  * transfer operations initiated by the remote device, a scenario that may
  * present itself whenever the node independently streams a series of data
- * records to the PerLa system. <code>Payload</code> data corresponding to such
+ * samples to the PerLa system. <code>Payload</code> data corresponding to such
  * communications is made available to a single <code>IOHandler</code>
  * registered with the <code>setAsyncIOHandler</code> method.
  * </p>

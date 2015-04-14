@@ -4,8 +4,8 @@ import org.dei.perla.core.descriptor.AttributeDescriptor;
 import org.dei.perla.core.descriptor.DataType;
 
 /**
- * Populates the current record with the specified variable attribute. See the
- * <code>ExecutionContext</code> javadoc for more information about record
+ * Populates the current sample with the specified variable attribute. See the
+ * <code>ExecutionContext</code> javadoc for more information about sample
  * management.
  *
  * @author Guido Rota (2014)

@@ -17,9 +17,9 @@ import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.base.AsyncOperation.AsyncMessageHandler;
 import org.dei.perla.core.message.Mapper;
 import org.dei.perla.core.message.MapperFactory;
-import org.dei.perla.core.record.Record;
-import org.dei.perla.core.record.SamplePipeline;
-import org.dei.perla.core.record.SamplePipeline.PipelineBuilder;
+import org.dei.perla.core.sample.Sample;
+import org.dei.perla.core.sample.SamplePipeline;
+import org.dei.perla.core.sample.SamplePipeline.PipelineBuilder;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -214,26 +214,26 @@ public class ConcreteOperationTest {
 		assertTrue(getOp.getAttributes().containsAll(task.getAttributes()));
 		assertTrue(task.getAttributes().containsAll(getOp.getAttributes()));
 
-		Record record = syncHandler.getLastSample();
+		Sample sample = syncHandler.getLastSample();
 		assertFalse(task.isRunning());
-		assertThat(record, notNullValue());
+		assertThat(sample, notNullValue());
 
-		Object value = record.getValue("integer");
+		Object value = sample.getValue("integer");
 		assertThat(value, notNullValue());
 		assertTrue(value instanceof Integer);
 		assertThat((Integer) value, equalTo(5));
 
-		value = record.getValue("float");
+		value = sample.getValue("float");
 		assertThat(value, notNullValue());
 		assertTrue(value instanceof Float);
 		assertThat((Float) value, equalTo(5.2f));
 
-		value = record.getValue("boolean");
+		value = sample.getValue("boolean");
 		assertThat(value, notNullValue());
 		assertTrue(value instanceof Boolean);
 		assertThat((Boolean) value, equalTo(false));
 
-		value = record.getValue("string");
+		value = sample.getValue("string");
 		assertThat(value, notNullValue());
 		assertTrue(value instanceof String);
 		assertThat((String) value, equalTo("test"));
@@ -468,8 +468,8 @@ public class ConcreteOperationTest {
 		Task task = asyncOp.getAsyncOneoffOperation().schedule(
 				Collections.emptyMap(), handler);
 		assertThat(task, notNullValue());
-		Record record = handler.getLastSample();
-		assertThat(record, notNullValue());
+		Sample sample = handler.getLastSample();
+		assertThat(sample, notNullValue());
 	}
 
 	@Test
@@ -483,10 +483,10 @@ public class ConcreteOperationTest {
 
 		assertThat(task, notNullValue());
 		assertTrue(task instanceof PeriodicTask);
-		List<Record> res = handler.getSamples();
+		List<Sample> res = handler.getSamples();
 		Object current;
 		Object previous = -1;
-		for (Record s : res) {
+		for (Sample s : res) {
 			assertThat(s, notNullValue());
 			current = s.getValue("event");
 			assertThat(previous, not(equalTo(current)));
@@ -501,10 +501,10 @@ public class ConcreteOperationTest {
 		Task task = asyncOp.schedule(Collections.emptyMap(), handler);
 		assertThat(task, notNullValue());
 
-		List<Record> res = handler.getSamples();
+		List<Sample> res = handler.getSamples();
 		int current;
 		int previous = (int) -1;
-		for (Record s : res) {
+		for (Sample s : res) {
 			assertThat(s, notNullValue());
 			current = (int) s.getValue("event");
 			assertThat(previous, not(equalTo(current)));
@@ -526,13 +526,13 @@ public class ConcreteOperationTest {
 		assertThat(task2, notNullValue());
 		assertThat(task3, notNullValue());
 
-		Record result1 = handler1.getLastSample();
+		Sample result1 = handler1.getLastSample();
 		assertThat(result1, notNullValue());
 		assertThat(result1.getValue("event"), notNullValue());
-		Record result2 = handler2.getLastSample();
+		Sample result2 = handler2.getLastSample();
 		assertThat(result2, notNullValue());
 		assertThat(result2.getValue("event"), notNullValue());
-		Record result3 = handler3.getLastSample();
+		Sample result3 = handler3.getLastSample();
 		assertThat(result3, notNullValue());
 		assertThat(result3.getValue("event"), notNullValue());
 	}
