@@ -1,8 +1,8 @@
 package org.dei.perla.core.registry;
 
-import org.dei.perla.core.sample.Attribute;
-import org.dei.perla.core.fpc.Fpc;
 import org.dei.perla.core.descriptor.DataType;
+import org.dei.perla.core.fpc.Fpc;
+import org.dei.perla.core.sample.Attribute;
 import org.junit.Test;
 
 import java.util.*;
@@ -24,12 +24,23 @@ public class RegistryTest {
 	private static final Attribute pressAtt =
             Attribute.create("pressure", DataType.FLOAT);
 
+	private static final DataTemplate intTemp =
+			DataTemplate.create("integer", TypeClass.INTEGER);
+	private static final DataTemplate floatTemp =
+			DataTemplate.create("float", TypeClass.FLOAT);
+	private static final DataTemplate stringTemp =
+			DataTemplate.create("string", TypeClass.STRING);
+	private static final DataTemplate tempTemp =
+			DataTemplate.create("temparature", TypeClass.INTEGER);
+	private static final DataTemplate pressTemp =
+			DataTemplate.create("pressure", TypeClass.FLOAT);
+
 	@Test
 	public void singleAddition() {
 		Registry registry = new TreeRegistry();
 		Collection<Fpc> result;
-		Set<Attribute> withSet = new HashSet<>();
-		Set<Attribute> withoutSet = new HashSet<>();
+		Set<DataTemplate> withSet = new HashSet<>();
+		Set<DataTemplate> withoutSet = new HashSet<>();
 
 		Set<Attribute> attributeSet = new TreeSet<>();
 		attributeSet.add(intAtt);
@@ -42,48 +53,48 @@ public class RegistryTest {
 
 		// All fpcs with 'integer'
 		withSet.clear();
-		withSet.add(intAtt);
+		withSet.add(intTemp);
 		result = registry.getByAttribute(withSet, Collections.emptyList());
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(1));
 
 		// All fpcs with 'float'
 		withSet.clear();
-		withSet.add(pressAtt);
+		withSet.add(pressTemp);
 		result = registry.getByAttribute(withSet, Collections.emptyList());
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(0));
 
 		// All fpcs with 'integer' and 'temperature'
 		withSet.clear();
-		withSet.add(intAtt);
-		withSet.add(tempAtt);
+		withSet.add(intTemp);
+		withSet.add(tempTemp);
 		result = registry.getByAttribute(withSet, Collections.emptyList());
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(1));
 
 		// All fpcs with 'integer' and 'pressure'
 		withSet.clear();
-		withSet.add(intAtt);
-		withSet.add(pressAtt);
+		withSet.add(intTemp);
+		withSet.add(pressTemp);
 		result = registry.getByAttribute(withSet, Collections.emptyList());
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(0));
 
 		// All fpcs with 'integer' but without 'temperature'
 		withSet.clear();
-		withSet.add(intAtt);
+		withSet.add(intTemp);
 		withoutSet.clear();
-		withoutSet.add(tempAtt);
+		withoutSet.add(tempTemp);
 		result = registry.getByAttribute(withSet, withoutSet);
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(0));
 
 		// All fpcs with 'integer' but without 'pressure'
 		withSet.clear();
-		withSet.add(intAtt);
+		withSet.add(intTemp);
 		withoutSet.clear();
-		withoutSet.add(pressAtt);
+		withoutSet.add(pressTemp);
 		result = registry.getByAttribute(withSet, withoutSet);
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(1));
@@ -93,8 +104,8 @@ public class RegistryTest {
 	public void multipleAdditions() {
 		Registry registry = new TreeRegistry();
 		Collection<Fpc> result;
-		Set<Attribute> withSet = new HashSet<>();
-		Set<Attribute> withoutSet = new HashSet<>();
+		Set<DataTemplate> withSet = new HashSet<>();
+		Set<DataTemplate> withoutSet = new HashSet<>();
 
 		Set<Attribute> attributeSet = new TreeSet<>();
 		attributeSet.add(intAtt);
@@ -111,13 +122,13 @@ public class RegistryTest {
 		Fpc fpc2 = new FakeFpc(attributeSet);
 		registry.add(fpc2);
 
-		withSet.add(intAtt);
+		withSet.add(intTemp);
 		result = registry.getByAttribute(withSet, Collections.emptyList());
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(2));
 
 		withSet.clear();
-		withSet.add(stringAtt);
+		withSet.add(stringTemp);
 		result = registry.getByAttribute(withSet, Collections.emptyList());
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(1));
@@ -125,8 +136,8 @@ public class RegistryTest {
 
 		withSet.clear();
 		withoutSet.clear();
-		withSet.add(intAtt);
-		withoutSet.add(pressAtt);
+		withSet.add(intTemp);
+		withoutSet.add(pressTemp);
 		result = registry.getByAttribute(withSet, withoutSet);
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(1));
@@ -137,7 +148,7 @@ public class RegistryTest {
 	public void testRemove() {
 		Registry registry = new TreeRegistry();
 		Collection<Fpc> result;
-		Set<Attribute> withSet = new HashSet<>();
+		Set<DataTemplate> withSet = new HashSet<>();
 
 		Set<Attribute> attributeSet = new TreeSet<>();
 		attributeSet.add(intAtt);
@@ -154,14 +165,14 @@ public class RegistryTest {
 		Fpc fpc2 = new FakeFpc(attributeSet);
 		registry.add(fpc2);
 
-		withSet.add(intAtt);
+		withSet.add(intTemp);
 		result = registry.getByAttribute(withSet, Collections.emptyList());
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(2));
 
 		registry.remove(fpc1);
 
-		withSet.add(intAtt);
+		withSet.add(intTemp);
 		result = registry.getByAttribute(withSet, Collections.emptyList());
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(1));

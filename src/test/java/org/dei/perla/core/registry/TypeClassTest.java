@@ -3,8 +3,8 @@ package org.dei.perla.core.registry;
 import org.dei.perla.core.descriptor.DataType;
 import org.junit.Test;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * @author Guido Rota 15/04/15.
@@ -12,7 +12,7 @@ import static org.junit.Assert.assertTrue;
 public class TypeClassTest {
 
     @Test
-    public void testID() {
+    public void testMatchID() {
         assertTrue(TypeClass.ID.match(DataType.ID));
         assertFalse(TypeClass.ID.match(DataType.TIMESTAMP));
         assertFalse(TypeClass.ID.match(DataType.BOOLEAN));
@@ -22,7 +22,7 @@ public class TypeClassTest {
     }
 
     @Test
-    public void testTimestamp() {
+    public void testMatchTimestamp() {
         assertFalse(TypeClass.TIMESTAMP.match(DataType.ID));
         assertTrue(TypeClass.TIMESTAMP.match(DataType.TIMESTAMP));
         assertFalse(TypeClass.TIMESTAMP.match(DataType.BOOLEAN));
@@ -32,7 +32,7 @@ public class TypeClassTest {
     }
 
     @Test
-    public void testBoolean() {
+    public void testMatchBoolean() {
         assertFalse(TypeClass.BOOLEAN.match(DataType.ID));
         assertFalse(TypeClass.BOOLEAN.match(DataType.TIMESTAMP));
         assertTrue(TypeClass.BOOLEAN.match(DataType.BOOLEAN));
@@ -42,7 +42,7 @@ public class TypeClassTest {
     }
 
     @Test
-    public void testString() {
+    public void testMatchString() {
         assertFalse(TypeClass.STRING.match(DataType.ID));
         assertFalse(TypeClass.STRING.match(DataType.TIMESTAMP));
         assertFalse(TypeClass.STRING.match(DataType.BOOLEAN));
@@ -52,7 +52,7 @@ public class TypeClassTest {
     }
 
     @Test
-    public void testInteger() {
+    public void testMatchInteger() {
         assertFalse(TypeClass.INTEGER.match(DataType.ID));
         assertFalse(TypeClass.INTEGER.match(DataType.TIMESTAMP));
         assertFalse(TypeClass.INTEGER.match(DataType.BOOLEAN));
@@ -62,7 +62,7 @@ public class TypeClassTest {
     }
 
     @Test
-    public void testFloat() {
+    public void testMatchFloat() {
         assertFalse(TypeClass.FLOAT.match(DataType.ID));
         assertFalse(TypeClass.FLOAT.match(DataType.TIMESTAMP));
         assertFalse(TypeClass.FLOAT.match(DataType.BOOLEAN));
@@ -72,13 +72,125 @@ public class TypeClassTest {
     }
 
     @Test
-    public void testWildcard() {
+    public void testMatchWildcard() {
         assertTrue(TypeClass.WILDCARD.match(DataType.ID));
         assertTrue(TypeClass.WILDCARD.match(DataType.TIMESTAMP));
         assertTrue(TypeClass.WILDCARD.match(DataType.BOOLEAN));
         assertTrue(TypeClass.WILDCARD.match(DataType.STRING));
         assertTrue(TypeClass.WILDCARD.match(DataType.INTEGER));
         assertTrue(TypeClass.WILDCARD.match(DataType.FLOAT));
+    }
+
+    @Test
+    public void testCompareMatchTimestamp() {
+        int res = TypeClass.TIMESTAMP.compareMatch(DataType.FLOAT);
+        assertThat(res, greaterThan(0));
+        res = TypeClass.TIMESTAMP.compareMatch(DataType.INTEGER);
+        assertThat(res, greaterThan(0));
+        res = TypeClass.TIMESTAMP.compareMatch(DataType.BOOLEAN);
+        assertThat(res, greaterThan(0));
+        res = TypeClass.TIMESTAMP.compareMatch(DataType.STRING);
+        assertThat(res, greaterThan(0));
+        res = TypeClass.TIMESTAMP.compareMatch(DataType.ID);
+        assertThat(res, greaterThan(0));
+        res = TypeClass.TIMESTAMP.compareMatch(DataType.TIMESTAMP);
+        assertThat(res, equalTo(0));
+    }
+
+    @Test
+    public void testCompareMatchID() {
+        int res = TypeClass.ID.compareMatch(DataType.FLOAT);
+        assertThat(res, greaterThan(0));
+        res = TypeClass.ID.compareMatch(DataType.INTEGER);
+        assertThat(res, greaterThan(0));
+        res = TypeClass.ID.compareMatch(DataType.BOOLEAN);
+        assertThat(res, greaterThan(0));
+        res = TypeClass.ID.compareMatch(DataType.STRING);
+        assertThat(res, greaterThan(0));
+        res = TypeClass.ID.compareMatch(DataType.ID);
+        assertThat(res, equalTo(0));
+        res = TypeClass.ID.compareMatch(DataType.TIMESTAMP);
+        assertThat(res, lessThan(0));
+    }
+
+    @Test
+    public void testCompareMatchString() {
+        int res = TypeClass.STRING.compareMatch(DataType.FLOAT);
+        assertThat(res, greaterThan(0));
+        res = TypeClass.STRING.compareMatch(DataType.INTEGER);
+        assertThat(res, greaterThan(0));
+        res = TypeClass.STRING.compareMatch(DataType.BOOLEAN);
+        assertThat(res, greaterThan(0));
+        res = TypeClass.STRING.compareMatch(DataType.STRING);
+        assertThat(res, equalTo(0));
+        res = TypeClass.STRING.compareMatch(DataType.ID);
+        assertThat(res, lessThan(0));
+        res = TypeClass.STRING.compareMatch(DataType.TIMESTAMP);
+        assertThat(res, lessThan(0));
+    }
+
+    @Test
+    public void testCompareMatchBoolean() {
+        int res = TypeClass.BOOLEAN.compareMatch(DataType.FLOAT);
+        assertThat(res, greaterThan(0));
+        res = TypeClass.BOOLEAN.compareMatch(DataType.INTEGER);
+        assertThat(res, greaterThan(0));
+        res = TypeClass.BOOLEAN.compareMatch(DataType.BOOLEAN);
+        assertThat(res, equalTo(0));
+        res = TypeClass.BOOLEAN.compareMatch(DataType.STRING);
+        assertThat(res, lessThan(0));
+        res = TypeClass.BOOLEAN.compareMatch(DataType.ID);
+        assertThat(res, lessThan(0));
+        res = TypeClass.BOOLEAN.compareMatch(DataType.TIMESTAMP);
+        assertThat(res, lessThan(0));
+    }
+
+    @Test
+    public void testCompareMatchInteger() {
+        int res = TypeClass.INTEGER.compareMatch(DataType.FLOAT);
+        assertThat(res, greaterThan(0));
+        res = TypeClass.INTEGER.compareMatch(DataType.INTEGER);
+        assertThat(res, equalTo(0));
+        res = TypeClass.INTEGER.compareMatch(DataType.BOOLEAN);
+        assertThat(res, lessThan(0));
+        res = TypeClass.INTEGER.compareMatch(DataType.STRING);
+        assertThat(res, lessThan(0));
+        res = TypeClass.INTEGER.compareMatch(DataType.ID);
+        assertThat(res, lessThan(0));
+        res = TypeClass.INTEGER.compareMatch(DataType.TIMESTAMP);
+        assertThat(res, lessThan(0));
+    }
+
+    @Test
+    public void testCompareMatchFloat() {
+        int res = TypeClass.FLOAT.compareMatch(DataType.FLOAT);
+        assertThat(res, equalTo(0));
+        res = TypeClass.FLOAT.compareMatch(DataType.INTEGER);
+        assertThat(res, lessThan(0));
+        res = TypeClass.FLOAT.compareMatch(DataType.BOOLEAN);
+        assertThat(res, lessThan(0));
+        res = TypeClass.FLOAT.compareMatch(DataType.STRING);
+        assertThat(res, lessThan(0));
+        res = TypeClass.FLOAT.compareMatch(DataType.ID);
+        assertThat(res, lessThan(0));
+        res = TypeClass.FLOAT.compareMatch(DataType.TIMESTAMP);
+        assertThat(res, lessThan(0));
+    }
+
+    @Test
+    public void testCompareMatchWildcard() {
+        int res = TypeClass.WILDCARD.compareMatch(DataType.ID);
+        assertThat(res, equalTo(0));
+        res = TypeClass.WILDCARD.compareMatch(DataType.TIMESTAMP);
+        assertThat(res, equalTo(0));
+        res = TypeClass.WILDCARD.compareMatch(DataType.BOOLEAN);
+        assertThat(res, equalTo(0));
+        res = TypeClass.WILDCARD.compareMatch(DataType.FLOAT);
+        assertThat(res, equalTo(0));
+        res = TypeClass.WILDCARD.compareMatch(DataType.INTEGER);
+        assertThat(res, equalTo(0));
+        res = TypeClass.WILDCARD.compareMatch(DataType.STRING);
+        assertThat(res, equalTo(0));
     }
 
 }

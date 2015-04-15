@@ -1,9 +1,8 @@
 package org.dei.perla.core.registry;
 
-import java.util.Collection;
-
-import org.dei.perla.core.sample.Attribute;
 import org.dei.perla.core.fpc.Fpc;
+
+import java.util.Collection;
 
 public interface Registry {
 
@@ -11,7 +10,8 @@ public interface Registry {
 
 	public Collection<Fpc> getAll();
 
-	public Collection<Fpc> getByAttribute(Collection<Attribute> with, Collection<Attribute> without);
+	public Collection<Fpc> getByAttribute(Collection<DataTemplate> with,
+			Collection<DataTemplate> without);
 
 	public void add(Fpc fpc);
 

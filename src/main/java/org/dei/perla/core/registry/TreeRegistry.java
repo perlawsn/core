@@ -1,20 +1,11 @@
 package org.dei.perla.core.registry;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import org.dei.perla.core.fpc.Fpc;
+import org.dei.perla.core.sample.Attribute;
+
+import java.util.*;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-import org.dei.perla.core.sample.Attribute;
-import org.dei.perla.core.fpc.Fpc;
 
 public class TreeRegistry implements Registry {
 
@@ -43,11 +34,11 @@ public class TreeRegistry implements Registry {
 	}
 
 	@Override
-	public Collection<Fpc> getByAttribute(Collection<Attribute> with,
-			Collection<Attribute> without) {
-		List<Attribute> withList = new ArrayList<>(with);
+	public Collection<Fpc> getByAttribute(Collection<DataTemplate> with,
+			Collection<DataTemplate> without) {
+		List<DataTemplate> withList = new ArrayList<>(with);
 		Collections.sort(withList);
-		List<Attribute> withoutList = new ArrayList<>(without);
+		List<DataTemplate> withoutList = new ArrayList<>(without);
 		Collections.sort(withoutList);
 
 		Collection<Fpc> result = new ArrayList<>();
@@ -61,8 +52,9 @@ public class TreeRegistry implements Registry {
 		return result;
 	}
 
-	private void find(Node node, List<Attribute> withList, int withIdx,
-			List<Attribute> withoutList, int withoutIdx, Collection<Fpc> result) {
+	private void find(Node node, List<DataTemplate> withList, int withIdx,
+			List<DataTemplate> withoutList, int withoutIdx,
+			Collection<Fpc> result) {
 		if (withIdx == withList.size() && withoutIdx == withoutList.size()) {
 			return;
 		}
@@ -70,16 +62,16 @@ public class TreeRegistry implements Registry {
 		for (Node child : node.children) {
 
 			if (withIdx < withList.size()) {
-				Attribute withAtt = withList.get(withIdx);
-				int with = child.id.compareTo(withAtt);
-				if (with == 0) {
+				DataTemplate with = withList.get(withIdx);
+				int res = with.compareMatch(child.id);
+				if (res == 0) {
 					withIdx += 1;
 					if (withIdx == withList.size()) {
 						result.addAll(child.fpcs);
 					}
 				}
 
-				if (with <= 0) {
+				if (res >= 0) {
 					find(child, withList, withIdx, withoutList, withoutIdx, result);
 				} else {
 					return;
@@ -87,9 +79,9 @@ public class TreeRegistry implements Registry {
 			}
 
 			if (withoutIdx < withoutList.size()) {
-				Attribute withoutAtt = withoutList.get(withoutIdx);
-				boolean without = child.id.equals(withoutAtt);
-				if (without) {
+				DataTemplate without = withoutList.get(withoutIdx);
+				boolean res = without.match(child.id);
+				if (res) {
 					withoutIdx += 1;
 					result.removeAll(child.fpcs);
 				}

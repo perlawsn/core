@@ -4,8 +4,8 @@ import org.dei.perla.core.descriptor.DataType;
 import org.dei.perla.core.sample.Attribute;
 import org.junit.Test;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * @author Guido Rota 15/04/15.
@@ -13,7 +13,7 @@ import static org.junit.Assert.assertTrue;
 public class DataTemplateTest {
 
     @Test
-    public void testTypeWildcard() {
+    public void testTypeWildcardMatch() {
         DataTemplate dt = DataTemplate.create("test", TypeClass.WILDCARD);
 
         Attribute a = Attribute.create("test", DataType.ID);
@@ -44,7 +44,7 @@ public class DataTemplateTest {
     }
 
     @Test
-    public void testPlain() {
+    public void testPlainMatch() {
         DataTemplate dt = DataTemplate.create("test", TypeClass.ID);
         Attribute a = Attribute.create("test", DataType.ID);
         assertTrue(dt.match(a));
@@ -92,6 +92,33 @@ public class DataTemplateTest {
         assertFalse(dt.match(a));
         a = Attribute.create("test", DataType.ID);
         assertFalse(dt.match(a));
+    }
+
+    @Test
+    public void testWildcardCompareMatch() {
+        DataTemplate dt = DataTemplate.create("t", TypeClass.WILDCARD);
+
+        Attribute a = Attribute.create("t", DataType.INTEGER);
+        assertThat(dt.compareMatch(a), equalTo(0));
+        a = Attribute.create("a", DataType.FLOAT);
+        assertThat(dt.compareMatch(a), greaterThan(0));
+        a = Attribute.create("z", DataType.TIMESTAMP);
+        assertThat(dt.compareMatch(a), lessThan(0));
+    }
+
+    @Test
+    public void testPlainCompareMatch() {
+        DataTemplate dt = DataTemplate.create("t", TypeClass.BOOLEAN);
+        Attribute a = Attribute.create("t", DataType.BOOLEAN);
+        assertThat(dt.compareMatch(a), equalTo(0));
+        a = Attribute.create("t", DataType.TIMESTAMP);
+        assertThat(dt.compareMatch(a), lessThan(0));
+        a = Attribute.create("t", DataType.FLOAT);
+        assertThat(dt.compareMatch(a), greaterThan(0));
+        a = Attribute.create("a", DataType.BOOLEAN);
+        assertThat(dt.compareMatch(a), greaterThan(0));
+        a = Attribute.create("z", DataType.BOOLEAN);
+        assertThat(dt.compareMatch(a), lessThan(0));
     }
 
 }
