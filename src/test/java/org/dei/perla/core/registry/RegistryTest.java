@@ -31,7 +31,7 @@ public class RegistryTest {
 	private static final DataTemplate stringTemp =
 			DataTemplate.create("string", TypeClass.STRING);
 	private static final DataTemplate tempTemp =
-			DataTemplate.create("temparature", TypeClass.INTEGER);
+			DataTemplate.create("temperature", TypeClass.INTEGER);
 	private static final DataTemplate pressTemp =
 			DataTemplate.create("pressure", TypeClass.FLOAT);
 
