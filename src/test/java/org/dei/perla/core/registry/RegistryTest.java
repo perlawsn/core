@@ -35,6 +35,9 @@ public class RegistryTest {
 	private static final DataTemplate pressTemp =
 			DataTemplate.create("pressure", TypeClass.FLOAT);
 
+	private static final DataTemplate tempWild =
+			DataTemplate.create("temperature", TypeClass.WILDCARD);
+
 	@Test
 	public void singleAddition() {
 		Registry registry = new TreeRegistry();
@@ -98,6 +101,24 @@ public class RegistryTest {
 		result = registry.getByAttribute(withSet, withoutSet);
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(1));
+
+		// All fpc with 'integer' and wildcard 'temperature'
+		withSet.clear();
+		withSet.add(intTemp);
+		withSet.add(tempWild);
+		withoutSet.clear();
+		result = registry.getByAttribute(withSet, withoutSet);
+		assertThat(result, notNullValue());
+		assertThat(result.size(), equalTo(1));
+
+		// All fpcs with 'integer' but without wildcard 'temperature'
+		withSet.clear();
+		withSet.add(intTemp);
+		withoutSet.clear();
+		withoutSet.add(tempWild);
+		result = registry.getByAttribute(withSet, withoutSet);
+		assertThat(result, notNullValue());
+		assertThat(result.size(), equalTo(0));
 	}
 
 	@Test
