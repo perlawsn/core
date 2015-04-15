@@ -13,72 +13,72 @@ public class TypeClassTest {
 
     @Test
     public void testID() {
-        assertTrue(TypeClass.ID.contains(DataType.ID));
-        assertFalse(TypeClass.ID.contains(DataType.TIMESTAMP));
-        assertFalse(TypeClass.ID.contains(DataType.BOOLEAN));
-        assertFalse(TypeClass.ID.contains(DataType.STRING));
-        assertFalse(TypeClass.ID.contains(DataType.INTEGER));
-        assertFalse(TypeClass.ID.contains(DataType.FLOAT));
+        assertTrue(TypeClass.ID.match(DataType.ID));
+        assertFalse(TypeClass.ID.match(DataType.TIMESTAMP));
+        assertFalse(TypeClass.ID.match(DataType.BOOLEAN));
+        assertFalse(TypeClass.ID.match(DataType.STRING));
+        assertFalse(TypeClass.ID.match(DataType.INTEGER));
+        assertFalse(TypeClass.ID.match(DataType.FLOAT));
     }
 
     @Test
     public void testTimestamp() {
-        assertFalse(TypeClass.TIMESTAMP.contains(DataType.ID));
-        assertTrue(TypeClass.TIMESTAMP.contains(DataType.TIMESTAMP));
-        assertFalse(TypeClass.TIMESTAMP.contains(DataType.BOOLEAN));
-        assertFalse(TypeClass.TIMESTAMP.contains(DataType.STRING));
-        assertFalse(TypeClass.TIMESTAMP.contains(DataType.INTEGER));
-        assertFalse(TypeClass.TIMESTAMP.contains(DataType.FLOAT));
+        assertFalse(TypeClass.TIMESTAMP.match(DataType.ID));
+        assertTrue(TypeClass.TIMESTAMP.match(DataType.TIMESTAMP));
+        assertFalse(TypeClass.TIMESTAMP.match(DataType.BOOLEAN));
+        assertFalse(TypeClass.TIMESTAMP.match(DataType.STRING));
+        assertFalse(TypeClass.TIMESTAMP.match(DataType.INTEGER));
+        assertFalse(TypeClass.TIMESTAMP.match(DataType.FLOAT));
     }
 
     @Test
     public void testBoolean() {
-        assertFalse(TypeClass.BOOLEAN.contains(DataType.ID));
-        assertFalse(TypeClass.BOOLEAN.contains(DataType.TIMESTAMP));
-        assertTrue(TypeClass.BOOLEAN.contains(DataType.BOOLEAN));
-        assertFalse(TypeClass.BOOLEAN.contains(DataType.STRING));
-        assertFalse(TypeClass.BOOLEAN.contains(DataType.INTEGER));
-        assertFalse(TypeClass.BOOLEAN.contains(DataType.FLOAT));
+        assertFalse(TypeClass.BOOLEAN.match(DataType.ID));
+        assertFalse(TypeClass.BOOLEAN.match(DataType.TIMESTAMP));
+        assertTrue(TypeClass.BOOLEAN.match(DataType.BOOLEAN));
+        assertFalse(TypeClass.BOOLEAN.match(DataType.STRING));
+        assertFalse(TypeClass.BOOLEAN.match(DataType.INTEGER));
+        assertFalse(TypeClass.BOOLEAN.match(DataType.FLOAT));
     }
 
     @Test
     public void testString() {
-        assertFalse(TypeClass.STRING.contains(DataType.ID));
-        assertFalse(TypeClass.STRING.contains(DataType.TIMESTAMP));
-        assertFalse(TypeClass.STRING.contains(DataType.BOOLEAN));
-        assertTrue(TypeClass.STRING.contains(DataType.STRING));
-        assertFalse(TypeClass.STRING.contains(DataType.INTEGER));
-        assertFalse(TypeClass.STRING.contains(DataType.FLOAT));
+        assertFalse(TypeClass.STRING.match(DataType.ID));
+        assertFalse(TypeClass.STRING.match(DataType.TIMESTAMP));
+        assertFalse(TypeClass.STRING.match(DataType.BOOLEAN));
+        assertTrue(TypeClass.STRING.match(DataType.STRING));
+        assertFalse(TypeClass.STRING.match(DataType.INTEGER));
+        assertFalse(TypeClass.STRING.match(DataType.FLOAT));
     }
 
     @Test
     public void testInteger() {
-        assertFalse(TypeClass.INTEGER.contains(DataType.ID));
-        assertFalse(TypeClass.INTEGER.contains(DataType.TIMESTAMP));
-        assertFalse(TypeClass.INTEGER.contains(DataType.BOOLEAN));
-        assertFalse(TypeClass.INTEGER.contains(DataType.STRING));
-        assertTrue(TypeClass.INTEGER.contains(DataType.INTEGER));
-        assertFalse(TypeClass.INTEGER.contains(DataType.FLOAT));
+        assertFalse(TypeClass.INTEGER.match(DataType.ID));
+        assertFalse(TypeClass.INTEGER.match(DataType.TIMESTAMP));
+        assertFalse(TypeClass.INTEGER.match(DataType.BOOLEAN));
+        assertFalse(TypeClass.INTEGER.match(DataType.STRING));
+        assertTrue(TypeClass.INTEGER.match(DataType.INTEGER));
+        assertFalse(TypeClass.INTEGER.match(DataType.FLOAT));
     }
 
     @Test
     public void testFloat() {
-        assertFalse(TypeClass.FLOAT.contains(DataType.ID));
-        assertFalse(TypeClass.FLOAT.contains(DataType.TIMESTAMP));
-        assertFalse(TypeClass.FLOAT.contains(DataType.BOOLEAN));
-        assertFalse(TypeClass.FLOAT.contains(DataType.STRING));
-        assertFalse(TypeClass.FLOAT.contains(DataType.INTEGER));
-        assertTrue(TypeClass.FLOAT.contains(DataType.FLOAT));
+        assertFalse(TypeClass.FLOAT.match(DataType.ID));
+        assertFalse(TypeClass.FLOAT.match(DataType.TIMESTAMP));
+        assertFalse(TypeClass.FLOAT.match(DataType.BOOLEAN));
+        assertFalse(TypeClass.FLOAT.match(DataType.STRING));
+        assertFalse(TypeClass.FLOAT.match(DataType.INTEGER));
+        assertTrue(TypeClass.FLOAT.match(DataType.FLOAT));
     }
 
     @Test
     public void testWildcard() {
-        assertTrue(TypeClass.WILDCARD.contains(DataType.ID));
-        assertTrue(TypeClass.WILDCARD.contains(DataType.TIMESTAMP));
-        assertTrue(TypeClass.WILDCARD.contains(DataType.BOOLEAN));
-        assertTrue(TypeClass.WILDCARD.contains(DataType.STRING));
-        assertTrue(TypeClass.WILDCARD.contains(DataType.INTEGER));
-        assertTrue(TypeClass.WILDCARD.contains(DataType.FLOAT));
+        assertTrue(TypeClass.WILDCARD.match(DataType.ID));
+        assertTrue(TypeClass.WILDCARD.match(DataType.TIMESTAMP));
+        assertTrue(TypeClass.WILDCARD.match(DataType.BOOLEAN));
+        assertTrue(TypeClass.WILDCARD.match(DataType.STRING));
+        assertTrue(TypeClass.WILDCARD.match(DataType.INTEGER));
+        assertTrue(TypeClass.WILDCARD.match(DataType.FLOAT));
     }
 
 }

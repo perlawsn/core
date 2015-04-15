@@ -7,13 +7,19 @@ import org.dei.perla.core.descriptor.DataType;
  */
 public enum TypeClass {
 
-    ID("id"),
-    TIMESTAMP("timestamp"),
-    BOOLEAN("boolean"),
-    INTEGER("integer"),
+    // The order of the TypeClass enum constants is crucial for the correct
+    // execution of the Registry matching methods. All wildcards must come
+    // before the actual data types, and must be ordered from the most
+    // general to the most specific. Actual data types order must be
+    // consistent with the ordering found in the DataType enum
+
+    WILDCARD("wildcard"),
     FLOAT("float"),
+    INTEGER("integer"),
+    BOOLEAN("boolean"),
     STRING("string"),
-    WILDCARD("wildcard");
+    ID("id"),
+    TIMESTAMP("timestamp");
 
     private final String name;
 
@@ -21,7 +27,7 @@ public enum TypeClass {
         this.name = name;
     }
 
-    public boolean contains(DataType type) {
+    public boolean match(DataType type) {
         switch (this) {
             case ID:
                 return type == DataType.ID;
@@ -39,6 +45,34 @@ public enum TypeClass {
                 return true;
             default:
                 throw new RuntimeException("Unexpected TypeClass " + this);
+        }
+    }
+
+    public int compareMatch(DataType type) {
+        if (this == WILDCARD) {
+            return 0;
+        }
+
+        TypeClass o = typeToClass(type);
+        return this.compareTo(o);
+    }
+
+    private static TypeClass typeToClass(DataType type) {
+        switch (type) {
+            case FLOAT:
+                return TypeClass.FLOAT;
+            case INTEGER:
+                return TypeClass.INTEGER;
+            case BOOLEAN:
+                return TypeClass.BOOLEAN;
+            case STRING:
+                return TypeClass.STRING;
+            case ID:
+                return TypeClass.ID;
+            case TIMESTAMP:
+                return TypeClass.TIMESTAMP;
+            default:
+                throw new RuntimeException("Unexpected DataType " + type);
         }
     }
 
