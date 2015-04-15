@@ -12,6 +12,9 @@ public final class DataTemplate implements Comparable<DataTemplate> {
 
     private static final Map<String, DataTemplate> cache = new HashMap<>();
 
+    public static final DataTemplate TIMESTAMP =
+            DataTemplate.create("timestamp", TypeClass.TIMESTAMP);
+
     private final String id;
     private final TypeClass typeClass;
 

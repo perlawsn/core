@@ -10,13 +10,13 @@ public final class Attribute implements Comparable<Attribute> {
 
     private static final Map<String, Attribute> cache = new HashMap<>();
 
+	public static final Attribute ID =
+			Attribute.create("id", DataType.ID);
+	public static final Attribute TIMESTAMP =
+			Attribute.create("timestamp", DataType.TIMESTAMP);
+
 	private final String id;
 	private final DataType type;
-
-    public static Attribute ID =
-			Attribute.create("id", DataType.ID);
-    public static Attribute TIMESTAMP =
-            Attribute.create("timestamp", DataType.TIMESTAMP);
 
     private Attribute(String id, DataType type) {
         this.id = id;
