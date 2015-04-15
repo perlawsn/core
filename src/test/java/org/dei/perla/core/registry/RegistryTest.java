@@ -36,7 +36,7 @@ public class RegistryTest {
 			DataTemplate.create("pressure", TypeClass.FLOAT);
 
 	private static final DataTemplate tempWild =
-			DataTemplate.create("temperature", TypeClass.WILDCARD);
+			DataTemplate.create("temperature", TypeClass.ANY);
 
 	@Test
 	public void singleAddition() {

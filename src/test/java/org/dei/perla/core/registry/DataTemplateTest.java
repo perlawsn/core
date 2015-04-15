@@ -14,7 +14,7 @@ public class DataTemplateTest {
 
     @Test
     public void testTypeWildcardMatch() {
-        DataTemplate dt = DataTemplate.create("test", TypeClass.WILDCARD);
+        DataTemplate dt = DataTemplate.create("test", TypeClass.ANY);
 
         Attribute a = Attribute.create("test", DataType.ID);
         assertTrue(dt.match(a));
@@ -96,7 +96,7 @@ public class DataTemplateTest {
 
     @Test
     public void testWildcardCompareMatch() {
-        DataTemplate dt = DataTemplate.create("t", TypeClass.WILDCARD);
+        DataTemplate dt = DataTemplate.create("t", TypeClass.ANY);
 
         Attribute a = Attribute.create("t", DataType.INTEGER);
         assertThat(dt.compareMatch(a), equalTo(0));

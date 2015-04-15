@@ -13,7 +13,10 @@ public enum TypeClass {
     // general to the most specific. Actual data types order must be
     // consistent with the ordering found in the DataType enum
 
-    WILDCARD("wildcard"),
+    // Wildcards
+    ANY("any"),
+
+    // Actual types
     FLOAT("float"),
     INTEGER("integer"),
     BOOLEAN("boolean"),
@@ -41,7 +44,7 @@ public enum TypeClass {
                 return type == DataType.FLOAT;
             case STRING:
                 return type == DataType.STRING;
-            case WILDCARD:
+            case ANY:
                 return true;
             default:
                 throw new RuntimeException("Unexpected TypeClass " + this);
@@ -49,7 +52,7 @@ public enum TypeClass {
     }
 
     public int compareMatch(DataType type) {
-        if (this == WILDCARD) {
+        if (this == ANY) {
             return 0;
         }
 

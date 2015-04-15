@@ -73,12 +73,12 @@ public class TypeClassTest {
 
     @Test
     public void testMatchWildcard() {
-        assertTrue(TypeClass.WILDCARD.match(DataType.ID));
-        assertTrue(TypeClass.WILDCARD.match(DataType.TIMESTAMP));
-        assertTrue(TypeClass.WILDCARD.match(DataType.BOOLEAN));
-        assertTrue(TypeClass.WILDCARD.match(DataType.STRING));
-        assertTrue(TypeClass.WILDCARD.match(DataType.INTEGER));
-        assertTrue(TypeClass.WILDCARD.match(DataType.FLOAT));
+        assertTrue(TypeClass.ANY.match(DataType.ID));
+        assertTrue(TypeClass.ANY.match(DataType.TIMESTAMP));
+        assertTrue(TypeClass.ANY.match(DataType.BOOLEAN));
+        assertTrue(TypeClass.ANY.match(DataType.STRING));
+        assertTrue(TypeClass.ANY.match(DataType.INTEGER));
+        assertTrue(TypeClass.ANY.match(DataType.FLOAT));
     }
 
     @Test
@@ -179,17 +179,17 @@ public class TypeClassTest {
 
     @Test
     public void testCompareMatchWildcard() {
-        int res = TypeClass.WILDCARD.compareMatch(DataType.ID);
+        int res = TypeClass.ANY.compareMatch(DataType.ID);
         assertThat(res, equalTo(0));
-        res = TypeClass.WILDCARD.compareMatch(DataType.TIMESTAMP);
+        res = TypeClass.ANY.compareMatch(DataType.TIMESTAMP);
         assertThat(res, equalTo(0));
-        res = TypeClass.WILDCARD.compareMatch(DataType.BOOLEAN);
+        res = TypeClass.ANY.compareMatch(DataType.BOOLEAN);
         assertThat(res, equalTo(0));
-        res = TypeClass.WILDCARD.compareMatch(DataType.FLOAT);
+        res = TypeClass.ANY.compareMatch(DataType.FLOAT);
         assertThat(res, equalTo(0));
-        res = TypeClass.WILDCARD.compareMatch(DataType.INTEGER);
+        res = TypeClass.ANY.compareMatch(DataType.INTEGER);
         assertThat(res, equalTo(0));
-        res = TypeClass.WILDCARD.compareMatch(DataType.STRING);
+        res = TypeClass.ANY.compareMatch(DataType.STRING);
         assertThat(res, equalTo(0));
     }
 
