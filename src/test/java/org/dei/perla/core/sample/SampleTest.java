@@ -14,9 +14,12 @@ import static org.junit.Assert.*;
 
 public class SampleTest {
 
+	public static final Sample EMPTY_SAMPLE =
+			new Sample(Collections.emptyList(), new Object[0]);
+
 	@Test
 	public void sampleCreationTest() {
-		Sample empty = Sample.EMPTY;
+		Sample empty = EMPTY_SAMPLE;
 		assertThat(empty, notNullValue());
 		assertTrue(empty.isEmpty());
 		assertTrue(empty.fields().isEmpty());

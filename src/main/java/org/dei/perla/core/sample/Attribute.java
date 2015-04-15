@@ -13,7 +13,8 @@ public final class Attribute implements Comparable<Attribute> {
 	private final String id;
 	private final DataType type;
 
-    public static Attribute ID = Attribute.create("id", DataType.ID);
+    public static Attribute ID =
+			Attribute.create("id", DataType.ID);
     public static Attribute TIMESTAMP =
             Attribute.create("timestamp", DataType.TIMESTAMP);
 

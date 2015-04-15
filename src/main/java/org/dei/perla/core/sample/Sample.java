@@ -15,20 +15,39 @@ import java.util.Map;
  */
 public class Sample {
 
-	/**
-	 * Empty immutable sample
-	 */
-	public static final Sample EMPTY =
-            new Sample(Collections.emptyList(), new Object[0]);
-
     private final List<Attribute> fields;
     private final Object[] values;
 
+    /**
+     * Creates a new sample with the desired fields and field values.
+     *
+     * <p>
+     * The caller must ensure that there is a one-to-one positional
+     * correspondance between the attributes inside the {@code fields} list
+     * and their values in the {@code values} array.
+     *
+     * <p>
+     * Moreover, it is up to the caller (i.e., the PerLa core Middleware) to
+     * ensure that the {@code fields} list does not contain 2 attributes with
+     * the same name.
+     *
+     * @param fields list of fields that compose the sample
+     * @param values values of the fields
+     */
     public Sample(List<Attribute> fields, Object[] values) {
         this.fields = Collections.unmodifiableList(fields);
         this.values = values;
     }
 
+    /**
+     * A convenience method for converting an attribute-value map into a
+     * {@code Sample}. Due to its O(n) running time, the {@code Sample}
+     * constructor is to be preferred over this method when performances are
+     * critical.
+     *
+     * @param entries attribute-value map used to populate the Sample
+     * @return new Sample view of the entry map passed as input.
+     */
     public static Sample from(Map<Attribute, Object> entries) {
         Attribute[] fields = new Attribute[entries.size()];
         Object[] values = new Object[entries.size()];
@@ -43,6 +62,12 @@ public class Sample {
         return new Sample(Arrays.asList(fields), values);
     }
 
+    /**
+     * Returns the index of the given field
+     *
+     * @param name field name
+     * @return index of the field
+     */
     private int getIndex(String name) {
         int idx = 0;
         for (Attribute a : fields) {
@@ -89,7 +114,7 @@ public class Sample {
 	 * Returns the value of a field contained in the {@code Sample}.
      *
 	 * @param name field name
-	 * @return Field value
+	 * @return field value
 	 */
 	public Object getValue(String name) {
         int idx = getIndex(name);
@@ -99,6 +124,12 @@ public class Sample {
         return values[idx];
     }
 
+    /**
+     * Returns the type of a field contained in the {@code Sample}.
+     *
+     * @param name field name
+     * @return field value
+     */
     public DataType getType(String name) {
         int idx = getIndex(name);
         if (idx == -1) {
