@@ -8,7 +8,7 @@ import java.util.Map;
 
 public final class Attribute implements Comparable<Attribute> {
 
-    private static Map<String, Attribute> cache = new HashMap<>();
+    private static final Map<String, Attribute> cache = new HashMap<>();
 
 	private final String id;
 	private final DataType type;
