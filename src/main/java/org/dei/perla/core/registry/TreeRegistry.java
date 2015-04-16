@@ -7,6 +7,12 @@ import java.util.*;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+/**
+ * An Fpc Registry based on the prefix tree data structure. The relative
+ * position of an FPC inside the tree is defined by its attributes.
+ *
+ * @author Guido Rota (2014)
+ */
 public class TreeRegistry implements Registry {
 
 	private final ReadWriteLock lock = new ReentrantReadWriteLock();
@@ -203,11 +209,11 @@ public class TreeRegistry implements Registry {
 	}
 
 	/**
+	 * A single node of the prefix tree.
 	 *
 	 * @author Guido Rota (2014)
-	 *
 	 */
-	public class Node implements Comparable<Node> {
+	public static class Node implements Comparable<Node> {
 
 		private final Attribute id;
 		private final Collection<Fpc> fpcs = new HashSet<>();
