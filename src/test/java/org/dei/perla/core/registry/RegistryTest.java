@@ -57,14 +57,14 @@ public class RegistryTest {
 		// All fpcs with 'integer'
 		withSet.clear();
 		withSet.add(intTemp);
-		result = registry.getByAttribute(withSet, Collections.emptyList());
+		result = registry.get(withSet, Collections.emptyList());
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(1));
 
 		// All fpcs with 'float'
 		withSet.clear();
 		withSet.add(pressTemp);
-		result = registry.getByAttribute(withSet, Collections.emptyList());
+		result = registry.get(withSet, Collections.emptyList());
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(0));
 
@@ -72,7 +72,7 @@ public class RegistryTest {
 		withSet.clear();
 		withSet.add(intTemp);
 		withSet.add(tempTemp);
-		result = registry.getByAttribute(withSet, Collections.emptyList());
+		result = registry.get(withSet, Collections.emptyList());
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(1));
 
@@ -80,7 +80,7 @@ public class RegistryTest {
 		withSet.clear();
 		withSet.add(intTemp);
 		withSet.add(pressTemp);
-		result = registry.getByAttribute(withSet, Collections.emptyList());
+		result = registry.get(withSet, Collections.emptyList());
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(0));
 
@@ -89,7 +89,7 @@ public class RegistryTest {
 		withSet.add(intTemp);
 		withoutSet.clear();
 		withoutSet.add(tempTemp);
-		result = registry.getByAttribute(withSet, withoutSet);
+		result = registry.get(withSet, withoutSet);
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(0));
 
@@ -98,7 +98,7 @@ public class RegistryTest {
 		withSet.add(intTemp);
 		withoutSet.clear();
 		withoutSet.add(pressTemp);
-		result = registry.getByAttribute(withSet, withoutSet);
+		result = registry.get(withSet, withoutSet);
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(1));
 
@@ -107,7 +107,7 @@ public class RegistryTest {
 		withSet.add(intTemp);
 		withSet.add(tempWild);
 		withoutSet.clear();
-		result = registry.getByAttribute(withSet, withoutSet);
+		result = registry.get(withSet, withoutSet);
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(1));
 
@@ -116,7 +116,7 @@ public class RegistryTest {
 		withSet.add(intTemp);
 		withoutSet.clear();
 		withoutSet.add(tempWild);
-		result = registry.getByAttribute(withSet, withoutSet);
+		result = registry.get(withSet, withoutSet);
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(0));
 	}
@@ -144,13 +144,13 @@ public class RegistryTest {
 		registry.add(fpc2);
 
 		withSet.add(intTemp);
-		result = registry.getByAttribute(withSet, Collections.emptyList());
+		result = registry.get(withSet, Collections.emptyList());
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(2));
 
 		withSet.clear();
 		withSet.add(stringTemp);
-		result = registry.getByAttribute(withSet, Collections.emptyList());
+		result = registry.get(withSet, Collections.emptyList());
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(1));
 		result.forEach(fpc -> assertThat(fpc, equalTo(fpc1)));
@@ -159,7 +159,7 @@ public class RegistryTest {
 		withoutSet.clear();
 		withSet.add(intTemp);
 		withoutSet.add(pressTemp);
-		result = registry.getByAttribute(withSet, withoutSet);
+		result = registry.get(withSet, withoutSet);
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(1));
 		result.forEach(fpc -> assertThat(fpc, equalTo(fpc1)));
@@ -187,14 +187,14 @@ public class RegistryTest {
 		registry.add(fpc2);
 
 		withSet.add(intTemp);
-		result = registry.getByAttribute(withSet, Collections.emptyList());
+		result = registry.get(withSet, Collections.emptyList());
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(2));
 
 		registry.remove(fpc1);
 
 		withSet.add(intTemp);
-		result = registry.getByAttribute(withSet, Collections.emptyList());
+		result = registry.get(withSet, Collections.emptyList());
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(1));
 	}

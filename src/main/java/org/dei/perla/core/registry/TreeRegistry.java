@@ -40,7 +40,7 @@ public class TreeRegistry implements Registry {
 	}
 
 	@Override
-	public Collection<Fpc> getByAttribute(Collection<DataTemplate> with,
+	public Collection<Fpc> get(Collection<DataTemplate> with,
 			Collection<DataTemplate> without) {
 		List<DataTemplate> withList = new ArrayList<>(with);
 		Collections.sort(withList);
