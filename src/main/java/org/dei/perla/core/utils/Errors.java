@@ -55,7 +55,7 @@ import java.util.List;
  * @author Guido Rota (2014)
  *
  */
-public class Errors {
+public final class Errors {
 
 	private Errors parent;
 	private int errorCount = 0;

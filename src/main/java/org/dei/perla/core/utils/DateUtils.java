@@ -10,7 +10,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
 
-public class DateUtils {
+public final class DateUtils {
 
 	/**
 	 * Parses a string into an {@link Instant}. Approximations may be introduced
