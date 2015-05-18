@@ -6,23 +6,25 @@ package org.dei.perla.core.descriptor;
  * @author Guido Rota (2014)
  *
  */
-public class InvalidDeviceDescriptorException extends Exception {
+public class InvalidDeviceDescriptorException
+        extends DeviceDescriptorException {
 
 	private static final long serialVersionUID = -3281091164247373760L;
 
-	public InvalidDeviceDescriptorException() {
-	}
+    public InvalidDeviceDescriptorException() {
+        super();
+    }
 
-	public InvalidDeviceDescriptorException(String message) {
-		super(message);
-	}
+    public InvalidDeviceDescriptorException(String message) {
+        super(message);
+    }
 
-	public InvalidDeviceDescriptorException(Throwable cause) {
-		super(cause);
-	}
+    public InvalidDeviceDescriptorException(Throwable cause) {
+        super(cause);
+    }
 
-	public InvalidDeviceDescriptorException(String message, Throwable cause) {
-		super(message, cause);
-	}
+    public InvalidDeviceDescriptorException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
 }

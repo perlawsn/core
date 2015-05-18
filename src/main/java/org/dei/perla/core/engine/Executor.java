@@ -24,7 +24,7 @@ import org.dei.perla.core.utils.Conditions;
  *
  * <p>
  * All methods used for executing <code>Script</code>s return a
- * <code>Runner</code> object to allow callers control and manage the
+ * <code>Runner</code> object to allow the callers to control and manage a
  * <code>Script</code> once it has started. Each <code>Script</code> is run in a
  * dedicated thread. It is therefore important that access to shared data
  * structures from within <code>Instruction</code> be properly guarded with

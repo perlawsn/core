@@ -3,6 +3,7 @@ package org.dei.perla.core;
 import org.apache.log4j.Logger;
 import org.dei.perla.core.channel.*;
 import org.dei.perla.core.descriptor.DeviceDescriptor;
+import org.dei.perla.core.descriptor.DeviceDescriptorException;
 import org.dei.perla.core.descriptor.DeviceDescriptorParser;
 import org.dei.perla.core.descriptor.JaxbDeviceDescriptorParser;
 import org.dei.perla.core.fpc.Fpc;
@@ -12,9 +13,13 @@ import org.dei.perla.core.message.MapperFactory;
 import org.dei.perla.core.registry.Registry;
 import org.dei.perla.core.registry.TreeRegistry;
 
+import java.io.InputStream;
 import java.util.*;
 
 /**
+ * A simple helper class employed to automatically setup the PerLa Middleware.
+ * See the perla-example and perla-web for examples of its use.
+ *
  * @author Guido Rota 18/05/15.
  */
 public final class PerLaSystem {
@@ -27,6 +32,13 @@ public final class PerLaSystem {
 
     private final FactoryHandler fctHand = new FactoryHandler();
 
+    /**
+     * Creates a new {@code PerLaSystem} object configured with the required
+     * {@link Plugin}s.
+     *
+     * @param plugins plugin objects to use in the PerLa installation
+     *                (MapperFactory and ChannelPlugin)
+     */
     public PerLaSystem(List<Plugin> plugins) {
         registry = new TreeRegistry();
 
@@ -63,6 +75,27 @@ public final class PerLaSystem {
         factory = new BaseFpcFactory(maps, chans, reqs);
     }
 
+    /**
+     * Off-band Device Descriptor injection. This method allows the creation
+     * of {@link Fpc} proxies for devices whose {@link Channel} cannot relay
+     * Device Descriptor information.
+     *
+     * @param is Device Descriptor {@link InputStream}
+     * @throws DeviceDescriptorException if the {@link Fpc} creation process
+     * fails due to an error in the Device Descriptor
+     */
+    public void injectDescriptor(InputStream is)
+            throws DeviceDescriptorException {
+        DeviceDescriptor d = parser.parse(is);
+        Fpc fpc = factory.createFpc(d, 1);
+        registry.add(fpc);
+    }
+
+    /**
+     * Returns the FPC {@link Registry} in use inside this object.
+     *
+     * @return FPC {@link Registry} instance
+     */
     public Registry getRegistry() {
         return registry;
     }
@@ -76,16 +109,17 @@ public final class PerLaSystem {
 
         @Override
         public void complete(IORequest request, Optional<Payload> result) {
-            result.map(this::createFpc).ifPresent(registry::add);
+            result.map(Payload::asInputStream)
+                    .map(this::createFpc)
+                    .ifPresent(registry::add);
         }
 
-        private Fpc createFpc(Payload p) {
+        private Fpc createFpc(InputStream is) {
             try {
-                DeviceDescriptor d = parser.parse(p.asInputStream());
+                DeviceDescriptor d = parser.parse(is);
                 return factory.createFpc(d, 1);
             } catch (Exception e) {
-                log.error("Error parsing device descriptor:\n" +
-                        p.asString(), e);
+                log.error("Error parsing device descriptor", e);
             }
             return null;
         }

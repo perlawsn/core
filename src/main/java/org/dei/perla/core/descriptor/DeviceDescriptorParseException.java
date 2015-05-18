@@ -11,24 +11,24 @@ package org.dei.perla.core.descriptor;
  * @author Guido Rota (2014)
  *
  */
-public class DeviceDescriptorParseException extends Exception {
+public class DeviceDescriptorParseException extends DeviceDescriptorException {
 
-	private static final long serialVersionUID = 1963539081564488346L;
+    private static final long serialVersionUID = 4908999122256729057L;
 
-	public DeviceDescriptorParseException() {
-		super();
-	}
+    public DeviceDescriptorParseException() {
+        super();
+    }
 
-	public DeviceDescriptorParseException(String message) {
-		super(message);
-	}
+    public DeviceDescriptorParseException(String message) {
+        super(message);
+    }
 
-	public DeviceDescriptorParseException(Throwable cause) {
-		super(cause);
-	}
+    public DeviceDescriptorParseException(Throwable cause) {
+        super(cause);
+    }
 
-	public DeviceDescriptorParseException(String message, Throwable cause) {
-		super(message, cause);
-	}
+    public DeviceDescriptorParseException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
 }
