@@ -1,35 +1,38 @@
 package org.dei.perla.core.descriptor;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.text.IsEmptyString.isEmptyOrNullString;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
-import java.io.FileInputStream;
-import java.util.Arrays;
-import java.util.List;
-
 import org.dei.perla.core.channel.simulator.SimulatorChannelDescriptor;
-import org.dei.perla.core.channel.simulator.SimulatorMessageDescriptor;
 import org.dei.perla.core.channel.simulator.SimulatorIORequestDescriptor;
+import org.dei.perla.core.channel.simulator.SimulatorMessageDescriptor;
 import org.dei.perla.core.descriptor.AttributeDescriptor.AttributeAccessType;
 import org.dei.perla.core.descriptor.AttributeDescriptor.AttributePermission;
 import org.junit.Test;
 
+import java.io.FileInputStream;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.text.IsEmptyString.isEmptyOrNullString;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+
 public class JaxbDeviceDescriptorParserTest {
 
 	private static final String descriptorPath = "src/test/java/org/dei/perla/core/descriptor/device_descriptor.xml";
-	private List<String> packageList = Arrays
-			.asList(new String[] { "org.dei.perla.core.descriptor",
-					"org.dei.perla.core.descriptor.instructions",
-					"org.dei.perla.core.channel.simulator" });
+	private static final Set<String> packages;
+	static {
+		Set<String> pkgs = new HashSet<>();
+		pkgs.add("org.dei.perla.core.descriptor");
+		pkgs.add("org.dei.perla.core.descriptor.instructions");
+		pkgs.add("org.dei.perla.core.channel.simulator");
+		packages = Collections.unmodifiableSet(pkgs);
+	}
 
 	@Test
 	public void parserCreation() throws Exception {
 		DeviceDescriptorParser parser = new JaxbDeviceDescriptorParser(
-				packageList);
+				packages);
 
 		assertThat(parser, notNullValue());
 	}
@@ -39,7 +42,7 @@ public class JaxbDeviceDescriptorParserTest {
 		DeviceDescriptorParser parser;
 		DeviceDescriptor descriptor;
 
-		parser = new JaxbDeviceDescriptorParser(packageList);
+		parser = new JaxbDeviceDescriptorParser(packages);
 		descriptor = parser.parse(new FileInputStream(descriptorPath));
 
 		assertThat(descriptor, notNullValue());
@@ -52,7 +55,7 @@ public class JaxbDeviceDescriptorParserTest {
 		DeviceDescriptorParser parser;
 		DeviceDescriptor descriptor;
 
-		parser = new JaxbDeviceDescriptorParser(packageList);
+		parser = new JaxbDeviceDescriptorParser(packages);
 		descriptor = parser.parse(new FileInputStream(descriptorPath));
 
 		for (AttributeDescriptor attribute : descriptor.getAttributeList()) {
@@ -91,7 +94,7 @@ public class JaxbDeviceDescriptorParserTest {
 		DeviceDescriptorParser parser;
 		DeviceDescriptor descriptor;
 
-		parser = new JaxbDeviceDescriptorParser(packageList);
+		parser = new JaxbDeviceDescriptorParser(packages);
 		descriptor = parser.parse(new FileInputStream(descriptorPath));
 
 		for (MessageDescriptor message : descriptor.getMessageList()) {
@@ -118,7 +121,7 @@ public class JaxbDeviceDescriptorParserTest {
 		DeviceDescriptorParser parser;
 		DeviceDescriptor descriptor;
 
-		parser = new JaxbDeviceDescriptorParser(packageList);
+		parser = new JaxbDeviceDescriptorParser(packages);
 		descriptor = parser.parse(new FileInputStream(descriptorPath));
 
 		for (ChannelDescriptor channel : descriptor.getChannelList()) {
@@ -133,7 +136,7 @@ public class JaxbDeviceDescriptorParserTest {
 		DeviceDescriptorParser parser;
 		DeviceDescriptor descriptor;
 
-		parser = new JaxbDeviceDescriptorParser(packageList);
+		parser = new JaxbDeviceDescriptorParser(packages);
 		descriptor = parser.parse(new FileInputStream(descriptorPath));
 
 		assertThat(descriptor.getRequestList(), notNullValue());
@@ -148,7 +151,7 @@ public class JaxbDeviceDescriptorParserTest {
 		DeviceDescriptorParser parser;
 		DeviceDescriptor descriptor;
 
-		parser = new JaxbDeviceDescriptorParser(packageList);
+		parser = new JaxbDeviceDescriptorParser(packages);
 		descriptor = parser.parse(new FileInputStream(descriptorPath));
 
 		assertThat(descriptor.getOperationList(), notNullValue());

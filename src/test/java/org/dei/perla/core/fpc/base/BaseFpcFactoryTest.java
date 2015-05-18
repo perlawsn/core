@@ -1,40 +1,28 @@
 package org.dei.perla.core.fpc.base;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
-import java.io.FileInputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-
 import org.dei.perla.core.channel.ChannelFactory;
 import org.dei.perla.core.channel.IORequestBuilderFactory;
 import org.dei.perla.core.channel.simulator.SimulatorChannelFactory;
 import org.dei.perla.core.channel.simulator.SimulatorIORequestBuilderFactory;
 import org.dei.perla.core.channel.simulator.SimulatorMapperFactory;
-import org.dei.perla.core.sample.Attribute;
-import org.dei.perla.core.fpc.Fpc;
-import org.dei.perla.core.fpc.FpcFactory;
 import org.dei.perla.core.descriptor.DataType;
 import org.dei.perla.core.descriptor.DeviceDescriptor;
 import org.dei.perla.core.descriptor.DeviceDescriptorParser;
 import org.dei.perla.core.descriptor.JaxbDeviceDescriptorParser;
-import org.dei.perla.core.engine.CreateComplexVarInstruction;
-import org.dei.perla.core.engine.EmitInstruction;
-import org.dei.perla.core.engine.Instruction;
-import org.dei.perla.core.engine.PutInstruction;
-import org.dei.perla.core.engine.Script;
-import org.dei.perla.core.engine.SetComplexInstruction;
-import org.dei.perla.core.engine.StopInstruction;
-import org.dei.perla.core.engine.SubmitInstruction;
+import org.dei.perla.core.engine.*;
+import org.dei.perla.core.fpc.Fpc;
+import org.dei.perla.core.fpc.FpcFactory;
 import org.dei.perla.core.message.MapperFactory;
+import org.dei.perla.core.sample.Attribute;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import java.io.FileInputStream;
+import java.util.*;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.*;
 
 public class BaseFpcFactoryTest {
 
@@ -46,17 +34,21 @@ public class BaseFpcFactoryTest {
 
 	private static final String descriptorPath =
             "src/test/java/org/dei/perla/core/fpc/base/fpc_descriptor.xml";
-	private static List<String> packageList = Arrays.asList(new String[] {
-			"org.dei.perla.core.descriptor",
-			"org.dei.perla.core.descriptor.instructions",
-			"org.dei.perla.core.channel.simulator" });
+	private static final Set<String> packages;
+	static {
+		Set<String> pkgs = new HashSet<>();
+		pkgs.add("org.dei.perla.core.descriptor");
+		pkgs.add("org.dei.perla.core.descriptor.instructions");
+		pkgs.add("org.dei.perla.core.channel.simulator");
+		packages = Collections.unmodifiableSet(pkgs);
+	}
 	private static BaseFpc baseFpc;
 	private static Scheduler scheduler;
 
 	@BeforeClass
 	public static void setup() throws Exception {
 		DeviceDescriptorParser parser = new JaxbDeviceDescriptorParser(
-				packageList);
+				packages);
 		DeviceDescriptor descriptor = parser.parse(new FileInputStream(
 				descriptorPath));
 

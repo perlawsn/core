@@ -1,12 +1,12 @@
 package org.dei.perla.core.message;
 
-import java.util.Map;
-
 import javassist.ClassPool;
-
 import org.apache.http.annotation.ThreadSafe;
+import org.dei.perla.core.Plugin;
 import org.dei.perla.core.descriptor.InvalidDeviceDescriptorException;
 import org.dei.perla.core.descriptor.MessageDescriptor;
+
+import java.util.Map;
 
 /**
  * A factory for creating new Mapper classes. Each MapperFactory implementation
@@ -18,7 +18,7 @@ import org.dei.perla.core.descriptor.MessageDescriptor;
  *
  */
 @ThreadSafe
-public interface MapperFactory {
+public interface MapperFactory extends Plugin {
 
 	/**
 	 * Returns the <code>MessageDescriptor</code> class that this

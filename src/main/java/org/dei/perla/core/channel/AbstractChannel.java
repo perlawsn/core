@@ -1,13 +1,13 @@
 package org.dei.perla.core.channel;
 
+import org.apache.log4j.Logger;
+import org.dei.perla.core.utils.Conditions;
+
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import org.apache.log4j.Logger;
-import org.dei.perla.core.utils.Conditions;
 
 /**
  * <p>
@@ -138,9 +138,6 @@ public abstract class AbstractChannel implements Channel {
 
 	@Override
 	public void close() {
-		if (stopped.get()) {
-			return;
-		}
 		if (!stopped.compareAndSet(false, true)) {
 			return;
 		}
@@ -194,10 +191,6 @@ public abstract class AbstractChannel implements Channel {
 		private final IORequest request;
 		private final IOHandler handler;
 
-		// Result
-		private Payload result = null;
-		private ChannelException exception = null;
-
 		public FutureIOTask(final IORequest request, final IOHandler handler) {
 			this.request = request;
 			this.handler = handler;
@@ -210,28 +203,43 @@ public abstract class AbstractChannel implements Channel {
 			}
 
 			try {
-				result = handleRequest(request);
-				complete();
+				Payload result = handleRequest(request);
+				complete(result);
 
 			} catch (ChannelException e) {
 				log.error("An error occurred while processing an I/O Request", e);
-				exception = e;
-				complete();
+				error(e);
 
 			} catch (InterruptedException e) {
 				// Close the entire Channel if an InterruptedException is
 				// received. This will cause the interrupted status to
 				// be correctly restored and all pending tasks to be
 				// cancelled.
-				exception = new ChannelException(e);
-				complete();
+				error(new ChannelException("Thread interruption received " +
+						"while processing I/O request", e));
 				close();
 
 			} catch (Exception e) {
-				log.error("Unexpected error while processing an I/O Request", e);
-				exception = new ChannelException(e);
-				complete();
+                String msg = "Unexpected error while processing an I/O Request";
+				log.error("msg", e);
+				error(new ChannelException(msg, e));
 			}
+		}
+
+		private void complete(Payload result) {
+			if (!state.compareAndSet(RUNNING, FINISHED)) {
+				return;
+			}
+
+			handler.complete(request, Optional.ofNullable(result));
+		}
+
+		private void error(Throwable cause) {
+			if (!state.compareAndSet(RUNNING, FINISHED)) {
+				return;
+			}
+
+			handler.error(request, cause);
 		}
 
 		@Override
@@ -253,17 +261,6 @@ public abstract class AbstractChannel implements Channel {
 		@Override
 		public boolean isCancelled() {
 			return state.get() == CANCELLED;
-		}
-
-		private void complete() {
-			if (!state.compareAndSet(RUNNING, FINISHED)) {
-				return;
-			}
-			if (exception != null) {
-				handler.error(request, exception);
-			} else {
-				handler.complete(request, Optional.ofNullable(result));
-			}
 		}
 
 	}

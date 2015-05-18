@@ -31,14 +31,20 @@ public class BaseFpcTest {
             "src/test/java/org/dei/perla/core/fpc/base/fpc_descriptor.xml";
 	private static Fpc fpc;
 
+	private static final Set<String> packages;
+	static {
+		Set<String> pkgs = new HashSet<>();
+		pkgs.add("org.dei.perla.core.descriptor");
+		pkgs.add("org.dei.perla.core.descriptor.instructions");
+		pkgs.add("org.dei.perla.core.channel.simulator");
+		packages = Collections.unmodifiableSet(pkgs);
+	}
+
 	@BeforeClass
 	public static void createFpc() throws Exception {
 		List<String> packageList = new ArrayList<>();
-		packageList.add("org.dei.perla.core.descriptor");
-		packageList.add("org.dei.perla.core.descriptor.instructions");
-		packageList.add("org.dei.perla.core.channel.simulator");
-		JaxbDeviceDescriptorParser parser = new JaxbDeviceDescriptorParser(
-				packageList);
+		JaxbDeviceDescriptorParser parser =
+				new JaxbDeviceDescriptorParser(packages);
 
 		List<MapperFactory> mapperFactoryList = new ArrayList<>();
 		mapperFactoryList.add(new SimulatorMapperFactory());
@@ -176,7 +182,7 @@ public class BaseFpcTest {
 
 		assertThat(task2, notNullValue());
 		assertTrue(task2 instanceof PeriodicTask);
-		assertThat(handler2.getAveragePeriod(), greaterThanOrEqualTo(1d));
+		assertThat(handler2.getAveragePeriod(), greaterThanOrEqualTo(0.9d));
 		assertThat(handler2.getAveragePeriod(), lessThan(1.1d));
 		assertThat(handler1.getAveragePeriod(), greaterThanOrEqualTo(9.9d));
 		assertThat(handler1.getAveragePeriod(), lessThan(11d));

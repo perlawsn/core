@@ -1,15 +1,14 @@
 package org.dei.perla.core.descriptor;
 
-import java.io.InputStream;
-import java.util.Iterator;
-import java.util.List;
+import org.apache.log4j.Logger;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
-
-import org.apache.log4j.Logger;
+import java.io.InputStream;
+import java.util.Iterator;
+import java.util.Set;
 
 /**
  * Concrete <code>DeviceDescriptorParser</code> class for parsing device
@@ -26,7 +25,7 @@ public class JaxbDeviceDescriptorParser implements DeviceDescriptorParser {
 			.getLogger(JaxbDeviceDescriptorParser.class);
 	private final JAXBContext context;
 
-	public JaxbDeviceDescriptorParser(List<String> packageList) {
+	public JaxbDeviceDescriptorParser(Set<String> packageList) {
 		StringBuilder contextPath = new StringBuilder();
 
 		Iterator<String> iterator = packageList.iterator();
