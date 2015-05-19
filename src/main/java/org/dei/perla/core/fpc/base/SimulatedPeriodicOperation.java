@@ -1,7 +1,6 @@
 package org.dei.perla.core.fpc.base;
 
 import org.dei.perla.core.engine.Executor;
-import org.dei.perla.core.engine.Runner;
 import org.dei.perla.core.engine.Script;
 import org.dei.perla.core.engine.ScriptHandler;
 import org.dei.perla.core.fpc.FpcException;
@@ -10,6 +9,9 @@ import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
 public class SimulatedPeriodicOperation extends PeriodicOperation {
@@ -19,7 +21,7 @@ public class SimulatedPeriodicOperation extends PeriodicOperation {
 	private final Script script;
 
 	private volatile ScheduledFuture<?> timerFuture = null;
-	private final ScriptHandler handler = new TimerScriptHandler();
+	private final TimerScriptHandler handler = new TimerScriptHandler();
 
 	public SimulatedPeriodicOperation(String id, Script script) {
 		super(id, script.getEmit());
@@ -54,11 +56,10 @@ public class SimulatedPeriodicOperation extends PeriodicOperation {
 
 	private void sample() {
 		try {
-			Runner r = Executor.execute(script,
-					Executor.EMPTY_PARAMETER_ARRAY, handler);
+			Executor.execute(script, Executor.EMPTY_PARAMETER_ARRAY, handler);
 			// The synchronous execution of the sampling script ensures that
 			// all script invocations are performed sequentially.
-			r.await();
+			handler.await();
 		} catch (Exception e) {
 			handler.error(new RuntimeException("Unexpected error while " +
 					"running simulated periodic operation", e));
@@ -71,21 +72,48 @@ public class SimulatedPeriodicOperation extends PeriodicOperation {
 		handler.accept(this);
 	}
 
+	/**
+	 * Timer handler, distributes the outcome of the script to all the
+     * {@link Task} objects.
+	 */
 	private class TimerScriptHandler implements ScriptHandler {
 
+        private final Lock lk = new ReentrantLock();
+        private final Condition done = lk.newCondition();
+
+        public void await() throws InterruptedException {
+            lk.lock();
+            try {
+                done.await();
+            } finally {
+                lk.unlock();
+            }
+        }
 
 		@Override
 		public void complete(Script script, List<Object[]>
 				samples) {
-				for (Object[] s : samples) {
-					forEachTask(t -> t.newSample(s));
-				}
+            lk.lock();
+            try {
+                for (Object[] s : samples) {
+                    forEachTask(t -> t.newSample(s));
+                }
+                done.signal();
+            } finally {
+                lk.unlock();
+            }
 		}
 
 		@Override
 		public void error(Throwable cause) {
-				Exception e = new FpcException(cause);
-				forEachTask(t -> t.notifyError(e, false));
+            lk.lock();
+            try {
+                Exception e = new FpcException(cause);
+                forEachTask(t -> t.notifyError(e, false));
+                done.signal();
+            } finally {
+                lk.unlock();
+            }
 		}
 
 	}

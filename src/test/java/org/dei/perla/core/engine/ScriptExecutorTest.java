@@ -204,27 +204,6 @@ public class ScriptExecutorTest {
 	}
 
 	@Test
-	public void testAwait() throws Exception {
-		Script script = ScriptBuilder
-				.newScript()
-				.add(new CreateComplexVarInstruction("var", mapper1))
-				.add(new SetComplexInstruction("var", "integer", Integer.class, "12"))
-				.add(new SetComplexInstruction("var", "string", String.class, "test_order"))
-				.add(new PutInstruction("${var.integer}", integer, 0))
-				.add(new PutInstruction("${var.integer}", integer, 0))
-				.add(new PutInstruction("${var.string}", string, 1))
-				.add(new EmitInstruction())
-				.add(new StopInstruction())
-				.buildScript("testOrder");
-
-		SynchronizerScriptHandler handler = new SynchronizerScriptHandler();
-		Runner runner = Executor.execute(script, handler);
-		runner.await();
-		assertTrue(runner.isDone());
-		assertFalse(runner.isCancelled());
-	}
-
-	@Test
 	public void testScriptTimestampCreation() throws Exception {
 		Script script = ScriptBuilder.newScript()
 				.add(new PutInstruction("${now()}", timestamp, 0))
