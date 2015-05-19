@@ -157,7 +157,6 @@ public class Executor {
 	 */
 	public static Runner execute(Script script, ScriptParameter[] paramArray,
 			ScriptHandler handler, ScriptDebugger debugger) {
-
 		if (!isRunning.get()) {
 			throw new RejectedExecutionException(
 					"Cannot start, Executor has been stopped");
@@ -182,6 +181,10 @@ public class Executor {
 	 *            <code>Script</code>
 	 */
 	public static void resume(final Runner runner) {
+		if (!isRunning.get()) {
+			throw new RejectedExecutionException(
+					"Cannot start, Executor has been stopped");
+		}
 		if (!runner.isSuspended()) {
 			throw new IllegalStateException(
 					"Cannot resume, runner is not in suspended state");

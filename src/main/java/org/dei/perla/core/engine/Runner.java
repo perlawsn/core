@@ -100,7 +100,10 @@ public class Runner {
 	 * </p>
 	 */
 	protected void suspend() {
-		state.compareAndSet(RUNNING, SUSPENDED);
+		if (!state.compareAndSet(RUNNING, SUSPENDED)) {
+			throw new IllegalStateException("Cannot suspend, not in running " +
+					"state");
+		}
 	}
 
 	/**

@@ -100,7 +100,7 @@ public abstract class AbstractChannel implements Channel {
 	 *            Data asynchronously received from the remote device
 	 */
 	protected void notifyAsyncData(Payload result) {
-		if (asyncHandler == null) {
+		if (asyncHandler == null || stopped.get()) {
 			return;
 		}
 		asyncHandler.complete(null, Optional.ofNullable(result));
@@ -114,10 +114,10 @@ public abstract class AbstractChannel implements Channel {
 	 *            Exception caught while handling an asynchronous communication
 	 */
 	protected void notifyAsyncError(Throwable cause) {
-		log.error("Asynchronous reception error", cause);
-		if (asyncHandler == null) {
+		if (asyncHandler == null || stopped.get()) {
 			return;
 		}
+		log.error("Asynchronous reception error", cause);
 		asyncHandler.error(null, cause);
 	}
 
@@ -199,7 +199,8 @@ public abstract class AbstractChannel implements Channel {
 		public void run() {
 			if (!state.compareAndSet(NEW, RUNNING)) {
 				// Task was cancelled or has already been run
-				return;
+				throw new IllegalStateException("Cannot start, IOTask has " +
+						"already run");
 			}
 
 			try {
