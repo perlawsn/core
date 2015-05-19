@@ -9,24 +9,27 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 public class FakeFpc implements Fpc {
 
 	private final Collection<Attribute> attributes;
+	private final int id;
 
-	public FakeFpc(Collection<Attribute> attributes) {
+	public FakeFpc(int id, Collection<Attribute> attributes) {
 		this.attributes = new ArrayList<>(attributes);
+        this.id = id;
 	}
 
 	@Override
 	public int getId() {
-		return 0;
+		return id;
 	}
 
     @Override
     public String getType() {
-        return "";
+        return "FakeFpc";
     }
 
 	@Override

@@ -1,6 +1,7 @@
 package org.dei.perla.core.registry;
 
 import org.dei.perla.core.fpc.Fpc;
+import org.dei.perla.core.fpc.IDGenerator;
 import org.dei.perla.core.sample.Attribute;
 
 import java.util.*;
@@ -13,11 +14,14 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  *
  * @author Guido Rota (2014)
  */
-public class TreeRegistry implements Registry {
+public class TreeRegistry implements Registry, IDGenerator {
 
 	private final ReadWriteLock lock = new ReentrantReadWriteLock();
 	private volatile Node root = new Node(null);
 	private Map<Integer, Fpc> fpcMap = new HashMap<>();
+
+	private final Set<Integer> reservedIds = new HashSet<>();
+    private int lowestFreeId = 0;
 
 	@Override
 	public Fpc get(int id) {
@@ -101,14 +105,25 @@ public class TreeRegistry implements Registry {
 	}
 
 	@Override
-	public void add(Fpc fpc) {
+	public void add(Fpc fpc) throws DuplicateDeviceIDException {
 		List<Attribute> attributeList = new LinkedList<>(fpc.getAttributes());
 		Collections.sort(attributeList);
 
 		lock.writeLock().lock();
 		try {
-			fpcMap.put(fpc.getId(), fpc);
+            int id = fpc.getId();
+            if (fpcMap.containsKey(id)) {
+                throw new DuplicateDeviceIDException("Duplicate Device ID " + id);
+            }
+
+            // Remove reservation, if any
+            reservedIds.remove(id);
+			fpcMap.put(id, fpc);
 			root = add(root, fpc, attributeList);
+
+            if (id == lowestFreeId) {
+                lowestFreeId = findNextFreeId(lowestFreeId);
+            }
 		} finally {
 			lock.writeLock().unlock();
 		}
@@ -169,6 +184,9 @@ public class TreeRegistry implements Registry {
 		try {
 			fpcMap.remove(fpc);
 			root = remove(root, fpc, attributeList);
+            if (fpc.getId() < lowestFreeId) {
+                lowestFreeId = fpc.getId();
+            }
 		} finally {
 			lock.writeLock().unlock();
 		}
@@ -206,6 +224,40 @@ public class TreeRegistry implements Registry {
 		clone.children.add(newChild);
 
 		return clone;
+	}
+
+	@Override
+	public int generateID() {
+        lock.writeLock().lock();
+        try {
+            int id = lowestFreeId;
+            lowestFreeId = findNextFreeId(lowestFreeId);
+            reservedIds.add(id);
+            return id;
+        } finally {
+            lock.writeLock().unlock();
+        }
+	}
+
+    private int findNextFreeId(int id) {
+        Set<Integer> ids = fpcMap.keySet();
+        do {
+            id++;
+        } while (reservedIds.contains(id) || ids.contains(id));
+        return id;
+    }
+
+	@Override
+	public void releaseID(int id) {
+        lock.writeLock().lock();
+        try {
+            reservedIds.remove(id);
+            if (id < lowestFreeId) {
+                lowestFreeId = id;
+            }
+        } finally {
+            lock.writeLock().unlock();
+        }
 	}
 
 	/**

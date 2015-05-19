@@ -61,7 +61,7 @@ public class BaseFpcFactoryTest {
 		FpcFactory factory = new BaseFpcFactory(mhfList, chfList, rbfList);
 
 		assertThat(descriptor, notNullValue());
-		Fpc fpc = factory.createFpc(descriptor, 0);
+		Fpc fpc = factory.createFpc(descriptor, new IncrementalIDGenerator());
 		assertThat(fpc, notNullValue());
 		assertThat(fpc.getId(), equalTo(0));
 

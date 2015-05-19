@@ -25,6 +25,13 @@ public class DeviceDescriptor {
 	private String type;
 
 	/**
+	 * Static Device ID. If omitted a dynamically generated ID will be
+	 * automatically chosen by the PerLa system
+	 */
+	@XmlAttribute(name = "id", required = false)
+	private Integer id = null;
+
+	/**
 	 * List of attributes exposed by the device. Attributes in this list can be
 	 * queried using the PerLa language.
 	 */
@@ -82,6 +89,10 @@ public class DeviceDescriptor {
 
 	public String getType() {
 		return type;
+	}
+
+	public Integer getId() {
+		return id;
 	}
 
 	public List<AttributeDescriptor> getAttributeList() {

@@ -39,7 +39,7 @@ public class RegistryTest {
 			DataTemplate.create("temperature", TypeClass.ANY);
 
 	@Test
-	public void singleAddition() {
+	public void singleAddition() throws Exception {
 		Registry registry = new TreeRegistry();
 		Collection<Fpc> result;
 		Set<DataTemplate> withSet = new HashSet<>();
@@ -50,7 +50,7 @@ public class RegistryTest {
 		attributeSet.add(floatAtt);
 		attributeSet.add(stringAtt);
 		attributeSet.add(tempAtt);
-		Fpc fpc = new FakeFpc(attributeSet);
+		Fpc fpc = new FakeFpc(0, attributeSet);
 
 		registry.add(fpc);
 
@@ -122,7 +122,7 @@ public class RegistryTest {
 	}
 
 	@Test
-	public void multipleAdditions() {
+	public void multipleAdditions() throws Exception {
 		Registry registry = new TreeRegistry();
 		Collection<Fpc> result;
 		Set<DataTemplate> withSet = new HashSet<>();
@@ -133,14 +133,14 @@ public class RegistryTest {
 		attributeSet.add(floatAtt);
 		attributeSet.add(stringAtt);
 		attributeSet.add(tempAtt);
-		Fpc fpc1 = new FakeFpc(attributeSet);
+		Fpc fpc1 = new FakeFpc(0, attributeSet);
 		registry.add(fpc1);
 
 		attributeSet.clear();
 		attributeSet.add(intAtt);
 		attributeSet.add(floatAtt);
 		attributeSet.add(pressAtt);
-		Fpc fpc2 = new FakeFpc(attributeSet);
+		Fpc fpc2 = new FakeFpc(1, attributeSet);
 		registry.add(fpc2);
 
 		withSet.add(intTemp);
@@ -165,8 +165,28 @@ public class RegistryTest {
 		result.forEach(fpc -> assertThat(fpc, equalTo(fpc1)));
 	}
 
+	@Test(expected = DuplicateDeviceIDException.class)
+    public void idCollision() throws Exception {
+        Registry registry = new TreeRegistry();
+
+        Set<Attribute> attributeSet = new TreeSet<>();
+        attributeSet.add(intAtt);
+        attributeSet.add(floatAtt);
+        attributeSet.add(stringAtt);
+        attributeSet.add(tempAtt);
+        Fpc fpc1 = new FakeFpc(0, attributeSet);
+        registry.add(fpc1);
+
+        attributeSet.clear();
+        attributeSet.add(intAtt);
+        attributeSet.add(floatAtt);
+        attributeSet.add(pressAtt);
+        Fpc fpc2 = new FakeFpc(0, attributeSet);
+        registry.add(fpc2);
+    }
+
 	@Test
-	public void testRemove() {
+	public void testRemove() throws Exception {
 		Registry registry = new TreeRegistry();
 		Collection<Fpc> result;
 		Set<DataTemplate> withSet = new HashSet<>();
@@ -176,14 +196,14 @@ public class RegistryTest {
 		attributeSet.add(floatAtt);
 		attributeSet.add(stringAtt);
 		attributeSet.add(tempAtt);
-		Fpc fpc1 = new FakeFpc(attributeSet);
+		Fpc fpc1 = new FakeFpc(0, attributeSet);
 		registry.add(fpc1);
 
 		attributeSet.clear();
 		attributeSet.add(intAtt);
 		attributeSet.add(floatAtt);
 		attributeSet.add(pressAtt);
-		Fpc fpc2 = new FakeFpc(attributeSet);
+		Fpc fpc2 = new FakeFpc(1, attributeSet);
 		registry.add(fpc2);
 
 		withSet.add(intTemp);
@@ -198,5 +218,38 @@ public class RegistryTest {
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(1));
 	}
+
+    @Test
+    public void generateId() throws Exception {
+        TreeRegistry registry = new TreeRegistry();
+
+        assertThat(registry.generateID(), equalTo(0));
+        assertThat(registry.generateID(), equalTo(1));
+        registry.releaseID(0);
+        assertThat(registry.generateID(), equalTo(0));
+        assertThat(registry.generateID(), equalTo(2));
+        registry.releaseID(1);
+        assertThat(registry.generateID(), equalTo(1));
+        registry.releaseID(0);
+        registry.releaseID(1);
+        registry.releaseID(2);
+
+        Set<Attribute> attributeSet = new TreeSet<>();
+        attributeSet.add(intAtt);
+        attributeSet.add(floatAtt);
+        attributeSet.add(stringAtt);
+        attributeSet.add(tempAtt);
+        Fpc fpc1 = new FakeFpc(0, attributeSet);
+        registry.add(fpc1);
+
+        attributeSet.clear();
+        attributeSet.add(intAtt);
+        attributeSet.add(floatAtt);
+        attributeSet.add(pressAtt);
+        Fpc fpc2 = new FakeFpc(1, attributeSet);
+        registry.add(fpc2);
+
+        assertThat(registry.generateID(), equalTo(2));
+    }
 
 }

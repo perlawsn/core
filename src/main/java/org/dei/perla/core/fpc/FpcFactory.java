@@ -59,7 +59,7 @@ public interface FpcFactory {
 	 * @return
 	 * @throws InvalidDeviceDescriptorException
 	 */
-	public Fpc createFpc(DeviceDescriptor descriptor, int id)
+	public Fpc createFpc(DeviceDescriptor descriptor, IDGenerator gen)
 			throws InvalidDeviceDescriptorException;
 
 }

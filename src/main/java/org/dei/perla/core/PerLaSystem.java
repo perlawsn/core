@@ -3,7 +3,6 @@ package org.dei.perla.core;
 import org.apache.log4j.Logger;
 import org.dei.perla.core.channel.*;
 import org.dei.perla.core.descriptor.DeviceDescriptor;
-import org.dei.perla.core.descriptor.DeviceDescriptorException;
 import org.dei.perla.core.descriptor.DeviceDescriptorParser;
 import org.dei.perla.core.descriptor.JaxbDeviceDescriptorParser;
 import org.dei.perla.core.fpc.Fpc;
@@ -18,7 +17,7 @@ import java.util.*;
 
 /**
  * A simple helper class employed to automatically setup the PerLa Middleware.
- * See the perla-example and perla-web for examples of its use.
+ * See the perla-example and perla-web projects for examples of its use.
  *
  * @author Guido Rota 18/05/15.
  */
@@ -28,7 +27,7 @@ public final class PerLaSystem {
 
     private final DeviceDescriptorParser parser;
     private final FpcFactory factory;
-    private final Registry registry;
+    private final TreeRegistry registry;
 
     private final FactoryHandler fctHand = new FactoryHandler();
 
@@ -81,14 +80,21 @@ public final class PerLaSystem {
      * Device Descriptor information.
      *
      * @param is Device Descriptor {@link InputStream}
+     * @return the newly created {@link Fpc} object
      * @throws DeviceDescriptorException if the {@link Fpc} creation process
      * fails due to an error in the Device Descriptor
      */
-    public void injectDescriptor(InputStream is)
-            throws DeviceDescriptorException {
-        DeviceDescriptor d = parser.parse(is);
-        Fpc fpc = factory.createFpc(d, 1);
-        registry.add(fpc);
+    public Fpc injectDescriptor(InputStream is)
+            throws DeviceConnectionException {
+        try {
+            DeviceDescriptor d = parser.parse(is);
+            Fpc fpc = factory.createFpc(d, registry);
+            registry.add(fpc);
+            return fpc;
+        } catch (Exception e) {
+            throw new DeviceConnectionException("Error injecting Device " +
+                    "Descriptor", e);
+        }
     }
 
     /**
@@ -110,18 +116,17 @@ public final class PerLaSystem {
         @Override
         public void complete(IORequest request, Optional<Payload> result) {
             result.map(Payload::asInputStream)
-                    .map(this::createFpc)
-                    .ifPresent(registry::add);
+                    .ifPresent(this::addFpc);
         }
 
-        private Fpc createFpc(InputStream is) {
+        private void addFpc(InputStream is) {
             try {
                 DeviceDescriptor d = parser.parse(is);
-                return factory.createFpc(d, 1);
+                Fpc fpc = factory.createFpc(d, registry);
+                registry.add(fpc);
             } catch (Exception e) {
-                log.error("Error parsing device descriptor", e);
+                log.error("Cannot create Fpc", e);
             }
-            return null;
         }
 
         @Override
