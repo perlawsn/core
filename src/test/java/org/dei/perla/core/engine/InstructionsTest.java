@@ -27,7 +27,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-public class ScriptInstructionsTest {
+public class InstructionsTest {
 
 	private static AttributeDescriptor integer;
 	private static AttributeDescriptor string;
@@ -678,7 +678,8 @@ public class ScriptInstructionsTest {
 				.add(new SetComplexInstruction("param", "integer",
 						Integer.class, "5"))
 				.add(new SetComplexInstruction("param", "string", String.class,
-						"test")).add(submit)
+						"test"))
+                .add(submit)
 				.add(new PutInstruction("${output.integer}", integer, 0))
 				.add(new PutInstruction("${output.string}", string, 1))
 				.add(new EmitInstruction()).add(new StopInstruction())

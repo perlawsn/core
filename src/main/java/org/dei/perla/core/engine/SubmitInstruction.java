@@ -1,16 +1,12 @@
 package org.dei.perla.core.engine;
 
-import java.util.Optional;
-
-import org.dei.perla.core.channel.Channel;
-import org.dei.perla.core.channel.IOHandler;
-import org.dei.perla.core.channel.IORequest;
-import org.dei.perla.core.channel.IORequestBuilder;
-import org.dei.perla.core.channel.Payload;
+import org.dei.perla.core.channel.*;
 import org.dei.perla.core.engine.ExecutionContext.InstructionLocal;
 import org.dei.perla.core.message.FpcMessage;
 import org.dei.perla.core.message.Mapper;
 import org.dei.perla.core.utils.Conditions;
+
+import java.util.Optional;
 
 /**
  * Creates and submits an <code>IORequest</code>. The I/O operation is performed
@@ -31,7 +27,7 @@ public class SubmitInstruction implements Instruction {
 
 	// Instruction status
 	private Instruction next;
-	private InstructionLocal<Boolean> submitted;
+	private final InstructionLocal<Boolean> submitted;
 
 	// Channel response
 	private Optional<Payload> channelResponse = null;
@@ -80,15 +76,20 @@ public class SubmitInstruction implements Instruction {
 
 	@Override
 	public Instruction run(Runner runner) throws ScriptException {
-		if (!submitted.getValue(runner)) {
-			submitted.setValue(runner, true);
-			submitRequest(runner);
-			return this;
-		} else {
-			handleResponse(runner);
-			submitted.setValue(runner, false);
-			return next;
-		}
+        // Synchronizing on the runner object prevents the Channel response
+        // from reaching the 'else' section before the submit section is
+        // complete
+        synchronized (runner) {
+            if (!submitted.getValue(runner)) {
+                submitted.setValue(runner, true);
+                submitRequest(runner);
+                return this;
+            } else {
+                handleResponse(runner);
+                submitted.setValue(runner, false);
+                return next;
+            }
+        }
 	}
 
 	private void submitRequest(final Runner runner) throws ScriptException {

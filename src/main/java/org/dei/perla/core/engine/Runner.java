@@ -58,6 +58,10 @@ public class Runner {
 		this.ctx.init(script.getEmit().size(), params);
 	}
 
+    protected Script getScript() {
+        return script;
+    }
+
 	/**
 	 * Returns an <code>ExecutionContext</code> taken from a pool of unused
 	 * contexts. The <code>ExecutionContext</code> object is cleared of all
@@ -177,17 +181,31 @@ public class Runner {
 		return state.get() == CANCELLED;
 	}
 
+    /**
+     * Method invoked by the {@link Executor} class to resume a previously
+     * suspended {@link Script}.
+     */
+	protected void resume() {
+		if (!state.compareAndSet(SUSPENDED, RUNNING)) {
+            throw new IllegalStateException(
+                    "Cannot resume, runner is not in suspended state");
+		}
+		run();
+	}
+
 	/**
-	 * Main execution method invoked by the <code>Executor</code> class to run
-	 * the script.
+	 * Main execution method invoked by the {@link Executor} class to run
+	 * the {@link Script}.
 	 */
 	protected void execute() {
-		if (state.compareAndSet(NEW, RUNNING)) {
-			instruction = script.getCode();
-		} else if (!state.compareAndSet(SUSPENDED, RUNNING)) {
-			return;
-		}
+		if (!state.compareAndSet(NEW, RUNNING)) {
 
+		}
+		instruction = script.getCode();
+		run();
+	}
+
+	private void run() {
 		try {
 			do {
 				if (instruction == null) {

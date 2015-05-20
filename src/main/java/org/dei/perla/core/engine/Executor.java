@@ -185,11 +185,8 @@ public class Executor {
 			throw new RejectedExecutionException(
 					"Cannot start, Executor has been stopped");
 		}
-		if (!runner.isSuspended()) {
-			throw new IllegalStateException(
-					"Cannot resume, runner is not in suspended state");
-		}
-		pool.submit(runner::execute);
+		logger.debug("Resuming script " + runner.getScript().getName());
+		pool.submit(runner::resume);
 	}
 
 	/**
