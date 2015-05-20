@@ -7,19 +7,13 @@ import java.nio.charset.Charset;
 public class LoopbackPayload implements Payload {
 
 	private final String message;
-	private final boolean wasPaused;
 
-	protected LoopbackPayload(String message, boolean wasPaused) {
+	protected LoopbackPayload(String message) {
 		this.message = message;
-		this.wasPaused = wasPaused;
 	}
 
 	public String getMessage() {
 		return message;
-	}
-
-	public boolean wasPaused() {
-		return wasPaused;
 	}
 
 	@Override

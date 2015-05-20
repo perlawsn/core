@@ -2,8 +2,6 @@ package org.dei.perla.core.channel;
 
 public class MockChannel extends AbstractChannel {
 
-	// Ensures that the channel fetched a request and is waiting to be resumed
-	private boolean waiting = false;
 	// When paused the channel does not process requests
 	private boolean paused = false;
 
@@ -12,35 +10,24 @@ public class MockChannel extends AbstractChannel {
 	}
 
 	@Override
-	public Payload handleRequest(IORequest request) throws InterruptedException {
-		LoopbackRequest loopbackRequest;
-		LoopbackPayload response;
+	public synchronized Payload handleRequest(IORequest request)
+            throws InterruptedException {
+        LoopbackRequest req = (LoopbackRequest) request;
+        while (paused) {
+            req.setPaused();
+            this.wait();
+        }
+        req.setProcessed();
+        return new LoopbackPayload(req.getMessage());
+	}
 
-		loopbackRequest = (LoopbackRequest) request;
-
-		synchronized (this) {
-			response = new LoopbackPayload(loopbackRequest.getMessage(), paused);
-			if (paused) {
-				waiting = true;
-				this.notify();
-				this.wait();
-			}
-			waiting = false;
-		}
-
-		return response;
+	public synchronized void resume() {
+		paused = false;
+        this.notify();
 	}
 
 	public synchronized void pause() {
 		paused = true;
-	}
-
-	public synchronized void resume() throws InterruptedException {
-		if (waiting == false && !this.isClosed()) {
-			this.wait();
-		}
-		paused = false;
-		this.notify();
 	}
 
 	public int pendingRequestCount() {

@@ -13,6 +13,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
@@ -29,13 +30,13 @@ public class AbstractChannelTest {
 		assertNotNull(channel);
 		assertFalse(channel.isClosed());
 
-		LoopbackRequest request = new LoopbackRequest(testMessage);
-		SynchronizerIOHandler syncHandler = new SynchronizerIOHandler();
-		channel.submit(request, syncHandler);
-		LoopbackPayload response = (LoopbackPayload) syncHandler.getResult()
+		LoopbackRequest req = new LoopbackRequest(testMessage);
+		SynchronizerIOHandler handler = new SynchronizerIOHandler();
+		channel.submit(req, handler);
+        req.waitProcessed();
+		LoopbackPayload response = (LoopbackPayload) handler.getResult()
 				.orElseThrow(RuntimeException::new);
 		assertTrue(response.getMessage().equals(testMessage));
-		assertFalse(response.wasPaused());
 
 		channel.close();
 		assertTrue(channel.isClosed());
@@ -55,8 +56,8 @@ public class AbstractChannelTest {
 	}
 
 	@Test
-	public void testPausedRequest() throws InterruptedException,
-			ExecutionException {
+	public void testPausedRequest()
+            throws InterruptedException, ExecutionException {
 		MockChannel channel = new MockChannel();
 
 		assertNotNull(channel);
@@ -64,13 +65,14 @@ public class AbstractChannelTest {
 
 		channel.pause();
 		SynchronizerIOHandler syncHandler = new SynchronizerIOHandler();
-		channel.submit(new LoopbackRequest(testMessage), syncHandler);
+        LoopbackRequest req = new LoopbackRequest(testMessage);
+		channel.submit(req, syncHandler);
+        req.waitPaused();
 		channel.resume();
 
 		LoopbackPayload response = (LoopbackPayload) syncHandler.getResult()
 				.orElseThrow(RuntimeException::new);
 		assertTrue(response.getMessage().equals(testMessage));
-		assertTrue(response.wasPaused());
 
 		channel.close();
 		assertTrue(channel.isClosed());
@@ -168,7 +170,7 @@ public class AbstractChannelTest {
 		IOHandler handler = new IOHandler() {
 			@Override
 			public void complete(IORequest request, Optional<Payload> result) {
-				latch.countDown();
+                latch.countDown();
 			}
 
 			@Override
@@ -187,7 +189,7 @@ public class AbstractChannelTest {
 		channel.resume();
 		latch.await();
 
-		// Due to the particular implementation of LoopbackChannel one request
+		// Due to the particular implementation of AbstractChannel, one request
 		// could be scheduled for execution before the channel gets closed,
 		// hence the requestCount -1 and the greaterThanOrEqualTo matcher
 		assertThat(cancelled.get(), greaterThanOrEqualTo(requestCount - 1));

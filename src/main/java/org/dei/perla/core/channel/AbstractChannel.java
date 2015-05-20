@@ -33,15 +33,16 @@ public abstract class AbstractChannel implements Channel {
 
 	// Coordination between threads achieved through CAS
 	private final AtomicBoolean stopped;
+
 	// Worker thread used to sequentially perform the submitted requests
-	private final Thread thread;
+	private final Thread dispatcher;
 
 	public AbstractChannel(String id) {
 		this.id = id;
 		log = Logger.getLogger(this.getClass().getCanonicalName() + "_" + id);
-		thread = new Thread(this::dispatch);
+		dispatcher = new Thread(this::dispatch);
 		stopped = new AtomicBoolean(false);
-		thread.start();
+		dispatcher.start();
 	}
 
 	@Override
@@ -63,11 +64,18 @@ public abstract class AbstractChannel implements Channel {
 	public IOTask submit(IORequest request, IOHandler handler)
 			throws ChannelException {
 		if (stopped.get()) {
-			throw new ChannelException();
+			throw new ChannelException(
+                    "Cannot process IORequest: Channel is not running");
 		}
 		FutureIOTask task = new FutureIOTask(request, handler);
-		pending.add(task);
-		return task;
+
+        // Mutual exclusion synchronization ensures, that the newly inserted
+        // task cannot be run by the dispatcher thread before the submit call
+        // has terminated (see dispatch() method)
+		synchronized (task) {
+			pending.add(task);
+			return task;
+		}
 	}
 
 	private void dispatch() {
@@ -75,10 +83,15 @@ public abstract class AbstractChannel implements Channel {
 		while (!stopped.get() && !Thread.currentThread().isInterrupted()) {
 			try {
 				task = pending.take();
-				if (task.isCancelled()) {
-					continue;
-				}
-				task.run();
+                // Mutual exclusion synchronization, ensures that the newly
+                // inserted task cannot be run by the dispatcher thread
+                // before the submit call has terminated (see submit() method)
+                synchronized (task) {
+                    if (task.isCancelled()) {
+                        continue;
+                    }
+                    task.run();
+                }
 			} catch (InterruptedException e) {
 				// Thread exits on InterruptedException
 				break;
@@ -141,7 +154,7 @@ public abstract class AbstractChannel implements Channel {
 		if (!stopped.compareAndSet(false, true)) {
 			return;
 		}
-		thread.interrupt();
+		dispatcher.interrupt();
 	}
 
 	/**
@@ -181,12 +194,12 @@ public abstract class AbstractChannel implements Channel {
 	private class FutureIOTask implements IOTask {
 
 		private static final int NEW = 0;
-		private static final int RUNNING = 1;
+		private static final int SCHEDULED = 1;
 		private static final int FINISHED = 2;
 		private static final int CANCELLED = 3;
 
 		// State
-		private AtomicInteger state = new AtomicInteger(NEW);
+		private final AtomicInteger state = new AtomicInteger(NEW);
 
 		private final IORequest request;
 		private final IOHandler handler;
@@ -196,61 +209,57 @@ public abstract class AbstractChannel implements Channel {
 			this.handler = handler;
 		}
 
-		public void run() {
-			if (!state.compareAndSet(NEW, RUNNING)) {
+		public void run() throws InterruptedException {
+			if (!state.compareAndSet(NEW, SCHEDULED)) {
 				// Task was cancelled or has already been run
-				throw new IllegalStateException("Cannot start, IOTask has " +
-						"already run");
+                return;
 			}
 
 			try {
 				Payload result = handleRequest(request);
-				complete(result);
+                complete(result);
 
 			} catch (ChannelException e) {
 				log.error("An error occurred while processing an I/O Request", e);
 				error(e);
 
 			} catch (InterruptedException e) {
-				// Close the entire Channel if an InterruptedException is
-				// received. This will cause the interrupted status to
-				// be correctly restored and all pending tasks to be
-				// cancelled.
-				error(new ChannelException("Thread interruption received " +
-						"while processing I/O request", e));
-				close();
+				error(new ChannelException("IOTask interrupted while " +
+                        "processing I/O request", e));
+                // Call close to stop the main processing thread
+                close();
 
 			} catch (Exception e) {
                 String msg = "Unexpected error while processing an I/O Request";
-				log.error("msg", e);
+				log.error(msg, e);
 				error(new ChannelException(msg, e));
 			}
 		}
 
 		private void complete(Payload result) {
-			if (!state.compareAndSet(RUNNING, FINISHED)) {
+			if (!state.compareAndSet(SCHEDULED, FINISHED)) {
 				return;
 			}
-
 			handler.complete(request, Optional.ofNullable(result));
 		}
 
 		private void error(Throwable cause) {
-			if (!state.compareAndSet(RUNNING, FINISHED)) {
+			if (!state.compareAndSet(SCHEDULED, FINISHED)) {
 				return;
 			}
-
 			handler.error(request, cause);
 		}
 
 		@Override
 		public boolean isDone() {
-			return state.get() > RUNNING;
+			return state.get() > SCHEDULED;
 		}
 
 		@Override
 		public void cancel() {
-			state.set(CANCELLED);
+            if (!state.compareAndSet(NEW, CANCELLED)) {
+                return;
+            }
 			handler.error(request, new IOTaskCancelledException());
 		}
 
