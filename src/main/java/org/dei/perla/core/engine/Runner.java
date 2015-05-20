@@ -44,7 +44,7 @@ public class Runner {
 	private Instruction instruction; // Program counter
 
 	private boolean breakpoint;
-	private AtomicInteger state;
+	private final AtomicInteger state;
 
 	protected Runner(Script script, ScriptParameter[] params,
 			ScriptHandler handler, ScriptDebugger debugger) {
@@ -74,19 +74,19 @@ public class Runner {
 		// some additional ExecutionContext objects
 		ExecutionContext context = contextPool.poll();
 		if (context == null) {
-			context = new ExecutionContext();
+			return new ExecutionContext();
 		}
-		context.clear();
 		return context;
 	}
 
 	/**
-	 * Places an <code>ExecutionContext</code> in the pool.
+	 * Places an unused <code>ExecutionContext</code> in the pool.
 	 *
 	 * @param context
 	 *            <code>ExecutionContext</code> to be returned to the pool
 	 */
 	private static final void relinquishContext(ExecutionContext context) {
+        context.clear();
 		contextPool.add(context);
 	}
 
@@ -95,19 +95,14 @@ public class Runner {
 	 * Suspends the execution of the <code>Script</code> being run by the
 	 * <code>Runner</code>. Suspended <code>Runners</code> can be resumed using
 	 * the <code>Executor.resume()</code> method.
-	 * </p>
 	 *
 	 * <p>
 	 * A suspended <code>Runner</code> is not considered done. Invoking the
 	 * <code>getResult()</code> method on a suspended <code>Runner</code> will
 	 * block until the execution is resumed and completed.
-	 * </p>
 	 */
 	protected void suspend() {
-		if (!state.compareAndSet(RUNNING, SUSPENDED)) {
-			throw new IllegalStateException("Cannot suspend, not in running " +
-					"state");
-		}
+		state.compareAndSet(RUNNING, SUSPENDED);
 	}
 
 	/**
@@ -122,16 +117,20 @@ public class Runner {
 	}
 
 	/**
-	 * Cancels the <code>Script</code>. No samples are emitted upon
+	 * Cancels the {@link Script} execution. No samples are emitted upon
 	 * cancellation.
 	 */
 	public void cancel() {
-		if (state.compareAndSet(NEW, CANCELLED)
-				|| state.compareAndSet(RUNNING, CANCELLED)
-				|| state.compareAndSet(SUSPENDED, CANCELLED)) {
-			handler.error(new ScriptCancelledException("Script '"
-					+ script.getName() + "' cancelled."));
-		}
+        int old;
+        do {
+            old = state.get();
+            if (old == CANCELLED || old == STOPPED) {
+                return;
+            }
+        } while (!state.compareAndSet(old, CANCELLED));
+        relinquishContext(ctx);
+        handler.error(new ScriptCancelledException("Script '"
+                + script.getName() + "' cancelled."));
 	}
 
 	/**
@@ -188,7 +187,7 @@ public class Runner {
 	protected void resume() {
 		if (!state.compareAndSet(SUSPENDED, RUNNING)) {
             throw new IllegalStateException(
-                    "Cannot resume, runner is not in suspended state");
+                    "Cannot resume, Runner is not in suspended state");
 		}
 		run();
 	}
@@ -199,7 +198,8 @@ public class Runner {
 	 */
 	protected void execute() {
 		if (!state.compareAndSet(NEW, RUNNING)) {
-
+            throw new IllegalStateException(
+                    "Cannot start, Runner has already been run");
 		}
 		instruction = script.getCode();
 		run();

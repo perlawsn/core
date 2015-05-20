@@ -17,24 +17,22 @@ import org.dei.perla.core.utils.Conditions;
 
 /**
  * <p>
- * The <code>Executor</code> class provides various convenience methods for
- * executing <code>Script</code>s and evaluating expressions found in various
- * <code>Script Instruction</code>s.
- * </p>
+ * The {@code Executor} class provides various convenience methods for
+ * executing {@link Script}s and evaluating expressions found in various
+ * {@link Instruction}s.
  *
  * <p>
- * All methods used for executing <code>Script</code>s return a
- * <code>Runner</code> object to allow the callers to control and manage a
- * <code>Script</code> once it has started. Each <code>Script</code> is run in a
+ * All methods used for executing {@link Script}s return a
+ * {@link Runner} object to allow the callers to control and manage a
+ * {@link Script} once it has started. Each {@link Script} is run in a
  * dedicated thread. It is therefore important that access to shared data
- * structures from within <code>Instruction</code> be properly guarded with
+ * structures from within {@link Instruction}s be properly guarded with
  * adequate concurrency control mechanisms (locks, immutability, etc.).
- * </p>
  *
  * <p>
- * The <code>resume</code> method is provided for restarting execution after
- * suspension. <code>ScriptDebugger</code>s and
- * <code>ScriptHandler<code>s are preserved during suspension.
+ * The {@code resume()} method is provided for restarting execution after
+ * suspension. {@link ScriptDebugger} and {@link ScriptHandler} are preserved
+ * during suspension.
  * </p>
  *
  *
@@ -100,8 +98,8 @@ public class Executor {
 	}
 
 	/**
-	 * Runs a <code>Script</code> with a <code>ScriptHandler</code> attached.
-	 * The <code>ScriptHandler</code> is invoked when the <code>Script</code> is
+	 * Runs a {@link Script} with a {@link ScriptHandler} attached.
+	 * The {@link ScriptHandler} is invoked when the {@link Script} is
 	 * terminated, normally or abnormally.
 	 *
 	 * @param script
@@ -117,18 +115,18 @@ public class Executor {
 	}
 
 	/**
-	 * Runs a <code>Script</code> with a <code>ScriptHandler</code> attached.
-	 * The <code>ScriptHandler</code> is invoked when the <code>Script</code> is
+	 * Runs a {@link Script} with a {@link ScriptHandler} attached.
+	 * The {@link ScriptHandler} is invoked when the {@link Script} is
 	 * terminated, normally or abnormally.
 	 *
 	 * @param script
-	 *            <code>Script</code> to execute
+	 *            {@link Script} to execute
 	 * @param paramArray
-	 *            Array of parameters to pass to the <code>Script</code>
+	 *            Array of parameters to pass to the {@link Script}
 	 * @param handler
-	 *            <code>ScriptHandler</code> to be invoke upon
-	 *            <code>Script</code> termination.
-	 * @return <code>Runner</code> object for controlling <code>Script</code>
+	 *            {@link ScriptHandler} to be invoke upon {@link Script}
+     *            termination.
+	 * @return {@link Runner} object for controlling {@link Script}
 	 *         execution
 	 */
 	public static Runner execute(Script script, ScriptParameter[] paramArray,
@@ -137,22 +135,22 @@ public class Executor {
 	}
 
 	/**
-	 * Runs a <code>Script</code> with both a <code>ScriptHandler</code> and a
-	 * <code>ScriptDebugger</code> attached. The <code>ScriptHandler</code> is
-	 * invoked when the <code>Script</code> is terminated, normally or
+	 * Runs a {@link Script} with both a {@link ScriptHandler} and a
+	 * {@link ScriptDebugger} attached. The {@link ScriptHandler} is
+	 * invoked when the {@link Script} is terminated, normally or
 	 * abnormally.
 	 *
 	 * @param script
-	 *            <code>Script</code> to execute
+	 *            {@link Script} to execute
 	 * @param paramArray
-	 *            Array of parameters to pass to the <code>Script</code>
+	 *            Array of parameters to pass to the {@link Script}
 	 * @param handler
-	 *            <code>ScriptHandler</code> to be invoke upon
-	 *            <code>Script</code> termination.
+	 *            {@link ScriptHandler} to be invoke upon
+	 *            {@link Script} termination.
 	 * @param debugger
-	 *            <code>ScriptDebugger</code> to invoke when the execution hits
+	 *            {@link ScriptDebugger} to invoke when the execution hits
 	 *            a breakpoint
-	 * @return <code>Runner</code> object for controlling <code>Script</code>
+	 * @return {@link Runner} object for controlling {@link Script}
 	 *         execution
 	 */
 	public static Runner execute(Script script, ScriptParameter[] paramArray,
@@ -174,11 +172,11 @@ public class Executor {
 	}
 
 	/**
-	 * Resumes a previously suspended <code>Script</code>.
+	 * Resumes a previously suspended {@link Script}
 	 *
 	 * @param runner
-	 *            <code>Runner</code> object representing the suspended
-	 *            <code>Script</code>
+	 *            {@link Runner} object representing the suspended
+	 *            {@link Script}
 	 */
 	public static void resume(final Runner runner) {
 		if (!isRunning.get()) {
@@ -191,13 +189,13 @@ public class Executor {
 
 	/**
 	 * Convenience method for creating a
-	 * <code>ValueExpression<code> that wraps a Java object.
+	 * {@link ValueExpression} that wraps a Java object.
 	 *
 	 * @param value
 	 *            The object to be wrapped
 	 * @param type
 	 *            Type of the object to be wrapped
-	 * @return <code>ValueExpression</code> wrapping a Java object
+	 * @return {@link ValueExpression} wrapping a Java object
 	 */
 	protected static ValueExpression createValueExpression(Object value,
 			Class<?> type) {
@@ -208,7 +206,7 @@ public class Executor {
 	 * Evaluates an EL expression.
 	 *
 	 * @param context
-	 *            <code>ExecutionContext</code> to be used during evaluation
+	 *            {@link ExecutionContext} to be used during evaluation
 	 * @param expression
 	 *            Expression to evaluate
 	 * @return Result of the expression
@@ -223,7 +221,7 @@ public class Executor {
 	 * into the specified type.
 	 *
 	 * @param context
-	 *            <code>ExecutionContext</code> to be used during evaluation
+	 *            {@link ExecutionContext} to be used during evaluation
 	 * @param expression
 	 *            Expression to evaluate
 	 * @param type

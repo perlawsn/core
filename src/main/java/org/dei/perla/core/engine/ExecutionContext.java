@@ -58,6 +58,7 @@ public class ExecutionContext {
 	}
 
     protected void init(int sampleSize, ScriptParameter[] params) {
+        samples = new ArrayList<>();
         sample = new Object[sampleSize];
         setParameters(params);
     }
@@ -161,7 +162,6 @@ public class ExecutionContext {
 		instructionLocalMap.clear();
 		variableMap.clear();
 		elVariableMapper.clear();
-        samples = new ArrayList<>();
 		elContext.clearParameterMap();
 	}
 
