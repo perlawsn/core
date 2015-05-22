@@ -1,19 +1,15 @@
 package org.dei.perla.core.engine;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
+import org.apache.http.annotation.ThreadSafe;
+import org.apache.log4j.Logger;
+import org.dei.perla.core.utils.Conditions;
 
 import javax.el.ELContext;
 import javax.el.ExpressionFactory;
 import javax.el.ValueExpression;
-
-import org.apache.http.annotation.ThreadSafe;
-import org.apache.log4j.Logger;
-import org.dei.perla.core.utils.Conditions;
+import java.util.concurrent.*;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * <p>
@@ -46,7 +42,9 @@ public class Executor {
 
 	private static final Logger logger = Logger.getLogger(Executor.class);
 
-	private static final AtomicBoolean isRunning = new AtomicBoolean(true);
+	private static final ReadWriteLock lk = new ReentrantReadWriteLock();
+	private static boolean running = true;
+
 	private static final ExpressionFactory expFct = ExpressionFactory.newInstance();
 
 	private static final ExecutorService pool;
@@ -77,15 +75,17 @@ public class Executor {
 	 *            running {@link Script}s.
 	 */
 	public static void shutdown(int timeoutSec) throws InterruptedException {
-		if (!isRunning.compareAndSet(true, false)) {
-			return;
-		}
-
-		pool.shutdown();
-		boolean terminated = pool.awaitTermination(timeoutSec, TimeUnit.SECONDS);
-		if (!terminated) {
-			logger.info("Termination timeout expired, attempting to interrupt lingering Scripts");
-			pool.shutdownNow();
+		lk.writeLock().lock();
+		try {
+			running = false;
+			pool.shutdown();
+			boolean terminated = pool.awaitTermination(timeoutSec, TimeUnit.SECONDS);
+			if (!terminated) {
+				logger.info("Termination timeout expired, attempting to interrupt lingering Scripts");
+				pool.shutdownNow();
+			}
+		} finally {
+			lk.writeLock().unlock();
 		}
 	}
 
@@ -94,7 +94,12 @@ public class Executor {
 	 * {@link Script}s.
 	 */
 	public static boolean isRunning() {
-		return isRunning.get();
+		lk.readLock().lock();
+		try {
+			return running;
+		} finally {
+			lk.readLock().unlock();
+		}
 	}
 
 	/**
@@ -111,7 +116,7 @@ public class Executor {
 	 *         execution
 	 */
 	public static Runner execute(Script script, ScriptHandler handler) {
-		return execute(script, EMPTY_PARAMETER_ARRAY, handler, null);
+        return execute(script, EMPTY_PARAMETER_ARRAY, handler, null);
 	}
 
 	/**
@@ -155,20 +160,25 @@ public class Executor {
 	 */
 	public static Runner execute(Script script, ScriptParameter[] paramArray,
 			ScriptHandler handler, ScriptDebugger debugger) {
-		if (!isRunning.get()) {
-			throw new RejectedExecutionException(
-					"Cannot start, Executor has been stopped");
+		lk.readLock().lock();
+		try {
+			if (!running) {
+				throw new RejectedExecutionException(
+						"Cannot start, Executor has been stopped");
+			}
+
+			logger.debug("Executing script " + script.getName());
+
+			script = Conditions.checkNotNull(script, "script");
+			paramArray = Conditions.checkNotNull(paramArray, "paramArray");
+			handler = Conditions.checkNotNull(handler, "handler");
+
+			final Runner runner = new Runner(script, paramArray, handler, debugger);
+			pool.submit(runner::execute);
+			return runner;
+		} finally {
+			lk.readLock().unlock();
 		}
-
-		logger.debug("Executing script " + script.getName());
-
-		script = Conditions.checkNotNull(script, "script");
-		paramArray = Conditions.checkNotNull(paramArray, "paramArray");
-		handler = Conditions.checkNotNull(handler, "handler");
-
-		final Runner runner = new Runner(script, paramArray, handler, debugger);
-		pool.submit(runner::execute);
-		return runner;
 	}
 
 	/**
@@ -179,12 +189,19 @@ public class Executor {
 	 *            {@link Script}
 	 */
 	public static void resume(final Runner runner) {
-		if (!isRunning.get()) {
-			throw new RejectedExecutionException(
-					"Cannot start, Executor has been stopped");
+		lk.readLock().lock();
+		try {
+			if (!running) {
+				throw new RejectedExecutionException(
+						"Cannot start, Executor has been stopped");
+			}
+
+			logger.debug("Resuming script " + runner.getScript().getName());
+
+			pool.submit(runner::resume);
+		} finally {
+			lk.readLock().unlock();
 		}
-		logger.debug("Resuming script " + runner.getScript().getName());
-		pool.submit(runner::resume);
 	}
 
 	/**
