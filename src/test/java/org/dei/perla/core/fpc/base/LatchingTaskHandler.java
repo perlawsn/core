@@ -33,7 +33,7 @@ public class LatchingTaskHandler implements TaskHandler {
 	public int getCount() throws InterruptedException {
 		lk.lock();
 		try {
-			if (waitCount > 0) {
+			if (waitCount > 0 && error == null) {
 				cond.await();
 			}
 			if (error != null) {
@@ -48,7 +48,7 @@ public class LatchingTaskHandler implements TaskHandler {
 	public double getAveragePeriod() throws InterruptedException {
 		lk.lock();
 		try {
-			if (waitCount > 0) {
+			if (waitCount > 0 && error == null) {
 				cond.await();
 			}
 			if (error != null) {
@@ -63,7 +63,7 @@ public class LatchingTaskHandler implements TaskHandler {
 	public List<Sample> getSamples() throws InterruptedException {
 		lk.lock();
 		try {
-			if (waitCount > 0) {
+			if (waitCount > 0 && error == null) {
 				cond.await();
 			}
 			if (error != null) {
@@ -78,7 +78,7 @@ public class LatchingTaskHandler implements TaskHandler {
 	public Sample getLastSample() throws InterruptedException {
 		lk.lock();
 		try {
-			if (waitCount > 0) {
+			if (waitCount > 0 && error == null) {
 				cond.await();
 			}
 			if (error != null) {
@@ -93,8 +93,11 @@ public class LatchingTaskHandler implements TaskHandler {
 	public void awaitCompletion() throws InterruptedException {
 		lk.lock();
 		try {
-			if (waitCount > 0) {
+			if (waitCount > 0 && error == null) {
 				cond.await();
+			}
+			if (error != null) {
+				throw new RuntimeException(error);
 			}
 		} finally {
 			lk.unlock();
