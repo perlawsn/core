@@ -1,16 +1,16 @@
 package org.dei.perla.core.channel.simulator;
 
+import org.dei.perla.core.channel.AbstractChannel;
+import org.dei.perla.core.channel.ChannelException;
+import org.dei.perla.core.channel.IORequest;
+import org.dei.perla.core.channel.Payload;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
-import org.dei.perla.core.channel.AbstractChannel;
-import org.dei.perla.core.channel.ChannelException;
-import org.dei.perla.core.channel.IORequest;
-import org.dei.perla.core.channel.Payload;
 
 /**
  * <p>
@@ -154,29 +154,23 @@ public class SimulatorChannel extends AbstractChannel {
     }
 
     @Override
-    public Payload handleRequest(IORequest request) throws ChannelException,
+    public Payload handleRequest(IORequest req) throws ChannelException,
             InterruptedException {
-        SimulatorIORequest simReq;
+        SimulatorIORequest simReq = (SimulatorIORequest) req;
 
-        simReq = (SimulatorIORequest) request;
-
-        Generator generator = findGenerator(simReq.getGeneratorId());
-        if (generator == null) {
+        Generator gen = findGenerator(simReq.getGeneratorId());
+        if (gen == null) {
             return null;
         }
 
         if (simReq.getPeriod() != null) {
-            SimulatorPayload payload = (SimulatorPayload) simReq.getPeriod();
-            if (!payload.getValueMap().containsKey("period")) {
-                throw new ChannelException(
-                        "Missing 'period' attribute in period message");
-            }
-            int period = (Integer) payload.getValueMap().get("period");
-            scheduleResponse(simReq, period, generator);
+            int period = getPeriod(simReq);
+            schedulePeriodic(simReq, period, gen);
             return null;
-        }
 
-        return generator.generateResponse();
+        } else {
+            return gen.generateResponse();
+        }
     }
 
     private Generator findGenerator(String id) {
@@ -188,32 +182,43 @@ public class SimulatorChannel extends AbstractChannel {
         return null;
     }
 
-    private void scheduleResponse(SimulatorIORequest request, int period,
-            final Generator generator) throws ChannelException {
-
-        if (period < 0) {
+    private int getPeriod(SimulatorIORequest req) throws ChannelException {
+        SimulatorPayload p = (SimulatorPayload) req.getPeriod();
+        if (!p.getValueMap().containsKey("period")) {
             throw new ChannelException(
-                    "Invalid negative period in Simulator request '"
-                            + request.getId() + "'.");
+                    "Missing 'period' attribute in period message");
         }
+        return (Integer) p.getValueMap().get("period");
+    }
 
-        ScheduledFuture<?> future = runningMap.remove(request.getGeneratorId());
-        if (future != null) {
-            future.cancel(true);
+    private void schedulePeriodic(SimulatorIORequest req, int period,
+            Generator gen) throws ChannelException {
+        synchronized (gen) {
+            if (period < 0) {
+                throw new ChannelException("Invalid negative period in " +
+                        "Simulator request '" + req.getId() + "'.");
+            }
+
+            ScheduledFuture<?> future = runningMap.remove(req.getGeneratorId());
+            if (future != null) {
+                future.cancel(true);
+            }
+
+            // Setting a period = 0 stops the simulator from periodically generating
+            // values
+            if (period == 0) {
+                return;
+            }
+
+            future = exec.scheduleAtFixedRate(() -> {
+                synchronized (gen) {
+                    Payload response = gen.generateResponse();
+                    notifyAsyncData(response);
+                }
+            }, 0, period, TimeUnit.MILLISECONDS);
+
+            runningMap.put(req.getGeneratorId(), future);
         }
-
-        // Setting a period = 0 stops the simulator from periodically generating
-        // values
-        if (period == 0) {
-            return;
-        }
-
-        future = exec.scheduleAtFixedRate(() -> {
-            Payload response = generator.generateResponse();
-            notifyAsyncData(response);
-        }, 0, period, TimeUnit.MILLISECONDS);
-
-        runningMap.put(request.getGeneratorId(), future);
     }
 
     @Override
@@ -222,8 +227,8 @@ public class SimulatorChannel extends AbstractChannel {
         for (ScheduledFuture<?> future : runningMap.values()) {
             future.cancel(true);
         }
-        runningMap = null;
         exec.shutdownNow();
+        runningMap = null;
         exec = null;
     }
 
