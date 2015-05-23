@@ -11,8 +11,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -42,9 +40,7 @@ public abstract class AbstractOperation<T extends AbstractTask> implements
 
 	private final SamplePipeline defPipeline;
 
-	// State
-	private final Lock lk = new ReentrantLock();
-	private volatile boolean schedulable;
+	private boolean schedulable;
 
 	// Unsynchronized acces to the taskList when reading. Reads on the
 	// taskList will greatly outnumber the writes, since this list is traversed
@@ -79,7 +75,7 @@ public abstract class AbstractOperation<T extends AbstractTask> implements
 	}
 
 	@Override
-	public final boolean isSchedulable() {
+	public final synchronized boolean isSchedulable() {
 		return schedulable;
 	}
 
@@ -90,26 +86,19 @@ public abstract class AbstractOperation<T extends AbstractTask> implements
 	}
 
 	@Override
-	public final AbstractTask schedule(Map<String, Object> params, TaskHandler h,
+	public final synchronized AbstractTask schedule(Map<String, Object> params,
+			TaskHandler h,
             SamplePipeline p) throws IllegalArgumentException, IllegalStateException {
 		Conditions.checkNotNull(h, "handler");
 		if (!schedulable) {
 			throw new IllegalStateException("Operation '" + id
 					+ "' is not schedulable");
 		}
-
-		lk.lock();
-		try {
-
-			// Wrapping the invocation inside a lock ensures that the scheduling
-			// operations are run in mutual exclusion with all other methods
-			// that may modify the internal task list or the operating status of
-			// this operation
-			return doSchedule(params, h, p);
-
-		} finally {
-			lk.unlock();
-		}
+        // Wrapping the invocation inside a lock ensures that the scheduling
+        // operations are run in mutual exclusion with all other methods
+        // that may modify the internal task list or the operating status of
+        // this operation
+        return doSchedule(params, h, p);
 	}
 
 	/**
@@ -137,22 +126,15 @@ public abstract class AbstractOperation<T extends AbstractTask> implements
             SamplePipeline p) throws IllegalArgumentException;
 
 	@Override
-	public final void stop(Consumer<Operation> h) {
+	public final synchronized void stop(Consumer<Operation> h) {
 		if (!schedulable) {
 			return;
 		}
 
-		lk.lock();
-		try {
-
-			tasks.forEach(T::operationStopped);
-			tasks.clear();
-			doStop(h);
-			schedulable = false;
-
-		} finally {
-			lk.unlock();
-		}
+        tasks.forEach(T::operationStopped);
+        tasks.clear();
+        doStop(h);
+        schedulable = false;
 	}
 
 	/**
@@ -189,13 +171,8 @@ public abstract class AbstractOperation<T extends AbstractTask> implements
 	 * @param task
 	 *            {@link AbstractTask} to be added
 	 */
-	protected final void add(T task) {
-		lk.lock();
-		try {
-			tasks.add(task);
-		} finally {
-			lk.unlock();
-		}
+	protected final synchronized void add(T task) {
+        tasks.add(task);
 	}
 
 	/**
@@ -209,25 +186,18 @@ public abstract class AbstractOperation<T extends AbstractTask> implements
 	 * @param task
 	 *            {@link AbstractTask} to be removed
 	 */
-	protected final void remove(AbstractTask task) {
-		lk.lock();
-		try {
+	protected final synchronized void remove(AbstractTask task) {
+        if (!tasks.contains(task)) {
+            return;
+        }
+        tasks.remove(task);
 
-			if (!tasks.contains(task)) {
-				return;
-			}
-			tasks.remove(task);
+        if (tasks.isEmpty()) {
+            doStop();
+            return;
+        }
 
-			if (tasks.isEmpty()) {
-				doStop();
-				return;
-			}
-
-			postRemove(Collections.unmodifiableList(tasks));
-
-		} finally {
-			lk.unlock();
-		}
+        postRemove(Collections.unmodifiableList(tasks));
 	}
 
 	/**
@@ -261,19 +231,13 @@ public abstract class AbstractOperation<T extends AbstractTask> implements
 	 * @param cause
 	 *            Cause of the unrecoverable error
 	 */
-	protected final void unrecoverableError(String msg, Throwable cause) {
-		lk.lock();
-		try {
-
-			log.error("Unexpected error, stopping operation", cause);
-			FpcException e = new FpcException(msg, cause);
-			tasks.forEach(t -> t.operationError(e));
-			tasks.clear();
-			doStop();
-
-		} finally {
-			lk.unlock();
-		}
+	protected final synchronized void unrecoverableError(String msg,
+			Throwable cause) {
+        log.error("Unexpected error, stopping operation", cause);
+        FpcException e = new FpcException(msg, cause);
+        tasks.forEach(t -> t.operationError(e));
+        tasks.clear();
+        doStop();
 	}
 
 	// ////////////////
@@ -298,13 +262,8 @@ public abstract class AbstractOperation<T extends AbstractTask> implements
 	 * @param operation
 	 *            Operation to perform
 	 */
-	protected final void runUnderLock(Runnable op) {
-		lk.lock();
-		try {
-			op.run();
-		} finally {
-			lk.unlock();
-		}
+	protected final synchronized void runUnderLock(Runnable op) {
+        op.run();
 	}
 
 	/**
@@ -315,13 +274,8 @@ public abstract class AbstractOperation<T extends AbstractTask> implements
 	 * @param operation
 	 *            Operation to perform
 	 */
-	protected final <E> E runUnderLock(Supplier<E> op) {
-		lk.lock();
-		try {
-			return op.get();
-		} finally {
-			lk.unlock();
-		}
+	protected final synchronized <E> E runUnderLock(Supplier<E> op) {
+        return op.get();
 	}
 
 	/**

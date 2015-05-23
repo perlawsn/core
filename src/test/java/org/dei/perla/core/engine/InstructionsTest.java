@@ -648,7 +648,7 @@ public class InstructionsTest {
 		}
 	}
 
-	@Test
+	@Test(expected = ExecutionException.class)
 	public void testErrorInstruction() throws Exception {
 		Script script = ScriptBuilder.newScript()
 				.add(new ErrorInstruction("Test error instruction"))
@@ -656,14 +656,7 @@ public class InstructionsTest {
 
 		SynchronizerScriptHandler syncHandler = new SynchronizerScriptHandler();
 		Runner runner = Executor.execute(script, syncHandler);
-		try {
-			syncHandler.getResult();
-			assertTrue(runner.isDone());
-			assertTrue(runner.isCancelled());
-		} catch (ExecutionException e) {
-			assertThat(e, notNullValue());
-			assertTrue(e.getCause() instanceof ScriptException);
-		}
+        syncHandler.getResult();
 	}
 
 	@Test

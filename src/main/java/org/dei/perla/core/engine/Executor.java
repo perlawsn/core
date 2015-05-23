@@ -38,9 +38,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 @ThreadSafe
 public class Executor {
 
-	public static final ScriptParameter[] EMPTY_PARAMETER_ARRAY = new ScriptParameter[0];
+	private static final Logger log = Logger.getLogger(Executor.class);
 
-	private static final Logger logger = Logger.getLogger(Executor.class);
+	public static final ScriptParameter[] EMPTY_PARAMETER_ARRAY = new ScriptParameter[0];
 
 	private static final ReadWriteLock lk = new ReentrantReadWriteLock();
 	private static boolean running = true;
@@ -81,7 +81,7 @@ public class Executor {
 			pool.shutdown();
 			boolean terminated = pool.awaitTermination(timeoutSec, TimeUnit.SECONDS);
 			if (!terminated) {
-				logger.info("Termination timeout expired, attempting to interrupt lingering Scripts");
+				log.info("Termination timeout expired, attempting to interrupt lingering Scripts");
 				pool.shutdownNow();
 			}
 		} finally {
@@ -167,7 +167,7 @@ public class Executor {
 						"Cannot start, Executor has been stopped");
 			}
 
-			logger.debug("Executing script " + script.getName());
+			log.debug("Starting script '" + script.getName() + "'");
 
 			script = Conditions.checkNotNull(script, "script");
 			paramArray = Conditions.checkNotNull(paramArray, "paramArray");
@@ -196,7 +196,7 @@ public class Executor {
 						"Cannot start, Executor has been stopped");
 			}
 
-			logger.debug("Resuming script " + runner.getScript().getName());
+			log.debug("Resuming script '" + runner.getScript().getName() + "'");
 
 			pool.submit(runner::resume);
 		} finally {

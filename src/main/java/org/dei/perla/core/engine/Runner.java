@@ -1,5 +1,7 @@
 package org.dei.perla.core.engine;
 
+import org.apache.log4j.Logger;
+
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -23,6 +25,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  */
 public class Runner {
+
+	private static final Logger log = Logger.getLogger(Runner.class);
 
 	// Caching mechanism to reuse ExecutionContext objects
 	private static final Queue<ExecutionContext> contextPool = new ConcurrentLinkedQueue<>();
@@ -226,9 +230,10 @@ public class Runner {
             // user's scripts to bring down the entire system
 			state.set(CANCELLED);
 			relinquishContext(ctx);
-			handler.error(new ScriptException("Unexpected error in script '"
-					+ script.getName() + "', instruction '"
-					+ instruction.getClass().getSimpleName() + "'", t));
+			String msg = "Unexpected error in script '" + script.getName() +
+					"', instruction '" + instruction.getClass().getSimpleName() + "'";
+			log.error(msg, t);
+			handler.error(new ScriptException(msg, t));
 		}
 	}
 

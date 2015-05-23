@@ -1,5 +1,6 @@
 package org.dei.perla.core.fpc.base;
 
+import org.apache.log4j.Logger;
 import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.TaskHandler;
 import org.dei.perla.core.sample.Sample;
@@ -12,6 +13,9 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class LatchingTaskHandler implements TaskHandler {
+
+    private static final Logger log =
+            Logger.getLogger(LatchingTaskHandler.class);
 
 	private final Lock lk = new ReentrantLock();
 	private final Condition cond = lk.newCondition();
@@ -129,6 +133,7 @@ public class LatchingTaskHandler implements TaskHandler {
 			} else {
 				ts = Instant.now();
 			}
+
 			if (previousTime == null) {
 				previousTime = ts;
 			} else {
