@@ -19,7 +19,7 @@ public final class AsyncUtils {
      * @param task task to run in a {@link Thread} different than the current
      *             one.
      */
-    public static void runOnNewThread(Runnable task) {
+    public static void runInNewThread(Runnable task) {
         pool.submit(task);
     }
 

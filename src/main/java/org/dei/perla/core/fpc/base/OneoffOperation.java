@@ -4,6 +4,7 @@ import org.dei.perla.core.engine.Script;
 import org.dei.perla.core.fpc.TaskHandler;
 import org.dei.perla.core.sample.Attribute;
 import org.dei.perla.core.sample.SamplePipeline;
+import org.dei.perla.core.utils.AsyncUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -34,7 +35,16 @@ public class OneoffOperation extends AbstractOperation<AbstractTask> {
 
 	@Override
 	protected void doStop(Consumer<Operation> handler) {
-		handler.accept(this);
+		// Synchronization and AsyncUtils.runInNewThread ensures that the
+		// handler is effectively called after the doStop invocation is has
+		// been completed
+		AsyncUtils.runInNewThread(() -> {
+			notifyStop(handler);
+		});
+	}
+
+	private void notifyStop(Consumer<Operation> h) {
+		runUnderLock(() -> h.accept(this));
 	}
 
 }

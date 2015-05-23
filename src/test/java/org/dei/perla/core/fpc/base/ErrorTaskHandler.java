@@ -47,7 +47,7 @@ public class ErrorTaskHandler implements TaskHandler {
 
     @Override
     public void data(Task task, Sample sample) {
-        throw new RuntimeException("Injecting error");
+        throw new RuntimeException("Exception injected for test purposes");
     }
 
     @Override

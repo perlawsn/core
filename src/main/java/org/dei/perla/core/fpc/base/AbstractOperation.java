@@ -86,14 +86,15 @@ public abstract class AbstractOperation<T extends AbstractTask> implements
 	}
 
 	@Override
-	public final synchronized AbstractTask schedule(Map<String, Object> params,
-			TaskHandler h,
-            SamplePipeline p) throws IllegalArgumentException, IllegalStateException {
+	public final synchronized AbstractTask schedule(
+			Map<String, Object> params, TaskHandler h, SamplePipeline p)
+			throws IllegalArgumentException, IllegalStateException {
 		Conditions.checkNotNull(h, "handler");
 		if (!schedulable) {
-			throw new IllegalStateException("Operation '" + id
-					+ "' is not schedulable");
+			throw new IllegalStateException(
+					"Operation '" + id + "' is not schedulable");
 		}
+
         // Wrapping the invocation inside a lock ensures that the scheduling
         // operations are run in mutual exclusion with all other methods
         // that may modify the internal task list or the operating status of
@@ -215,8 +216,7 @@ public abstract class AbstractOperation<T extends AbstractTask> implements
 	 * @param tasks
 	 *            List of remaining {@link Task}s
 	 */
-	protected void postRemove(List<T> tasks) {
-	}
+	protected void postRemove(List<T> tasks) { }
 
 	/**
 	 * Stops all active {@link Task}s and signal the cause of the error that
@@ -240,9 +240,9 @@ public abstract class AbstractOperation<T extends AbstractTask> implements
         doStop();
 	}
 
-	// ////////////////
+	///////////////////
 	// Utility methods
-	// ////////////////
+	///////////////////
 
 	/**
 	 * Returns the number of {@link Task}s currently scheduled on this

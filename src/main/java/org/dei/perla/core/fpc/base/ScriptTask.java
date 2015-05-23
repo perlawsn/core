@@ -1,5 +1,6 @@
 package org.dei.perla.core.fpc.base;
 
+import org.apache.log4j.Logger;
 import org.dei.perla.core.engine.Executor;
 import org.dei.perla.core.engine.Runner;
 import org.dei.perla.core.engine.Script;
@@ -27,13 +28,15 @@ import java.util.List;
  */
 public class ScriptTask extends AbstractTask {
 
+	private final Logger log;
 	private final Runner runner;
 
-	protected ScriptTask(OneoffOperation operation, TaskHandler handler,
-			SamplePipeline pipeline) {
-		super(operation, handler, pipeline);
-		this.runner = Executor.execute(operation.getScript(),
-				new OneoffScriptHandler());
+	protected ScriptTask(OneoffOperation op, TaskHandler h, SamplePipeline p) {
+		super(op, h, p);
+		log = Logger.getLogger(op.getId() + " one-off Operation");
+
+		ScriptHandler scriptHand = new OneoffScriptHandler();
+		this.runner = Executor.execute(op.getScript(), scriptHand);
 	}
 
 	@Override
@@ -53,8 +56,14 @@ public class ScriptTask extends AbstractTask {
 
 		@Override
 		public void complete(Script script, List<Object[]> samples) {
-			samples.forEach(ScriptTask.this::processSample);
-			notifyComplete();
+			try {
+				samples.forEach(ScriptTask.this::processSample);
+				notifyComplete();
+			} catch (Exception e) {
+				String msg = "Error while running operation handler";
+				log.error(msg, e);
+				notifyError(e, true);
+			}
 		}
 
 		@Override

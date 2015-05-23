@@ -225,15 +225,16 @@ public class Runner {
 				}
 				instruction = instruction.run(this);
 			} while (state.get() == RUNNING);
-		} catch (Throwable t) {
+		} catch (Exception e) {
             // Catching Throwable, since we don't want any error in the
-            // user's scripts to bring down the entire system
+            // user's scripts or in the handler code to bring down the entire
+            // system
 			state.set(CANCELLED);
 			relinquishContext(ctx);
 			String msg = "Unexpected error in script '" + script.getName() +
 					"', instruction '" + instruction.getClass().getSimpleName() + "'";
-			log.error(msg, t);
-			handler.error(new ScriptException(msg, t));
+			log.error(msg, e);
+			handler.error(new ScriptException(msg, e));
 		}
 	}
 

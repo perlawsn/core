@@ -96,11 +96,13 @@ public abstract class AbstractTask implements Task {
 	 * Immediately cancels the {@link AbstractTask} execution following an error
 	 * occurred to the connected {@link Operation}.
 	 *
+	 * <p>
 	 * This method is intended to be called by an {@link Operation} object to
 	 * indicate that an exception occurred while processing a script. Invoking
 	 * this method will not remove the task from the {@link AbstractOperation}'s
 	 * task list.
 	 *
+	 * <p>
 	 * Invoking this method does not produce any effect if the
 	 * {@code AbstractTask} is stopped
 	 *
@@ -116,21 +118,17 @@ public abstract class AbstractTask implements Task {
 	}
 
 	/**
-	 * <p>
 	 * Immediately stops the {@link AbstractTask} execution.
-	 * </p>
 	 *
 	 * <p>
 	 * This method is intended to be called by an {@link AbstractOperation}
 	 * object to indicate that no more samples will be produced. Invoking this
 	 * method will not remove the task from the {@link AbstractOperation}'s task
 	 * list.
-	 * </p>
 	 *
 	 * <p>
 	 * Invoking this method does not produce any effect if the
 	 * {@code AbstractTask} is stopped
-	 * </p>
 	 */
 	protected final void operationStopped() {
 		if (!running.compareAndSet(true, false)) {
@@ -141,17 +139,14 @@ public abstract class AbstractTask implements Task {
 	}
 
 	/**
-	 * <p>
 	 * Runs the a new {@link Sample} in the {@link SamplePipeline} and handles
 	 * it over to the registered {@link TaskHandler}. This method is intended to
 	 * be invoked by a {@link AbstractOperation} whenever a new sample is
 	 * produced by the remote device.
-	 * </p>
 	 *
 	 * <p>
 	 * Invoking this method does not produce any effect if the
 	 * {@code AbstractTask} is stopped
-	 * </p>
 	 *
 	 * @param sample
 	 *            sample to be processed
@@ -166,16 +161,13 @@ public abstract class AbstractTask implements Task {
 	}
 
 	/**
-	 * <p>
 	 * Invokes the registered {@link TaskHandler} to inform any interested
 	 * object that the {@link Task} is complete, and that no new {@link Sample}
 	 * are going to be produced.
-	 * </p>
 	 *
 	 * <p>
 	 * Invoking this method does not produce any effect if the
 	 * {@code AbstractTask} is stopped
-	 * </p>
 	 */
 	protected final void notifyComplete() {
 		if (!running.compareAndSet(true, false)) {
@@ -191,6 +183,7 @@ public abstract class AbstractTask implements Task {
 	 * may be used to indicate whether the error is unrecoverable (no new
 	 * {@link Sample}s will be produced) or not.
 	 *
+	 * <p>
 	 * Invoking this method does not produce any effect if the
 	 * {@code AbstractTask} is stopped
 	 *
