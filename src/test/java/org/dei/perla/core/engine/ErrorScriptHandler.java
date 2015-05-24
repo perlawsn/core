@@ -33,7 +33,7 @@ public class ErrorScriptHandler implements ScriptHandler {
     }
 
     @Override
-    public void error(Throwable cause) {
+    public void error(Script script, Throwable cause) {
         lk.lock();
         try {
             error = cause;

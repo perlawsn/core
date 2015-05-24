@@ -61,8 +61,8 @@ public class SimulatedPeriodicOperation extends PeriodicOperation {
 			// all script invocations are performed sequentially.
 			handler.await();
 		} catch (Exception e) {
-			handler.error(new RuntimeException("Unexpected error while " +
-					"running simulated periodic operation", e));
+			handler.error(script, new RuntimeException("Unexpected error " +
+					"while running simulated periodic operation", e));
 		}
 	}
 
@@ -105,7 +105,7 @@ public class SimulatedPeriodicOperation extends PeriodicOperation {
 		}
 
 		@Override
-		public void error(Throwable cause) {
+		public void error(Script script, Throwable cause) {
             lk.lock();
             try {
                 Exception e = new FpcException(cause);

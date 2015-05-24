@@ -67,7 +67,7 @@ public class ScriptTask extends AbstractTask {
 		}
 
 		@Override
-		public void error(Throwable cause) {
+		public void error(Script script, Throwable cause) {
 			notifyError(cause, true);
 		}
 

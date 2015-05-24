@@ -67,11 +67,11 @@ public class Runner {
     }
 
 	/**
-	 * Returns an <code>ExecutionContext</code> taken from a pool of unused
-	 * contexts. The <code>ExecutionContext</code> object is cleared of all
+	 * Returns an {@link ExecutionContext} taken from a pool of unused
+	 * contexts. The {@link ExecutionContext} object is cleared of all
 	 * previous information prior to return.
 	 *
-	 * @return <code>ExecutionContext</code> object
+	 * @return {@link ExecutionContext} object
 	 */
 	private static final ExecutionContext getContext() {
 		// No synchronization needed. Worst that can happen is that we create
@@ -84,10 +84,9 @@ public class Runner {
 	}
 
 	/**
-	 * Places an unused <code>ExecutionContext</code> in the pool.
+	 * Places an unused {@link ExecutionContext} in the pool.
 	 *
-	 * @param context
-	 *            <code>ExecutionContext</code> to be returned to the pool
+	 * @param context {@link ExecutionContext} to be returned to the pool
 	 */
 	private static final void relinquishContext(ExecutionContext context) {
         context.clear();
@@ -96,21 +95,21 @@ public class Runner {
 
 	/**
 	 * <p>
-	 * Suspends the execution of the <code>Script</code> being run by the
-	 * <code>Runner</code>. Suspended <code>Runners</code> can be resumed using
-	 * the <code>Executor.resume()</code> method.
+	 * Suspends the execution of the {@link Script} being run by the {@code
+	 * Runner} Suspended {@code Runner} can be resumed using the {@code
+	 * Executor.resume()} method.
 	 *
 	 * <p>
-	 * A suspended <code>Runner</code> is not considered done. Invoking the
-	 * <code>getResult()</code> method on a suspended <code>Runner</code> will
-	 * block until the execution is resumed and completed.
+	 * A suspended {@code Runner} is not considered done. Invoking the {@code
+	 * getResult()} method on a suspended {@code Runner} will block until the
+	 * execution is resumed and completed.
 	 */
 	protected void suspend() {
 		state.compareAndSet(RUNNING, SUSPENDED);
 	}
 
 	/**
-	 * Stops the <code>Script</code>.
+	 * Stops the {@link Script}.
 	 */
 	protected void stop() {
 		if (!state.compareAndSet(RUNNING, STOPPED)) {
@@ -122,7 +121,7 @@ public class Runner {
 			String msg = "Unexpected error in script '" + script.getName() +
 					"': exception occurred in ScriptHandler.complete() method";
 			log.error(msg, e);
-			handler.error(new ScriptException(msg, e));
+			handler.error(script, new ScriptException(msg, e));
 		}
 		relinquishContext(ctx);
 	}
@@ -140,13 +139,15 @@ public class Runner {
             }
         } while (!state.compareAndSet(old, CANCELLED));
         relinquishContext(ctx);
-        handler.error(new ScriptCancelledException("Script '"
-                + script.getName() + "' cancelled."));
+
+		String msg = "Script '" + script.getName() + "' cancelled.";
+		log.debug(msg);
+        handler.error(script, new ScriptCancelledException(msg));
 	}
 
 	/**
-	 * Sets a breakpoint, causing the <code>Runner</code> to invoke the
-	 * <code>ScriptDebugger</code> (if any) before running the next instruction.
+	 * Sets a breakpoint, causing the {@code Runner} to invoke the
+	 * {@link ScriptDebugger} (if any) before running the next instruction.
 	 */
 	protected void setBreakpoint() {
 		breakpoint = true;
@@ -197,9 +198,13 @@ public class Runner {
      */
 	protected void resume() {
 		if (!state.compareAndSet(SUSPENDED, RUNNING)) {
-            throw new IllegalStateException(
-                    "Cannot resume, Runner is not in suspended state");
+			String msg = "Cannot resume, Runner is not in suspended state";
+			log.error(msg);
+            throw new IllegalStateException(msg);
 		}
+
+		// No need to fetch the first instruction of the Script, since the
+		// Runner is resuming from where it was previously interrupted
 		run();
 	}
 
@@ -209,21 +214,28 @@ public class Runner {
 	 */
 	protected void execute() {
 		if (!state.compareAndSet(NEW, RUNNING)) {
-            throw new IllegalStateException(
-                    "Cannot start, Runner has already been run");
+			String msg = "Cannot start, Runner has already been run";
+			log.error(msg);
+            throw new IllegalStateException(msg);
 		}
+
+		// Fetch the first instruction and start the run loop
 		instruction = script.getCode();
 		run();
 	}
 
+	/**
+	 * Main {@link Script} execution loop.
+	 */
 	private void run() {
 		try {
 			do {
-				if (instruction == null) {
-					state.set(CANCELLED);
-					handler.error(new ScriptException(
-							"Missing stop instruction in script '"
-									+ script.getName() + "'"));
+				if (instruction == null &&
+						state.compareAndSet(RUNNING, CANCELLED)) {
+					String msg = "Missing stop instruction in script '"
+									+ script.getName() + "'";
+					log.error(msg);
+					handler.error(script, new ScriptException(msg));
 				}
 
 				if (debugger != null && breakpoint) {
@@ -233,7 +245,7 @@ public class Runner {
 				instruction = instruction.run(this);
 			} while (state.get() == RUNNING);
 		} catch (Exception e) {
-            // Catching Throwable, since we don't want any error in the
+            // Catching all Exceptions, since we don't want any error in the
             // user's scripts or in the handler code to bring down the entire
             // system
 			state.set(CANCELLED);
@@ -241,7 +253,7 @@ public class Runner {
 			String msg = "Unexpected error in script '" + script.getName() +
 					"', instruction '" + instruction.getClass().getSimpleName() + "'";
 			log.error(msg, e);
-			handler.error(new ScriptException(msg, e));
+			handler.error(script, new ScriptException(msg, e));
 		}
 	}
 

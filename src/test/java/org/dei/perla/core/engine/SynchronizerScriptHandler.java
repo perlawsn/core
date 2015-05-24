@@ -53,7 +53,7 @@ public class SynchronizerScriptHandler implements ScriptHandler {
 	}
 
 	@Override
-	public void error(Throwable cause) {
+	public void error(Script script, Throwable cause) {
 		lock.lock();
 		try {
 			this.exception = cause;

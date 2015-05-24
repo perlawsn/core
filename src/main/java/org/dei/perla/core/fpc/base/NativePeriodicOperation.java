@@ -183,7 +183,7 @@ public class NativePeriodicOperation extends PeriodicOperation {
 		}
 
 		@Override
-		public void error(Throwable cause) {
+		public void error(Script script, Throwable cause) {
 			unrecoverableError("Cannot start operation '" + getId() + "'",
 					cause);
 		}
@@ -238,7 +238,7 @@ public class NativePeriodicOperation extends PeriodicOperation {
 		}
 
 		@Override
-		public void error(Throwable cause) {
+		public void error(Script script, Throwable cause) {
 			if (stopHandler == null) {
 				unrecoverableError("Cannot stop operation", cause);
 			}
@@ -305,9 +305,9 @@ public class NativePeriodicOperation extends PeriodicOperation {
         }
 
 		@Override
-		public void error(Throwable cause) {
+		public void error(Script script, Throwable cause) {
 			Exception e = new FpcException(cause);
-			forEachTask(t -> error(e));
+			forEachTask(t -> error(script, e));
 		}
 
 	}

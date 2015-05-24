@@ -74,7 +74,7 @@ public class ScriptExecutorTest {
 			}
 
 			@Override
-			public void error(Throwable cause) {
+			public void error(Script script, Throwable cause) {
 				resultQueue.add(null);
 			}
 		});

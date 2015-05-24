@@ -114,7 +114,7 @@ public class AsyncOperation extends AbstractOperation<AsyncOperation.AsyncTask> 
 		}
 
 		@Override
-		public void error(Throwable cause) {
+		public void error(Script script, Throwable cause) {
 			runUnderLock(() -> {
 				if (state == SUSPENDED) {
 					return;
@@ -144,7 +144,7 @@ public class AsyncOperation extends AbstractOperation<AsyncOperation.AsyncTask> 
 		}
 
 		@Override
-		public void error(Throwable cause) {
+		public void error(Script script, Throwable cause) {
 			log.error("Execution error in 'on' script", cause);
 			forEachTask(t -> t.notifyError(cause, false));
 		}
