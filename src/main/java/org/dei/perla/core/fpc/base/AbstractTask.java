@@ -199,10 +199,7 @@ public abstract class AbstractTask implements Task {
 
 		if (stop && running.compareAndSet(true, false)) {
 			op.remove(this);
-		} else {
-			return;
 		}
-
 		handler.error(this, cause);
 	}
 

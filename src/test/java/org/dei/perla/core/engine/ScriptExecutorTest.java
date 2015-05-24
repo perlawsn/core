@@ -239,4 +239,15 @@ public class ScriptExecutorTest {
 		assertThat(il.getValue(runner2), equalTo(0));
 	}
 
+	@Test
+	public void testHandlerError() throws InterruptedException {
+		Script s = ScriptBuilder.newScript()
+				.add(new StopInstruction())
+				.buildScript("test");
+		ErrorScriptHandler handler = new ErrorScriptHandler();
+		Executor.execute(s, handler);
+		Throwable e = handler.awaitError();
+		assertTrue(e instanceof ScriptException);
+	}
+
 }

@@ -116,7 +116,14 @@ public class Runner {
 		if (!state.compareAndSet(RUNNING, STOPPED)) {
 			return;
 		}
-		handler.complete(script, ctx.getSamples());
+		try {
+			handler.complete(script, ctx.getSamples());
+		} catch (Exception e) {
+			String msg = "Unexpected error in script '" + script.getName() +
+					"': exception occurred in ScriptHandler.complete() method";
+			log.error(msg, e);
+			handler.error(new ScriptException(msg, e));
+		}
 		relinquishContext(ctx);
 	}
 
