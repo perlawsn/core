@@ -24,7 +24,6 @@ public class AsyncOperation extends AbstractOperation<AsyncOperation.AsyncTask> 
 	private static final int STARTED = 2;
 
 	private static final ScheduledThreadPoolExecutor executor;
-
 	static {
 		executor = new ScheduledThreadPoolExecutor(10);
 		executor.setRemoveOnCancelPolicy(true);

@@ -38,7 +38,7 @@ public class SamplePipeline {
 
     /**
      * Creates a passthrough {@code SamplePipeline} that creates a new sample
-     * wihtout performing any modification to the source data
+     * without performing any modification to the source data
      *
      * @param atts sample attributes
      * @return a passthrough {@code SamplePipeline} that does not perform any

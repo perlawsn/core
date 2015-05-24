@@ -1,5 +1,6 @@
 package org.dei.perla.core.fpc.base;
 
+import org.apache.log4j.Logger;
 import org.dei.perla.core.fpc.FpcException;
 import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.TaskHandler;
@@ -14,13 +15,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * An abstract implementation of the {@link Task} interface. It is the base
- * class implemented by all {@link Task}s scheduled from an
- * {@link AbstractOperation}.
+ * class implemented by all {@link Task}s scheduled from an {@link
+ * AbstractOperation}.
  *
  * @author Guido Rota (2014)
  *
  */
 public abstract class AbstractTask implements Task {
+
+	protected final Logger log;
 
 	private AtomicBoolean running = new AtomicBoolean(true);
 	private final AbstractOperation<? extends AbstractTask> op;
@@ -47,10 +50,13 @@ public abstract class AbstractTask implements Task {
 		this.handler = handler;
 		this.pipeline = pipeline;
 
-		// Enrich the attribute set with all attributes added by the Pipeline
-		List<Attribute> atts = new ArrayList<>(op.getAttributes());
-		if (pipeline != null) {
-			atts.addAll(pipeline.attributes());
+		log = Logger.getLogger(op.getClass().getSimpleName() + " task");
+
+		List<Attribute> atts;
+		if (pipeline == null) {
+			atts = op.getAttributes();
+		} else {
+			atts = new ArrayList<>(pipeline.attributes());
 		}
 		this.atts = Collections.unmodifiableList(atts);
 	}
@@ -156,8 +162,8 @@ public abstract class AbstractTask implements Task {
 			return;
 		}
 
-        Sample output = pipeline.run(sample);
-		handler.data(this, output);
+		Sample output = pipeline.run(sample);
+        handler.data(this, output);
 	}
 
 	/**

@@ -1,6 +1,5 @@
 package org.dei.perla.core.fpc.base;
 
-import org.apache.log4j.Logger;
 import org.dei.perla.core.engine.Executor;
 import org.dei.perla.core.engine.Runner;
 import org.dei.perla.core.engine.Script;
@@ -28,13 +27,10 @@ import java.util.List;
  */
 public class ScriptTask extends AbstractTask {
 
-	private final Logger log;
 	private final Runner runner;
 
 	protected ScriptTask(OneoffOperation op, TaskHandler h, SamplePipeline p) {
 		super(op, h, p);
-		log = Logger.getLogger(op.getId() + " one-off Operation");
-
 		ScriptHandler scriptHand = new OneoffScriptHandler();
 		this.runner = Executor.execute(op.getScript(), scriptHand);
 	}
