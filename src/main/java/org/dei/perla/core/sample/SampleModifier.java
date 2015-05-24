@@ -57,6 +57,8 @@ public interface SampleModifier {
 		private final int base;
 
 		/**
+		 * Creates a new {@link SampleModifier} that adds new static values
+		 * to the output samples.
 		 *
 		 * @param am attibute-value map identifying the values to be added in
 		 *                 the output sample
@@ -78,8 +80,20 @@ public interface SampleModifier {
 
 	public static final class Reorder implements SampleModifier {
 
-		public final int[] order;
+		private final int[] order;
 
+		/**
+		 * Creates a new {@link SampleModifier} that rearranges the order of
+		 * the output {@link Attribute}s. All input {@link Attribute}s not
+		 * found in the {@code out} list are not discarded, but appended at
+		 * the end of the list instead.
+		 *
+		 * <p>
+		 * NOTE: This constructor changes the order of the {@code in} list.
+		 *
+		 * @param in Original {@link Attribute} order
+		 * @param out Desired output {@link Attribute} order
+		 */
 		protected Reorder(List<Attribute> in, List<Attribute> out) {
 			order = new int[out.size()];
 

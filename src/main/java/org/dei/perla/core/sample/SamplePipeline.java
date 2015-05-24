@@ -24,11 +24,12 @@ public class SamplePipeline {
     public final List<Attribute> atts;
 
     /**
-     * Private {@code SamplePipeline} constructor, new isntances must be
-     * buiilt using the {@link PipelineBuilder} class.
+     * Private {@code SamplePipeline} constructor, new intances must be
+     * built using the {@link PipelineBuilder} class.
      *
      * @param mods {@link SampleModifier} used by the pipeline
-     * @param attOrder {@link Attribute}s in the order required by the fpc user
+     * @param atts {@link Attribute}s contained in the {@link Sample}s
+     *                              processed by the pipeline
      */
     private SamplePipeline(List<SampleModifier> mods,
             List<Attribute> atts) {
@@ -45,7 +46,7 @@ public class SamplePipeline {
      * operation to the data received as an input.
      */
     public static SamplePipeline passthrough(List<Attribute> atts) {
-        atts = Collections.unmodifiableList(atts);
+        atts = atts;
         return new SamplePipeline(Collections.emptyList(), atts);
     }
 
@@ -65,7 +66,7 @@ public class SamplePipeline {
 	 *
 	 * @return {@link Attribute}s added to the processed {@link Sample}
 	 */
-	public Collection<Attribute> attributes() {
+	public List<Attribute> attributes() {
         return atts;
     }
 
@@ -98,7 +99,7 @@ public class SamplePipeline {
 		private final List<SampleModifier> mods = new ArrayList<>();
 
         /**
-         * Private constructur, {@code PipelineBuilder} instances are
+         * Private constructor, {@code PipelineBuilder} instances are
          * supposed to be built using the static newBuilder method available
          * in the {@link SamplePipeline} class.
          */
@@ -106,6 +107,9 @@ public class SamplePipeline {
             atts.addAll(original);
         }
 
+        /**
+         * Adds a {@link SampleModifier} that adds a timestamp {@link Attribute}
+         */
         public void addTimestamp() {
             if (atts.contains(Attribute.TIMESTAMP)) {
                 throw new RuntimeException(
@@ -116,6 +120,12 @@ public class SamplePipeline {
             mods.add(m);
         }
 
+        /**
+         * Adds a {@link SampleModifier} that adds static {@link Attribute}
+         * values to every {@link Sample} processed.
+         *
+         * @param staticValues attribute-value pairs to add
+         */
         public void addStatic(Map<Attribute, Object> staticValues) {
             int base = atts.size();
             Object[] values = new Object[staticValues.size()];
@@ -125,7 +135,7 @@ public class SamplePipeline {
                 Attribute a = e.getKey();
                 if (atts.contains(a)) {
                     throw new RuntimeException(
-                            "The sample already contains a " + a + " field");
+                            "The sample already contains the " + a + " field");
                 }
                 atts.add(a);
                 values[i++] = e.getValue();
@@ -134,18 +144,22 @@ public class SamplePipeline {
             mods.add(m);
         }
 
-        public void reorder(List<Attribute> out) {
-            mods.add(new Reorder(atts, out));
+        /**
+         * Adds a {@link SampleModifier} that orders the {@link Sample}
+         * {@link Attribute}s according to the order found in the input list.
+         *
+         * @param order Desired {@link Attribute} order
+         */
+        public void reorder(List<Attribute> order) {
+            mods.add(new Reorder(atts, order));
         }
 
 		/**
 		 * Creates a new immutable {@code SamplePipeline} containing all
 		 * {@link SampleModifier}s added to the builder
-		 *
-         * @param attOrder {@link Attribute}s in the order required by the fpc user
 		 */
 		public SamplePipeline create() {
-			return new SamplePipeline(mods, atts);
+			return new SamplePipeline(mods, Collections.unmodifiableList(atts));
 		}
 
 	}

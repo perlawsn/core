@@ -49,16 +49,9 @@ public abstract class AbstractTask implements Task {
 		this.op = op;
 		this.handler = handler;
 		this.pipeline = pipeline;
+		this.atts = pipeline.atts;
 
 		log = Logger.getLogger(op.getClass().getSimpleName() + " task");
-
-		List<Attribute> atts;
-		if (pipeline == null) {
-			atts = op.getAttributes();
-		} else {
-			atts = new ArrayList<>(pipeline.attributes());
-		}
-		this.atts = Collections.unmodifiableList(atts);
 	}
 
 	@Override
