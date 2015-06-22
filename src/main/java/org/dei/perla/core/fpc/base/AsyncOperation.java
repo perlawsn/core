@@ -114,7 +114,7 @@ public class AsyncOperation extends AbstractOperation<AsyncOperation.AsyncTask> 
 
 		@Override
 		public void error(Script script, Throwable cause) {
-			runUnderLock(() -> {
+			synchronized (AsyncOperation.this) {
 				if (state == SUSPENDED) {
 					return;
 				}
@@ -123,7 +123,7 @@ public class AsyncOperation extends AbstractOperation<AsyncOperation.AsyncTask> 
 				log.error(message, cause);
 				// Stop all periodic tasks
 				asyncPeriodicOp.unrecoverableError(message, cause);
-			});
+			}
 		}
 
 	}
@@ -173,28 +173,26 @@ public class AsyncOperation extends AbstractOperation<AsyncOperation.AsyncTask> 
 		}
 
 		@Override
-		protected void setSamplingPeriod(final long period) {
-			runUnderLock(() -> {
-				if (timerFuture != null) {
-					timerFuture.cancel(false);
-				}
-				if (period == 0) {
-					currentPeriod = 0;
-					return;
-				}
+		protected synchronized void setSamplingPeriod(final long period) {
+            if (timerFuture != null) {
+                timerFuture.cancel(false);
+            }
+            if (period == 0) {
+                currentPeriod = 0;
+                return;
+            }
 
-				if (state == SUSPENDED) {
-					// Try to reboot the async operation
-					runStartScript();
-					state = STARTED;
-				}
+            if (state == SUSPENDED) {
+                // Try to reboot the async operation
+                runStartScript();
+                state = STARTED;
+            }
 
-				forEachTask(t -> t.setInputPeriod(period));
-				currentPeriod = period;
-				timerFuture = executor.scheduleAtFixedRate(
-						() -> forEachTask(t -> t.newSample(sample)), 0, period,
-						TimeUnit.MILLISECONDS);
-			});
+            forEachTask(t -> t.setInputPeriod(period));
+            currentPeriod = period;
+            timerFuture = executor.scheduleAtFixedRate(
+                    () -> forEachTask(t -> t.newSample(sample)), 0, period,
+                    TimeUnit.MILLISECONDS);
 		}
 
 		@Override
@@ -215,24 +213,22 @@ public class AsyncOperation extends AbstractOperation<AsyncOperation.AsyncTask> 
 		public AsyncTask doSchedule(Map<String, Object> parameterMap,
 				TaskHandler handler, SamplePipeline pipeline)
 				throws IllegalArgumentException {
-			return runUnderLock(() -> {
-				if (state == STOPPED) {
-					throw new IllegalStateException("Opertion '" + getId()
-							+ "' is stopped, cannot start new tasks");
-				} else if (state == SUSPENDED) {
-					// Try to reboot the async operation
-					runStartScript();
-					state = STARTED;
-				}
+            if (state == STOPPED) {
+                throw new IllegalStateException("Opertion '" + getId()
+                        + "' is stopped, cannot start new tasks");
+            } else if (state == SUSPENDED) {
+                // Try to reboot the async operation
+                runStartScript();
+                state = STARTED;
+            }
 
-				// We're not waiting for a sample to be produced. Since this
-				// operation runs asynchronously, we have no way to know when
-				// new data will arrive
-				AsyncTask task = new AsyncTask(this, handler, pipeline);
-				task.processSample(sample);
-				task.notifyComplete();
-				return task;
-			});
+            // We're not waiting for a sample to be produced. Since this
+            // operation runs asynchronously, we have no way to know when
+            // new data will arrive
+            AsyncTask task = new AsyncTask(this, handler, pipeline);
+            task.processSample(sample);
+            task.notifyComplete();
+            return task;
 		}
 
 		@Override

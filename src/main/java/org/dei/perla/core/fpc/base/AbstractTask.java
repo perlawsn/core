@@ -8,10 +8,7 @@ import org.dei.perla.core.sample.Attribute;
 import org.dei.perla.core.sample.Sample;
 import org.dei.perla.core.sample.SamplePipeline;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * An abstract implementation of the {@link Task} interface. It is the base
@@ -25,7 +22,7 @@ public abstract class AbstractTask implements Task {
 
 	protected final Logger log;
 
-	private AtomicBoolean running = new AtomicBoolean(true);
+	private boolean running = true;
 	private final AbstractOperation<? extends AbstractTask> op;
 	private final SamplePipeline pipeline;
 	private final List<Attribute> atts;
@@ -60,8 +57,8 @@ public abstract class AbstractTask implements Task {
 	}
 
 	@Override
-	public final boolean isRunning() {
-		return running.get();
+	public final synchronized boolean isRunning() {
+		return running;
 	}
 
 	/**
@@ -73,23 +70,28 @@ public abstract class AbstractTask implements Task {
 		return op;
 	}
 
+	@Override
+	public final synchronized void stop() {
+		if (!running) {
+			return;
+		}
+		running = false;
+		doStop();
+		op.remove(this);
+		handler.complete(this);
+	}
+
 	/**
 	 * A method invoked whenever the {@code AbstractTask} is stopped. It can be
 	 * overridden by concrete {@code AbstractTask} implementation to add custom
 	 * shutdown behaviour.
 	 */
-	public void doStop() {
-	}
+	protected void doStop() {}
 
-	@Override
-	public final void stop() {
-		if (!running.compareAndSet(true, false)) {
-			return;
-		}
-		doStop();
-		op.remove(this);
-		handler.complete(this);
-	}
+
+	//////////////////////////////////////
+	// Methods invoked by parent Operation
+	//////////////////////////////////////
 
 	/**
 	 * Immediately cancels the {@link AbstractTask} execution following an error
@@ -108,10 +110,11 @@ public abstract class AbstractTask implements Task {
 	 * @param cause
 	 *            Cause of the error
 	 */
-	protected void operationError(FpcException cause) {
-		if (!running.compareAndSet(true, false)) {
+	protected final synchronized void operationError(FpcException cause) {
+		if (!running) {
 			return;
 		}
+		running = false;
 		doStop();
 		handler.error(this, cause);
 	}
@@ -129,13 +132,19 @@ public abstract class AbstractTask implements Task {
 	 * Invoking this method does not produce any effect if the
 	 * {@code AbstractTask} is stopped
 	 */
-	protected final void operationStopped() {
-		if (!running.compareAndSet(true, false)) {
+	protected final synchronized void operationStopped() {
+		if (!running) {
 			return;
 		}
+		running = false;
 		doStop();
 		handler.complete(this);
 	}
+
+
+	///////////////////////////////////////////
+	// Methods invoked by AbstractTask children
+	///////////////////////////////////////////
 
 	/**
 	 * Runs the a new {@link Sample} in the {@link SamplePipeline} and handles
@@ -150,11 +159,10 @@ public abstract class AbstractTask implements Task {
 	 * @param sample
 	 *            sample to be processed
 	 */
-	protected final void processSample(Object[] sample) {
-		if (!running.get()) {
+	protected final synchronized void processSample(Object[] sample) {
+		if (!running) {
 			return;
 		}
-
 		Sample output = pipeline.run(sample);
         handler.data(this, output);
 	}
@@ -165,13 +173,17 @@ public abstract class AbstractTask implements Task {
 	 * are going to be produced.
 	 *
 	 * <p>
+	 * This method is intended to be used by an AbstractTask subclass
+	 *
+	 * <p>
 	 * Invoking this method does not produce any effect if the
 	 * {@code AbstractTask} is stopped
 	 */
-	protected final void notifyComplete() {
-		if (!running.compareAndSet(true, false)) {
+	protected final synchronized void notifyComplete() {
+		if (!running) {
 			return;
 		}
+		running = false;
 		op.remove(this);
 		handler.complete(this);
 	}
@@ -183,6 +195,9 @@ public abstract class AbstractTask implements Task {
 	 * {@link Sample}s will be produced) or not.
 	 *
 	 * <p>
+	 * This method is intended to be used by an AbstractTask subclass
+	 *
+	 * <p>
 	 * Invoking this method does not produce any effect if the
 	 * {@code AbstractTask} is stopped
 	 *
@@ -191,12 +206,12 @@ public abstract class AbstractTask implements Task {
 	 * @param stop
 	 *            Stops the {@link AbstractTask} if set to true
 	 */
-	protected final void notifyError(Throwable cause, boolean stop) {
-		if (!running.get()) {
+	protected final synchronized void notifyError(Throwable cause, boolean stop) {
+		if (!running) {
 			return;
 		}
-
-		if (stop && running.compareAndSet(true, false)) {
+		if (stop && running) {
+			running = false;
 			op.remove(this);
 		}
 		handler.error(this, cause);

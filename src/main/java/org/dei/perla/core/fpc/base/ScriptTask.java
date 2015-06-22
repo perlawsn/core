@@ -27,16 +27,24 @@ import java.util.List;
  */
 public class ScriptTask extends AbstractTask {
 
-	private final Runner runner;
+	private final Script script;
+	private Runner runner = null;
 
 	protected ScriptTask(OneoffOperation op, TaskHandler h, SamplePipeline p) {
 		super(op, h, p);
+		this.script = op.getScript();
+	}
+
+	protected synchronized void start() {
 		ScriptHandler scriptHand = new OneoffScriptHandler();
-		this.runner = Executor.execute(op.getScript(), scriptHand);
+		this.runner = Executor.execute(script, scriptHand);
 	}
 
 	@Override
 	public void doStop() {
+		if (runner == null) {
+			return;
+		}
 		runner.cancel();
 	}
 
@@ -52,19 +60,23 @@ public class ScriptTask extends AbstractTask {
 
 		@Override
 		public void complete(Script script, List<Object[]> samples) {
-			try {
-				samples.forEach(ScriptTask.this::processSample);
-				notifyComplete();
-			} catch (Exception e) {
-				String msg = "Error while running operation handler";
-				log.error(msg, e);
-				notifyError(e, true);
+			synchronized (ScriptTask.this) {
+				try {
+					samples.forEach(ScriptTask.this::processSample);
+					notifyComplete();
+				} catch (Exception e) {
+					String msg = "Error while running operation handler";
+					log.error(msg, e);
+					notifyError(e, true);
+				}
 			}
 		}
 
 		@Override
 		public void error(Script script, Throwable cause) {
-			notifyError(cause, true);
+			synchronized (ScriptTask.this) {
+				notifyError(cause, true);
+			}
 		}
 
 	}

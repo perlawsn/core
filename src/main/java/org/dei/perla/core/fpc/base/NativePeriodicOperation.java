@@ -166,7 +166,7 @@ public class NativePeriodicOperation extends PeriodicOperation {
 
 		@Override
 		public void complete(Script script, List<Object[]> samples) {
-			runUnderLock(() -> {
+			synchronized (NativePeriodicOperation.this) {
 				state = RUNNING;
 
 				if (currentPeriod < requestedPeriod) {
@@ -179,7 +179,7 @@ public class NativePeriodicOperation extends PeriodicOperation {
 					addAsyncCallback();
 					forEachTask(t -> t.setInputPeriod(currentPeriod));
 				}
-			});
+			}
 		}
 
 		@Override
@@ -220,7 +220,7 @@ public class NativePeriodicOperation extends PeriodicOperation {
 
 		@Override
 		public void complete(Script script, List<Object[]> samples) {
-			runUnderLock(() -> {
+			synchronized (NativePeriodicOperation.this) {
 				if (currentPeriod != 0) {
 					// Restart the operation if the sampling period changed
 					// while the stop script was running
@@ -234,7 +234,7 @@ public class NativePeriodicOperation extends PeriodicOperation {
 						stopHandler.accept(NativePeriodicOperation.this);
 					}
 				}
-			});
+			}
 		}
 
 		@Override

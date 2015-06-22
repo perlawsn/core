@@ -30,8 +30,8 @@ import java.util.function.Supplier;
  * @author Guido Rota (2014)
  *
  */
-public abstract class AbstractOperation<T extends AbstractTask> implements
-        Operation {
+public abstract class AbstractOperation<T extends AbstractTask>
+		implements Operation {
 
 	protected final Logger log;
 
@@ -57,10 +57,10 @@ public abstract class AbstractOperation<T extends AbstractTask> implements
 	 *            {@link Operation}
 	 */
 	public AbstractOperation(String id, List<Attribute> atts) {
+		this.log = Logger.getLogger(this.getClass().getSimpleName() + "_" + id);
 		this.id = id;
 		this.atts = Collections.unmodifiableList(atts);
 		schedulable = true;
-		this.log = Logger.getLogger(this.getClass().getSimpleName() + "_" + id);
 		defPipeline = SamplePipeline.passthrough(atts);
 	}
 
@@ -250,32 +250,8 @@ public abstract class AbstractOperation<T extends AbstractTask> implements
 	 *
 	 * @return Number of scheduled {@link Task}s
 	 */
-	protected final int taskCount() {
+	protected final synchronized int taskCount() {
 		return tasks.size();
-	}
-
-	/**
-	 * Performs the function passed as parameter in mutual exclusion with all
-	 * other methods that may change the internal task list or that may modify
-	 * the {@code Operation} state.
-	 *
-	 * @param operation
-	 *            Operation to perform
-	 */
-	protected final synchronized void runUnderLock(Runnable op) {
-        op.run();
-	}
-
-	/**
-	 * Performs the function passed as parameter in mutual exclusion with all
-	 * other methods that may change the internal task list or that may modify
-	 * the {@code Operation} state.
-	 *
-	 * @param operation
-	 *            Operation to perform
-	 */
-	protected final synchronized <E> E runUnderLock(Supplier<E> op) {
-        return op.get();
 	}
 
 	/**

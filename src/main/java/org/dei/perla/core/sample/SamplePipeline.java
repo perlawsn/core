@@ -33,8 +33,8 @@ public class SamplePipeline {
      */
     private SamplePipeline(List<SampleModifier> mods,
             List<Attribute> atts) {
-        this.mods = mods;
-        this.atts = atts;
+        this.mods = Collections.unmodifiableList(mods);
+        this.atts = Collections.unmodifiableList(atts);
     }
 
     /**
@@ -159,7 +159,7 @@ public class SamplePipeline {
 		 * {@link SampleModifier}s added to the builder
 		 */
 		public SamplePipeline create() {
-			return new SamplePipeline(mods, Collections.unmodifiableList(atts));
+			return new SamplePipeline(mods, atts);
 		}
 
 	}

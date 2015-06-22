@@ -26,16 +26,22 @@ public class OneoffOperation extends AbstractOperation<AbstractTask> {
 	@Override
 	public AbstractTask doSchedule(Map<String, Object> parameterMap,
 			TaskHandler handler, SamplePipeline pipeline) {
-		return new ScriptTask(this, handler, pipeline);
+		ScriptTask t = new ScriptTask(this, handler, pipeline);
+		// Synchronization and AsyncUtils.runInNewThread ensure that
+		// ScriptTask.start() is effectively postponed until the ScriptTask
+		// reference is returned to the calling function
+		synchronized (t) {
+			AsyncUtils.runInNewThread(t::start);
+			return t;
+		}
 	}
 
 	@Override
-	protected void doStop() {
-	}
+	protected void doStop() {}
 
 	@Override
 	protected void doStop(Consumer<Operation> handler) {
-		// Synchronization and AsyncUtils.runInNewThread ensures that the
+		// Synchronization and AsyncUtils.runInNewThread ensure that the
 		// handler is effectively called after the doStop invocation is has
 		// been completed
 		AsyncUtils.runInNewThread(() -> {
@@ -43,8 +49,8 @@ public class OneoffOperation extends AbstractOperation<AbstractTask> {
 		});
 	}
 
-	private void notifyStop(Consumer<Operation> h) {
-		runUnderLock(() -> h.accept(this));
+	private synchronized void notifyStop(Consumer<Operation> h) {
+		h.accept(this);
 	}
 
 }
