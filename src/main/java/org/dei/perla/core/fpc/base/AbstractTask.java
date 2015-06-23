@@ -22,7 +22,8 @@ public abstract class AbstractTask implements Task {
 
 	protected final Logger log;
 
-	private boolean running = true;
+	private boolean hasStarted = false;
+	private boolean running = false;
 	private final AbstractOperation<? extends AbstractTask> op;
 	private final SamplePipeline pipeline;
 	private final List<Attribute> atts;
@@ -69,6 +70,26 @@ public abstract class AbstractTask implements Task {
 	protected final Operation getOperation() {
 		return op;
 	}
+
+	/**
+	 * Starts the {@link Task}.
+	 */
+	protected final synchronized void start() {
+		if (hasStarted) {
+			throw new IllegalStateException("Cannot start," +
+					"AbstractTask has already been started once");
+		}
+		running = true;
+		hasStarted = true;
+		doStart();
+	}
+
+	/**
+	 * A method invoked whenever the {@code AbstractTask} is started. It can be
+	 * overridden by concrete {@code AbstractTask} implementation to add custom
+	 * startup behaviour.
+	 */
+	protected void doStart() {}
 
 	@Override
 	public final synchronized void stop() {

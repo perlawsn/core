@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-public class OneoffOperation extends AbstractOperation<AbstractTask> {
+public final class OneoffOperation extends AbstractOperation<AbstractTask> {
 
 	private final Script script;
 
@@ -27,11 +27,10 @@ public class OneoffOperation extends AbstractOperation<AbstractTask> {
 	public AbstractTask doSchedule(Map<String, Object> parameterMap,
 			TaskHandler handler, SamplePipeline pipeline) {
 		ScriptTask t = new ScriptTask(this, handler, pipeline);
-		// Synchronization and AsyncUtils.runInNewThread ensure that
-		// ScriptTask.start() is effectively postponed until the ScriptTask
-		// reference is returned to the calling function
+		// Synchronization ensures that handler invocations by the task are
+		// postponed until the doSchedule() method has completed
 		synchronized (t) {
-			AsyncUtils.runInNewThread(t::start);
+			t.start();
 			return t;
 		}
 	}
@@ -42,15 +41,13 @@ public class OneoffOperation extends AbstractOperation<AbstractTask> {
 	@Override
 	protected void doStop(Consumer<Operation> handler) {
 		// Synchronization and AsyncUtils.runInNewThread ensure that the
-		// handler is effectively called after the doStop invocation is has
-		// been completed
+		// handler is effectively asynchronously called after the doStop
+		// invocation is has been completed.
 		AsyncUtils.runInNewThread(() -> {
-			notifyStop(handler);
+			synchronized (OneoffOperation.this) {
+				handler.accept(this);
+			}
 		});
-	}
-
-	private synchronized void notifyStop(Consumer<Operation> h) {
-		h.accept(this);
 	}
 
 }

@@ -25,7 +25,7 @@ import java.util.List;
  * @author Guido Rota (2014)
  *
  */
-public class ScriptTask extends AbstractTask {
+public final class ScriptTask extends AbstractTask {
 
 	private final Script script;
 	private Runner runner = null;
@@ -35,7 +35,8 @@ public class ScriptTask extends AbstractTask {
 		this.script = op.getScript();
 	}
 
-	protected synchronized void start() {
+	@Override
+	protected void doStart() {
 		ScriptHandler scriptHand = new OneoffScriptHandler();
 		this.runner = Executor.execute(script, scriptHand);
 	}

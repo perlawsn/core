@@ -13,14 +13,14 @@ public abstract class PeriodicOperation extends AbstractOperation<PeriodicTask> 
 	private static final String SAMPLING_PERIOD = "period";
 
 	// Global sampling period expressed in milliseconds
-	protected volatile long currentPeriod;
+	protected long currentPeriod;
 
 	public PeriodicOperation(String id, List<Attribute> atts) {
 		super(id, atts);
 		this.currentPeriod = 0;
 	}
 
-	public final long getSamplingPeriod() {
+	public final synchronized long getSamplingPeriod() {
 		return currentPeriod;
 	}
 
@@ -28,43 +28,21 @@ public abstract class PeriodicOperation extends AbstractOperation<PeriodicTask> 
 	protected PeriodicTask doSchedule(Map<String, Object> parameterMap,
 			TaskHandler handler, SamplePipeline pipeline)
 			throws IllegalArgumentException {
-		long periodMs = getPeriodParameter(parameterMap);
+		long periodMs = getPeriod(parameterMap);
 
 		PeriodicTask task = new PeriodicTask(this, handler, periodMs, pipeline);
 		add(task);
-		if (periodMs < currentPeriod || currentPeriod == 0) {
+		if (currentPeriod > periodMs || currentPeriod == 0) {
 			setSamplingPeriod(periodMs);
 		} else {
 			task.setInputPeriod(currentPeriod);
 		}
+		task.start();
 
 		return task;
 	}
 
-	@Override
-	protected void postRemove(List<PeriodicTask> taskList) {
-		long minTaskPeriod = taskList.get(0).getPeriod();
-		for (int i = 1; i < taskList.size(); i++) {
-			long taskPeriod = taskList.get(i).getPeriod();
-			if (minTaskPeriod > taskPeriod) {
-				minTaskPeriod = taskPeriod;
-			}
-		}
-
-		// All remaining task require a slower sampling rate, slow down
-		if (minTaskPeriod > currentPeriod) {
-			setSamplingPeriod(minTaskPeriod);
-		}
-	}
-
-	protected abstract void setSamplingPeriod(long period);
-
-	@Override
-	protected void doStop() {
-		setSamplingPeriod(0);
-	}
-
-	protected final long getPeriodParameter(Map<String, Object> parameterMap)
+	protected final long getPeriod(Map<String, Object> parameterMap)
 			throws IllegalArgumentException {
 		long period;
 
@@ -72,19 +50,19 @@ public abstract class PeriodicOperation extends AbstractOperation<PeriodicTask> 
 				parameterMap.containsKey(SAMPLING_PERIOD),
 				"Missing sampling period in parameterMap");
 
-		Object periodObj = parameterMap.get(SAMPLING_PERIOD);
-		if (periodObj instanceof Long) {
-			period = (long) periodObj;
-		} else if (periodObj instanceof Integer) {
-			period = (int) periodObj;
-		} else if (periodObj instanceof Short) {
-			period = (short) periodObj;
-		} else if (periodObj instanceof Byte) {
-			period = (byte) periodObj;
+		Object o = parameterMap.get(SAMPLING_PERIOD);
+		if (o instanceof Long) {
+			period = (long) o;
+		} else if (o instanceof Integer) {
+			period = (int) o;
+		} else if (o instanceof Short) {
+			period = (short) o;
+		} else if (o instanceof Byte) {
+			period = (byte) o;
 		} else {
 			throw new IllegalArgumentException(
 					"Period parameter must be an integral value ("
-							+ periodObj.getClass().getSimpleName()
+							+ o.getClass().getSimpleName()
 							+ "' received instead)");
 		}
 
@@ -93,5 +71,36 @@ public abstract class PeriodicOperation extends AbstractOperation<PeriodicTask> 
 
 		return period;
 	}
+
+	@Override
+	protected void postRemove(List<PeriodicTask> tasks) {
+		long min = minTaskPeriod(tasks);
+
+		// All remaining task require a slower sampling rate, slow down
+		if (min > currentPeriod) {
+			setSamplingPeriod(min);
+		}
+	}
+
+	/**
+	 * Returns the slowest sampling period in all the running tasks
+	 */
+	private long minTaskPeriod(List<PeriodicTask> tasks) {
+		long min = tasks.get(0).getPeriod();
+		for (int i = 1; i < tasks.size(); i++) {
+			long taskPeriod = tasks.get(i).getPeriod();
+			if (min > taskPeriod) {
+				min = taskPeriod;
+			}
+		}
+		return min;
+	}
+
+	@Override
+	protected void doStop() {
+		setSamplingPeriod(0);
+	}
+
+	protected abstract void setSamplingPeriod(long period);
 
 }

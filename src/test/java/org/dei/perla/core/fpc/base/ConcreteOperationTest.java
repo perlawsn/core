@@ -294,10 +294,13 @@ public class ConcreteOperationTest {
 		SamplePipeline p = pb.create();
 
 		Task task1 = natPeriodicOp.schedule(paramMap1, h1, p);
+		assertTrue(task1.isRunning());
 		assertThat(natPeriodicOp.getSamplingPeriod(), equalTo(100l));
 		Task task2 = natPeriodicOp.schedule(paramMap2, h2, p);
+		assertTrue(task2.isRunning());
 		assertThat(natPeriodicOp.getSamplingPeriod(), equalTo(10l));
 		Task task3 = natPeriodicOp.schedule(paramMap3, h3, p);
+		assertTrue(task3.isRunning());
 		assertThat(natPeriodicOp.getSamplingPeriod(), equalTo(1l));
 
 		assertThat(task1, notNullValue());
