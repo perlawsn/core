@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-public final class OneoffOperation extends AbstractOperation<AbstractTask> {
+public final class OneoffOperation extends BaseOperation<BaseTask> {
 
 	private final Script script;
 
@@ -24,15 +24,9 @@ public final class OneoffOperation extends AbstractOperation<AbstractTask> {
 	}
 
 	@Override
-	public AbstractTask doSchedule(Map<String, Object> parameterMap,
+	public BaseTask doSchedule(Map<String, Object> parameterMap,
 			TaskHandler handler, SamplePipeline pipeline) {
-		ScriptTask t = new ScriptTask(this, handler, pipeline);
-		// Synchronization ensures that handler invocations by the task are
-		// postponed until the doSchedule() method has completed
-		synchronized (t) {
-			t.start();
-			return t;
-		}
+		return new ScriptTask(this, handler, pipeline);
 	}
 
 	@Override

@@ -17,7 +17,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-public class AsyncOperation extends AbstractOperation<AsyncOperation.AsyncTask> {
+public class AsyncOperation extends BaseOperation<AsyncOperation.AsyncTask> {
 
 	private static final int STOPPED = 0;
 	private static final int SUSPENDED = 1;
@@ -203,7 +203,7 @@ public class AsyncOperation extends AbstractOperation<AsyncOperation.AsyncTask> 
 
 	}
 
-	private class AsyncOneoffOperation extends AbstractOperation<AsyncTask> {
+	private class AsyncOneoffOperation extends BaseOperation<AsyncTask> {
 
 		public AsyncOneoffOperation(String id, List<Attribute> atts) {
 			super(id, atts);
@@ -242,9 +242,9 @@ public class AsyncOperation extends AbstractOperation<AsyncOperation.AsyncTask> 
 
 	}
 
-	protected class AsyncTask extends AbstractTask {
+	protected class AsyncTask extends BaseTask {
 
-		public AsyncTask(AbstractOperation<?> operation, TaskHandler handler,
+		public AsyncTask(BaseOperation<?> operation, TaskHandler handler,
 				SamplePipeline pipeline) {
 			super(operation, handler, pipeline);
 		}

@@ -15,7 +15,7 @@ import java.math.RoundingMode;
  *
  * @author Guido Rota (2014)
  */
-public class PeriodicTask extends AbstractTask {
+public class PeriodicTask extends BaseTask {
 
 	// Downsampling data
 	private long ratio = 0;

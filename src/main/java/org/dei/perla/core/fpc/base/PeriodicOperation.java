@@ -8,7 +8,7 @@ import org.dei.perla.core.utils.Conditions;
 import java.util.List;
 import java.util.Map;
 
-public abstract class PeriodicOperation extends AbstractOperation<PeriodicTask> {
+public abstract class PeriodicOperation extends BaseOperation<PeriodicTask> {
 
 	private static final String SAMPLING_PERIOD = "period";
 
@@ -37,7 +37,6 @@ public abstract class PeriodicOperation extends AbstractOperation<PeriodicTask> 
 		} else {
 			task.setInputPeriod(currentPeriod);
 		}
-		task.start();
 
 		return task;
 	}

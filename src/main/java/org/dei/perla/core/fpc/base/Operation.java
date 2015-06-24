@@ -64,7 +64,7 @@ public interface Operation {
 	 *             If the {@code schedule} method is invoked when the
 	 *             {@code Operation} is not running
 	 */
-	public AbstractTask schedule(Map<String, Object> parameterMap,
+	public BaseTask schedule(Map<String, Object> parameterMap,
 			TaskHandler handler) throws IllegalArgumentException,
 			IllegalStateException;
 
@@ -105,7 +105,7 @@ public interface Operation {
 	 *             If the {@code schedule} method is invoked when the
 	 *             {@code Operation} is not running
 	 */
-	public AbstractTask schedule(Map<String, Object> parameterMap,
+	public BaseTask schedule(Map<String, Object> parameterMap,
 			TaskHandler handler, SamplePipeline pipeline)
 			throws IllegalArgumentException, IllegalStateException;
 

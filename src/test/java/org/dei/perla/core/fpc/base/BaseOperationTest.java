@@ -14,7 +14,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.*;
 
-public class AbstractOperationTest {
+public class BaseOperationTest {
 
 	@Test
 	public void testScheduling() {
@@ -127,12 +127,12 @@ public class AbstractOperationTest {
 	}
 
 	/**
-	 * Test implementation of the {@link AbstractOperation} class
+	 * Test implementation of the {@link BaseOperation} class
 	 *
 	 * @author Guido Rota (2014)
 	 *
 	 */
-	private static class TestOperation extends AbstractOperation<TestTask> {
+	private static class TestOperation extends BaseOperation<TestTask> {
 
 		public TestOperation() {
 			super("test", Collections.emptyList());
@@ -160,14 +160,14 @@ public class AbstractOperationTest {
 	}
 
 	/**
-	 * Test implementation of the {@link AbstractTask} class
+	 * Test implementation of the {@link BaseTask} class
 	 *
 	 * @author Guido Rota (2014)
 	 *
 	 */
-	private static class TestTask extends AbstractTask {
+	private static class TestTask extends BaseTask {
 
-		public TestTask(AbstractOperation<? extends AbstractTask> operation,
+		public TestTask(BaseOperation<? extends BaseTask> operation,
 				TaskHandler handler, SamplePipeline pipeline) {
 			super(operation, handler, pipeline);
 		}

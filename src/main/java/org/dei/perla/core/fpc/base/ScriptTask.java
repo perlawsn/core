@@ -25,7 +25,7 @@ import java.util.List;
  * @author Guido Rota (2014)
  *
  */
-public final class ScriptTask extends AbstractTask {
+public final class ScriptTask extends BaseTask {
 
 	private final Script script;
 	private Runner runner = null;
