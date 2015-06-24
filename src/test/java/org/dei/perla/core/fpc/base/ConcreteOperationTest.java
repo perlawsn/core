@@ -388,7 +388,10 @@ public class ConcreteOperationTest {
                 simPeriodicOp.getAttributes());
 
         // Start test
-        Task task = simPeriodicOp.schedule(parameterMap, handler, p);
+        BaseTask task = simPeriodicOp.schedule(parameterMap, handler, p);
+        assertFalse(task.isRunning());
+        task.start();
+        assertTrue(task.isRunning());
         assertThat(task, notNullValue());
         assertTrue(task.isRunning());
         assertThat(handler.getAveragePeriod(), greaterThanOrEqualTo(9d));
@@ -417,11 +420,20 @@ public class ConcreteOperationTest {
         SamplePipeline p = SamplePipeline.passthrough(
                 simPeriodicOp.getAttributes());
 
-        Task task1 = simPeriodicOp.schedule(paramMap1, h1, p);
+        BaseTask task1 = simPeriodicOp.schedule(paramMap1, h1, p);
+        assertFalse(task1.isRunning());
+        task1.start();
+        assertTrue(task1.isRunning());
         assertThat(simPeriodicOp.getSamplingPeriod(), equalTo(100l));
-        Task task2 = simPeriodicOp.schedule(paramMap2, h2, p);
+        BaseTask task2 = simPeriodicOp.schedule(paramMap2, h2, p);
+        assertFalse(task2.isRunning());
+        task2.start();
+        assertTrue(task2.isRunning());
         assertThat(simPeriodicOp.getSamplingPeriod(), equalTo(10l));
-        Task task3 = simPeriodicOp.schedule(paramMap3, h3, p);
+        BaseTask task3 = simPeriodicOp.schedule(paramMap3, h3, p);
+        assertFalse(task3.isRunning());
+        task3.start();
+        assertTrue(task3.isRunning());
         assertThat(simPeriodicOp.getSamplingPeriod(), equalTo(1l));
 
         assertThat(task1, notNullValue());

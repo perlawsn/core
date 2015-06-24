@@ -16,7 +16,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
-public class NativePeriodicOperation extends PeriodicOperation {
+public final class NativePeriodicOperation extends PeriodicOperation {
 
 	// Operation states
 	private static final int STOPPED = 0;
