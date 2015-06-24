@@ -19,161 +19,189 @@ import java.util.function.Consumer;
 
 public class AsyncOperation extends BaseOperation<AsyncOperation.AsyncTask> {
 
-	private static final int STOPPED = 0;
-	private static final int SUSPENDED = 1;
-	private static final int STARTED = 2;
+    private static final int STOPPED = 0;
+    private static final int SUSPENDED = 1;
+    private static final int STARTED = 2;
 
-	private static final ScheduledThreadPoolExecutor executor;
-	static {
-		executor = new ScheduledThreadPoolExecutor(10);
-		executor.setRemoveOnCancelPolicy(true);
-	}
+    private static final ScheduledThreadPoolExecutor executor;
+    static {
+        executor = new ScheduledThreadPoolExecutor(10);
+        executor.setRemoveOnCancelPolicy(true);
+    }
 
-	private final Script startScript;
+    private final Script startScript;
 
-	private volatile int state;
+    private volatile int state;
 
-	private final AsyncMessageHandler asyncHandler;
-	private final OnHandler onHandler = new OnHandler();
+    private final AsyncMessageHandler asyncHandler;
+    private final OnHandler onHandler = new OnHandler();
 
-	// Simulated operations
-	private final AsyncPeriodicOperation asyncPeriodicOp;
-	private final AsyncOneoffOperation asyncOneoffOp;
+    // Simulated operations
+    private final AsyncPeriodicOperation asyncPeriodicOp;
+    private final AsyncOneoffOperation asyncOneoffOp;
 
-	private volatile Object[] sample;
+    private volatile Object[] sample;
 
-	protected AsyncOperation(String id, List<Attribute> atts,
-			Script startScript, AsyncMessageHandler handler,
-			ChannelManager channelMgr) {
-		super(id, atts);
-		this.startScript = startScript;
-		this.asyncHandler = handler;
+    protected AsyncOperation(String id, List<Attribute> atts,
+            Script startScript, AsyncMessageHandler handler,
+            ChannelManager channelMgr) {
+        super(id, atts);
+        this.startScript = startScript;
+        this.asyncHandler = handler;
 
-		asyncPeriodicOp = new AsyncPeriodicOperation(id, atts);
-		asyncOneoffOp = new AsyncOneoffOperation(id, atts);
+        asyncPeriodicOp = new AsyncPeriodicOperation(id, atts);
+        asyncOneoffOp = new AsyncOneoffOperation(id, atts);
 
-		sample = new Object[atts.size()];
+        sample = new Object[atts.size()];
 
-		state = STARTED;
-		runStartScript();
-		channelMgr.addCallback(asyncHandler.mapper, this::handleMessage);
-	}
+        state = STOPPED;
+        runStartScript();
+        channelMgr.addCallback(asyncHandler.mapper, this::handleMessage);
+    }
 
-	private void runStartScript() {
-		if (startScript != null) {
-			Executor.execute(startScript, new StartHandler());
-		}
-	}
-
-	protected PeriodicOperation getAsyncPeriodicOperation() {
-		return asyncPeriodicOp;
-	}
-
-	protected Operation getAsyncOneoffOperation() {
-		return asyncOneoffOp;
-	}
-
-	@Override
-	public AsyncTask doSchedule(Map<String, Object> parameterMap,
-			TaskHandler handler, SamplePipeline pipeline)
-			throws IllegalArgumentException {
-		AsyncTask task = new AsyncTask(this, handler, pipeline);
-		add(task);
-		return task;
-	}
-
-	public void handleMessage(FpcMessage message) {
-		ScriptParameter paramArray[] = new ScriptParameter[1];
-		paramArray[0] = new ScriptParameter(asyncHandler.variable, message);
-
-		Executor.execute(asyncHandler.script, paramArray, onHandler);
-	}
-
-	@Override
-	public void doStop() {
-		state = STOPPED;
-	}
-
-	@Override
-	public void doStop(Consumer<Operation> handler) {
-		doStop();
-		handler.accept(this);
-	}
-
-	/**
-	 *
-	 * @author Guido Rota (2014)
-	 *
-	 */
-	private class StartHandler implements ScriptHandler {
-
-		@Override
-		public void complete(Script script, List<Object[]> samples) {
-			// Does nothing, AsyncOperation are set as "STARTED" by default
-		}
-
-		@Override
-		public void error(Script script, Throwable cause) {
-			synchronized (AsyncOperation.this) {
-				if (state == SUSPENDED) {
-					return;
-				}
-				state = SUSPENDED;
-				String message = "Error starting asynchronous operation";
-				log.error(message, cause);
-				// Stop all periodic tasks
-				asyncPeriodicOp.unrecoverableError(message, cause);
-			}
-		}
+    protected void start() {
 
 	}
 
-	/**
-	 *
-	 * @author Guido Rota (2014)
-	 *
-	 */
-	private class OnHandler implements ScriptHandler {
+    private void runStartScript() {
+        if (startScript != null) {
+            Executor.execute(startScript, new StartHandler());
+        }
+    }
 
-		@Override
-		public void complete(Script script, List<Object[]> samples) {
-			samples.forEach(s -> forEachTask(t -> t.processSample(s)));
-			int last = samples.size() - 1;
-			sample = samples.get(last);
-		}
+    protected PeriodicOperation getAsyncPeriodicOperation() {
+        return asyncPeriodicOp;
+    }
 
-		@Override
-		public void error(Script script, Throwable cause) {
-			log.error("Execution error in 'on' script", cause);
-			forEachTask(t -> t.notifyError(cause, false));
-		}
+    protected Operation getAsyncOneoffOperation() {
+        return asyncOneoffOp;
+    }
 
-	}
+    @Override
+    public AsyncTask doSchedule(Map<String, Object> parameterMap,
+            TaskHandler handler, SamplePipeline pipeline)
+            throws IllegalArgumentException {
+        AsyncTask task = new AsyncTask(this, handler, pipeline);
+        add(task);
+        return task;
+    }
 
-	public static class AsyncMessageHandler {
+    public void handleMessage(FpcMessage message) {
+        ScriptParameter paramArray[] = new ScriptParameter[1];
+        paramArray[0] = new ScriptParameter(asyncHandler.variable, message);
 
-		private final Mapper mapper;
-		private final Script script;
-		private final String variable;
+        Executor.execute(asyncHandler.script, paramArray, onHandler);
+    }
 
-		public AsyncMessageHandler(Mapper mapper, Script script, String variable) {
-			this.mapper = mapper;
-			this.script = script;
-			this.variable = variable;
-		}
+    @Override
+    public void doStop() {
+        state = STOPPED;
+    }
 
-	}
+    @Override
+    public void doStop(Consumer<Operation> handler) {
+        doStop();
+        handler.accept(this);
+    }
 
-	private class AsyncPeriodicOperation extends PeriodicOperation {
+    /**
+     * Operation startup script handler
+     *
+     * @author Guido Rota (2014)
+     */
+    private class StartHandler implements ScriptHandler {
 
-		private ScheduledFuture<?> timerFuture;
+        @Override
+        public void complete(Script script, List<Object[]> samples) {
+            // Does nothing, AsyncOperation are set as "STARTED" by default
+        }
 
-		public AsyncPeriodicOperation(String id, List<Attribute> atts) {
-			super(id, atts);
-		}
+        @Override
+        public void error(Script script, Throwable cause) {
+            synchronized (AsyncOperation.this) {
+                if (state == SUSPENDED) {
+                    return;
+                }
+                state = SUSPENDED;
+                String message = "Error starting asynchronous operation";
+                log.error(message, cause);
+                // Stop all periodic tasks
+                asyncPeriodicOp.unrecoverableError(message, cause);
+            }
+        }
 
-		@Override
-		protected synchronized void setSamplingPeriod(final long period) {
+    }
+
+    /**
+     * Data script handler
+     *
+     * @author Guido Rota (2014)
+     */
+    private class OnHandler implements ScriptHandler {
+
+        @Override
+        public void complete(Script script, List<Object[]> samples) {
+            synchronized (AsyncOperation.this) {
+                samples.forEach(s -> forEachTask(t -> t.processSample(s)));
+                int last = samples.size() - 1;
+                sample = samples.get(last);
+            }
+        }
+
+        @Override
+        public void error(Script script, Throwable cause) {
+            synchronized (AsyncOperation.this) {
+                log.error("Execution error in 'on' script", cause);
+                forEachTask(t -> t.notifyError(cause, false));
+            }
+        }
+
+    }
+
+    /**
+     * Implementation of a {@link Task} for managing asynchronous data
+     * transmissions.
+     *
+     * @author Guido Rota
+     */
+    protected class AsyncTask extends BaseTask {
+
+        public AsyncTask(BaseOperation<?> operation, TaskHandler handler,
+                         SamplePipeline pipeline) {
+            super(operation, handler, pipeline);
+        }
+
+    }
+
+    public static class AsyncMessageHandler {
+
+        private final Mapper mapper;
+        private final Script script;
+        private final String variable;
+
+        public AsyncMessageHandler(Mapper mapper, Script script, String variable) {
+            this.mapper = mapper;
+            this.script = script;
+            this.variable = variable;
+        }
+
+    }
+
+    /**
+     * Simulated periodic operation
+     *
+     * @author Guido Rota
+     */
+    private class AsyncPeriodicOperation extends PeriodicOperation {
+
+        private ScheduledFuture<?> timerFuture;
+
+        public AsyncPeriodicOperation(String id, List<Attribute> atts) {
+            super(id, atts);
+        }
+
+        @Override
+        protected synchronized void setSamplingPeriod(final long period) {
             if (timerFuture != null) {
                 timerFuture.cancel(false);
             }
@@ -193,26 +221,31 @@ public class AsyncOperation extends BaseOperation<AsyncOperation.AsyncTask> {
             timerFuture = executor.scheduleAtFixedRate(
                     () -> forEachTask(t -> t.newSample(sample)), 0, period,
                     TimeUnit.MILLISECONDS);
-		}
+        }
 
-		@Override
-		protected void doStop(Consumer<Operation> handler) {
-			doStop();
-			handler.accept(this);
-		}
+        @Override
+        protected void doStop(Consumer<Operation> handler) {
+            doStop();
+            handler.accept(this);
+        }
 
-	}
+    }
 
-	private class AsyncOneoffOperation extends BaseOperation<AsyncTask> {
+    /**
+     * Simulated one-off get operation
+     *
+     * @author Guido Rota
+     */
+    private class AsyncOneoffOperation extends BaseOperation<AsyncTask> {
 
-		public AsyncOneoffOperation(String id, List<Attribute> atts) {
-			super(id, atts);
-		}
+        public AsyncOneoffOperation(String id, List<Attribute> atts) {
+            super(id, atts);
+        }
 
-		@Override
-		public AsyncTask doSchedule(Map<String, Object> parameterMap,
-				TaskHandler handler, SamplePipeline pipeline)
-				throws IllegalArgumentException {
+        @Override
+        public AsyncTask doSchedule(Map<String, Object> parameterMap,
+                TaskHandler handler, SamplePipeline pipeline)
+                throws IllegalArgumentException {
             if (state == STOPPED) {
                 throw new IllegalStateException("Opertion '" + getId()
                         + "' is stopped, cannot start new tasks");
@@ -229,26 +262,16 @@ public class AsyncOperation extends BaseOperation<AsyncOperation.AsyncTask> {
             task.processSample(sample);
             task.notifyComplete();
             return task;
-		}
+        }
 
-		@Override
-		protected void doStop() {
-		}
+        @Override
+        protected void doStop() {}
 
-		@Override
-		protected void doStop(Consumer<Operation> handler) {
-			handler.accept(this);
-		}
+        @Override
+        protected void doStop(Consumer<Operation> handler) {
+            handler.accept(this);
+        }
 
-	}
-
-	protected class AsyncTask extends BaseTask {
-
-		public AsyncTask(BaseOperation<?> operation, TaskHandler handler,
-				SamplePipeline pipeline) {
-			super(operation, handler, pipeline);
-		}
-
-	}
+    }
 
 }
