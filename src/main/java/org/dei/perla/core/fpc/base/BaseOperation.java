@@ -7,10 +7,10 @@ import org.dei.perla.core.sample.Attribute;
 import org.dei.perla.core.sample.SamplePipeline;
 import org.dei.perla.core.utils.Conditions;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
 /**
@@ -41,10 +41,7 @@ public abstract class BaseOperation<T extends BaseTask>
 
     private boolean schedulable;
 
-    // Unsynchronized acces to the taskList when reading. Reads on the
-    // taskList will greatly outnumber the writes, since this list is traversed
-    // every time a sample is produced by the remote device.
-    private volatile List<T> tasks = new CopyOnWriteArrayList<>();
+    private volatile List<T> tasks = new ArrayList<>();
 
     /**
      * {@code BaseOperation} constructor.
@@ -176,9 +173,11 @@ public abstract class BaseOperation<T extends BaseTask>
     }
 
     /**
-     * Removes an {@link BaseTask} from the list of task scheduled by this
+     * <p>
+     * Removes a {@link BaseTask} from the list of task scheduled by this
      * {@code BaseOperation}.
      *
+     * <p>
      * This method is executed in mutual exclusion with all other operation that
      * may change the task list content or the internal state of this
      * {@link BaseOperation}.
@@ -254,15 +253,18 @@ public abstract class BaseOperation<T extends BaseTask>
     }
 
     /**
+     * <p>
      * Performs the operation passed as parameter for all registered
      * {@link PeriodicTask}s
+     *
+     * <p>
+     * NOTE: This function is not thread-safe. For proper synchronization, a
+     * lock to the Operation object must be acquired.
      *
      * @param operation
      *            Operation to execute
      */
     public final void forEachTask(Consumer<T> op) {
-        // No synchronization needed on read-only operation, since the task
-        // list has a copy-on-write semantics
         tasks.forEach(op);
     }
 

@@ -34,7 +34,6 @@ public final class NativePeriodicOperation extends PeriodicOperation {
 
     // Current sample, used to merge the results from different async messages
     private Object[] currentSample;
-    Lock rlk = new ReentrantLock();
 
     public NativePeriodicOperation(String id, List<Attribute> atts,
             Script start, Script stop, List<MessageScript> msgs,
@@ -102,6 +101,8 @@ public final class NativePeriodicOperation extends PeriodicOperation {
                 currentPeriod = period;
                 runStopScript(); // stop handler will update the sampling period
                 break;
+            default:
+                throw new RuntimeException("Unknown state " + state);
         }
     }
 
@@ -122,18 +123,6 @@ public final class NativePeriodicOperation extends PeriodicOperation {
         Executor.execute(stop, new StopScriptHandler());
     }
 
-    private void addAsyncCallback() {
-        for (OnScriptHandler h : handlers.values()) {
-            chanMgr.addCallback(h.msgs.getMapper(), this::handleMessage);
-        }
-    }
-
-    private void removeAsyncCallback() {
-        for (OnScriptHandler h : handlers.values()) {
-            chanMgr.removeCallback(h.msgs.getMapper());
-        }
-    }
-
     public void handleMessage(FpcMessage message) {
         OnScriptHandler h = handlers.get(message.getId());
         MessageScript ms = h.msgs;
@@ -145,12 +134,10 @@ public final class NativePeriodicOperation extends PeriodicOperation {
     }
 
     /**
-     * <p>
      * Handler for managing the {@link Script} that starts this operation. This
      * handler checks for sampling rate changes requested while the starting
      * script was still being executed, and reboots the sampling operation to
      * comply with the new rate.
-     * </p>
      *
      * @author Guido Rota (2014)
      *
@@ -181,6 +168,13 @@ public final class NativePeriodicOperation extends PeriodicOperation {
             }
         }
 
+        private void addAsyncCallback() {
+            for (OnScriptHandler h : handlers.values()) {
+                chanMgr.addCallback(h.msgs.getMapper(),
+                        NativePeriodicOperation.this::handleMessage);
+            }
+        }
+
         @Override
         public void error(Script script, Throwable cause) {
             synchronized (NativePeriodicOperation.this) {
@@ -196,13 +190,11 @@ public final class NativePeriodicOperation extends PeriodicOperation {
      * Handler for managing the {@link Script} that stops this operation. This
      * handler is responsible for restarting the sampling activity if the
      * sampling rate of the operation is different than zero.
-     * </p>
      *
      * <p>
      * This may happen when a new sampling task is requested while the stopping
      * script is executing or if the stop script was invoked to restart the
      * sampling operation.
-     * </p>
      *
      * @author Guido Rota (2014)
      *
@@ -238,12 +230,15 @@ public final class NativePeriodicOperation extends PeriodicOperation {
             }
         }
 
+        private void removeAsyncCallback() {
+            for (OnScriptHandler h : handlers.values()) {
+                chanMgr.removeCallback(h.msgs.getMapper());
+            }
+        }
+
         @Override
         public void error(Script script, Throwable cause) {
             synchronized (NativePeriodicOperation.this) {
-                // TODO: due to this condition, it could be better to create
-                // a new stop handler to manage the explicit stop commands
-                // given by the user
                 if (stopHandler == null) {
                     unrecoverableError("Cannot stop operation", cause);
                 }
@@ -254,10 +249,11 @@ public final class NativePeriodicOperation extends PeriodicOperation {
                 }
             }
         }
+
     }
 
     /**
-     * Handler for managing the 'on' <code>Script</code> (sample creation from
+     * Handler for managing the 'on' {@link Script} (sample creation from
      * asynchronous message)
      *
      * @author Guido Rota (2014)
@@ -273,11 +269,11 @@ public final class NativePeriodicOperation extends PeriodicOperation {
 
         @Override
         public void complete(Script script, List<Object[]> samples) {
-            synchronized (NativePeriodicOperation.this) {
-                if (Check.nullOrEmpty(samples)) {
-                    return;
-                }
+            if (Check.nullOrEmpty(samples)) {
+                return;
+            }
 
+            synchronized (NativePeriodicOperation.this) {
                 if (handlers.size() == 1) {
                     // Distribute immediately to the Tasks if the operation only
                     // receives one message type. Doing so avoids the cost of
@@ -285,33 +281,33 @@ public final class NativePeriodicOperation extends PeriodicOperation {
                     for (Object[] s : samples) {
                         forEachTask(t -> t.newSample(s));
                     }
+                    return;
 
                 } else if (msgs.isSync()) {
-                    // Merge with the current sample and distribute
-                    for (Object[] s : samples) {
-                        merge(s);
-                        forEachTask(t -> t.newSample(currentSample));
+                    synchronized (currentSample) {
+                        // Merge with the current sample and distribute
+                        for (Object[] s : samples) {
+                            merge(s);
+                            forEachTask(t -> t.newSample(currentSample));
+                        }
+                        return;
                     }
-
-                } else {
-                    // We only care about the last sample when merging
-                    int lastIndex = samples.size() - 1;
-                    Object[] last = samples.get(lastIndex);
-                    merge(last);
                 }
+            }
+
+            synchronized (currentSample) {
+                // We only care about the last sample when merging
+                int lastIndex = samples.size() - 1;
+                Object[] last = samples.get(lastIndex);
+                merge(last);
             }
         }
 
         private Object[] merge(Object[] r) {
-            rlk.lock();
-            try {
-                for (int i = 0; i < r.length; i++) {
-                    currentSample[msgs.getBase() + i] = r[i];
-                }
-                return currentSample;
-            } finally {
-                rlk.unlock();
+            for (int i = 0; i < r.length; i++) {
+                currentSample[msgs.getBase() + i] = r[i];
             }
+            return currentSample;
         }
 
         @Override

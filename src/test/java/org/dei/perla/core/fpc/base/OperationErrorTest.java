@@ -214,7 +214,8 @@ public class OperationErrorTest {
     public void getError() throws InterruptedException {
         PipelineBuilder pb = SamplePipeline.newBuilder(getOp.getAttributes());
         ErrorTaskHandler handler = new ErrorTaskHandler();
-        Task t = getOp.doSchedule(null, handler, pb.create());
+        BaseTask t = getOp.doSchedule(null, handler, pb.create());
+        t.start();
         Throwable err = handler.awaitError();
         assertThat(err, notNullValue());
     }
