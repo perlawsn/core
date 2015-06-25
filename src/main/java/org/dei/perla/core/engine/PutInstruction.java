@@ -13,33 +13,33 @@ import org.dei.perla.core.descriptor.DataType;
  */
 public class PutInstruction extends BasicInstruction {
 
-	private final String exp;
-	private final AttributeDescriptor att;
+    private final String exp;
+    private final AttributeDescriptor att;
     private final int idx;
 
-	public PutInstruction(String exp, AttributeDescriptor att, int idx) {
-		this.exp = exp;
-		this.att = att;
+    public PutInstruction(String exp, AttributeDescriptor att, int idx) {
+        this.exp = exp;
+        this.att = att;
         this.idx = idx;
-	}
+    }
 
-	protected String getExpression() {
-		return exp;
-	}
+    protected String getExpression() {
+        return exp;
+    }
 
-	protected AttributeDescriptor getAttribute() {
-		return att;
-	}
+    protected AttributeDescriptor getAttribute() {
+        return att;
+    }
 
     protected int getIndex() {
         return idx;
     }
 
-	@Override
-	protected void runBasic(Runner runner) throws ScriptException {
-		Class<?> type = DataType.getClass(att.getType());
-		Object result = Executor.evaluateExpression(runner.ctx, exp, type);
-		runner.ctx.putAttribute(idx, result);
-	}
+    @Override
+    protected void runBasic(Runner runner) throws ScriptException {
+        Class<?> type = DataType.getClass(att.getType());
+        Object result = Executor.evaluateExpression(runner.ctx, exp, type);
+        runner.ctx.putAttribute(idx, result);
+    }
 
 }

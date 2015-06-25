@@ -171,7 +171,6 @@ public class ExecutionContext {
 	 * value instance is local to a certain {@link ExecutionContext}. The same
 	 * {@code InstructionLocal} variable, when used from different
 	 * {@link ExecutionContext}s, will access different values.
-	 * </p>
 	 *
 	 * <p>
 	 * This methanism allows the same instruction to store information that can
@@ -180,7 +179,6 @@ public class ExecutionContext {
 	 * instruction being executed by different {@link Runner}s will access a
 	 * different instance when reaching for the {@code InstructionLocal}
 	 * internal value.
-	 * </p>
 	 *
 	 * @author Guido Rota (2014)
 	 *
@@ -216,8 +214,8 @@ public class ExecutionContext {
 		 *            value to set
 		 */
 		public void setValue(Runner runner, E value) {
-			ExecutionContext ctx = runner.ctx;
-			ctx.instructionLocalMap.put(id, value);
+            ExecutionContext ctx = runner.ctx;
+            ctx.instructionLocalMap.put(id, value);
 		}
 
 		/**
@@ -230,16 +228,16 @@ public class ExecutionContext {
 		 *         for the current {@link ExecutionContext}
 		 */
 		public E getValue(Runner runner) {
-			ExecutionContext ctx = runner.ctx;
+            ExecutionContext ctx = runner.ctx;
 
-			if (!ctx.instructionLocalMap.containsKey(id)) {
-				ctx.instructionLocalMap.put(id, initialValue);
-				return initialValue;
-			}
+            if (!ctx.instructionLocalMap.containsKey(id)) {
+                ctx.instructionLocalMap.put(id, initialValue);
+                return initialValue;
+            }
 
-			@SuppressWarnings("unchecked")
-			E value = (E) ctx.instructionLocalMap.get(id);
-			return value;
+            @SuppressWarnings("unchecked")
+            E value = (E) ctx.instructionLocalMap.get(id);
+            return value;
 		}
 
 	}

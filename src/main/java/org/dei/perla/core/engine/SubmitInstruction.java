@@ -79,16 +79,14 @@ public class SubmitInstruction implements Instruction {
         // Synchronizing on the runner object prevents the Channel response
         // from reaching the 'else' section before the submit section is
         // complete
-        synchronized (runner) {
-            if (!submitted.getValue(runner)) {
-                submitted.setValue(runner, true);
-                submitRequest(runner);
-                return this;
-            } else {
-                handleResponse(runner);
-                submitted.setValue(runner, false);
-                return next;
-            }
+        if (!submitted.getValue(runner)) {
+            submitted.setValue(runner, true);
+            submitRequest(runner);
+            return this;
+        } else {
+            handleResponse(runner);
+            submitted.setValue(runner, false);
+            return next;
         }
 	}
 

@@ -20,32 +20,32 @@ import org.dei.perla.core.message.Mapper;
  */
 public class CreateComplexVarInstruction extends BasicInstruction {
 
-	private final String name;
-	private final Mapper mapper;
+    private final String name;
+    private final Mapper mapper;
 
-	public CreateComplexVarInstruction(String name, Mapper mapper) {
-		this.name = name;
-		this.mapper = mapper;
-	}
+    public CreateComplexVarInstruction(String name, Mapper mapper) {
+        this.name = name;
+        this.mapper = mapper;
+    }
 
-	protected String getName() {
-		return name;
-	}
+    protected String getName() {
+        return name;
+    }
 
-	protected Mapper getMapper() {
-		return mapper;
-	}
+    protected Mapper getMapper() {
+        return mapper;
+    }
 
-	@Override
-	public void runBasic(Runner runner) throws ScriptException {
-		FpcMessage object = mapper.createMessage();
-		if (object == null) {
-			throw new RuntimeException(
-					"Unexpected error while creating message '"
-							+ mapper.getMessageId() + "' for variable '" + name
-							+ "' in create instruction");
-		}
-		runner.ctx.setVariable(name, object);
-	}
+    @Override
+    public void runBasic(Runner runner) throws ScriptException {
+        FpcMessage object = mapper.createMessage();
+        if (object == null) {
+            throw new RuntimeException(
+                    "Unexpected error while creating message '"
+                            + mapper.getMessageId() + "' for variable '" + name
+                            + "' in create instruction");
+        }
+        runner.ctx.setVariable(name, object);
+    }
 
 }

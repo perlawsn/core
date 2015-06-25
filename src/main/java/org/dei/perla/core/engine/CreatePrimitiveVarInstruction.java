@@ -42,7 +42,7 @@ public class CreatePrimitiveVarInstruction extends BasicInstruction {
 			throw new RuntimeException("unimplemented");
 		}
 
-		runner.ctx.setVariable(name, obj);
+        runner.ctx.setVariable(name, obj);
 	}
 
 }

@@ -10,9 +10,9 @@ package org.dei.perla.core.engine;
  */
 public class BreakpointInstruction extends BasicInstruction {
 
-	@Override
-	protected void runBasic(Runner runner) throws ScriptException {
-		runner.setBreakpoint();
-	}
+    @Override
+    protected void runBasic(Runner runner) throws ScriptException {
+        runner.setBreakpoint();
+    }
 
 }
