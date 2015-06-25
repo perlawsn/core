@@ -33,6 +33,8 @@ public final class NativePeriodicOperation extends PeriodicOperation {
     private volatile int state = 0;
 
     // Current sample, used to merge the results from different async messages
+    // The currentSample contains an up-to-date view on the most recent value
+    // of all attributes managed by the Operation
     private Object[] currentSample;
 
     public NativePeriodicOperation(String id, List<Attribute> atts,
@@ -273,6 +275,19 @@ public final class NativePeriodicOperation extends PeriodicOperation {
                 return;
             }
 
+            // Merge only short-circuit: don't even acquire a lock to the
+            // Operation if the only thing that needs to be done is merging
+            // the data
+            if (handlers.size() != 1 && !msgs.isSync()) {
+                synchronized (currentSample) {
+                    // We only care about the last sample when merging
+                    int lastIndex = samples.size() - 1;
+                    Object[] last = samples.get(lastIndex);
+                    merge(last);
+                }
+                return;
+            }
+
             synchronized (NativePeriodicOperation.this) {
                 if (handlers.size() == 1) {
                     // Distribute immediately to the Tasks if the operation only
@@ -281,7 +296,6 @@ public final class NativePeriodicOperation extends PeriodicOperation {
                     for (Object[] s : samples) {
                         forEachTask(t -> t.newSample(s));
                     }
-                    return;
 
                 } else if (msgs.isSync()) {
                     synchronized (currentSample) {
@@ -290,24 +304,21 @@ public final class NativePeriodicOperation extends PeriodicOperation {
                             merge(s);
                             forEachTask(t -> t.newSample(currentSample));
                         }
-                        return;
                     }
                 }
             }
-
-            synchronized (currentSample) {
-                // We only care about the last sample when merging
-                int lastIndex = samples.size() - 1;
-                Object[] last = samples.get(lastIndex);
-                merge(last);
-            }
         }
 
-        private Object[] merge(Object[] r) {
-            for (int i = 0; i < r.length; i++) {
-                currentSample[msgs.getBase() + i] = r[i];
+        /**
+         * Merges the samples received from the {@link Script} with the
+         * currentSample.
+         *
+         * @param s sample to merge
+         */
+        private void merge(Object[] s) {
+            for (int i = 0; i < s.length; i++) {
+                currentSample[msgs.getBase() + i] = s[i];
             }
-            return currentSample;
         }
 
         @Override

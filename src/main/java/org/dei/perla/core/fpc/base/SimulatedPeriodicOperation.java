@@ -38,7 +38,7 @@ public final class SimulatedPeriodicOperation extends PeriodicOperation {
     @Override
     protected void setSamplingPeriod(final long period) {
         if (timerFuture != null) {
-            timerFuture.cancel(true);
+            timerFuture.cancel(false);
         }
         if (period == 0) {
             currentPeriod = 0;
@@ -57,6 +57,7 @@ public final class SimulatedPeriodicOperation extends PeriodicOperation {
             // The synchronous execution of the sampling script ensures that
             // all script invocations are performed sequentially.
             handler.await();
+
         } catch (Exception e) {
             handler.error(script, new RuntimeException("Unexpected error " +
                     "while running simulated periodic operation", e));
@@ -82,18 +83,22 @@ public final class SimulatedPeriodicOperation extends PeriodicOperation {
         @Override
         public synchronized void complete(Script script,
                 List<Object[]> samples) {
-            for (Object[] s : samples) {
-                forEachTask(t -> t.newSample(s));
+            synchronized (SimulatedPeriodicOperation.this) {
+                for (Object[] s : samples) {
+                    forEachTask(t -> t.newSample(s));
+                }
+                this.notify();
             }
-            this.notify();
         }
 
         @Override
         public synchronized void error(Script script, Throwable cause) {
-            Exception e = new FpcException(cause);
-            forEachTask(t -> t.notifyError(e, false));
-            setSamplingPeriod(0); // Stop the operation
-            this.notify();
+            synchronized (SimulatedPeriodicOperation.this) {
+                Exception e = new FpcException(cause);
+                forEachTask(t -> t.notifyError(e, false));
+                setSamplingPeriod(0); // Stop the operation
+                this.notify();
+            }
         }
 
     }
