@@ -57,7 +57,7 @@ public class ExecutionContext {
 		elContext = new ScriptEngineELContext(elVariableMapper);
 	}
 
-    protected void init(int sampleSize, ScriptParameter[] params) {
+    protected synchronized void init(int sampleSize, ScriptParameter[] params) {
         samples = new ArrayList<>();
         sample = new Object[sampleSize];
         setParameters(params);
@@ -96,7 +96,7 @@ public class ExecutionContext {
 	 * @param value
 	 *            variable value
 	 */
-	protected void setVariable(String name, Object value) {
+	protected synchronized void setVariable(String name, Object value) {
 		variableMap.put(name, value);
 		elVariableMapper.setVariable(name,
                 Executor.createValueExpression(value, value.getClass()));
@@ -110,7 +110,7 @@ public class ExecutionContext {
 	 * @return Variable objects, null if no variable with the specified name is
 	 *         found
 	 */
-	protected Object getVariable(String name) {
+	protected synchronized Object getVariable(String name) {
 		return variableMap.get(name);
 	}
 
@@ -123,7 +123,7 @@ public class ExecutionContext {
 	 * @param value
 	 *            Attribute value
 	 */
-	protected void putAttribute(int idx, Object value) {
+	protected synchronized void putAttribute(int idx, Object value) {
         sample[idx] = value;
 	}
 
@@ -132,7 +132,7 @@ public class ExecutionContext {
 	 * samples emitted can be collected after {@code Script} execution
 	 * using the {@code getSamples()} method.
 	 */
-	protected void emitSample() {
+	protected synchronized void emitSample() {
         Object[] s = Arrays.copyOf(sample, sample.length);
 		samples.add(s);
 	}
@@ -143,7 +143,7 @@ public class ExecutionContext {
 	 *
 	 * @return List of emitted samples
 	 */
-	protected List<Object[]> getSamples() {
+	protected synchronized List<Object[]> getSamples() {
 		if (samples.isEmpty()) {
 			return Collections.emptyList();
 		}
@@ -158,7 +158,7 @@ public class ExecutionContext {
 	 * object so that it can be reused for future <code>Script</code>
 	 * executions.
 	 */
-	protected void clear() {
+	protected synchronized void clear() {
 		instructionLocalMap.clear();
 		variableMap.clear();
 		elVariableMapper.clear();
@@ -214,8 +214,10 @@ public class ExecutionContext {
 		 *            value to set
 		 */
 		public void setValue(Runner runner, E value) {
-            ExecutionContext ctx = runner.ctx;
-            ctx.instructionLocalMap.put(id, value);
+			synchronized (runner.ctx) {
+				ExecutionContext ctx = runner.ctx;
+				ctx.instructionLocalMap.put(id, value);
+			}
 		}
 
 		/**
@@ -228,16 +230,18 @@ public class ExecutionContext {
 		 *         for the current {@link ExecutionContext}
 		 */
 		public E getValue(Runner runner) {
-            ExecutionContext ctx = runner.ctx;
+			synchronized (runner.ctx) {
+				ExecutionContext ctx = runner.ctx;
 
-            if (!ctx.instructionLocalMap.containsKey(id)) {
-                ctx.instructionLocalMap.put(id, initialValue);
-                return initialValue;
-            }
+				if (!ctx.instructionLocalMap.containsKey(id)) {
+					ctx.instructionLocalMap.put(id, initialValue);
+					return initialValue;
+				}
 
-            @SuppressWarnings("unchecked")
-            E value = (E) ctx.instructionLocalMap.get(id);
-            return value;
+				@SuppressWarnings("unchecked")
+				E value = (E) ctx.instructionLocalMap.get(id);
+				return value;
+			}
 		}
 
 	}

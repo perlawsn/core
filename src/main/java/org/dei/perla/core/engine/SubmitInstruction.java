@@ -120,12 +120,12 @@ public class SubmitInstruction implements Instruction {
 		for (RequestParameter param : parameterArray) {
 
 			Object msg = ctx.getVariable(param.variable);
+			check(msg != null, "Variable '" + param.variable + "' not found.");
 			if (!(msg instanceof FpcMessage)) {
 				throw new ScriptException("Primitive parameter '"
 						+ param.variable
 						+ "' is not allowed. Use a complex type (FpcMessage).");
 			}
-			check(msg != null, "Variable '" + param.variable + "' not found.");
 			req.setParameter(param.name, param.mapper.marshal((FpcMessage) msg));
 		}
 

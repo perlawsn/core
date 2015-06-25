@@ -29,7 +29,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * The {@code resume()} method is provided for restarting execution after
  * suspension. {@link ScriptDebugger} and {@link ScriptHandler} are preserved
  * during suspension.
- * </p>
  *
  *
  * @author Guido Rota (2014)
@@ -208,7 +207,9 @@ public class Executor {
      */
     protected static Object evaluateExpression(ExecutionContext context,
             String expression) {
-        return evaluateExpression(context, expression, Object.class);
+        synchronized (context) {
+            return evaluateExpression(context, expression, Object.class);
+        }
     }
 
     /**
@@ -229,11 +230,13 @@ public class Executor {
     protected static <T> T evaluateExpression(ExecutionContext context,
             String expression, Class<T> type) {
 
-        ELContext elContext = context.getELContext();
+        synchronized (context) {
+            ELContext elContext = context.getELContext();
 
-        ValueExpression result = expFct.createValueExpression(elContext,
-                expression, type);
-        return (T) result.getValue(elContext);
+            ValueExpression result = expFct.createValueExpression(elContext,
+                    expression, type);
+            return (T) result.getValue(elContext);
+        }
     }
 
 }
