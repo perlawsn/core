@@ -240,6 +240,8 @@ public class ConcreteOperationTest {
         assertThat(value, notNullValue());
         assertTrue(value instanceof String);
         assertThat((String) value, equalTo("test"));
+
+        assertThat(getOp.taskCount(), equalTo(0));
     }
 
     @Test
@@ -254,6 +256,7 @@ public class ConcreteOperationTest {
 
         handler.awaitCompletion();
         assertFalse(task.isRunning());
+        assertThat(getOp.taskCount(), equalTo(0));
     }
 
     @Test
@@ -495,8 +498,8 @@ public class ConcreteOperationTest {
     public void asyncSimulatedOneoffOperation() throws Exception {
         LatchingTaskHandler handler = new LatchingTaskHandler(1);
 
-        Task task = asyncOp.getAsyncOneoffOperation().schedule(
-                Collections.emptyMap(), handler);
+        Operation op = new AsyncOneoffOperation(asyncOp);
+        Task task = op.schedule(Collections.emptyMap(), handler);
         assertThat(task, notNullValue());
         Sample sample = handler.getLastSample();
         assertThat(sample, notNullValue());
@@ -508,8 +511,8 @@ public class ConcreteOperationTest {
 
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("period", 500);
-        Task task = asyncOp.getAsyncPeriodicOperation()
-                .schedule(paramMap, handler);
+        Operation op = new AsyncPeriodicOperation(asyncOp);
+        Task task = op.schedule(paramMap, handler);
 
         assertThat(task, notNullValue());
         assertTrue(task instanceof PeriodicTask);

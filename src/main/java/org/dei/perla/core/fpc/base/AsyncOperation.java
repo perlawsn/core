@@ -10,11 +10,10 @@ import org.dei.perla.core.message.Mapper;
 import org.dei.perla.core.sample.Attribute;
 import org.dei.perla.core.sample.SamplePipeline;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class AsyncOperation extends BaseOperation<AsyncOperation.AsyncTask> {
@@ -23,6 +22,7 @@ public class AsyncOperation extends BaseOperation<AsyncOperation.AsyncTask> {
     private static final int SUSPENDED = 1;
     private static final int STARTED = 2;
 
+    // Thread pool for simulated periodic Operation
     private static final ScheduledThreadPoolExecutor executor;
     static {
         executor = new ScheduledThreadPoolExecutor(10);
@@ -31,14 +31,10 @@ public class AsyncOperation extends BaseOperation<AsyncOperation.AsyncTask> {
 
     private final Script startScript;
 
-    private volatile int state;
+    private int state;
 
     private final AsyncMessageHandler asyncHandler;
     private final OnHandler onHandler = new OnHandler();
-
-    // Simulated operations
-    private final AsyncPeriodicOperation asyncPeriodicOp;
-    private final AsyncOneoffOperation asyncOneoffOp;
 
     private volatile Object[] sample;
 
@@ -49,9 +45,6 @@ public class AsyncOperation extends BaseOperation<AsyncOperation.AsyncTask> {
         this.startScript = startScript;
         this.asyncHandler = handler;
 
-        asyncPeriodicOp = new AsyncPeriodicOperation(id, atts);
-        asyncOneoffOp = new AsyncOneoffOperation(id, atts);
-
         sample = new Object[atts.size()];
 
         state = STOPPED;
@@ -59,22 +52,14 @@ public class AsyncOperation extends BaseOperation<AsyncOperation.AsyncTask> {
         channelMgr.addCallback(asyncHandler.mapper, this::handleMessage);
     }
 
-    protected void start() {
-
-	}
-
     private void runStartScript() {
         if (startScript != null) {
             Executor.execute(startScript, new StartHandler());
         }
     }
 
-    protected PeriodicOperation getAsyncPeriodicOperation() {
-        return asyncPeriodicOp;
-    }
-
-    protected Operation getAsyncOneoffOperation() {
-        return asyncOneoffOp;
+    protected synchronized Object[] getSampleCopy() {
+        return Arrays.copyOf(sample, sample.length);
     }
 
     @Override
@@ -113,7 +98,9 @@ public class AsyncOperation extends BaseOperation<AsyncOperation.AsyncTask> {
 
         @Override
         public void complete(Script script, List<Object[]> samples) {
-            // Does nothing, AsyncOperation are set as "STARTED" by default
+            synchronized (AsyncOperation.this) {
+                state = STARTED;
+            }
         }
 
         @Override
@@ -125,8 +112,6 @@ public class AsyncOperation extends BaseOperation<AsyncOperation.AsyncTask> {
                 state = SUSPENDED;
                 String message = "Error starting asynchronous operation";
                 log.error(message, cause);
-                // Stop all periodic tasks
-                asyncPeriodicOp.unrecoverableError(message, cause);
             }
         }
 
@@ -173,6 +158,12 @@ public class AsyncOperation extends BaseOperation<AsyncOperation.AsyncTask> {
 
     }
 
+    /**
+     * Simple container class for managing the association between {@link
+     * Script}s and {@link Mapper}s.
+     *
+     * @author Guido Rota
+     */
     public static class AsyncMessageHandler {
 
         private final Mapper mapper;
@@ -183,93 +174,6 @@ public class AsyncOperation extends BaseOperation<AsyncOperation.AsyncTask> {
             this.mapper = mapper;
             this.script = script;
             this.variable = variable;
-        }
-
-    }
-
-    /**
-     * Simulated periodic operation
-     *
-     * @author Guido Rota
-     */
-    private class AsyncPeriodicOperation extends PeriodicOperation {
-
-        private ScheduledFuture<?> timerFuture;
-
-        public AsyncPeriodicOperation(String id, List<Attribute> atts) {
-            super(id, atts);
-        }
-
-        @Override
-        protected synchronized void setSamplingPeriod(final long period) {
-            if (timerFuture != null) {
-                timerFuture.cancel(false);
-            }
-            if (period == 0) {
-                currentPeriod = 0;
-                return;
-            }
-
-            if (state == SUSPENDED) {
-                // Try to reboot the async operation
-                runStartScript();
-                state = STARTED;
-            }
-
-            forEachTask(t -> t.setInputPeriod(period));
-            currentPeriod = period;
-            timerFuture = executor.scheduleAtFixedRate(
-                    () -> forEachTask(t -> t.newSample(sample)), 0, period,
-                    TimeUnit.MILLISECONDS);
-        }
-
-        @Override
-        protected void doStop(Consumer<Operation> handler) {
-            doStop();
-            handler.accept(this);
-        }
-
-    }
-
-    /**
-     * Simulated one-off get operation
-     *
-     * @author Guido Rota
-     */
-    private class AsyncOneoffOperation extends BaseOperation<AsyncTask> {
-
-        public AsyncOneoffOperation(String id, List<Attribute> atts) {
-            super(id, atts);
-        }
-
-        @Override
-        public AsyncTask doSchedule(Map<String, Object> parameterMap,
-                TaskHandler handler, SamplePipeline pipeline)
-                throws IllegalArgumentException {
-            if (state == STOPPED) {
-                throw new IllegalStateException("Opertion '" + getId()
-                        + "' is stopped, cannot start new tasks");
-            } else if (state == SUSPENDED) {
-                // Try to reboot the async operation
-                runStartScript();
-                state = STARTED;
-            }
-
-            // We're not waiting for a sample to be produced. Since this
-            // operation runs asynchronously, we have no way to know when
-            // new data will arrive
-            AsyncTask task = new AsyncTask(this, handler, pipeline);
-            task.processSample(sample);
-            task.notifyComplete();
-            return task;
-        }
-
-        @Override
-        protected void doStop() {}
-
-        @Override
-        protected void doStop(Consumer<Operation> handler) {
-            handler.accept(this);
         }
 
     }
