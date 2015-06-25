@@ -532,6 +532,7 @@ public class BaseFpcFactory implements FpcFactory {
         AsyncOperation asyncOp = new AsyncOperation(o.getId(), emitAtts,
                 start, handler, ctx.channelMgr);
         ctx.asyncOpList.add(asyncOp);
+        asyncOp.start();
         ctx.getOpList.add(new AsyncOneoffOperation(asyncOp));
         ctx.periodicOpList.add(new AsyncPeriodicOperation(asyncOp));
     }

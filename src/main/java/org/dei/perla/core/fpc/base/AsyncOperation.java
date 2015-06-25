@@ -9,6 +9,7 @@ import org.dei.perla.core.message.FpcMessage;
 import org.dei.perla.core.message.Mapper;
 import org.dei.perla.core.sample.Attribute;
 import org.dei.perla.core.sample.SamplePipeline;
+import org.dei.perla.core.utils.AsyncUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -48,8 +49,11 @@ public class AsyncOperation extends BaseOperation<AsyncOperation.AsyncTask> {
         sample = new Object[atts.size()];
 
         state = STOPPED;
-        runStartScript();
         channelMgr.addCallback(asyncHandler.mapper, this::handleMessage);
+    }
+
+    protected void start() {
+        runStartScript();
     }
 
     private void runStartScript() {
@@ -86,7 +90,14 @@ public class AsyncOperation extends BaseOperation<AsyncOperation.AsyncTask> {
     @Override
     public void doStop(Consumer<Operation> handler) {
         doStop();
-        handler.accept(this);
+        // Synchronization and AsyncUtils.runInNewThread ensure that the
+        // handler is effectively asynchronously called after the doStop
+        // invocation is has been completed.
+        AsyncUtils.runInNewThread(() -> {
+            synchronized (AsyncOperation.this) {
+                handler.accept(this);
+            }
+        });
     }
 
     /**

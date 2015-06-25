@@ -1,5 +1,7 @@
 package org.dei.perla.core.fpc.base;
 
+import org.dei.perla.core.utils.AsyncUtils;
+
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -51,6 +53,16 @@ public class AsyncPeriodicOperation extends PeriodicOperation {
     }
 
     @Override
-    protected void doStop(Consumer<Operation> handler) {}
+    protected void doStop(Consumer<Operation> handler) {
+        // Synchronization and AsyncUtils.runInNewThread ensure that the
+        // handler is effectively asynchronously called after the doStop
+        // invocation is has been completed.
+        AsyncUtils.runInNewThread(() -> {
+            synchronized (AsyncPeriodicOperation.this) {
+                handler.accept(this);
+            }
+        });
+    }
+
 
 }

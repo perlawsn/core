@@ -13,7 +13,6 @@ import org.dei.perla.core.channel.simulator.SimulatorMapperFactory;
 import org.dei.perla.core.descriptor.*;
 import org.dei.perla.core.engine.*;
 import org.dei.perla.core.engine.SubmitInstruction.RequestParameter;
-import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.base.AsyncOperation.AsyncMessageHandler;
 import org.dei.perla.core.message.Mapper;
 import org.dei.perla.core.message.MapperFactory;
@@ -152,6 +151,7 @@ public class ConcreteOperationTest {
 
         asyncOp = new AsyncOperation("async_operation", asyncOnScript.getEmit(),
                 asyncStartScript, handler, chMgr);
+        asyncOp.start();
 
         // Get operation and simulated periodic operation
         RequestParameter getParameterArray[] = new RequestParameter[] { new RequestParameter(
@@ -499,7 +499,9 @@ public class ConcreteOperationTest {
         LatchingTaskHandler handler = new LatchingTaskHandler(1);
 
         Operation op = new AsyncOneoffOperation(asyncOp);
-        Task task = op.schedule(Collections.emptyMap(), handler);
+        BaseTask task = op.schedule(Collections.emptyMap(), handler);
+        assertFalse(task.isRunning());
+        task.start();
         assertThat(task, notNullValue());
         Sample sample = handler.getLastSample();
         assertThat(sample, notNullValue());
@@ -511,8 +513,12 @@ public class ConcreteOperationTest {
 
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("period", 500);
-        Operation op = new AsyncPeriodicOperation(asyncOp);
-        Task task = op.schedule(paramMap, handler);
+        PeriodicOperation op = new AsyncPeriodicOperation(asyncOp);
+        BaseTask task = op.schedule(paramMap, handler);
+        assertFalse(task.isRunning());
+        task.start();
+        assertTrue(task.isRunning());
+        assertThat(op.taskCount(), equalTo(1));
 
         assertThat(task, notNullValue());
         assertTrue(task instanceof PeriodicTask);
@@ -525,13 +531,20 @@ public class ConcreteOperationTest {
             assertThat(previous, not(equalTo(current)));
             previous = current;
         }
+
+        task.stop();
+        assertFalse(task.isRunning());
+        assertThat(op.taskCount(), equalTo(0));
     }
 
     @Test
     public void singleAsyncRequest() throws Exception {
         LatchingTaskHandler handler = new LatchingTaskHandler(10);
 
-        Task task = asyncOp.schedule(Collections.emptyMap(), handler);
+        BaseTask task = asyncOp.schedule(Collections.emptyMap(), handler);
+        assertFalse(task.isRunning());
+        task.start();
+        assertTrue(task.isRunning());
         assertThat(task, notNullValue());
 
         List<Sample> res = handler.getSamples();
@@ -551,13 +564,21 @@ public class ConcreteOperationTest {
         LatchingTaskHandler handler2 = new LatchingTaskHandler(10);
         LatchingTaskHandler handler3 = new LatchingTaskHandler(10);
 
-        Task task1 = asyncOp.schedule(Collections.emptyMap(), handler1);
-        Task task2 = asyncOp.schedule(Collections.emptyMap(), handler2);
-        Task task3 = asyncOp.schedule(Collections.emptyMap(), handler3);
-
+        BaseTask task1 = asyncOp.schedule(Collections.emptyMap(), handler1);
         assertThat(task1, notNullValue());
+        assertFalse(task1.isRunning());
+        task1.start();
+        assertTrue(task1.isRunning());
+        BaseTask task2 = asyncOp.schedule(Collections.emptyMap(), handler2);
         assertThat(task2, notNullValue());
+        assertFalse(task2.isRunning());
+        task2.start();
+        assertTrue(task2.isRunning());
+        BaseTask task3 = asyncOp.schedule(Collections.emptyMap(), handler3);
         assertThat(task3, notNullValue());
+        assertFalse(task3.isRunning());
+        task3.start();
+        assertTrue(task3.isRunning());
 
         Sample result1 = handler1.getLastSample();
         assertThat(result1, notNullValue());

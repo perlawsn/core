@@ -4,6 +4,7 @@ import org.dei.perla.core.engine.Executor;
 import org.dei.perla.core.engine.Script;
 import org.dei.perla.core.engine.ScriptHandler;
 import org.dei.perla.core.fpc.FpcException;
+import org.dei.perla.core.utils.AsyncUtils;
 
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
@@ -67,7 +68,14 @@ public final class SimulatedPeriodicOperation extends PeriodicOperation {
     @Override
     protected void doStop(Consumer<Operation> handler) {
         executor.shutdownNow();
-        handler.accept(this);
+        // Synchronization and AsyncUtils.runInNewThread ensure that the
+        // handler is effectively asynchronously called after the doStop
+        // invocation is has been completed.
+        AsyncUtils.runInNewThread(() -> {
+            synchronized (SimulatedPeriodicOperation.this) {
+                handler.accept(this);
+            }
+        });
     }
 
     /**
