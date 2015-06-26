@@ -1,5 +1,9 @@
 package org.dei.perla.core.engine;
 
+import org.dei.perla.core.channel.Channel;
+import org.dei.perla.core.channel.IORequestBuilder;
+import org.dei.perla.core.channel.loopback.LoopbackChannel;
+import org.dei.perla.core.channel.loopback.LoopbackIORequestBuilder;
 import org.dei.perla.core.channel.loopback.TestMapper;
 import org.dei.perla.core.descriptor.AttributeDescriptor;
 import org.dei.perla.core.descriptor.AttributeDescriptor.AttributePermission;
@@ -8,6 +12,8 @@ import org.dei.perla.core.engine.ExecutionContext.InstructionLocal;
 import org.dei.perla.core.message.Mapper;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import org.dei.perla.core.engine.SubmitInstruction.RequestParameter;
 
 import java.time.Instant;
 import java.util.List;
@@ -248,6 +254,36 @@ public class ScriptExecutorTest {
 		Executor.execute(s, handler);
 		Throwable e = handler.awaitError();
 		assertTrue(e instanceof ScriptException);
+	}
+
+	@Test
+	public void stressTest() throws InterruptedException {
+		int count = 1000000;
+
+		Channel channel = new LoopbackChannel();
+		IORequestBuilder request = new LoopbackIORequestBuilder("request");
+		Instruction submit = new SubmitInstruction(request, channel,
+				new RequestParameter[] { new RequestParameter("var", "var",
+						mapper1) }, "output", mapper1);
+		Script script = ScriptBuilder
+				.newScript()
+				.add(new CreateComplexVarInstruction("var", mapper1))
+				.add(new SetComplexInstruction("var", "integer", Integer.class, "12"))
+				.add(new SetComplexInstruction("var", "string", String.class, "test_order"))
+				.add(submit)
+				.add(new PutInstruction("${output.integer}", integer, 0))
+				.add(new PutInstruction("${output.integer}", integer, 0))
+				.add(new PutInstruction("${output.string}", string, 1))
+				.add(new EmitInstruction())
+				.add(new StopInstruction())
+				.buildScript("stress_test");
+
+		LatchingScriptHandler h = new LatchingScriptHandler(count);
+		for (int i = 0; i < count; i++) {
+			Executor.execute(script, h);
+		}
+
+		h.await();
 	}
 
 }
