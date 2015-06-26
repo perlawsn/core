@@ -4,45 +4,28 @@ import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.TaskHandler;
 import org.dei.perla.core.sample.Sample;
 
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
 /**
  * @author Guido Rota 23/05/15.
  */
 public class ErrorTaskHandler implements TaskHandler {
 
-    private final Lock lk = new ReentrantLock();
-    private final Condition cond = lk.newCondition();
-
     private Throwable error;
     private boolean complete = false;
 
-    public Throwable awaitError() throws InterruptedException {
-        lk.lock();
-        try {
-            while (error == null && !complete) {
-                cond.await();
-            }
-            if (complete) {
-                throw new RuntimeException("Complete without error");
-            }
-            return error;
-        } finally {
-            lk.unlock();
+    public synchronized Throwable awaitError() throws InterruptedException {
+        while (error == null && !complete) {
+            wait();
         }
+        if (complete) {
+            throw new RuntimeException("Complete without error");
+        }
+        return error;
     }
 
     @Override
-    public void complete(Task task) {
-        lk.lock();
-        try {
-            complete = true;
-            cond.signalAll();
-        } finally {
-            lk.unlock();
-        }
+    public synchronized void complete(Task task) {
+        complete = true;
+        notifyAll();
     }
 
     @Override
@@ -51,14 +34,9 @@ public class ErrorTaskHandler implements TaskHandler {
     }
 
     @Override
-    public void error(Task task, Throwable cause) {
-        lk.lock();
-        try {
-            error = cause;
-            cond.signalAll();
-        } finally {
-            lk.unlock();
-        }
+    public synchronized void error(Task task, Throwable cause) {
+        error = cause;
+        notifyAll();
     }
 
 }

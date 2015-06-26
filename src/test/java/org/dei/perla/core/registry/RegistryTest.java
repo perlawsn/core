@@ -26,8 +26,6 @@ public class RegistryTest {
 
 	private static final DataTemplate intTemp =
 			DataTemplate.create("integer", TypeClass.INTEGER);
-	private static final DataTemplate floatTemp =
-			DataTemplate.create("float", TypeClass.FLOAT);
 	private static final DataTemplate stringTemp =
 			DataTemplate.create("string", TypeClass.STRING);
 	private static final DataTemplate tempTemp =

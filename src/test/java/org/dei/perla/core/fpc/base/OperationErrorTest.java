@@ -13,7 +13,6 @@ import org.dei.perla.core.channel.simulator.SimulatorMapperFactory;
 import org.dei.perla.core.descriptor.*;
 import org.dei.perla.core.engine.*;
 import org.dei.perla.core.engine.SubmitInstruction.RequestParameter;
-import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.base.AsyncOperation.AsyncMessageHandler;
 import org.dei.perla.core.message.Mapper;
 import org.dei.perla.core.message.MapperFactory;
@@ -30,8 +29,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertThat;
 
 /**
  * @author Guido Rota 23/05/15.

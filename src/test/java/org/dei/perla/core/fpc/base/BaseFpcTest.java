@@ -42,7 +42,6 @@ public class BaseFpcTest {
 
 	@BeforeClass
 	public static void createFpc() throws Exception {
-		List<String> packageList = new ArrayList<>();
 		JaxbDeviceDescriptorParser parser =
 				new JaxbDeviceDescriptorParser(packages);
 

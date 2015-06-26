@@ -1,7 +1,5 @@
 package org.dei.perla.core.utils;
 
-import org.dei.perla.core.message.Mapper;
-
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;

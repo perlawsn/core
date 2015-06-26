@@ -8,155 +8,109 @@ import org.dei.perla.core.sample.Sample;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class LatchingTaskHandler implements TaskHandler {
 
     private static final Logger log =
             Logger.getLogger(LatchingTaskHandler.class);
 
-	private final Lock lk = new ReentrantLock();
-	private final Condition cond = lk.newCondition();
+    private int waitCount;
+    private int count = 0;
 
-	private int waitCount;
-	private int count = 0;
+    private Instant previousTime = null;
+    private double avgPeriod = 0;
 
-	private Instant previousTime = null;
-	private double avgPeriod = 0;
+    private Throwable error;
 
-	private Throwable error;
+    private final List<Sample> samples = new ArrayList<>();
 
-	private final List<Sample> samples = new ArrayList<>();
+    public LatchingTaskHandler(int waitCount) {
+        this.waitCount = waitCount;
+    }
 
-	public LatchingTaskHandler(int waitCount) {
-		this.waitCount = waitCount;
-	}
+    public synchronized int getCount() throws InterruptedException {
+        while (waitCount > 0 && error == null) {
+            wait();
+        }
+        if (error != null) {
+            throw new RuntimeException(error);
+        }
+        return count;
+    }
 
-	public int getCount() throws InterruptedException {
-		lk.lock();
-		try {
-			if (waitCount > 0 && error == null) {
-				cond.await();
-			}
-			if (error != null) {
-				throw new RuntimeException(error);
-			}
-			return count;
-		} finally {
-			lk.unlock();
-		}
-	}
+    public synchronized double getAveragePeriod() throws InterruptedException {
+        while (waitCount > 0 && error == null) {
+            wait();
+        }
+        if (error != null) {
+            throw new RuntimeException(error);
+        }
+        return avgPeriod;
+    }
 
-	public double getAveragePeriod() throws InterruptedException {
-		lk.lock();
-		try {
-			if (waitCount > 0 && error == null) {
-				cond.await();
-			}
-			if (error != null) {
-				throw new RuntimeException(error);
-			}
-			return avgPeriod;
-		} finally {
-			lk.unlock();
-		}
-	}
+    public synchronized List<Sample> getSamples() throws InterruptedException {
+        while (waitCount > 0 && error == null) {
+            wait();
+        }
+        if (error != null) {
+            throw new RuntimeException(error);
+        }
+        return samples;
+    }
 
-	public List<Sample> getSamples() throws InterruptedException {
-		lk.lock();
-		try {
-			if (waitCount > 0 && error == null) {
-				cond.await();
-			}
-			if (error != null) {
-				throw new RuntimeException(error);
-			}
-			return samples;
-		} finally {
-			lk.unlock();
-		}
-	}
+    public synchronized Sample getLastSample() throws InterruptedException {
+        if (waitCount > 0 && error == null) {
+            wait();
+        }
+        if (error != null) {
+            throw new RuntimeException(error);
+        }
+        return samples.get(samples.size() - 1);
+    }
 
-	public Sample getLastSample() throws InterruptedException {
-		lk.lock();
-		try {
-			if (waitCount > 0 && error == null) {
-				cond.await();
-			}
-			if (error != null) {
-				throw new RuntimeException(error);
-			}
-			return samples.get(samples.size() - 1);
-		} finally {
-			lk.unlock();
-		}
-	}
+    public synchronized void awaitCompletion() throws InterruptedException {
+        while (waitCount > 0 && error == null) {
+            wait();
+        }
+        if (error != null) {
+            throw new RuntimeException(error);
+        }
+    }
 
-	public void awaitCompletion() throws InterruptedException {
-		lk.lock();
-		try {
-			if (waitCount > 0 && error == null) {
-				cond.await();
-			}
-			if (error != null) {
-				throw new RuntimeException(error);
-			}
-		} finally {
-			lk.unlock();
-		}
-	}
+    @Override
+    public synchronized void complete(Task task) {
+        waitCount = 0;
+        notifyAll();
+    }
 
-	@Override
-	public void complete(Task task) {
-		lk.lock();
-		try {
-			waitCount = 0;
-			cond.signalAll();
-		} finally {
-			lk.unlock();
-		}
-	}
+    @Override
+    public synchronized void data(Task task, Sample sample) {
+        samples.add(sample);
+        waitCount--;
+        count++;
 
-	@Override
-	public void data(Task task, Sample sample) {
-		lk.lock();
-		try {
-			samples.add(sample);
-			waitCount--;
-			count++;
+        Instant ts;
+        if (sample.hasField("timestamp")) {
+            ts = (Instant) sample.getValue("timestamp");
+        } else {
+            ts = Instant.now();
+        }
 
-			Instant ts;
-			if (sample.hasField("timestamp")) {
-				ts = (Instant) sample.getValue("timestamp");
-			} else {
-				ts = Instant.now();
-			}
+        if (previousTime == null) {
+            previousTime = ts;
+        } else {
+            long diff = ts.toEpochMilli() - previousTime.toEpochMilli();
+            avgPeriod = (avgPeriod + diff) / count;
+        }
+        if (waitCount == 0) {
+            notifyAll();
+        }
+    }
 
-			if (previousTime == null) {
-				previousTime = ts;
-			} else {
-				long diff = ts.toEpochMilli() - previousTime.toEpochMilli();
-				avgPeriod = (avgPeriod + diff) / count;
-			}
-			if (waitCount == 0) {
-				cond.signalAll();
-			}
-		} finally {
-			lk.unlock();
-		}
-	}
-
-	@Override
-	public void error(Task task, Throwable cause) {
-		lk.lock();
-		try {
-			error = cause;
-			cond.signalAll();
-		} finally {
-			lk.unlock();
-		}
-	}
+    @Override
+    public synchronized void error(Task task, Throwable cause) {
+        error = cause;
+        notifyAll();
+    }
 
 }

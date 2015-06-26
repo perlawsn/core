@@ -1,10 +1,10 @@
 package org.dei.perla.core.channel.loopback;
 
+import org.dei.perla.core.message.FpcMessage;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.dei.perla.core.message.FpcMessage;
 
 /**
  * <code>FpcMessage</code> implementation for testing the

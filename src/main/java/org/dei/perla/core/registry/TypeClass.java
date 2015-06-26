@@ -79,4 +79,9 @@ public enum TypeClass {
         }
     }
 
+    @Override
+    public String toString() {
+        return name;
+    }
+
 }

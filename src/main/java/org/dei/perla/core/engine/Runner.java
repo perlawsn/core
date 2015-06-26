@@ -4,7 +4,6 @@ import org.apache.log4j.Logger;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * <p>
@@ -17,7 +16,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * instruction is encountered. It is important to note that {@link Script}
  * debugging may severly impact on the overall system performance, and it is not
  * intended to be used in a production environment.
- * </p>
  *
  * @author Guido Rota (2014)
  *
@@ -47,9 +45,6 @@ public class Runner {
 
     private boolean breakpoint;
     private int state;
-
-    // Lock acquired when running the Script
-    protected final Object runLock = new Object();
 
     protected Runner(Script script, ScriptParameter[] params,
             ScriptHandler handler, ScriptDebugger debugger) {
@@ -239,7 +234,7 @@ public class Runner {
      * Main {@link Script} execution loop.
      */
     private void run() {
-        synchronized (runLock) {
+        synchronized (ctx) {
             try {
                 do {
                     synchronized (this) {

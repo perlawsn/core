@@ -8,8 +8,6 @@ import javax.el.ELContext;
 import javax.el.ExpressionFactory;
 import javax.el.ValueExpression;
 import java.util.concurrent.*;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * <p>
@@ -160,7 +158,7 @@ public class Executor {
         paramArray = Conditions.checkNotNull(paramArray, "paramArray");
         handler = Conditions.checkNotNull(handler, "handler");
 
-        final Runner runner = new Runner(script, paramArray, handler, debugger);
+        Runner runner = new Runner(script, paramArray, handler, debugger);
         pool.submit(runner::execute);
         return runner;
     }
@@ -207,9 +205,7 @@ public class Executor {
      */
     protected static Object evaluateExpression(ExecutionContext context,
             String expression) {
-        synchronized (context) {
-            return evaluateExpression(context, expression, Object.class);
-        }
+        return evaluateExpression(context, expression, Object.class);
     }
 
     /**
@@ -229,10 +225,8 @@ public class Executor {
     @SuppressWarnings("unchecked")
     protected static <T> T evaluateExpression(ExecutionContext context,
             String expression, Class<T> type) {
-
         synchronized (context) {
             ELContext elContext = context.getELContext();
-
             ValueExpression result = expFct.createValueExpression(elContext,
                     expression, type);
             return (T) result.getValue(elContext);

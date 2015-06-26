@@ -46,7 +46,6 @@ public class SamplePipeline {
      * operation to the data received as an input.
      */
     public static SamplePipeline passthrough(List<Attribute> atts) {
-        atts = atts;
         return new SamplePipeline(Collections.emptyList(), atts);
     }
 

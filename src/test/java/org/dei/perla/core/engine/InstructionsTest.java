@@ -655,7 +655,7 @@ public class InstructionsTest {
 				.add(new StopInstruction()).buildScript("testErrorInstruction");
 
 		SynchronizerScriptHandler syncHandler = new SynchronizerScriptHandler();
-		Runner runner = Executor.execute(script, syncHandler);
+		Executor.execute(script, syncHandler);
         syncHandler.getResult();
 	}
 
