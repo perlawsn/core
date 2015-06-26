@@ -88,7 +88,9 @@ public final class SimulatedPeriodicOperation extends PeriodicOperation {
         private boolean triggered = false;
 
         public synchronized void await() throws InterruptedException {
-            this.wait();
+            while (!triggered) {
+                this.wait();
+            }
         }
 
         public synchronized void reset() {
