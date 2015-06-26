@@ -70,13 +70,11 @@ public class Runner {
      * @return {@link ExecutionContext} object
      */
     private static final ExecutionContext getContext() {
-        synchronized (contextPool) {
-            ExecutionContext context = contextPool.poll();
-            if (context == null) {
-                return new ExecutionContext();
-            }
-            return context;
+        ExecutionContext context = contextPool.poll();
+        if (context == null) {
+            return new ExecutionContext();
         }
+        return context;
     }
 
     /**
@@ -85,10 +83,8 @@ public class Runner {
      * @param context {@link ExecutionContext} to be returned to the pool
      */
     private static final void relinquishContext(ExecutionContext context) {
-        synchronized (contextPool) {
-            context.clear();
-            contextPool.add(context);
-        }
+        context.clear();
+        contextPool.add(context);
     }
 
     /**
