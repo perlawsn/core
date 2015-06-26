@@ -11,6 +11,7 @@ import org.dei.perla.core.sample.Attribute;
 import org.dei.perla.core.sample.Sample;
 import org.dei.perla.core.sample.SamplePipeline;
 import org.dei.perla.core.sample.SamplePipeline.PipelineBuilder;
+import org.dei.perla.core.utils.AsyncUtils;
 
 import java.time.Instant;
 import java.util.*;
@@ -18,164 +19,194 @@ import java.util.function.Consumer;
 
 public class BaseFpc implements Fpc {
 
-	private final int id;
+    private final int id;
     private final String type;
-	private final Set<Attribute> atts;
+    private final Set<Attribute> atts;
     private final Map<Attribute, Object> attValues;
-	private final ChannelManager cmgr;
-	private final Scheduler sched;
+    private final ChannelManager cmgr;
+    private final Scheduler sched;
 
-	// This Operation creates an empty sample. It is used for scheduling the
-	// periodic creation of empty samples, to which additional static fields
-	// may be appended, to satisfy a periodic request of static attributes
-	private static final Operation emptySampleOperation;
+    // This Operation creates an empty sample. It is used for scheduling the
+    // periodic creation of empty samples, to which additional static fields
+    // may be appended, to satisfy a periodic request of static attributes
+    private static final Operation emptySampleOperation;
 
-	static {
+    static {
         Instruction start = new EmitInstruction();
         start.setNext(new StopInstruction());
         Script empty = new Script("_empty", start, Collections.emptyList(),
                 Collections.emptyList());
-		emptySampleOperation = new SimulatedPeriodicOperation("_empty", empty);
-	}
+        emptySampleOperation = new SimulatedPeriodicOperation("_empty", empty);
+    }
 
-	protected BaseFpc(int id, String type, Set<Attribute> atts,
+    protected BaseFpc(int id, String type, Set<Attribute> atts,
             Map<Attribute, Object> attValues, ChannelManager cmgr,
-			Scheduler sched) {
-		this.id = id;
+            Scheduler sched) {
+        this.id = id;
         this.type = type;
         this.atts = atts;
         this.attValues = attValues;
         this.cmgr = cmgr;
-		this.sched = sched;
-	}
+        this.sched = sched;
+    }
 
-	@Override
-	public int getId() {
-		return id;
-	}
+    @Override
+    public int getId() {
+        return id;
+    }
 
     @Override
     public String getType() {
         return type;
     }
 
-	@Override
-	public Set<Attribute> getAttributes() {
-		return atts;
-	}
+    @Override
+    public Set<Attribute> getAttributes() {
+        return atts;
+    }
 
-	protected Scheduler getOperationScheduler() {
-		return sched;
-	}
+    protected Scheduler getOperationScheduler() {
+        return sched;
+    }
 
-	@Override
-	public Task set(Map<Attribute, Object> values, boolean strict,
-			TaskHandler handler) {
-		Operation op = sched.set(values.keySet(), strict);
-		if (op == null) {
-			return null;
-		}
+    @Override
+    public Task set(Map<Attribute, Object> values, boolean strict,
+            TaskHandler handler) {
+        Operation op = sched.set(values.keySet(), strict);
+        if (op == null) {
+            return null;
+        }
 
-		Map<String, Object> pm = new HashMap<>();
-		values.entrySet().forEach(
-				e -> pm.put(e.getKey().getId(), e.getValue()));
-		return op.schedule(pm, handler);
-	}
+        Map<String, Object> pm = new HashMap<>();
+        values.entrySet().forEach(
+                e -> pm.put(e.getKey().getId(), e.getValue()));
 
-	@Override
-	public Task get(List<Attribute> atts, boolean strict,
-			TaskHandler handler) {
-        Request req = new Request(atts);
-
-		if (req.staticOnly()) {
-            Task t = new CompletedTask(req.statAtts);
-            handler.data(t, req.staticSample());
-            handler.complete(t);
+        // Start task only after the set method completes
+        BaseTask t = op.schedule(pm, handler);
+        synchronized (t) {
+			AsyncUtils.runInNewThread(t::start);
             return t;
-
 		}
+    }
 
-		Operation op = sched.get(req.dynAtts, strict);
-		if (op == null) {
-			return null;
-		}
+    @Override
+    public Task get(List<Attribute> atts, boolean strict,
+            TaskHandler handler) {
+        Request req = new Request(atts);
 
-		PipelineBuilder pb = SamplePipeline.newBuilder(op.getAttributes());
+        if (req.staticOnly()) {
+            Task t = new CompletedTask(req.statAtts);
+            synchronized (t) {
+                AsyncUtils.runInNewThread(() -> {
+                    handler.data(t, req.staticSample());
+                    handler.complete(t);
+                });
+                return t;
+            }
+        }
+
+        Operation op = sched.get(req.dynAtts, strict);
+        if (op == null) {
+            return null;
+        }
+
+        PipelineBuilder pb = SamplePipeline.newBuilder(op.getAttributes());
         if (req.mixed()) {
-			pb.addStatic(req.staticValues());
-		}
-		if (!op.getAttributes().contains(Attribute.TIMESTAMP)) {
-			pb.addTimestamp();
-		}
-		pb.reorder(atts);
+            pb.addStatic(req.staticValues());
+        }
+        if (!op.getAttributes().contains(Attribute.TIMESTAMP)) {
+            pb.addTimestamp();
+        }
+        pb.reorder(atts);
 
-		return op.schedule(Collections.emptyMap(), handler, pb.create());
-	}
+        // Start the task only after the get method completes
+        BaseTask t = op.schedule(Collections.emptyMap(), handler, pb.create());
+        synchronized (t) {
+            AsyncUtils.runInNewThread(t::start);
+            return t;
+        }
+    }
 
-	@Override
-	public Task get(List<Attribute> atts, boolean strict, long ms,
-			TaskHandler handler) {
-		PipelineBuilder pb;
+    @Override
+    public Task get(List<Attribute> atts, boolean strict, long ms,
+            TaskHandler handler) {
+        PipelineBuilder pb;
         Request req = new Request(atts);
 
-		if (req.staticOnly()) {
-			pb = SamplePipeline.newBuilder(Collections.emptyList());
-			pb.addStatic(req.staticValues());
-			pb.addTimestamp();
-			Map<String, Object> paramMap = new HashMap<>();
-			paramMap.put("period", ms);
-			pb.reorder(atts);
-			return emptySampleOperation.schedule(paramMap, handler,
-					pb.create());
-		}
+        if (req.staticOnly()) {
+            pb = SamplePipeline.newBuilder(Collections.emptyList());
+            pb.addStatic(req.staticValues());
+            pb.addTimestamp();
+            Map<String, Object> paramMap = new HashMap<>();
+            paramMap.put("period", ms);
+            pb.reorder(atts);
+            BaseTask t = emptySampleOperation
+                    .schedule(paramMap, handler, pb.create());
+            synchronized (t) {
+                AsyncUtils.runInNewThread(t::start);
+                return t;
+            }
+        }
 
-		Operation op = sched.periodic(req.dynAtts, strict);
-		if (op == null) {
-			return null;
-		}
+        Operation op = sched.periodic(req.dynAtts, strict);
+        if (op == null) {
+            return null;
+        }
 
-		Map<String, Object> pm = new HashMap<>();
-		pm.put("period", ms);
+        Map<String, Object> pm = new HashMap<>();
+        pm.put("period", ms);
 
-		pb = SamplePipeline.newBuilder(op.getAttributes());
-		if (!req.statAtts.isEmpty()) {
-			pb.addStatic(req.staticValues());
-		}
-		if (!op.getAttributes().contains(Attribute.TIMESTAMP)) {
-			pb.addTimestamp();
-		}
-		pb.reorder(atts);
-		return op.schedule(pm, handler, pb.create());
-	}
+        pb = SamplePipeline.newBuilder(op.getAttributes());
+        if (!req.statAtts.isEmpty()) {
+            pb.addStatic(req.staticValues());
+        }
+        if (!op.getAttributes().contains(Attribute.TIMESTAMP)) {
+            pb.addTimestamp();
+        }
+        pb.reorder(atts);
 
-	@Override
-	public Task async(List<Attribute> atts, boolean strict,
-			TaskHandler handler) {
+        // Start the task only after the get method completes
+        BaseTask t = op.schedule(pm, handler, pb.create());
+        synchronized (t) {
+            AsyncUtils.runInNewThread(t::start);
+            return t;
+        }
+    }
+
+    @Override
+    public Task async(List<Attribute> atts, boolean strict,
+            TaskHandler handler) {
         Request req = new Request(atts);
 
-		if (!req.statAtts.isEmpty()) {
-			return null;
-		}
+        if (!req.statAtts.isEmpty()) {
+            return null;
+        }
 
-		Operation op = sched.async(atts, strict);
-		if (op == null) {
-			return null;
-		}
+        Operation op = sched.async(atts, strict);
+        if (op == null) {
+            return null;
+        }
 
-		PipelineBuilder pb = SamplePipeline.newBuilder(op.getAttributes());
-		if (!op.getAttributes().contains(Attribute.TIMESTAMP)) {
-			pb.addTimestamp();
-		}
-		return op.schedule(Collections.emptyMap(), handler, pb.create());
-	}
+        PipelineBuilder pb = SamplePipeline.newBuilder(op.getAttributes());
+        if (!op.getAttributes().contains(Attribute.TIMESTAMP)) {
+            pb.addTimestamp();
+        }
 
-	@Override
-	public void stop(final Consumer<Fpc> handler) {
-		sched.stop((Void) -> {
-			cmgr.stop();
-			handler.accept(this);
-		});
-	}
+        // Start the task only after the async method completes
+        BaseTask t = op.schedule(Collections.emptyMap(), handler, pb.create());
+        synchronized (t) {
+            AsyncUtils.runInNewThread(t::start);
+            return t;
+        }
+    }
+
+    @Override
+    public void stop(final Consumer<Fpc> handler) {
+        sched.stop((Void) -> {
+            cmgr.stop();
+            handler.accept(this);
+        });
+    }
 
     /**
      * Request is a simple utility class employed to classify the
@@ -235,36 +266,36 @@ public class BaseFpc implements Fpc {
 
     }
 
-	/**
-	 * Implementation of a {@link Task} that terminates immediately. This class is
-	 * mainly used as a return value for 'get' requests that only return static
-	 * attributes, or for which the result was already available.
-	 *
-	 * @author Guido Rota (2014)
-	 *
-	 */
-	private class CompletedTask implements Task {
+    /**
+     * Implementation of a {@link Task} that terminates immediately. This class is
+     * mainly used as a return value for 'get' requests that only return static
+     * attributes, or for which the result was already available.
+     *
+     * @author Guido Rota (2014)
+     *
+     */
+    private class CompletedTask implements Task {
 
-		private final List<Attribute> atts;
+        private final List<Attribute> atts;
 
-		public CompletedTask(List<Attribute> atts) {
-			this.atts = atts;
-		}
+        public CompletedTask(List<Attribute> atts) {
+            this.atts = atts;
+        }
 
-		@Override
-		public boolean isRunning() {
-			return false;
-		}
+        @Override
+        public boolean isRunning() {
+            return false;
+        }
 
-		@Override
-		public List<Attribute> getAttributes() {
-			return atts;
-		}
+        @Override
+        public List<Attribute> getAttributes() {
+            return atts;
+        }
 
-		@Override
-		public void stop() {
-		}
+        @Override
+        public void stop() {
+        }
 
-	}
+    }
 
 }
