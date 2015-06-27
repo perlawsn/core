@@ -54,12 +54,7 @@ public final class SimulatedPeriodicOperation extends PeriodicOperation {
 
     private void sample() {
         try {
-            handler.reset();
             Executor.execute(script, Executor.EMPTY_PARAMETER_ARRAY, handler);
-            // The synchronous execution of the sampling script ensures that
-            // all script invocations are performed sequentially.
-            handler.await();
-
         } catch (Exception e) {
             handler.error(script, new RuntimeException("Unexpected error " +
                     "while running simulated periodic operation", e));
@@ -85,18 +80,6 @@ public final class SimulatedPeriodicOperation extends PeriodicOperation {
      */
     private class TimerScriptHandler implements ScriptHandler {
 
-        private boolean triggered = false;
-
-        public synchronized void await() throws InterruptedException {
-            while (!triggered) {
-                this.wait();
-            }
-        }
-
-        public synchronized void reset() {
-            triggered = false;
-        }
-
         @Override
         public synchronized void complete(Script script,
                 List<Object[]> samples) {
@@ -104,8 +87,6 @@ public final class SimulatedPeriodicOperation extends PeriodicOperation {
                 for (Object[] s : samples) {
                     forEachTask(t -> t.newSample(s));
                 }
-                triggered = true;
-                this.notify();
             }
         }
 
@@ -115,8 +96,6 @@ public final class SimulatedPeriodicOperation extends PeriodicOperation {
                 Exception e = new FpcException(cause);
                 forEachTask(t -> t.notifyError(e, false));
                 setSamplingPeriod(0); // Stop the operation
-                triggered = true;
-                this.notify();
             }
         }
 

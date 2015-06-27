@@ -7,16 +7,16 @@ import java.util.List;
  */
 public class LatchingScriptHandler implements ScriptHandler {
 
-    private final int count;
+    private final int thresh;
     private int completed = 0;
     private Throwable error = null;
 
-    protected LatchingScriptHandler(int count) {
-        this.count = count;
+    protected LatchingScriptHandler(int thresh) {
+        this.thresh = thresh;
     }
 
     protected synchronized void await() throws InterruptedException {
-        while (completed < count && error == null) {
+        while (completed < thresh && error == null) {
             wait();
         }
 
@@ -27,8 +27,11 @@ public class LatchingScriptHandler implements ScriptHandler {
 
     @Override
     public synchronized void complete(Script script, List<Object[]> samples) {
+        if (completed >= thresh) {
+            return;
+        }
         completed++;
-        if (completed >= count) {
+        if (completed >= thresh) {
             notifyAll();
         }
     }
