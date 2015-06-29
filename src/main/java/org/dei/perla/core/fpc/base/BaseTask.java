@@ -93,14 +93,18 @@ public abstract class BaseTask implements Task {
     protected void doStart() {}
 
     @Override
-    public final synchronized void stop() {
-        if (!running) {
-            return;
+    public final void stop() {
+        synchronized (op) {
+            synchronized (this) {
+                if (!running) {
+                    return;
+                }
+                running = false;
+                doStop();
+                op.remove(this);
+                handler.complete(this);
+            }
         }
-        running = false;
-        doStop();
-        op.remove(this);
-        handler.complete(this);
     }
 
     /**

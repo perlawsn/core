@@ -278,8 +278,8 @@ public class ConcreteOperationTest {
         assertTrue(task.getAttributes().containsAll(
                 natPeriodicOp.getAttributes()));
         assertThat(task, notNullValue());
-        assertThat(handler.getAveragePeriod(), greaterThanOrEqualTo(0.9d));
-        assertThat(handler.getAveragePeriod(), lessThanOrEqualTo(1.1d));
+        assertThat(handler.getAveragePeriod(), greaterThanOrEqualTo(0.8d));
+        assertThat(handler.getAveragePeriod(), lessThanOrEqualTo(1.2d));
 
         // Stop test
         task.stop();
@@ -331,18 +331,18 @@ public class ConcreteOperationTest {
 
         assertThat(h1.getCount(), greaterThanOrEqualTo(10));
         assertThat(h1.getCount(), lessThanOrEqualTo(12));
-        assertThat(h1.getAveragePeriod(), greaterThanOrEqualTo(90d));
+        assertThat(h1.getAveragePeriod(), greaterThanOrEqualTo(80d));
         assertThat(h1.getAveragePeriod(), lessThanOrEqualTo(120d));
 
         assertThat(h2.getCount(), greaterThanOrEqualTo(100));
         assertThat(h2.getCount(), lessThanOrEqualTo(110));
-        assertThat(h2.getAveragePeriod(), greaterThanOrEqualTo(9d));
-        assertThat(h2.getAveragePeriod(), lessThanOrEqualTo(11d));
+        assertThat(h2.getAveragePeriod(), greaterThanOrEqualTo(8d));
+        assertThat(h2.getAveragePeriod(), lessThanOrEqualTo(12d));
 
         assertThat(h3.getCount(), greaterThanOrEqualTo(1000));
         assertThat(h3.getCount(), lessThanOrEqualTo(1010));
-        assertThat(h3.getAveragePeriod(), greaterThanOrEqualTo(0.9d));
-        assertThat(h3.getAveragePeriod(), lessThanOrEqualTo(1.1d));
+        assertThat(h3.getAveragePeriod(), greaterThanOrEqualTo(0.8d));
+        assertThat(h3.getAveragePeriod(), lessThanOrEqualTo(1.2d));
 
         int initialH1Count;
         int initialH2Count;
@@ -397,8 +397,8 @@ public class ConcreteOperationTest {
         assertTrue(task.isRunning());
         assertThat(task, notNullValue());
         assertTrue(task.isRunning());
-        assertThat(handler.getAveragePeriod(), greaterThanOrEqualTo(9d));
-        assertThat(handler.getAveragePeriod(), lessThanOrEqualTo(11d));
+        assertThat(handler.getAveragePeriod(), greaterThanOrEqualTo(8d));
+        assertThat(handler.getAveragePeriod(), lessThanOrEqualTo(12d));
 
         // Stop test
         task.stop();
@@ -447,14 +447,14 @@ public class ConcreteOperationTest {
         assertTrue(task2.isRunning());
         assertTrue(task3.isRunning());
 
-        assertThat(h1.getAveragePeriod(), greaterThanOrEqualTo(90d));
+        assertThat(h1.getAveragePeriod(), greaterThanOrEqualTo(80d));
         assertThat(h1.getAveragePeriod(), lessThanOrEqualTo(120d));
 
-        assertThat(h2.getAveragePeriod(), greaterThanOrEqualTo(9d));
-        assertThat(h2.getAveragePeriod(), lessThanOrEqualTo(11d));
+        assertThat(h2.getAveragePeriod(), greaterThanOrEqualTo(8d));
+        assertThat(h2.getAveragePeriod(), lessThanOrEqualTo(12d));
 
-        assertThat(h3.getAveragePeriod(), greaterThanOrEqualTo(0.9d));
-        assertThat(h3.getAveragePeriod(), lessThanOrEqualTo(1.1d));
+        assertThat(h3.getAveragePeriod(), greaterThanOrEqualTo(0.8d));
+        assertThat(h3.getAveragePeriod(), lessThanOrEqualTo(1.2d));
 
         int initialH1Count;
         int initialH2Count;
