@@ -1,6 +1,5 @@
 package org.dei.perla.core.fpc.base;
 
-import org.apache.log4j.Logger;
 import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.TaskHandler;
 import org.dei.perla.core.sample.Sample;
@@ -10,9 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LatchingTaskHandler implements TaskHandler {
-
-    private static final Logger log =
-            Logger.getLogger(LatchingTaskHandler.class);
 
     private int waitCount;
     private int count = 0;
