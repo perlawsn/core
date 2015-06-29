@@ -258,7 +258,7 @@ public class ScriptExecutorTest {
 
 	@Test
 	public void stressTest() throws InterruptedException {
-		int count = 1000000;
+		int count = 1000;
 
 		Channel channel = new LoopbackChannel();
 		IORequestBuilder request = new LoopbackIORequestBuilder("request");
