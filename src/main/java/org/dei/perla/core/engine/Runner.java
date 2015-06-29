@@ -4,18 +4,22 @@ import org.apache.log4j.Logger;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * <p>
- * A class for running {@link Script} {@code Runner} objects contain
- * various methods for controlling {@link Script} execution.
+ * A class for running <code>Script</code>s. <code>Runner</code> objects contain
+ * various methods for controlling <code>Script</code> execution.
+ * </p>
+ *
  *
  * <p>
- * {@link Script} execution can be monitored and influenced using a
- * {@link ScriptDebugger} which is invoked whenever a breakpoint
- * instruction is encountered. It is important to note that {@link Script}
+ * <code>Script</code> execution can be monitored and influenced using a
+ * <code>ScriptDebugger</code>, which is invoked whenever a breakpoint
+ * instruction is encountered. It is important to note that <code>Script</code>
  * debugging may severly impact on the overall system performance, and it is not
  * intended to be used in a production environment.
+ * </p>
  *
  * @author Guido Rota (2014)
  *
@@ -41,10 +45,10 @@ public class Runner {
     private final Script script;
     private final ScriptHandler handler;
     private final ScriptDebugger debugger;
-    private volatile Instruction instruction; // Program counter
+    private Instruction instruction; // Program counter
 
     private boolean breakpoint;
-    private int state;
+    private final AtomicInteger state;
 
     protected Runner(Script script, ScriptParameter[] params,
             ScriptHandler handler, ScriptDebugger debugger) {
@@ -53,7 +57,7 @@ public class Runner {
         this.debugger = debugger;
 
         this.breakpoint = false;
-        state = NEW;
+        this.state = new AtomicInteger(NEW);
         this.ctx = getContext();
         this.ctx.init(script.getEmit().size(), params);
     }
@@ -70,10 +74,13 @@ public class Runner {
      * @return {@link ExecutionContext} object
      */
     private static final ExecutionContext getContext() {
+        // No synchronization needed. Worst that can happen is that we create
+        // some additional ExecutionContext objects
         ExecutionContext context = contextPool.poll();
         if (context == null) {
             return new ExecutionContext();
         }
+        context.clear();
         return context;
     }
 
@@ -83,7 +90,6 @@ public class Runner {
      * @param context {@link ExecutionContext} to be returned to the pool
      */
     private static final void relinquishContext(ExecutionContext context) {
-        context.clear();
         contextPool.add(context);
     }
 
@@ -98,23 +104,16 @@ public class Runner {
      * getResult()} method on a suspended {@code Runner} will block until the
      * execution is resumed and completed.
      */
-    protected synchronized void suspend() {
-        if (state != RUNNING) {
-            String msg = "Cannot suspend, Runner is not in execution";
-            log.error(msg);
-            throw new IllegalStateException(msg);
-        }
-        state = SUSPENDED;
+    protected void suspend() {
+        state.compareAndSet(RUNNING, SUSPENDED);
     }
 
     /**
      * Stops the {@link Script}.
      */
-    protected synchronized void stop() {
-        if (state != RUNNING) {
-            String msg = "Cannot stop, Runner is not in execution";
-            log.error(msg);
-            throw new IllegalStateException(msg);
+    protected void stop() {
+        if (!state.compareAndSet(RUNNING, STOPPED)) {
+            return;
         }
         try {
             handler.complete(script, ctx.getSamples());
@@ -124,7 +123,6 @@ public class Runner {
             log.error(msg, e);
             handler.error(script, new ScriptException(msg, e));
         }
-        state = STOPPED;
         relinquishContext(ctx);
     }
 
@@ -132,23 +130,26 @@ public class Runner {
      * Cancels the {@link Script} execution. No samples are emitted upon
      * cancellation.
      */
-    public synchronized void cancel() {
-        if (state == CANCELLED || state == STOPPED) {
-            return;
-        }
-        state = CANCELLED;
-        relinquishContext(ctx);
+    public void cancel() {
+        int old;
+        do {
+            old = state.get();
+            if (old == CANCELLED || old == STOPPED) {
+                return;
+            }
+        } while (!state.compareAndSet(old, CANCELLED));
 
         String msg = "Script '" + script.getName() + "' cancelled.";
         log.debug(msg);
         handler.error(script, new ScriptCancelledException(msg));
+        relinquishContext(ctx);
     }
 
     /**
      * Sets a breakpoint, causing the {@code Runner} to invoke the
      * {@link ScriptDebugger} (if any) before running the next instruction.
      */
-    protected synchronized void setBreakpoint() {
+    protected void setBreakpoint() {
         breakpoint = true;
     }
 
@@ -157,54 +158,38 @@ public class Runner {
      *
      * @return True if the <code>Runner</code> is suspended, false otherwise
      */
-    public synchronized boolean isSuspended() {
-        return state == SUSPENDED;
+    public boolean isSuspended() {
+        return state.get() == SUSPENDED;
     }
 
     /**
-     * Indicates whether the {@code Runner} has stopped or has been cancelled.
+     * Indicates whether the <code>Runner</code> has stopped or has been
+     * cancelled.
      *
-     * @return True if the {@code Runner} has stopped or has been cancelled,
-     * false otherwise
+     * @return True if the <code>Runner</code> has stopped or has been
+     *         cancelled, false otherwise
      */
-    public synchronized boolean isDone() {
-        return state >= STOPPED;
+    public boolean isDone() {
+        return state.get() >= STOPPED;
     }
 
     /**
      * <p>
-     * Indicates whether the {@code Runner} has been cancelled or not.
+     * Indicates whether the <code>Runner</code> has been cancelled or not.
+     * </p>
      *
      * <p>
-     * {@code Runner}s enter the cancelled state if they are explicitly
-     * cancelled by a user through the {@code cancel()} method or if an
-     * exception occurs during while the {@link Script} is executed. in
+     * <code>Runner</code>s enter the cancelled state if they are explicitly
+     * cancelled by a user through the <code>cancel()</code> method or if an
+     * exception occurs during while the <code>Script</code> is executed. in
      * this latter case the exception that caused cancellation can be retrieved
-     * with an invocation to the {@code getResult()} method.
+     * with an invocation to the <code>getResult()</code> method.
+     * </p>
      *
-     * @return True if the {@code Runner} was cancelled, false otherwise
+     * @return True if the <code>Runner</code> was cancelled, false otherwise
      */
-    public synchronized boolean isCancelled() {
-        return state == CANCELLED;
-    }
-
-    /**
-     * Main execution method invoked by the {@link Executor} class to run
-     * the {@link Script}.
-     */
-    protected void execute() {
-        synchronized (this) {
-            if (state != NEW) {
-                String msg = "Cannot start, Runner has already been run";
-                log.error(msg);
-                throw new IllegalStateException(msg);
-            }
-            state = RUNNING;
-            // Fetch the first instruction and start the run loop
-            instruction = script.getCode();
-        }
-
-        run();
+    public boolean isCancelled() {
+        return state.get() == CANCELLED;
     }
 
     /**
@@ -212,13 +197,10 @@ public class Runner {
      * suspended {@link Script}.
      */
     protected void resume() {
-        synchronized (this) {
-            if (state != SUSPENDED) {
-                String msg = "Cannot resume, Runner is not in suspended state";
-                log.error(msg);
-                throw new IllegalStateException(msg);
-            }
-            state = RUNNING;
+        if (!state.compareAndSet(SUSPENDED, RUNNING)) {
+            String msg = "Cannot resume, Runner is not in suspended state";
+            log.error(msg);
+            throw new IllegalStateException(msg);
         }
 
         // No need to fetch the first instruction of the Script, since the
@@ -227,56 +209,51 @@ public class Runner {
     }
 
     /**
+     * Main execution method invoked by the {@link Executor} class to run
+     * the {@link Script}.
+     */
+    protected void execute() {
+        if (!state.compareAndSet(NEW, RUNNING)) {
+            String msg = "Cannot start, Runner has already been run";
+            log.error(msg);
+            throw new IllegalStateException(msg);
+        }
+
+        // Fetch the first instruction and start the run loop
+        instruction = script.getCode();
+        run();
+    }
+
+    /**
      * Main {@link Script} execution loop.
      */
     private void run() {
-        synchronized (ctx) {
-            try {
-                do {
-                    synchronized (this) {
-                        if (instruction == null && state == RUNNING) {
-                            String msg = "Missing stop instruction in script '"
+        try {
+            do {
+                if (instruction == null &&
+                        state.compareAndSet(RUNNING, CANCELLED)) {
+                    String msg = "Missing stop instruction in script '"
                                     + script.getName() + "'";
-                            log.error(msg);
-                            handler.error(script, new ScriptException(msg));
-                        }
-                        if (debugger != null && breakpoint) {
-                            breakpoint = false;
-                            debugger.breakpoint(this, script, instruction);
-                        }
-                    }
-
-                    instruction = instruction.run(this);
-
-                    synchronized (this) {
-                        if (state != RUNNING) {
-                            break;
-                        }
-                    }
-
-                } while (true);
-            } catch (Exception e) {
-                synchronized (this) {
-                    // Catching all Exceptions, since we don't want any error in the
-                    // user's scripts or in the handler code to bring down the entire
-                    // system
-                    if (state == CANCELLED || state == STOPPED) {
-                        return;
-                    } else if (state == SUSPENDED) {
-                        String msg = "FATAL: Runner should not receive exceptions" +
-                                " while in SUSPENDED mode";
-                        log.error(msg, e);
-                        throw new IllegalStateException(msg, e);
-                    }
-
-                    state = CANCELLED;
-                    relinquishContext(ctx);
-                    String msg = "Unexpected error in script '" + script.getName() +
-                            "', instruction '" + instruction.getClass().getSimpleName() + "'";
-                    log.error(msg, e);
-                    handler.error(script, new ScriptException(msg, e));
+                    log.error(msg);
+                    handler.error(script, new ScriptException(msg));
                 }
-            }
+
+                if (debugger != null && breakpoint) {
+                    breakpoint = false;
+                    debugger.breakpoint(this, script, instruction);
+                }
+                instruction = instruction.run(this);
+            } while (state.get() == RUNNING);
+        } catch (Exception e) {
+            // Catching all Exceptions, since we don't want any error in the
+            // user's scripts or in the handler code to bring down the entire
+            // system
+            state.set(CANCELLED);
+            relinquishContext(ctx);
+            String msg = "Unexpected error in script '" + script.getName() +
+                    "', instruction '" + instruction.getClass().getSimpleName() + "'";
+            log.error(msg, e);
+            handler.error(script, new ScriptException(msg, e));
         }
     }
 

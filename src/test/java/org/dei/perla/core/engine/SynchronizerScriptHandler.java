@@ -15,53 +15,33 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class SynchronizerScriptHandler implements ScriptHandler {
 
-	private final Lock lock = new ReentrantLock();
-	private final Condition doneCond = lock.newCondition();
+    private boolean done = false;
+    private List<Object[]> samples = null;
+    private Throwable exception = null;
 
-	private boolean done = false;
-	private List<Object[]> samples = null;
-	private Throwable exception = null;
+    public synchronized List<Object[]> getResult() throws ExecutionException,
+        InterruptedException {
+        while (!done && exception == null) {
+            wait();
+        }
+        if (exception != null) {
+            throw new ExecutionException(exception);
+        }
+        return samples;
+    }
 
-	public List<Object[]> getResult() throws ExecutionException,
-			InterruptedException {
-		lock.lock();
-		try {
+    @Override
+    public synchronized void complete(Script script, List<Object[]> samples) {
+        this.samples = samples;
+        done = true;
+        notifyAll();
+    }
 
-			while (!done) {
-				doneCond.await();
-			}
-			if (exception != null) {
-				throw new ExecutionException(exception);
-			}
-			return samples;
-
-		} finally {
-			lock.unlock();
-		}
-	}
-
-	@Override
-	public void complete(Script script, List<Object[]> samples) {
-		lock.lock();
-		try {
-			this.samples = samples;
-			done = true;
-			doneCond.signal();
-		} finally {
-			lock.unlock();
-		}
-	}
-
-	@Override
-	public void error(Script script, Throwable cause) {
-		lock.lock();
-		try {
-			this.exception = cause;
-			done = true;
-			doneCond.signal();
-		} finally {
-			lock.unlock();
-		}
-	}
+    @Override
+    public synchronized void error(Script script, Throwable cause) {
+        exception = cause;
+        done = true;
+        notifyAll();
+    }
 
 }
