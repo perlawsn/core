@@ -41,12 +41,11 @@ public final class SimulatedPeriodicOperation extends PeriodicOperation {
         if (timerFuture != null) {
             timerFuture.cancel(false);
         }
+        currentPeriod = period;
         if (period == 0) {
-            currentPeriod = 0;
             return;
         }
 
-        currentPeriod = period;
         forEachTask(t -> t.setInputPeriod(period));
         timerFuture = executor.scheduleAtFixedRate(this::sample,
                 period, period, TimeUnit.MILLISECONDS);
@@ -94,7 +93,7 @@ public final class SimulatedPeriodicOperation extends PeriodicOperation {
         public synchronized void error(Script script, Throwable cause) {
             synchronized (SimulatedPeriodicOperation.this) {
                 Exception e = new FpcException(cause);
-                forEachTask(t -> t.notifyError(e, false));
+                forEachTask(t -> t.notifyError(e, true));
                 setSamplingPeriod(0); // Stop the operation
             }
         }

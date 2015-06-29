@@ -94,6 +94,9 @@ public abstract class BaseTask implements Task {
 
     @Override
     public final void stop() {
+        // Acquiring locks in the same order as they are acquired in the
+        // corresponding Operation (Operation first, then Task) to avoid
+        // deadlock
         synchronized (op) {
             synchronized (this) {
                 if (!running) {
@@ -205,13 +208,20 @@ public abstract class BaseTask implements Task {
      * Invoking this method does not produce any effect if the
      * {@code BaseTask} is stopped
      */
-    protected final synchronized void notifyComplete() {
-        if (!running) {
-            return;
+    protected final void notifyComplete() {
+        // Acquiring locks in the same order as they are acquired in the
+        // corresponding Operation (Operation first, then Task) to avoid
+        // deadlock
+        synchronized (op) {
+            synchronized (this) {
+                if (!running) {
+                    return;
+                }
+                running = false;
+                op.remove(this);
+                handler.complete(this);
+            }
         }
-        running = false;
-        op.remove(this);
-        handler.complete(this);
     }
 
     /**
@@ -232,15 +242,22 @@ public abstract class BaseTask implements Task {
      * @param stop
      *            Stops the {@link BaseTask} if set to true
      */
-    protected final synchronized void notifyError(Throwable cause, boolean stop) {
-        if (!running) {
-            return;
+    protected final void notifyError(Throwable cause, boolean stop) {
+        // Acquiring locks in the same order as they are acquired in the
+        // corresponding Operation (Operation first, then Task) to avoid
+        // deadlock
+        synchronized (op) {
+            synchronized (this) {
+                if (!running) {
+                    return;
+                }
+                if (stop && running) {
+                    running = false;
+                    op.remove(this);
+                }
+                handler.error(this, cause);
+            }
         }
-        if (stop && running) {
-            running = false;
-            op.remove(this);
-        }
-        handler.error(this, cause);
     }
 
 }
