@@ -160,7 +160,7 @@ public class BaseFpcTest {
 
 		assertThat(task1, notNullValue());
 		assertTrue(task1 instanceof PeriodicTask);
-		assertThat(handler1.getAveragePeriod(), greaterThanOrEqualTo(9.9d));
+		assertThat(handler1.getAveragePeriod(), greaterThanOrEqualTo(9d));
 		assertThat(handler1.getAveragePeriod(), lessThan(11d));
 		sample = handler1.getLastSample();
 		assertThat(sample, notNullValue());
@@ -183,7 +183,7 @@ public class BaseFpcTest {
 		assertTrue(task2 instanceof PeriodicTask);
 		assertThat(handler2.getAveragePeriod(), greaterThanOrEqualTo(0.9d));
 		assertThat(handler2.getAveragePeriod(), lessThan(1.1d));
-		assertThat(handler1.getAveragePeriod(), greaterThanOrEqualTo(9.9d));
+		assertThat(handler1.getAveragePeriod(), greaterThanOrEqualTo(9d));
 		assertThat(handler1.getAveragePeriod(), lessThan(11d));
 		sample = handler1.getLastSample();
 		assertThat(sample, notNullValue());
@@ -205,7 +205,7 @@ public class BaseFpcTest {
 		int countBefore = handler1.getCount();
 		Thread.sleep(500);
 		assertThat(countBefore, lessThan(handler1.getCount()));
-		assertThat(handler1.getAveragePeriod(), greaterThanOrEqualTo(9.9d));
+		assertThat(handler1.getAveragePeriod(), greaterThanOrEqualTo(9d));
 		assertThat(handler1.getAveragePeriod(), lessThan(11d));
 
 		task1.stop();
@@ -257,7 +257,7 @@ public class BaseFpcTest {
 
 		assertThat(task, notNullValue());
 		assertTrue(task instanceof PeriodicTask);
-		assertThat(handler.getAveragePeriod(), greaterThanOrEqualTo(9.9d));
+		assertThat(handler.getAveragePeriod(), greaterThanOrEqualTo(9d));
 		assertThat(handler.getAveragePeriod(), lessThan(11d));
 		sample = handler.getLastSample();
 		assertThat(sample, notNullValue());

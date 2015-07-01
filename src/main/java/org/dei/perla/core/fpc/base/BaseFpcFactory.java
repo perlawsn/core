@@ -26,7 +26,12 @@ import org.dei.perla.core.utils.Errors;
 
 import java.util.*;
 
-public class BaseFpcFactory implements FpcFactory {
+/**
+ * Base implementation of the {@link FpcFactory} interface.
+ *
+ * @author Guido Rota (2015)
+ */
+public final class BaseFpcFactory implements FpcFactory {
 
     private final Logger logger = Logger.getLogger(BaseFpcFactory.class);
     private final Map<Class<? extends MessageDescriptor>, MapperFactory>

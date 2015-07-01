@@ -13,7 +13,7 @@ import java.util.Map;
  * @author Guido Rota (2014)
  *
  */
-public class Sample {
+public final class Sample {
 
     private final List<Attribute> fields;
     private final Object[] values;

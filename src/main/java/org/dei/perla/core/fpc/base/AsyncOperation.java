@@ -17,7 +17,8 @@ import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.function.Consumer;
 
-public class AsyncOperation extends BaseOperation<AsyncOperation.AsyncTask> {
+public final class AsyncOperation
+        extends BaseOperation<AsyncOperation.AsyncTask> {
 
     private static final int STOPPED = 0;
     private static final int SUSPENDED = 1;

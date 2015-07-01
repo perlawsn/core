@@ -17,7 +17,12 @@ import java.time.Instant;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class BaseFpc implements Fpc {
+/**
+ * Base implementation of the {@link Fpc} interface.
+ *
+ * @author Guido Rota (2015)
+ */
+public final class BaseFpc implements Fpc {
 
     private final int id;
     private final String type;

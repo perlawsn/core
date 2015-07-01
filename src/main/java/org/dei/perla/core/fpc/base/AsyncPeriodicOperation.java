@@ -10,7 +10,7 @@ import java.util.function.Consumer;
 /**
  * @author Guido Rota 25/06/15.
  */
-public class AsyncPeriodicOperation extends PeriodicOperation {
+public final class AsyncPeriodicOperation extends PeriodicOperation {
 
     private final ScheduledThreadPoolExecutor executor;
 

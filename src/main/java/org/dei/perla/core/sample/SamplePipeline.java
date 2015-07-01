@@ -18,7 +18,7 @@ import java.util.Map.Entry;
  * @author Guido Rota (2014)
  *
  */
-public class SamplePipeline {
+public final class SamplePipeline {
 
     public final List<SampleModifier> mods;
     public final List<Attribute> atts;

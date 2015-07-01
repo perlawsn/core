@@ -5,7 +5,7 @@ import org.dei.perla.core.sample.Attribute;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class Scheduler {
+public final class Scheduler {
 
 	// Used to order operations by number of attributes
 	private static final Comparator<Operation> attComp =

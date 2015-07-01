@@ -12,7 +12,7 @@ import java.util.function.Consumer;
  *
  * @author Guido Rota 25/06/15.
  */
-public class AsyncOneoffOperation extends BaseOperation<BaseTask> {
+public final class AsyncOneoffOperation extends BaseOperation<BaseTask> {
 
     private final AsyncOperation op;
 
