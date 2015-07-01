@@ -210,10 +210,9 @@ public class ConcreteOperationTest {
         PipelineBuilder pb = SamplePipeline.newBuilder(getOp.getAttributes());
         LatchingTaskHandler syncHandler = new LatchingTaskHandler(1);
         BaseTask task = getOp.schedule(null, syncHandler, pb.create());
+        assertThat(task, notNullValue());
         assertFalse(task.isRunning());
         task.start();
-        assertTrue(task.isRunning());
-        assertThat(task, notNullValue());
         assertTrue(getOp.getAttributes().containsAll(task.getAttributes()));
         assertTrue(task.getAttributes().containsAll(getOp.getAttributes()));
 
@@ -249,10 +248,9 @@ public class ConcreteOperationTest {
         PipelineBuilder pb = SamplePipeline.newBuilder(Collections.emptyList());
         LatchingTaskHandler handler = new LatchingTaskHandler(1);
         BaseTask task = setOp.schedule(null, handler, pb.create());
+        assertThat(task, notNullValue());
         assertFalse(task.isRunning());
         task.start();
-        assertTrue(task.isRunning());
-        assertThat(task, notNullValue());
 
         handler.awaitCompletion();
         assertFalse(task.isRunning());
@@ -270,6 +268,7 @@ public class ConcreteOperationTest {
         // Start test
         BaseTask task = natPeriodicOp.schedule(parameterMap, handler,
                 pb.create());
+        assertThat(task, notNullValue());
         assertFalse(task.isRunning());
         task.start();
         assertTrue(task.isRunning());
@@ -277,7 +276,6 @@ public class ConcreteOperationTest {
                 task.getAttributes()));
         assertTrue(task.getAttributes().containsAll(
                 natPeriodicOp.getAttributes()));
-        assertThat(task, notNullValue());
         assertThat(handler.getAveragePeriod(), greaterThanOrEqualTo(0.8d));
         assertThat(handler.getAveragePeriod(), lessThanOrEqualTo(1.2d));
 
@@ -306,28 +304,23 @@ public class ConcreteOperationTest {
         SamplePipeline p = pb.create();
 
         BaseTask task1 = natPeriodicOp.schedule(paramMap1, h1, p);
+        assertThat(task1, notNullValue());
         assertFalse(task1.isRunning());
         task1.start();
         assertTrue(task1.isRunning());
         assertThat(natPeriodicOp.getSamplingPeriod(), equalTo(100l));
         BaseTask task2 = natPeriodicOp.schedule(paramMap2, h2, p);
+        assertThat(task2, notNullValue());
         assertFalse(task2.isRunning());
         task2.start();
         assertTrue(task2.isRunning());
         assertThat(natPeriodicOp.getSamplingPeriod(), equalTo(10l));
         BaseTask task3 = natPeriodicOp.schedule(paramMap3, h3, p);
+        assertThat(task3, notNullValue());
         assertFalse(task3.isRunning());
         task3.start();
         assertTrue(task3.isRunning());
         assertThat(natPeriodicOp.getSamplingPeriod(), equalTo(1l));
-
-        assertThat(task1, notNullValue());
-        assertThat(task2, notNullValue());
-        assertThat(task3, notNullValue());
-
-        assertTrue(task1.isRunning());
-        assertTrue(task2.isRunning());
-        assertTrue(task3.isRunning());
 
         assertThat(h1.getCount(), greaterThanOrEqualTo(10));
         assertThat(h1.getCount(), lessThanOrEqualTo(12));
@@ -392,10 +385,10 @@ public class ConcreteOperationTest {
 
         // Start test
         BaseTask task = simPeriodicOp.schedule(parameterMap, handler, p);
+        assertThat(task, notNullValue());
         assertFalse(task.isRunning());
         task.start();
         assertTrue(task.isRunning());
-        assertThat(task, notNullValue());
         assertTrue(task.isRunning());
         assertThat(handler.getAveragePeriod(), greaterThanOrEqualTo(8d));
         assertThat(handler.getAveragePeriod(), lessThanOrEqualTo(12d));
@@ -424,28 +417,23 @@ public class ConcreteOperationTest {
                 simPeriodicOp.getAttributes());
 
         BaseTask task1 = simPeriodicOp.schedule(paramMap1, h1, p);
+        assertThat(task1, notNullValue());
         assertFalse(task1.isRunning());
         task1.start();
         assertTrue(task1.isRunning());
         assertThat(simPeriodicOp.getSamplingPeriod(), equalTo(100l));
         BaseTask task2 = simPeriodicOp.schedule(paramMap2, h2, p);
+        assertThat(task2, notNullValue());
         assertFalse(task2.isRunning());
         task2.start();
         assertTrue(task2.isRunning());
         assertThat(simPeriodicOp.getSamplingPeriod(), equalTo(10l));
         BaseTask task3 = simPeriodicOp.schedule(paramMap3, h3, p);
+        assertThat(task3, notNullValue());
         assertFalse(task3.isRunning());
         task3.start();
         assertTrue(task3.isRunning());
         assertThat(simPeriodicOp.getSamplingPeriod(), equalTo(1l));
-
-        assertThat(task1, notNullValue());
-        assertThat(task2, notNullValue());
-        assertThat(task3, notNullValue());
-
-        assertTrue(task1.isRunning());
-        assertTrue(task2.isRunning());
-        assertTrue(task3.isRunning());
 
         assertThat(h1.getAveragePeriod(), greaterThanOrEqualTo(80d));
         assertThat(h1.getAveragePeriod(), lessThanOrEqualTo(120d));
@@ -500,9 +488,9 @@ public class ConcreteOperationTest {
 
         Operation op = new AsyncOneoffOperation(asyncOp);
         BaseTask task = op.schedule(Collections.emptyMap(), handler);
+        assertThat(task, notNullValue());
         assertFalse(task.isRunning());
         task.start();
-        assertThat(task, notNullValue());
         Sample sample = handler.getLastSample();
         assertThat(sample, notNullValue());
     }
@@ -515,12 +503,12 @@ public class ConcreteOperationTest {
         paramMap.put("period", 500);
         PeriodicOperation op = new AsyncPeriodicOperation(asyncOp);
         BaseTask task = op.schedule(paramMap, handler);
+        assertThat(task, notNullValue());
         assertFalse(task.isRunning());
         task.start();
         assertTrue(task.isRunning());
         assertThat(op.taskCount(), equalTo(1));
 
-        assertThat(task, notNullValue());
         assertTrue(task instanceof PeriodicTask);
         List<Sample> res = handler.getSamples();
         Object current;
@@ -542,10 +530,10 @@ public class ConcreteOperationTest {
         LatchingTaskHandler handler = new LatchingTaskHandler(10);
 
         BaseTask task = asyncOp.schedule(Collections.emptyMap(), handler);
+        assertThat(task, notNullValue());
         assertFalse(task.isRunning());
         task.start();
         assertTrue(task.isRunning());
-        assertThat(task, notNullValue());
 
         List<Sample> res = handler.getSamples();
         int current;
