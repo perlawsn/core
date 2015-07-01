@@ -12,36 +12,32 @@ import java.util.function.Consumer;
 
 public final class OneoffOperation extends BaseOperation<BaseTask> {
 
-	private final Script script;
+    private final Script script;
 
-	public OneoffOperation(String id, List<Attribute> atts, Script script) {
-		super(id, atts);
-		this.script = script;
-	}
+    public OneoffOperation(String id, List<Attribute> atts, Script script) {
+        super(id, atts);
+        this.script = script;
+    }
 
-	protected Script getScript() {
-		return script;
-	}
+    protected Script getScript() {
+        return script;
+    }
 
-	@Override
-	public BaseTask doSchedule(Map<String, Object> parameterMap,
-			TaskHandler handler, SamplePipeline pipeline) {
-		return new ScriptTask(this, handler, pipeline);
-	}
+    @Override
+    public BaseTask doSchedule(Map<String, Object> parameterMap,
+            TaskHandler handler, SamplePipeline pipeline) {
+        return new ScriptTask(this, handler, pipeline);
+    }
 
-	@Override
-	protected void doStop() {}
+    @Override
+    protected void doStop() {}
 
-	@Override
-	protected void doStop(Consumer<Operation> handler) {
-		// Synchronization and AsyncUtils.runInNewThread ensure that the
-		// handler is effectively asynchronously called after the doStop
-		// invocation is has been completed.
-		AsyncUtils.runInNewThread(() -> {
-			synchronized (OneoffOperation.this) {
-				handler.accept(this);
-			}
-		});
-	}
+    @Override
+    protected void doStop(Consumer<Operation> handler) {
+        // Invoke in new thread to preserve asynchronous locking semantics
+        AsyncUtils.runInNewThread(() -> {
+            handler.accept(this);
+        });
+    }
 
 }

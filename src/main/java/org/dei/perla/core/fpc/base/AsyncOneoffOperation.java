@@ -32,13 +32,9 @@ public class AsyncOneoffOperation extends BaseOperation<BaseTask> {
 
     @Override
     protected void doStop(Consumer<Operation> handler) {
-        // Synchronization and AsyncUtils.runInNewThread ensure that the
-        // handler is effectively asynchronously called after the doStop
-        // invocation is has been completed.
+        // Invoke in new thread to preserve asynchronous locking semantics
         AsyncUtils.runInNewThread(() -> {
-            synchronized (AsyncOneoffOperation.this) {
-                handler.accept(this);
-            }
+            handler.accept(this);
         });
     }
 
@@ -57,9 +53,11 @@ public class AsyncOneoffOperation extends BaseOperation<BaseTask> {
 
         @Override
         protected synchronized void doStart() {
-            Object[] sample = op.getSampleCopy();
-            this.processSample(sample);
-            this.notifyComplete();
+            AsyncUtils.runInNewThread(() -> {
+                Object[] sample = op.getSampleCopy();
+                this.processSample(sample);
+                this.notifyComplete();
+            });
         }
 
     }

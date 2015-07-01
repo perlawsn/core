@@ -77,7 +77,7 @@ public class BaseFpcFactory implements FpcFactory {
 
         Scheduler sched = new Scheduler(ctx.getOpList, ctx.setOpList,
                 ctx.periodicOpList, ctx.asyncOpList);
-        return new BaseFpc(ctx.id, desc.getType(), ctx.atts, ctx.attValues,
+        return new BaseFpc(ctx.id, desc.getType(), ctx.atts, ctx.staticAtts,
                 ctx.channelMgr, sched);
     }
 
@@ -645,7 +645,7 @@ public class BaseFpcFactory implements FpcFactory {
         // Attributes
         private final Map<String, AttributeDescriptor> attDescMap = new HashMap<>();
         private final Set<Attribute> atts = new HashSet<>();
-        private final Map<Attribute, Object> attValues = new HashMap<>();
+        private final Map<Attribute, Object> staticAtts = new HashMap<>();
 
         private final Map<String, Mapper> mappers = new HashMap<>();
         private final Map<String, Channel> channels = new HashMap<>();
@@ -677,7 +677,7 @@ public class BaseFpcFactory implements FpcFactory {
             atts.add(a);
             if (desc.getAccess() == AttributeAccessType.STATIC) {
                 Object v = DataType.parse(a.getType(), desc.getValue());
-                attValues.put(a, v);
+                staticAtts.put(a, v);
             }
         }
 

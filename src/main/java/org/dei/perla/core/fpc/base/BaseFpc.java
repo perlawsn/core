@@ -22,7 +22,7 @@ public class BaseFpc implements Fpc {
     private final int id;
     private final String type;
     private final Set<Attribute> atts;
-    private final Map<Attribute, Object> attValues;
+    private final Map<Attribute, Object> staticAtts;
     private final ChannelManager cmgr;
     private final Scheduler sched;
 
@@ -40,12 +40,12 @@ public class BaseFpc implements Fpc {
     }
 
     protected BaseFpc(int id, String type, Set<Attribute> atts,
-            Map<Attribute, Object> attValues, ChannelManager cmgr,
+            Map<Attribute, Object> staticAtts, ChannelManager cmgr,
             Scheduler sched) {
         this.id = id;
         this.type = type;
         this.atts = atts;
-        this.attValues = attValues;
+        this.staticAtts = staticAtts;
         this.cmgr = cmgr;
         this.sched = sched;
     }
@@ -81,12 +81,9 @@ public class BaseFpc implements Fpc {
         values.entrySet().forEach(
                 e -> pm.put(e.getKey().getId(), e.getValue()));
 
-        // Start task only after the set method completes
         BaseTask t = op.schedule(pm, handler);
-        synchronized (t) {
-			AsyncUtils.runInNewThread(t::start);
-            return t;
-		}
+        t.start();
+        return t;
     }
 
     @Override
@@ -96,13 +93,12 @@ public class BaseFpc implements Fpc {
 
         if (req.staticOnly()) {
             Task t = new CompletedTask(req.statAtts);
-            synchronized (t) {
-                AsyncUtils.runInNewThread(() -> {
-                    handler.data(t, req.staticSample());
-                    handler.complete(t);
-                });
-                return t;
-            }
+            // Running in a new thread to preserve asynchronous semantics
+            AsyncUtils.runInNewThread(() -> {
+                handler.data(t, req.staticSample());
+                handler.complete(t);
+            });
+            return t;
         }
 
         Operation op = sched.get(req.dynAtts, strict);
@@ -119,12 +115,9 @@ public class BaseFpc implements Fpc {
         }
         pb.reorder(atts);
 
-        // Start the task only after the get method completes
         BaseTask t = op.schedule(Collections.emptyMap(), handler, pb.create());
-        synchronized (t) {
-            AsyncUtils.runInNewThread(t::start);
-            return t;
-        }
+        t.start();
+        return t;
     }
 
     @Override
@@ -142,10 +135,9 @@ public class BaseFpc implements Fpc {
             pb.reorder(atts);
             BaseTask t = emptySampleOperation
                     .schedule(paramMap, handler, pb.create());
-            synchronized (t) {
-                AsyncUtils.runInNewThread(t::start);
-                return t;
-            }
+
+            t.start();
+            return t;
         }
 
         Operation op = sched.periodic(req.dynAtts, strict);
@@ -165,12 +157,9 @@ public class BaseFpc implements Fpc {
         }
         pb.reorder(atts);
 
-        // Start the task only after the get method completes
         BaseTask t = op.schedule(pm, handler, pb.create());
-        synchronized (t) {
-            AsyncUtils.runInNewThread(t::start);
-            return t;
-        }
+        t.start();
+        return t;
     }
 
     @Override
@@ -192,12 +181,9 @@ public class BaseFpc implements Fpc {
             pb.addTimestamp();
         }
 
-        // Start the task only after the async method completes
         BaseTask t = op.schedule(Collections.emptyMap(), handler, pb.create());
-        synchronized (t) {
-            AsyncUtils.runInNewThread(t::start);
-            return t;
-        }
+        t.start();
+        return t;
     }
 
     @Override
@@ -219,7 +205,7 @@ public class BaseFpc implements Fpc {
 
         private Request(Collection<Attribute> atts) {
             atts.forEach(a -> {
-                if (attValues.containsKey(a)) {
+                if (staticAtts.containsKey(a)) {
                     statAtts.add(a);
                 } else {
                     dynAtts.add(a);
@@ -250,7 +236,7 @@ public class BaseFpc implements Fpc {
             Object[] values = new Object[atts.size() + 1];
             int i = 0;
             for (Attribute a : statAtts) {
-                values[i] = attValues.get(a);
+                values[i] = staticAtts.get(a);
                 i++;
             }
             statAtts.add(Attribute.TIMESTAMP);
@@ -260,7 +246,7 @@ public class BaseFpc implements Fpc {
 
         private LinkedHashMap<Attribute, Object> staticValues() {
             LinkedHashMap<Attribute, Object> av = new LinkedHashMap<>();
-            statAtts.forEach(a -> av.put(a, attValues.get(a)));
+            statAtts.forEach(a -> av.put(a, staticAtts.get(a)));
             return av;
         }
 

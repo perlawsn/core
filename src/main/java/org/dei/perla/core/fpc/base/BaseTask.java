@@ -7,6 +7,7 @@ import org.dei.perla.core.fpc.TaskHandler;
 import org.dei.perla.core.sample.Attribute;
 import org.dei.perla.core.sample.Sample;
 import org.dei.perla.core.sample.SamplePipeline;
+import org.dei.perla.core.utils.AsyncUtils;
 
 import java.util.List;
 
@@ -105,7 +106,8 @@ public abstract class BaseTask implements Task {
                 running = false;
                 doStop();
                 op.remove(this);
-                handler.complete(this);
+                // Invoke in new thread to preserve asynchronous locking semantics
+                AsyncUtils.runInNewThread(() -> handler.complete(this));
             }
         }
     }

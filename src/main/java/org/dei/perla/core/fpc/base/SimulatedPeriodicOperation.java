@@ -63,13 +63,9 @@ public final class SimulatedPeriodicOperation extends PeriodicOperation {
     @Override
     protected void doStop(Consumer<Operation> handler) {
         executor.shutdownNow();
-        // Synchronization and AsyncUtils.runInNewThread ensure that the
-        // handler is effectively asynchronously called after the doStop
-        // invocation is has been completed.
+        // Invoke in new thread to preserve asynchronous locking semantics
         AsyncUtils.runInNewThread(() -> {
-            synchronized (SimulatedPeriodicOperation.this) {
-                handler.accept(this);
-            }
+            handler.accept(this);
         });
     }
 

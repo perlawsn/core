@@ -90,13 +90,9 @@ public class AsyncOperation extends BaseOperation<AsyncOperation.AsyncTask> {
     @Override
     public void doStop(Consumer<Operation> handler) {
         doStop();
-        // Synchronization and AsyncUtils.runInNewThread ensure that the
-        // handler is effectively asynchronously called after the doStop
-        // invocation is has been completed.
+        // Invoke in new thread to preserve asynchronous locking semantics
         AsyncUtils.runInNewThread(() -> {
-            synchronized (AsyncOperation.this) {
-                handler.accept(this);
-            }
+            handler.accept(this);
         });
     }
 
