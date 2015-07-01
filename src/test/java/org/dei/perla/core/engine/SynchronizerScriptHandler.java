@@ -2,9 +2,6 @@ package org.dei.perla.core.engine;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * {@code ScriptHandler} implementation for accessing synchronously to the

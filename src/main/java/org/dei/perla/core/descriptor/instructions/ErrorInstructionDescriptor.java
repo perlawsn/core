@@ -9,12 +9,10 @@ import javax.xml.bind.annotation.XmlRootElement;
  * <p>
  * Error intstruction descriptor. Instructs the <code>FpcFactory</code> to
  * create a new <code>ErrorInstruction</code>.
- * </p>
  *
  * <p>
  * The message field may be used to specify an optional textual description of
  * the error.
- * </p>
  *
  * Usage:
  *

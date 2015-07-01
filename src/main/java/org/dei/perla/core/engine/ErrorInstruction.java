@@ -20,8 +20,7 @@ public class ErrorInstruction implements Instruction {
 	}
 
 	@Override
-	public void setNext(Instruction instruction) {
-	}
+	public void setNext(Instruction instruction) {}
 
 	@Override
 	public Instruction next() {

@@ -103,6 +103,21 @@
 			<i:var name="set-data" type="set-msg"/>
 			<i:set variable="set-data" field="test" value="${param['integer']}"/>
 		</set>
+		<periodic id="unsupported-period">
+			<start>
+				<i:var name="period" type="sampling-period"/>
+				<i:set variable="period" field="period" value="12"/>
+				<i:unsupported-period suggested="${period.period}"/>
+			</start>
+			<stop>
+				<!-- NOOP -->
+				<i:stop/>
+			</stop>
+			<on message="string-msg" variable="result">
+				<!-- NOOP -->
+				<i:stop/>
+			</on>
+		</periodic>
 		<periodic id="all-periodic">
 			<start>
 				<i:var name="period" type="sampling-period"/>

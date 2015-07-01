@@ -233,7 +233,7 @@ public class Runner {
                 if (instruction == null &&
                         state.compareAndSet(RUNNING, CANCELLED)) {
                     String msg = "Missing stop instruction in script '"
-                                    + script.getName() + "'";
+                            + script.getName() + "'";
                     log.error(msg);
                     handler.error(script, new ScriptException(msg));
                 }
@@ -253,7 +253,16 @@ public class Runner {
             String msg = "Unexpected error in script '" + script.getName() +
                     "', instruction '" + instruction.getClass().getSimpleName() + "'";
             log.error(msg, e);
-            handler.error(script, new ScriptException(msg, e));
+
+            if (e instanceof UnsupportedPeriodException) {
+                // Relay UnsupportedPeriodException as is, since it conveys
+                // additional information that may be used by the handler to
+                // choose an appropriate failure strategy
+                handler.error(script, e);
+            } else {
+                // Wrap all other exceptionn in a ScriptException
+                handler.error(script, new ScriptException(msg, e));
+            }
         }
     }
 

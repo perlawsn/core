@@ -1,7 +1,6 @@
 package org.dei.perla.core.engine;
 
 import org.dei.perla.core.message.FpcMessage;
-import org.dei.perla.core.utils.Check;
 
 import javax.el.*;
 import java.beans.FeatureDescriptor;
@@ -14,7 +13,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * <p>
  * A collection of components and data structures used for a single
  * <code>Script</code> execution.
- * </p>
  *
  * <p>
  * This class is also used for creating and storing data samples, i.e. the
@@ -24,38 +22,36 @@ import java.util.concurrent.atomic.AtomicInteger;
  * number of data samples. Once all attributes have been put in the samples, a
  * <code>Script</code> must invoke the <code>emitSample</code> method to output
  * the current sample content.
- * </p>
  *
  * <p>
  * Emitting a sample does not clear the content of the Current Sample. This
  * allows <code>Script</code>s to unroll array messages into different data
  * samples while preserving attributes that are constant for each emitted
  * sample.
- * </p>
  *
  * <p>
  * <code>ExecutionContext</code>s are reuseable objects; once a
  * <code>Script</code> is done the corresponding <code>ExecutionContext</code>
  * can be cleared and repurposed to be used by a different <code>Script</code>
- * </p>
  *
  * @author Guido Rota (2014)
  *
  */
 public class ExecutionContext {
 
-	private final Map<Integer, Object> instructionLocalMap = new HashMap<>();
+    private final Map<Integer, Object> instructionLocalMap = new HashMap<>();
 
-	private final Map<String, Object> variableMap = new HashMap<>();
-	private final ScriptEngineELContext elContext;
-	private final FpcEngineVariableMapper elVariableMapper = new FpcEngineVariableMapper();
+    private Map<String, Object> parameterMap = new HashMap<>();
+    private final Map<String, Object> variableMap = new HashMap<>();
+    private final ScriptEngineELContext elContext;
+    private final FpcEngineVariableMapper elVariableMapper = new FpcEngineVariableMapper();
 
-	private Object[] sample;
-	private List<Object[]> samples;
+    private Object[] sample;
+    private List<Object[]> samples;
 
-	protected ExecutionContext() {
-		elContext = new ScriptEngineELContext(elVariableMapper);
-	}
+    protected ExecutionContext() {
+        elContext = new ScriptEngineELContext(elVariableMapper);
+    }
 
     protected synchronized void init(int sampleSize, ScriptParameter[] params) {
         samples = new ArrayList<>();
@@ -63,452 +59,405 @@ public class ExecutionContext {
         setParameters(params);
     }
 
-	private void setParameters(ScriptParameter[] params) {
-		// Register FpcMessage parameters as variables
-		for (ScriptParameter p : params) {
-			if (p.getValue() instanceof FpcMessage) {
-				setVariable(p.getName(), (FpcMessage) p.getValue());
-			}
-		}
-		// Set the param array in the elContext, so that all parameters are
-		// available in EL expressions as well
-		elContext.setParameterArray(params);
-	}
+    private void setParameters(ScriptParameter[] params) {
+        // Register FpcMessage parameters
+        for (ScriptParameter p : params) {
+            if (p.getValue() instanceof FpcMessage) {
+                setVariable(p.getName(), (FpcMessage) p.getValue());
+            }
+            parameterMap.put(p.getName(), p.getValue());
+        }
+    }
 
-	/**
-	 * Returns the <code>ELContext</code> to be used for evaluating EL
-	 * expressions found in various <code>Script Instruction</code>s.
-	 *
-	 * @return <code>ELContext</code>
-	 */
-	protected ELContext getELContext() {
-		return elContext;
-	}
+    /**
+     * Returns the <code>ELContext</code> to be used for evaluating EL
+     * expressions found in various <code>Script Instruction</code>s.
+     *
+     * @return <code>ELContext</code>
+     */
+    protected synchronized ELContext getELContext() {
+        return elContext;
+    }
 
-	/**
-	 * Sets a new variable in the current <code>ExecutionContext</code>.
-	 * <code>Script</code> variables are wrapped in a EL
-	 * <code>ValueExpression</code> and added to the <code>ELContext</code> to
-	 * allow referencing from EL expressions.
-	 *
-	 * @param name
-	 *            variable name
-	 * @param value
-	 *            variable value
-	 */
-	protected synchronized void setVariable(String name, Object value) {
-		variableMap.put(name, value);
-		elVariableMapper.setVariable(name,
+    /**
+     * Sets a new variable in the current <code>ExecutionContext</code>.
+     * <code>Script</code> variables are wrapped in a EL
+     * <code>ValueExpression</code> and added to the <code>ELContext</code> to
+     * allow referencing from EL expressions.
+     *
+     * @param name
+     *            variable name
+     * @param value
+     *            variable value
+     */
+    protected synchronized void setVariable(String name, Object value) {
+        variableMap.put(name, value);
+        elVariableMapper.setVariable(name,
                 Executor.createValueExpression(value, value.getClass()));
-	}
+    }
 
-	/**
-	 * Search and return a variable by name
-	 *
-	 * @param name
-	 *            Name of the variable
-	 * @return Variable objects, null if no variable with the specified name is
-	 *         found
-	 */
-	protected synchronized Object getVariable(String name) {
-		return variableMap.get(name);
-	}
+    /**
+     * Search and return a variable by name
+     *
+     * @param name
+     *            Name of the variable
+     * @return Variable objects, null if no variable with the specified name is
+     *         found
+     */
+    protected synchronized Object getVariable(String name) {
+        return variableMap.get(name);
+    }
 
-	/**
-	 * Adds an attribute to the current sample. Invoking this method on an
-	 * attribute previously set will overwrite the old value with the new one.
-	 *
-	 * @param idx
-	 *            Attribute index
-	 * @param value
-	 *            Attribute value
-	 */
-	protected synchronized void putAttribute(int idx, Object value) {
+    /**
+     * Adds an attribute to the current sample. Invoking this method on an
+     * attribute previously set will overwrite the old value with the new one.
+     *
+     * @param idx
+     *            Attribute index
+     * @param value
+     *            Attribute value
+     */
+    protected synchronized void putAttribute(int idx, Object value) {
         sample[idx] = value;
-	}
+    }
 
-	/**
-	 * Persists the current samples in the main sample {@link List}. All
-	 * samples emitted can be collected after {@code Script} execution
-	 * using the {@code getSamples()} method.
-	 */
-	protected synchronized void emitSample() {
+    /**
+     * Persists the current samples in the main sample {@link List}. All
+     * samples emitted can be collected after {@code Script} execution
+     * using the {@code getSamples()} method.
+     */
+    protected synchronized void emitSample() {
         Object[] s = Arrays.copyOf(sample, sample.length);
-		samples.add(s);
-	}
+        samples.add(s);
+    }
 
-	/**
-	 * Retrieves the list of all the samples emitted by the {@link Script}.
-	 * Returns an empty list if the script did not emit any sample.
-	 *
-	 * @return List of emitted samples
-	 */
-	protected synchronized List<Object[]> getSamples() {
-		if (samples.isEmpty()) {
-			return Collections.emptyList();
-		}
+    /**
+     * Retrieves the list of all the samples emitted by the {@link Script}.
+     * Returns an empty list if the script did not emit any sample.
+     *
+     * @return List of emitted samples
+     */
+    protected synchronized List<Object[]> getSamples() {
+        if (samples.isEmpty()) {
+            return Collections.emptyList();
+        }
 
         List<Object[]> res = samples;
         samples = new ArrayList<>(res.size());
-		return Collections.unmodifiableList(res);
-	}
+        return Collections.unmodifiableList(res);
+    }
 
-	/**
-	 * Clears the information contained in this <code>ExecutionContext</code>
-	 * object so that it can be reused for future <code>Script</code>
-	 * executions.
-	 */
-	protected synchronized void clear() {
-		instructionLocalMap.clear();
-		variableMap.clear();
-		elVariableMapper.clear();
-		elContext.clearParameterMap();
-	}
+    /**
+     * Clears the information contained in this <code>ExecutionContext</code>
+     * object so that it can be reused for future <code>Script</code>
+     * executions.
+     */
+    protected synchronized void clear() {
+        instructionLocalMap.clear();
+        parameterMap.clear();
+        variableMap.clear();
+        elVariableMapper.clear();
+    }
 
-	/**
-	 * <p>
-	 * A class for storing instruction-local variables, i.e. a variable whose
-	 * value instance is local to a certain {@link ExecutionContext}. The same
-	 * {@code InstructionLocal} variable, when used from different
-	 * {@link ExecutionContext}s, will access different values.
-	 *
-	 * <p>
-	 * This methanism allows the same instruction to store information that can
-	 * be retained throughout different invocations of the same instruction, but
-	 * that is not shared among other {@link ExecutionContext}s, i.e. the same
-	 * instruction being executed by different {@link Runner}s will access a
-	 * different instance when reaching for the {@code InstructionLocal}
-	 * internal value.
-	 *
-	 * @author Guido Rota (2014)
-	 *
-	 * @param <E>
-	 *            Type of the value contained in the InstructionLocal object
-	 */
-	public static class InstructionLocal<E> {
+    /**
+     * <p>
+     * A class for storing instruction-local variables, i.e. a variable whose
+     * value instance is local to a certain {@link ExecutionContext}. The same
+     * {@code InstructionLocal} variable, when used from different
+     * {@link ExecutionContext}s, will access different values.
+     *
+     * <p>
+     * This methanism allows the same instruction to store information that can
+     * be retained throughout different invocations of the same instruction, but
+     * that is not shared among other {@link ExecutionContext}s, i.e. the same
+     * instruction being executed by different {@link Runner}s will access a
+     * different instance when reaching for the {@code InstructionLocal}
+     * internal value.
+     *
+     * @author Guido Rota (2014)
+     *
+     * @param <E>
+     *            Type of the value contained in the InstructionLocal object
+     */
+    public static class InstructionLocal<E> {
 
-		private static final AtomicInteger idGenerator = new AtomicInteger();
+        private static final AtomicInteger idGenerator = new AtomicInteger();
 
-		private int id;
-		private E initialValue;
+        private int id;
+        private E initialValue;
 
-		/**
-		 * Creates a new {@code InstructionLocal} variable with the specified
-		 * initial value
-		 *
-		 * @param value
-		 *            Initial value
-		 */
-		public InstructionLocal(E value) {
-			this.initialValue = value;
-			this.id = idGenerator.incrementAndGet();
-		}
+        /**
+         * Creates a new {@code InstructionLocal} variable with the specified
+         * initial value
+         *
+         * @param value
+         *            Initial value
+         */
+        public InstructionLocal(E value) {
+            this.initialValue = value;
+            this.id = idGenerator.incrementAndGet();
+        }
 
-		/**
-		 * Sets a new value for the {@code InstructionLocal} variable in the
-		 * current {@link ExecutionContext}, overwriting the previous value.
-		 *
-		 * @param runner
-		 *            {@link Runner} currently executing the instruction
-		 * @param value
-		 *            value to set
-		 */
-		public void setValue(Runner runner, E value) {
-			synchronized (runner.ctx) {
-				ExecutionContext ctx = runner.ctx;
-				ctx.instructionLocalMap.put(id, value);
-			}
-		}
+        /**
+         * Sets a new value for the {@code InstructionLocal} variable in the
+         * current {@link ExecutionContext}, overwriting the previous value.
+         *
+         * @param runner
+         *            {@link Runner} currently executing the instruction
+         * @param value
+         *            value to set
+         */
+        public void setValue(Runner runner, E value) {
+            synchronized (runner.ctx) {
+                ExecutionContext ctx = runner.ctx;
+                ctx.instructionLocalMap.put(id, value);
+            }
+        }
 
-		/**
-		 * Retrieves the {@code InstructionLocal} variable value for the current
-		 * {@link ExecutionContext}.
-		 *
-		 * @param runner
-		 *            {@link Runner} currently executing the instruction
-		 * @return value of the variable stored in the {@code InstructionLocal}
-		 *         for the current {@link ExecutionContext}
-		 */
-		public E getValue(Runner runner) {
-			synchronized (runner.ctx) {
-				ExecutionContext ctx = runner.ctx;
+        /**
+         * Retrieves the {@code InstructionLocal} variable value for the current
+         * {@link ExecutionContext}.
+         *
+         * @param runner
+         *            {@link Runner} currently executing the instruction
+         * @return value of the variable stored in the {@code InstructionLocal}
+         *         for the current {@link ExecutionContext}
+         */
+        public E getValue(Runner runner) {
+            synchronized (runner.ctx) {
+                ExecutionContext ctx = runner.ctx;
 
-				if (!ctx.instructionLocalMap.containsKey(id)) {
-					ctx.instructionLocalMap.put(id, initialValue);
-					return initialValue;
-				}
+                if (!ctx.instructionLocalMap.containsKey(id)) {
+                    ctx.instructionLocalMap.put(id, initialValue);
+                    return initialValue;
+                }
 
-				@SuppressWarnings("unchecked")
-				E value = (E) ctx.instructionLocalMap.get(id);
-				return value;
-			}
-		}
+                @SuppressWarnings("unchecked")
+                E value = (E) ctx.instructionLocalMap.get(id);
+                return value;
+            }
+        }
 
-	}
+    }
 
-	/**
-	 * Custom <code>ElContext</code> implementation for the
-	 * <code>ScriptEngine</code>. This class acts as a bridge between the Java
-	 * Execution Engine and the FPC, allowing PerLa users to access various
-	 * PerLa variables and facilities directly from EL expressions.
-	 *
-	 * @author Guido Rota (2014)
-	 *
-	 */
-	private class ScriptEngineELContext extends ELContext {
+    /**
+     * Custom <code>ElContext</code> implementation for the
+     * <code>ScriptEngine</code>. This class acts as a bridge between the Java
+     * Execution Engine and the FPC, allowing PerLa users to access various
+     * PerLa variables and facilities directly from EL expressions.
+     *
+     * @author Guido Rota (2014)
+     *
+     */
+    private class ScriptEngineELContext extends ELContext {
 
-		private final VariableMapper variableMapper;
-		private final CompositeELResolver resolver;
-		private final ParameterELResolver paramResolver;
-		private final FunctionMapper functionMapper;
+        private final VariableMapper variableMapper;
+        private final CompositeELResolver resolver;
+        private final ParameterELResolver paramResolver;
+        private final FunctionMapper functionMapper;
 
-		public ScriptEngineELContext(VariableMapper variableMapper) {
-			this.variableMapper = variableMapper;
-			paramResolver = new ParameterELResolver();
-			functionMapper = new FpcEngineFunctionMapper();
-			resolver = new CompositeELResolver();
-			resolver.add(paramResolver);
-			resolver.add(new MapELResolver(true));
-			resolver.add(new AttributeELResolver());
-			resolver.add(new ListELResolver());
-		}
+        public ScriptEngineELContext(VariableMapper variableMapper) {
+            this.variableMapper = variableMapper;
+            paramResolver = new ParameterELResolver();
+            functionMapper = new FpcEngineFunctionMapper();
+            resolver = new CompositeELResolver();
+            resolver.add(paramResolver);
+            resolver.add(new MapELResolver(true));
+            resolver.add(new AttributeELResolver());
+            resolver.add(new ListELResolver());
+        }
 
-		/**
-		 * Clears the content of the map used to store <code>Script</code>
-		 * parameters
-		 */
-		private void clearParameterMap() {
-			paramResolver.clearParameterMap();
-		}
+        @Override
+        public ELResolver getELResolver() {
+            return resolver;
+        }
 
-		/**
-		 * Populates the internal data structures with the <code>Script</code>
-		 * parameters
-		 *
-		 * @param paramArray
-		 *            Parameter array
-		 */
-		private void setParameterArray(ScriptParameter[] paramArray) {
-			paramResolver.setParameterArray(paramArray);
-		}
+        @Override
+        public FunctionMapper getFunctionMapper() {
+            return functionMapper;
+        }
 
-		@Override
-		public ELResolver getELResolver() {
-			return resolver;
-		}
+        @Override
+        public VariableMapper getVariableMapper() {
+            return variableMapper;
+        }
 
-		@Override
-		public FunctionMapper getFunctionMapper() {
-			return functionMapper;
-		}
+    }
 
-		@Override
-		public VariableMapper getVariableMapper() {
-			return variableMapper;
-		}
+    private class FpcEngineFunctionMapper extends FunctionMapper {
 
-	}
+        @Override
+        public Method resolveFunction(String prefix, String name) {
+            if (!name.equals("now")) {
+                return null;
+            }
+            try {
+                return Instant.class.getMethod("now");
+            } catch(Exception e) {
+                throw new RuntimeException("fatal failure, check " +
+                        "ExecutionContext.FpcEngineFunctionMapper code", e);
+            }
+        }
 
-	private class FpcEngineFunctionMapper extends FunctionMapper {
+    }
 
-		@Override
-		public Method resolveFunction(String prefix, String name) {
-			if (!name.equals("now")) {
-				return null;
-			}
-			try {
-				return Instant.class.getMethod("now");
-			} catch(Exception e) {
-				throw new RuntimeException("fatal failure, check " +
-						"ExecutionContext.FpcEngineFunctionMapper code", e);
-			}
-		}
+    /**
+     * Custom <code>VariableMapper</code> implementation for the
+     * <code>FpcEngine</code>. This class provides a variable repository to
+     * allow the creation and manipulation of variables inside a
+     * <code>Script</code>.
+     *
+     * @author Guido Rota (2014)
+     *
+     */
+    private class FpcEngineVariableMapper extends VariableMapper {
 
-	}
+        private final Map<String, ValueExpression> variableMap = new HashMap<>();
 
-	/**
-	 * Custom <code>VariableMapper</code> implementation for the
-	 * <code>FpcEngine</code>. This class provides a variable repository to
-	 * allow the creation and manipulation of variables inside a
-	 * <code>Script</code>.
-	 *
-	 * @author Guido Rota (2014)
-	 *
-	 */
-	private class FpcEngineVariableMapper extends VariableMapper {
+        @Override
+        public ValueExpression resolveVariable(String variable) {
+            return variableMap.get(variable);
+        }
 
-		private final Map<String, ValueExpression> variableMap = new HashMap<>();
+        @Override
+        public ValueExpression setVariable(String variable,
+                ValueExpression expression) {
+            return variableMap.put(variable, expression);
+        }
 
-		@Override
-		public ValueExpression resolveVariable(String variable) {
-			return variableMap.get(variable);
-		}
+        public void clear() {
+            variableMap.clear();
+        }
 
-		@Override
-		public ValueExpression setVariable(String variable,
-				ValueExpression expression) {
-			return variableMap.put(variable, expression);
-		}
+    }
 
-		public void clear() {
-			variableMap.clear();
-		}
+    /**
+     * Custom <code>ELResolver</code> implementation for resolving the
+     * <code>param</code> keyword. This keyword can be used into EL expressions
+     * to access the <code>Script</code> parameters.
+     *
+     * @author Guido Rota (2014)
+     *
+     */
+    private class ParameterELResolver extends ELResolver {
 
-	}
 
-	/**
-	 * Custom <code>ELResolver</code> implementation for resolving the
-	 * <code>param</code> keyword. This keyword can be used into EL expressions
-	 * to access the <code>Script</code> parameters.
-	 *
-	 * @author Guido Rota (2014)
-	 *
-	 */
-	private class ParameterELResolver extends ELResolver {
+        // This function returns the internal parameter map when base == null
+        // and property == "param". The values inside the parameter map are then
+        // resolved using a MapELResolver (see SCriptEngineELContext).
+        @Override
+        public Object getValue(ELContext context, Object base, Object property) {
+            if (base != null || property == null
+                    || !(property instanceof String)
+                    || !property.equals("param")) {
+                context.setPropertyResolved(false);
+                return null;
+            }
 
-		private Map<String, Object> parameterMap = new HashMap<>();
+            context.setPropertyResolved(true);
+            return parameterMap;
+        }
 
-		/**
-		 * Clears the content of the map used to store <code>Script</code>
-		 * parameters
-		 */
-		private void clearParameterMap() {
-			parameterMap.clear();
-		}
+        @Override
+        public Class<?> getType(ELContext context, Object base, Object property) {
+            return parameterMap.getClass();
+        }
 
-		/**
-		 * Populates the internal data structures with the <code>Script</code>
-		 * parameters
-		 *
-		 * @param paramArray
-		 *            Parameter array
-		 */
-		private void setParameterArray(ScriptParameter[] paramArray) {
-			if (Check.nullOrEmpty(paramArray)) {
-				return;
-			}
+        @Override
+        public void setValue(ELContext context, Object base, Object property,
+                Object value) {
+        }
 
-			for (ScriptParameter param : paramArray) {
-				parameterMap.put(param.getName(), param.getValue());
-			}
-		}
+        @Override
+        public boolean isReadOnly(ELContext context, Object base,
+                Object property) {
+            return true;
+        }
 
-		// This function returns the internal parameter map when base == null
-		// and property == "param". The values inside the parameter map are then
-		// resolved using a MapELResolver (see SCriptEngineELContext).
-		@Override
-		public Object getValue(ELContext context, Object base, Object property) {
-			if (base != null || property == null
-					|| !(property instanceof String)
-					|| !property.equals("param")) {
-				context.setPropertyResolved(false);
-				return null;
-			}
+        @Override
+        public Iterator<FeatureDescriptor> getFeatureDescriptors(
+                ELContext context, Object base) {
+            return null;
+        }
 
-			context.setPropertyResolved(true);
-			return parameterMap;
-		}
+        @Override
+        public Class<?> getCommonPropertyType(ELContext context, Object base) {
+            return String.class;
+        }
 
-		@Override
-		public Class<?> getType(ELContext context, Object base, Object property) {
-			return parameterMap.getClass();
-		}
+    }
 
-		@Override
-		public void setValue(ELContext context, Object base, Object property,
-				Object value) {
-		}
+    /**
+     * Custom <code>ELResolver</code> implementation for resolving attributes on
+     * PerLa <code>FpcMessage</code> instances.
+     *
+     * @author Guido Rota (2014)
+     *
+     */
+    private class AttributeELResolver extends ELResolver {
 
-		@Override
-		public boolean isReadOnly(ELContext context, Object base,
-				Object property) {
-			return true;
-		}
+        private boolean checkParameters(Object base, Object property) {
+            if (base == null || property == null
+                    || !(base instanceof FpcMessage)
+                    || !(property instanceof String)
+                    || !((FpcMessage) base).hasField(property.toString())) {
+                return false;
+            }
+            return true;
+        }
 
-		@Override
-		public Iterator<FeatureDescriptor> getFeatureDescriptors(
-				ELContext context, Object base) {
-			return null;
-		}
+        @Override
+        public Object getValue(ELContext context, Object base, Object property) {
+            if (!checkParameters(base, property)) {
+                context.setPropertyResolved(false);
+                return null;
+            }
 
-		@Override
-		public Class<?> getCommonPropertyType(ELContext context, Object base) {
-			return String.class;
-		}
+            Object value = ((FpcMessage) base)
+                    .getField(property.toString());
+            context.setPropertyResolved(true);
+            return value;
+        }
 
-	}
+        @Override
+        public Class<?> getType(ELContext context, Object base, Object property) {
+            if (!checkParameters(base, property)) {
+                context.setPropertyResolved(false);
+                return null;
+            }
 
-	/**
-	 * Custom <code>ELResolver</code> implementation for resolving attributes on
-	 * PerLa <code>FpcMessage</code> instances.
-	 *
-	 * @author Guido Rota (2014)
-	 *
-	 */
-	private class AttributeELResolver extends ELResolver {
+            context.setPropertyResolved(true);
+            return ((FpcMessage) base).getField(property.toString())
+                    .getClass();
+        }
 
-		private boolean checkParameters(Object base, Object property) {
-			if (base == null || property == null
-					|| !(base instanceof FpcMessage)
-					|| !(property instanceof String)
-					|| !((FpcMessage) base).hasField(property.toString())) {
-				return false;
-			}
-			return true;
-		}
+        @Override
+        public void setValue(ELContext context, Object base, Object property,
+                Object value) {
+            if (!checkParameters(base, property)) {
+                return;
+            }
 
-		@Override
-		public Object getValue(ELContext context, Object base, Object property) {
-			if (!checkParameters(base, property)) {
-				context.setPropertyResolved(false);
-				return null;
-			}
+            ((FpcMessage) base).setField(property.toString(), value);
+        }
 
-			Object value = ((FpcMessage) base)
-					.getField(property.toString());
-			context.setPropertyResolved(true);
-			return value;
-		}
+        @Override
+        public boolean isReadOnly(ELContext context, Object base,
+                Object property) {
+            return false;
+        }
 
-		@Override
-		public Class<?> getType(ELContext context, Object base, Object property) {
-			if (!checkParameters(base, property)) {
-				context.setPropertyResolved(false);
-				return null;
-			}
+        @Override
+        public Iterator<FeatureDescriptor> getFeatureDescriptors(
+                ELContext context, Object base) {
+            return null;
+        }
 
-			context.setPropertyResolved(true);
-			return ((FpcMessage) base).getField(property.toString())
-					.getClass();
-		}
+        @Override
+        public Class<?> getCommonPropertyType(ELContext context, Object base) {
+            return String.class;
+        }
 
-		@Override
-		public void setValue(ELContext context, Object base, Object property,
-				Object value) {
-			if (!checkParameters(base, property)) {
-				return;
-			}
-
-			((FpcMessage) base).setField(property.toString(), value);
-		}
-
-		@Override
-		public boolean isReadOnly(ELContext context, Object base,
-				Object property) {
-			return false;
-		}
-
-		@Override
-		public Iterator<FeatureDescriptor> getFeatureDescriptors(
-				ELContext context, Object base) {
-			return null;
-		}
-
-		@Override
-		public Class<?> getCommonPropertyType(ELContext context, Object base) {
-			return String.class;
-		}
-
-	}
+    }
 
 }
