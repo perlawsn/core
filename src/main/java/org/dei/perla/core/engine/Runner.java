@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * <p>
@@ -47,7 +48,8 @@ public class Runner {
     private Instruction instruction; // Program counter
 
     private boolean breakpoint;
-    private int state;
+    private volatile Thread thread;
+    private final AtomicInteger state;
 
     protected Runner(Script script, ScriptParameter[] params,
             ScriptHandler handler, ScriptDebugger debugger) {
@@ -58,7 +60,8 @@ public class Runner {
         this.breakpoint = false;
         this.ctx = getContext();
         this.ctx.init(script.getEmit().size(), params);
-        state = NEW;
+        thread = null;
+        state = new AtomicInteger(NEW);
     }
 
     protected Script getScript() {
@@ -103,23 +106,17 @@ public class Runner {
      * getResult()} method on a suspended {@code Runner} will block until the
      * execution is resumed and completed.
      */
-    protected synchronized void suspend() {
-        if (state != RUNNING) {
-            String msg = "Cannot suspend, Script is not running";
-            log.error(msg);
-            throw new IllegalStateException(msg);
-        }
-        state = SUSPENDED;
+    protected void suspend() {
+        state.compareAndSet(RUNNING, SUSPENDED);
     }
 
     /**
      * Stops the {@link Script}.
      */
-    protected synchronized void stop() {
-        if (state != RUNNING) {
+    protected void stop() {
+        if (!state.compareAndSet(RUNNING, STOPPED)) {
             return;
         }
-        state = STOPPED;
         try {
             handler.complete(script, ctx.getSamples());
         } catch (Exception e) {
@@ -135,11 +132,14 @@ public class Runner {
      * Cancels the {@link Script} execution. No samples are emitted upon
      * cancellation.
      */
-    public synchronized void cancel() {
-        if (state == CANCELLED || state == STOPPED) {
-            return;
-        }
-        state = CANCELLED;
+    public void cancel() {
+        int old;
+        do {
+            old = state.get();
+            if (old == CANCELLED || old == STOPPED) {
+                return;
+            }
+        } while (!state.compareAndSet(old, CANCELLED));
 
         String msg = "Script '" + script.getName() + "' cancelled.";
         log.debug(msg);
@@ -151,7 +151,7 @@ public class Runner {
      * Sets a breakpoint, causing the {@code Runner} to invoke the
      * {@link ScriptDebugger} (if any) before running the next instruction.
      */
-    protected synchronized void setBreakpoint() {
+    protected void setBreakpoint() {
         breakpoint = true;
     }
 
@@ -160,8 +160,8 @@ public class Runner {
      *
      * @return True if the <code>Runner</code> is suspended, false otherwise
      */
-    public synchronized boolean isSuspended() {
-        return state == SUSPENDED;
+    public boolean isSuspended() {
+        return state.get() == SUSPENDED;
     }
 
     /**
@@ -171,8 +171,8 @@ public class Runner {
      * @return True if the <code>Runner</code> has stopped or has been
      *         cancelled, false otherwise
      */
-    public synchronized boolean isDone() {
-        return state >= STOPPED;
+    public boolean isDone() {
+        return state.get() >= STOPPED;
     }
 
     /**
@@ -190,8 +190,8 @@ public class Runner {
      *
      * @return True if the <code>Runner</code> was cancelled, false otherwise
      */
-    public synchronized boolean isCancelled() {
-        return state == CANCELLED;
+    public boolean isCancelled() {
+        return state.get() == CANCELLED;
     }
 
     /**
@@ -199,14 +199,17 @@ public class Runner {
      * suspended {@link Script}.
      */
     protected void resume() {
-        synchronized (this) {
-            if (state != SUSPENDED) {
-                String msg = "Cannot resume, Runner is not in suspended state";
-                log.error(msg);
-                throw new IllegalStateException(msg);
-            }
-            state = RUNNING;
+        if (!state.compareAndSet(SUSPENDED, RUNNING)) {
+            String msg = "Cannot resume, Runner is not in suspended state";
+            log.error(msg);
+            throw new IllegalStateException(msg);
         }
+
+        while (thread != null) {
+            System.out.println("yielding");
+            Thread.currentThread().yield();
+        }
+        thread = Thread.currentThread();
 
         // No need to fetch the first instruction of the Script, since the
         // Runner is resuming from where it was previously interrupted
@@ -218,16 +221,14 @@ public class Runner {
      * the {@link Script}.
      */
     protected void execute() {
-        synchronized (this) {
-            if (state != NEW) {
-                String msg = "Cannot start, Runner has already been run";
-                log.error(msg);
-                throw new IllegalStateException(msg);
-            }
-            state = RUNNING;
+        if (!state.compareAndSet(NEW, RUNNING)) {
+            String msg = "Cannot start, Runner has already been run";
+            log.error(msg);
+            throw new IllegalStateException(msg);
         }
 
         // Fetch the first instruction and start the run loop
+        thread = Thread.currentThread();
         instruction = script.getCode();
         run();
     }
@@ -238,47 +239,42 @@ public class Runner {
     private void run() {
         try {
             do {
-                synchronized (this) {
-                    if (state != RUNNING) {
-                        break;
-                    } else if (instruction == null) {
-                        state = CANCELLED;
-                        String msg = "Missing stop instruction in script '"
-                                + script.getName() + "'";
-                        log.error(msg);
-                        handler.error(script, new ScriptException(msg));
-                    }
-
-                    if (debugger != null && breakpoint) {
-                        breakpoint = false;
-                        debugger.breakpoint(this, script, instruction);
-                    }
+                if (instruction == null &&
+                        state.compareAndSet(RUNNING, CANCELLED)) {
+                    String msg = "Missing stop instruction in script '"
+                            + script.getName() + "'";
+                    log.error(msg);
+                    handler.error(script, new ScriptException(msg));
                 }
 
+                if (debugger != null && breakpoint) {
+                    breakpoint = false;
+                    debugger.breakpoint(this, script, instruction);
+                }
                 instruction = instruction.run(this);
-
-            } while (true);
+            } while (state.get() == RUNNING);
         } catch (Exception e) {
-            synchronized (this) {
-                // Catching all Exceptions, since we don't want any error in the
-                // user's scripts or in the handler code to bring down the entire
-                // system
-                state = CANCELLED;
-                relinquishContext(ctx);
-                String msg = "Unexpected error in script '" + script.getName() +
-                        "', instruction '" + instruction.getClass().getSimpleName() + "'";
-                log.error(msg, e);
+            // Catching all Exceptions, since we don't want any error in the
+            // user's scripts or in the handler code to bring down the entire
+            // system
+            state.set(CANCELLED);
+            relinquishContext(ctx);
+            String msg = "Unexpected error in script '" + script.getName() +
+                    "', instruction '" + instruction.getClass().getSimpleName() + "'";
+            log.error(msg, e);
 
-                if (e instanceof UnsupportedPeriodException) {
-                    // Relay UnsupportedPeriodException as is, since it conveys
-                    // additional information that may be used by the handler to
-                    // choose an appropriate failure strategy
-                    handler.error(script, e);
-                } else {
-                    // Wrap all other exceptionn in a ScriptException
-                    handler.error(script, new ScriptException(msg, e));
-                }
+            if (e instanceof UnsupportedPeriodException) {
+                // Relay UnsupportedPeriodException as is, since it conveys
+                // additional information that may be used by the handler to
+                // choose an appropriate failure strategy
+                handler.error(script, e);
+            } else {
+                // Wrap all other exceptionn in a ScriptException
+                handler.error(script, new ScriptException(msg, e));
             }
+        } finally {
+            // Resetting the thread reference, only occurs if the
+            thread = null;
         }
     }
 
