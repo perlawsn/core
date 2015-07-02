@@ -53,7 +53,7 @@ public class ExecutionContext {
         elContext = new ScriptEngineELContext(elVariableMapper);
     }
 
-    protected synchronized void init(int sampleSize, ScriptParameter[] params) {
+    protected void init(int sampleSize, ScriptParameter[] params) {
         samples = new ArrayList<>();
         sample = new Object[sampleSize];
         setParameters(params);
@@ -75,7 +75,7 @@ public class ExecutionContext {
      *
      * @return <code>ELContext</code>
      */
-    protected synchronized ELContext getELContext() {
+    protected ELContext getELContext() {
         return elContext;
     }
 
@@ -90,7 +90,7 @@ public class ExecutionContext {
      * @param value
      *            variable value
      */
-    protected synchronized void setVariable(String name, Object value) {
+    protected void setVariable(String name, Object value) {
         variableMap.put(name, value);
         elVariableMapper.setVariable(name,
                 Executor.createValueExpression(value, value.getClass()));
@@ -104,7 +104,7 @@ public class ExecutionContext {
      * @return Variable objects, null if no variable with the specified name is
      *         found
      */
-    protected synchronized Object getVariable(String name) {
+    protected Object getVariable(String name) {
         return variableMap.get(name);
     }
 
@@ -117,7 +117,7 @@ public class ExecutionContext {
      * @param value
      *            Attribute value
      */
-    protected synchronized void putAttribute(int idx, Object value) {
+    protected void putAttribute(int idx, Object value) {
         sample[idx] = value;
     }
 
@@ -126,7 +126,7 @@ public class ExecutionContext {
      * samples emitted can be collected after {@code Script} execution
      * using the {@code getSamples()} method.
      */
-    protected synchronized void emitSample() {
+    protected void emitSample() {
         Object[] s = Arrays.copyOf(sample, sample.length);
         samples.add(s);
     }
@@ -137,7 +137,7 @@ public class ExecutionContext {
      *
      * @return List of emitted samples
      */
-    protected synchronized List<Object[]> getSamples() {
+    protected List<Object[]> getSamples() {
         if (samples.isEmpty()) {
             return Collections.emptyList();
         }
@@ -152,7 +152,7 @@ public class ExecutionContext {
      * object so that it can be reused for future <code>Script</code>
      * executions.
      */
-    protected synchronized void clear() {
+    protected void clear() {
         instructionLocalMap.clear();
         parameterMap.clear();
         variableMap.clear();
@@ -208,10 +208,8 @@ public class ExecutionContext {
          *            value to set
          */
         public void setValue(Runner runner, E value) {
-            synchronized (runner.ctx) {
-                ExecutionContext ctx = runner.ctx;
-                ctx.instructionLocalMap.put(id, value);
-            }
+            ExecutionContext ctx = runner.ctx;
+            ctx.instructionLocalMap.put(id, value);
         }
 
         /**
@@ -224,18 +222,16 @@ public class ExecutionContext {
          *         for the current {@link ExecutionContext}
          */
         public E getValue(Runner runner) {
-            synchronized (runner.ctx) {
-                ExecutionContext ctx = runner.ctx;
+            ExecutionContext ctx = runner.ctx;
 
-                if (!ctx.instructionLocalMap.containsKey(id)) {
-                    ctx.instructionLocalMap.put(id, initialValue);
-                    return initialValue;
-                }
-
-                @SuppressWarnings("unchecked")
-                E value = (E) ctx.instructionLocalMap.get(id);
-                return value;
+            if (!ctx.instructionLocalMap.containsKey(id)) {
+                ctx.instructionLocalMap.put(id, initialValue);
+                return initialValue;
             }
+
+            @SuppressWarnings("unchecked")
+            E value = (E) ctx.instructionLocalMap.get(id);
+            return value;
         }
 
     }

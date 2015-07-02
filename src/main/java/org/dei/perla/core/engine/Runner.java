@@ -4,13 +4,13 @@ import org.apache.log4j.Logger;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * <p>
  * A class for running <code>Script</code>s. <code>Runner</code> objects contain
  * various methods for controlling <code>Script</code> execution.
- * </p>
  *
  *
  * <p>
@@ -19,7 +19,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * instruction is encountered. It is important to note that <code>Script</code>
  * debugging may severly impact on the overall system performance, and it is not
  * intended to be used in a production environment.
- * </p>
  *
  * @author Guido Rota (2014)
  *
@@ -46,10 +45,11 @@ public class Runner {
     private final ScriptHandler handler;
     private final ScriptDebugger debugger;
     private Instruction instruction; // Program counter
+    private volatile boolean breakpoint;
+    private int state;
 
-    private boolean breakpoint;
-    private volatile Thread thread;
-    private final AtomicInteger state;
+    private final Lock stateLk = new ReentrantLock();
+    private final Lock runLk = new ReentrantLock();
 
     protected Runner(Script script, ScriptParameter[] params,
             ScriptHandler handler, ScriptDebugger debugger) {
@@ -60,8 +60,7 @@ public class Runner {
         this.breakpoint = false;
         this.ctx = getContext();
         this.ctx.init(script.getEmit().size(), params);
-        thread = null;
-        state = new AtomicInteger(NEW);
+        state = NEW;
     }
 
     protected Script getScript() {
@@ -107,25 +106,43 @@ public class Runner {
      * execution is resumed and completed.
      */
     protected void suspend() {
-        state.compareAndSet(RUNNING, SUSPENDED);
+        stateLk.lock();
+        try {
+            if (state != RUNNING) {
+                String msg = "Cannot suspend, Runner is not running";
+                log.error(msg);
+                throw new IllegalStateException(msg);
+            }
+            state = SUSPENDED;
+        } finally {
+            stateLk.unlock();
+        }
     }
 
     /**
      * Stops the {@link Script}.
      */
     protected void stop() {
-        if (!state.compareAndSet(RUNNING, STOPPED)) {
-            return;
-        }
+        stateLk.lock();
         try {
-            handler.complete(script, ctx.getSamples());
-        } catch (Exception e) {
-            String msg = "Unexpected error in script '" + script.getName() +
-                    "': exception occurred in ScriptHandler.complete() method";
-            log.error(msg, e);
-            handler.error(script, new ScriptException(msg, e));
+            if (state != RUNNING) {
+                String msg = "Cannot stop, Runner is not running";
+                log.error(msg);
+                throw new IllegalStateException(msg);
+            }
+            state = STOPPED;
+            try {
+                handler.complete(script, ctx.getSamples());
+            } catch (Exception e) {
+                String msg = "Unexpected error in script '" + script.getName() +
+                        "': exception occurred in ScriptHandler.complete() method";
+                log.error(msg, e);
+                handler.error(script, new ScriptException(msg, e));
+            }
+            relinquishContext(ctx);
+        } finally {
+            stateLk.unlock();
         }
-        relinquishContext(ctx);
     }
 
     /**
@@ -133,18 +150,19 @@ public class Runner {
      * cancellation.
      */
     public void cancel() {
-        int old;
-        do {
-            old = state.get();
-            if (old == CANCELLED || old == STOPPED) {
+        stateLk.lock();
+        try {
+            if (state == CANCELLED || state == STOPPED) {
                 return;
             }
-        } while (!state.compareAndSet(old, CANCELLED));
-
-        String msg = "Script '" + script.getName() + "' cancelled.";
-        log.debug(msg);
-        handler.error(script, new ScriptCancelledException(msg));
-        relinquishContext(ctx);
+            state = CANCELLED;
+            String msg = "Script '" + script.getName() + "' cancelled.";
+            log.debug(msg);
+            handler.error(script, new ScriptCancelledException(msg));
+            relinquishContext(ctx);
+        } finally {
+            stateLk.unlock();
+        }
     }
 
     /**
@@ -161,7 +179,12 @@ public class Runner {
      * @return True if the <code>Runner</code> is suspended, false otherwise
      */
     public boolean isSuspended() {
-        return state.get() == SUSPENDED;
+        stateLk.lock();
+        try {
+            return state == SUSPENDED;
+        } finally {
+            stateLk.unlock();
+        }
     }
 
     /**
@@ -172,7 +195,12 @@ public class Runner {
      *         cancelled, false otherwise
      */
     public boolean isDone() {
-        return state.get() >= STOPPED;
+        stateLk.lock();
+        try {
+            return state >= STOPPED;
+        } finally {
+            stateLk.unlock();
+        }
     }
 
     /**
@@ -191,7 +219,12 @@ public class Runner {
      * @return True if the <code>Runner</code> was cancelled, false otherwise
      */
     public boolean isCancelled() {
-        return state.get() == CANCELLED;
+        stateLk.lock();
+        try {
+            return state == CANCELLED;
+        } finally {
+            stateLk.unlock();
+        }
     }
 
     /**
@@ -199,21 +232,26 @@ public class Runner {
      * suspended {@link Script}.
      */
     protected void resume() {
-        if (!state.compareAndSet(SUSPENDED, RUNNING)) {
-            String msg = "Cannot resume, Runner is not in suspended state";
-            log.error(msg);
-            throw new IllegalStateException(msg);
-        }
+        runLk.lock();
+        try {
+            stateLk.lock();
+            try {
+                if (state != SUSPENDED) {
+                    String msg = "Cannot resume, Runner is not in suspended state";
+                    log.error(msg);
+                    throw new IllegalStateException(msg);
+                }
+                state = RUNNING;
+            } finally {
+                stateLk.unlock();
+            }
 
-        while (thread != null) {
-            System.out.println("yielding");
-            Thread.currentThread().yield();
+            // No need to fetch the first instruction of the Script, since the
+            // Runner is resuming from where it was previously interrupted
+            run();
+        } finally {
+            runLk.unlock();
         }
-        thread = Thread.currentThread();
-
-        // No need to fetch the first instruction of the Script, since the
-        // Runner is resuming from where it was previously interrupted
-        run();
     }
 
     /**
@@ -221,16 +259,26 @@ public class Runner {
      * the {@link Script}.
      */
     protected void execute() {
-        if (!state.compareAndSet(NEW, RUNNING)) {
-            String msg = "Cannot start, Runner has already been run";
-            log.error(msg);
-            throw new IllegalStateException(msg);
-        }
+        runLk.lock();
+        try {
+            stateLk.lock();
+            try {
+                if (state != NEW) {
+                    String msg = "Cannot start, Runner has already been run";
+                    log.error(msg);
+                    throw new IllegalStateException(msg);
+                }
+                state = RUNNING;
+            } finally {
+                stateLk.unlock();
+            }
 
-        // Fetch the first instruction and start the run loop
-        thread = Thread.currentThread();
-        instruction = script.getCode();
-        run();
+            // Fetch the first instruction and start the run loop
+            instruction = script.getCode();
+            run();
+        } finally {
+            runLk.unlock();
+        }
     }
 
     /**
@@ -238,26 +286,39 @@ public class Runner {
      */
     private void run() {
         try {
+
             do {
-                if (instruction == null &&
-                        state.compareAndSet(RUNNING, CANCELLED)) {
-                    String msg = "Missing stop instruction in script '"
-                            + script.getName() + "'";
-                    log.error(msg);
-                    handler.error(script, new ScriptException(msg));
+                stateLk.lock();
+                try {
+                    if (state != RUNNING) {
+                        break;
+                    } else if (instruction == null && state == RUNNING) {
+                        throw new ScriptException("Missing stop instruction in script '"
+                                + script.getName() + "'");
+                    }
+                } finally {
+                    stateLk.unlock();
                 }
 
                 if (debugger != null && breakpoint) {
                     breakpoint = false;
                     debugger.breakpoint(this, script, instruction);
                 }
+
                 instruction = instruction.run(this);
-            } while (state.get() == RUNNING);
+
+            } while (true);
+
         } catch (Exception e) {
             // Catching all Exceptions, since we don't want any error in the
             // user's scripts or in the handler code to bring down the entire
             // system
-            state.set(CANCELLED);
+            stateLk.lock();
+            try {
+                state = CANCELLED;
+            } finally {
+                stateLk.unlock();
+            }
             relinquishContext(ctx);
             String msg = "Unexpected error in script '" + script.getName() +
                     "', instruction '" + instruction.getClass().getSimpleName() + "'";
@@ -272,9 +333,6 @@ public class Runner {
                 // Wrap all other exceptionn in a ScriptException
                 handler.error(script, new ScriptException(msg, e));
             }
-        } finally {
-            // Resetting the thread reference, only occurs if the
-            thread = null;
         }
     }
 
