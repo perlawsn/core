@@ -15,7 +15,7 @@ public final class AsyncPeriodicOperation extends PeriodicOperation {
     private final ScheduledThreadPoolExecutor executor;
 
     private final AsyncOperation op;
-    private volatile ScheduledFuture<?> timerFuture = null;
+    private ScheduledFuture<?> timerFuture = null;
 
     public AsyncPeriodicOperation(AsyncOperation op) {
         super("Simulated one-off (async) " + op.getId(), op.getAttributes());

@@ -1,19 +1,13 @@
 package org.dei.perla.core.fpc.base;
 
-import org.dei.perla.core.engine.EmitInstruction;
-import org.dei.perla.core.engine.Instruction;
-import org.dei.perla.core.engine.Script;
-import org.dei.perla.core.engine.StopInstruction;
 import org.dei.perla.core.fpc.Fpc;
 import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.TaskHandler;
 import org.dei.perla.core.sample.Attribute;
-import org.dei.perla.core.sample.Sample;
 import org.dei.perla.core.sample.SamplePipeline;
-import org.dei.perla.core.sample.SamplePipeline.PipelineBuilder;
 import org.dei.perla.core.utils.AsyncUtils;
+import org.dei.perla.core.utils.Check;
 
-import java.time.Instant;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -30,19 +24,6 @@ public final class BaseFpc implements Fpc {
     private final Map<Attribute, Object> staticAtts;
     private final ChannelManager cmgr;
     private final Scheduler sched;
-
-    // This Operation creates an empty sample. It is used for scheduling the
-    // periodic creation of empty samples, to which additional static fields
-    // may be appended, to satisfy a periodic request of static attributes
-    private static final Operation emptySampleOperation;
-
-    static {
-        Instruction start = new EmitInstruction();
-        start.setNext(new StopInstruction());
-        Script empty = new Script("_empty", start, Collections.emptyList(),
-                Collections.emptyList());
-        emptySampleOperation = new SimulatedPeriodicOperation("_empty", empty);
-    }
 
     protected BaseFpc(int id, String type, Set<Attribute> atts,
             Map<Attribute, Object> staticAtts, ChannelManager cmgr,
@@ -70,6 +51,10 @@ public final class BaseFpc implements Fpc {
         return atts;
     }
 
+    protected Map<Attribute, Object> getStaticAttributes() {
+        return staticAtts;
+    }
+
     protected Scheduler getOperationScheduler() {
         return sched;
     }
@@ -92,101 +77,84 @@ public final class BaseFpc implements Fpc {
     }
 
     @Override
-    public Task get(List<Attribute> atts, boolean strict,
+    public Task get(List<Attribute> requestAtts, boolean strict,
             TaskHandler handler) {
-        Request req = new Request(atts);
+        if (Check.nullOrEmpty(atts)) {
+            throw new RuntimeException(
+                    "Cannot sample, attribute list is null or empty");
+        }
+        Request req = new Request(this, requestAtts);
 
-        if (req.staticOnly()) {
-            Task t = new CompletedTask(req.statAtts);
+        if (req.isStatic()) {
+            Task t = new CompletedTask(req.getStatic());
             // Running in a new thread to preserve asynchronous semantics
             AsyncUtils.runInNewThread(() -> {
-                handler.data(t, req.staticSample());
+                handler.data(t, req.newStaticSample());
                 handler.complete(t);
             });
             return t;
-        }
+        } else {
+            Operation op = sched.get(req.getDynamic(), strict);
+            if (op == null) {
+                return null;
+            }
 
-        Operation op = sched.get(req.dynAtts, strict);
-        if (op == null) {
-            return null;
-        }
-
-        PipelineBuilder pb = SamplePipeline.newBuilder(op.getAttributes());
-        if (req.mixed()) {
-            pb.addStatic(req.staticValues());
-        }
-        if (!op.getAttributes().contains(Attribute.TIMESTAMP)) {
-            pb.addTimestamp();
-        }
-        pb.reorder(atts);
-
-        BaseTask t = op.schedule(Collections.emptyMap(), handler, pb.create());
-        t.start();
-        return t;
-    }
-
-    @Override
-    public Task get(List<Attribute> atts, boolean strict, long ms,
-            TaskHandler handler) {
-        PipelineBuilder pb;
-        Request req = new Request(atts);
-
-        if (req.staticOnly()) {
-            pb = SamplePipeline.newBuilder(Collections.emptyList());
-            pb.addStatic(req.staticValues());
-            pb.addTimestamp();
-            Map<String, Object> paramMap = new HashMap<>();
-            paramMap.put("period", ms);
-            pb.reorder(atts);
-            BaseTask t = emptySampleOperation
-                    .schedule(paramMap, handler, pb.create());
-
+            SamplePipeline pipe = req.createPipeline(op.getAttributes());
+            BaseTask t = op.schedule(Collections.emptyMap(), handler, pipe);
             t.start();
             return t;
         }
-
-        Operation op = sched.periodic(req.dynAtts, strict);
-        if (op == null) {
-            return null;
-        }
-
-        Map<String, Object> pm = new HashMap<>();
-        pm.put("period", ms);
-
-        pb = SamplePipeline.newBuilder(op.getAttributes());
-        if (!req.statAtts.isEmpty()) {
-            pb.addStatic(req.staticValues());
-        }
-        if (!op.getAttributes().contains(Attribute.TIMESTAMP)) {
-            pb.addTimestamp();
-        }
-        pb.reorder(atts);
-
-        BaseTask t = op.schedule(pm, handler, pb.create());
-        t.start();
-        return t;
     }
 
     @Override
-    public Task async(List<Attribute> atts, boolean strict,
+    public Task get(List<Attribute> requestAtts, boolean strict, long ms,
             TaskHandler handler) {
-        Request req = new Request(atts);
+        if (Check.nullOrEmpty(atts)) {
+            throw new RuntimeException(
+                    "Cannot sample, attribute list is null or empty");
+        }
+        Request req = new Request(this, requestAtts);
 
-        if (!req.statAtts.isEmpty()) {
+        if (req.isStatic()) {
+            StaticPeriodicTask t = new StaticPeriodicTask(req, ms, handler);
+            t.start();
+            return t;
+
+        } else {
+            Operation op = sched.periodic(req.getDynamic(), strict);
+            if (op == null) {
+                return null;
+            }
+
+            Map<String, Object> pm = new HashMap<>();
+            pm.put("period", ms);
+
+            SamplePipeline pipe = req.createPipeline(op.getAttributes());
+            BaseTask t = op.schedule(pm, handler, pipe);
+            t.start();
+            return t;
+        }
+    }
+
+    @Override
+    public Task async(List<Attribute> requestAtts, boolean strict,
+            TaskHandler handler) {
+        if (Check.nullOrEmpty(atts)) {
+            throw new RuntimeException(
+                    "Cannot sample, attribute list is null or empty");
+        }
+        Request req = new Request(this, requestAtts);
+
+        if (req.isStatic()) {
             return null;
         }
 
-        Operation op = sched.async(atts, strict);
+        Operation op = sched.async(req.getDynamic(), strict);
         if (op == null) {
             return null;
         }
-
-        PipelineBuilder pb = SamplePipeline.newBuilder(op.getAttributes());
-        if (!op.getAttributes().contains(Attribute.TIMESTAMP)) {
-            pb.addTimestamp();
-        }
-
-        BaseTask t = op.schedule(Collections.emptyMap(), handler, pb.create());
+        SamplePipeline pipe = req.createPipeline(op.getAttributes());
+        BaseTask t = op.schedule(Collections.emptyMap(), handler, pipe);
         t.start();
         return t;
     }
@@ -197,64 +165,6 @@ public final class BaseFpc implements Fpc {
             cmgr.stop();
             handler.accept(this);
         });
-    }
-
-    /**
-     * Request is a simple utility class employed to classify the
-     * attributes requested by the user as static or dynamic.
-     */
-    private class Request {
-
-        private final List<Attribute> dynAtts = new ArrayList<>();
-        private final List<Attribute> statAtts = new ArrayList<>();
-
-        private Request(Collection<Attribute> atts) {
-            atts.forEach(a -> {
-                if (staticAtts.containsKey(a)) {
-                    statAtts.add(a);
-                } else {
-                    dynAtts.add(a);
-                }
-            });
-        }
-
-        /**
-         * staticOnly returns true if the request contains only static
-         * attributes.
-         */
-        private boolean staticOnly() {
-            return dynAtts.isEmpty() && !statAtts.isEmpty();
-        }
-
-        /**
-         * mixed returns true if the request contains both static and dynamic
-         * attributes.
-         */
-        private boolean mixed() {
-            return !dynAtts.isEmpty() && !statAtts.isEmpty();
-        }
-
-        /**
-         * staticSample returns a new sample composed only of static values.
-         */
-        private Sample staticSample() {
-            Object[] values = new Object[atts.size() + 1];
-            int i = 0;
-            for (Attribute a : statAtts) {
-                values[i] = staticAtts.get(a);
-                i++;
-            }
-            statAtts.add(Attribute.TIMESTAMP);
-            values[i] = Instant.now();
-            return new Sample(Collections.unmodifiableList(statAtts), values);
-        }
-
-        private LinkedHashMap<Attribute, Object> staticValues() {
-            LinkedHashMap<Attribute, Object> av = new LinkedHashMap<>();
-            statAtts.forEach(a -> av.put(a, staticAtts.get(a)));
-            return av;
-        }
-
     }
 
     /**

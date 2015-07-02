@@ -250,7 +250,7 @@ public class BaseFpcTest {
         Task task = fpc.get(attributeList, 10, handler);
 
         assertThat(task, notNullValue());
-        assertTrue(task instanceof PeriodicTask);
+        assertTrue(task instanceof StaticPeriodicTask);
         handler.awaitCompletion();
         sample = handler.getLastSample();
         assertThat(sample, notNullValue());
