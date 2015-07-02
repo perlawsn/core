@@ -6,6 +6,7 @@ import org.dei.perla.core.descriptor.DeviceDescriptor;
 import org.dei.perla.core.descriptor.DeviceDescriptorParser;
 import org.dei.perla.core.descriptor.JaxbDeviceDescriptorParser;
 import org.dei.perla.core.fpc.Fpc;
+import org.dei.perla.core.fpc.FpcCreationException;
 import org.dei.perla.core.fpc.FpcFactory;
 import org.dei.perla.core.fpc.base.BaseFpcFactory;
 import org.dei.perla.core.message.MapperFactory;
@@ -64,8 +65,9 @@ public final class PerLaSystem {
                 reqs.add(cp.getIORequestBuilderFactory());
 
             } else {
-                throw new IllegalArgumentException("Unknown plugin type " +
-                        p.getClass().getName());
+                String msg = "Unknown plugin type " + p.getClass().getName();
+                log.error(msg);
+                throw new IllegalArgumentException(msg);
             }
         }
 
@@ -75,25 +77,40 @@ public final class PerLaSystem {
     }
 
     /**
-     * Off-band Device Descriptor injection. This method allows the creation
-     * of {@link Fpc} proxies for devices whose {@link Channel} cannot relay
-     * Device Descriptor information.
+     * Reads an XML Device Descriptor from the {@link InputStream} passed as
+     * parameter and uses it to create a new {@link Fpc}.
      *
      * @param is Device Descriptor {@link InputStream}
      * @return the newly created {@link Fpc} object
-     * @throws DeviceDescriptorException if the {@link Fpc} creation process
+     * @throws FpcCreationException if the {@link Fpc} creation process
      * fails due to an error in the Device Descriptor
      */
-    public Fpc injectDescriptor(InputStream is)
-            throws DeviceConnectionException {
+    public Fpc injectDescriptor(InputStream is) throws FpcCreationException {
+        int id = -1;
+        boolean idGenerated = false;
+
         try {
+
             DeviceDescriptor d = parser.parse(is);
-            Fpc fpc = factory.createFpc(d, registry);
+
+            if (d.getId() != null) {
+                id = d.getId();
+            } else {
+                id = registry.generateID();
+                idGenerated = true;
+            }
+
+            Fpc fpc = factory.createFpc(d, id);
             registry.add(fpc);
             return fpc;
-        } catch (Exception e) {
-            throw new DeviceConnectionException("Error injecting Device " +
-                    "Descriptor", e);
+
+        } catch(Exception e) {
+            if (idGenerated) {
+                registry.releaseID(id);
+            }
+            String msg = "Error creating Fpc '" + id + "'";
+            log.error(msg, e);
+            throw new FpcCreationException(msg, e);
         }
     }
 
@@ -121,11 +138,9 @@ public final class PerLaSystem {
 
         private void addFpc(InputStream is) {
             try {
-                DeviceDescriptor d = parser.parse(is);
-                Fpc fpc = factory.createFpc(d, registry);
-                registry.add(fpc);
-            } catch (Exception e) {
-                log.error("Cannot create Fpc", e);
+                injectDescriptor(is);
+            } catch (FpcCreationException e) {
+                log.error(e);
             }
         }
 

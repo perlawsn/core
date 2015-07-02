@@ -1,4 +1,4 @@
-package org.dei.perla.core.fpc;
+package org.dei.perla.core.registry;
 
 /**
  * Interface for a class that dynamically generates {@link Fpc} identifiers.

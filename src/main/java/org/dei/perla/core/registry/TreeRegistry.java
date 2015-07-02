@@ -1,7 +1,6 @@
 package org.dei.perla.core.registry;
 
 import org.dei.perla.core.fpc.Fpc;
-import org.dei.perla.core.fpc.IDGenerator;
 import org.dei.perla.core.sample.Attribute;
 
 import java.util.*;
@@ -14,7 +13,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  *
  * @author Guido Rota (2014)
  */
-public class TreeRegistry implements Registry, IDGenerator {
+public final class TreeRegistry implements Registry, IDGenerator {
 
 	private final ReadWriteLock lock = new ReentrantReadWriteLock();
 	private volatile Node root = new Node(null);

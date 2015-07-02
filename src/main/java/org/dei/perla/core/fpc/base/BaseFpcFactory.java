@@ -14,8 +14,8 @@ import org.dei.perla.core.descriptor.instructions.InstructionDescriptor;
 import org.dei.perla.core.engine.Compiler;
 import org.dei.perla.core.engine.Script;
 import org.dei.perla.core.fpc.Fpc;
+import org.dei.perla.core.fpc.FpcCreationException;
 import org.dei.perla.core.fpc.FpcFactory;
-import org.dei.perla.core.fpc.IDGenerator;
 import org.dei.perla.core.fpc.base.AsyncOperation.AsyncMessageHandler;
 import org.dei.perla.core.message.Mapper;
 import org.dei.perla.core.message.MapperFactory;
@@ -59,12 +59,11 @@ public final class BaseFpcFactory implements FpcFactory {
     }
 
     @Override
-    public Fpc createFpc(DeviceDescriptor desc, IDGenerator gen)
-            throws InvalidDeviceDescriptorException {
+    public Fpc createFpc(DeviceDescriptor desc, int id)
+            throws FpcCreationException {
         Conditions.checkNotNull(desc, "descriptor");
 
         Errors err = new Errors("Device descriptor '%s'", desc.getType());
-        int id = desc.getId() == null ? gen.generateID() : desc.getId();
         ParsingContext ctx = new ParsingContext(id);
 
         try {
@@ -74,10 +73,7 @@ public final class BaseFpcFactory implements FpcFactory {
         }
         if (!err.isEmpty()) {
             logger.error(err.asString());
-            if (desc.getId() == null) {
-                gen.releaseID(ctx.id);
-            }
-            throw new InvalidDeviceDescriptorException(err.asString());
+            throw new FpcCreationException(err.asString());
         }
 
         Scheduler sched = new Scheduler(ctx.getOpList, ctx.setOpList,

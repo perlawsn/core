@@ -20,7 +20,7 @@ import java.util.function.Consumer;
 /**
  * Base implementation of the {@link Fpc} interface.
  *
- * @author Guido Rota (2015)
+ * @author Guido Rota (2014)
  */
 public final class BaseFpc implements Fpc {
 

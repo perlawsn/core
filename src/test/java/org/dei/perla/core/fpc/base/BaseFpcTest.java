@@ -56,7 +56,7 @@ public class BaseFpcTest {
 
         DeviceDescriptor desc = parser
                 .parse(new FileInputStream(descriptorPath));
-        fpc = fpcFactory.createFpc(desc, new IncrementalIDGenerator());
+        fpc = fpcFactory.createFpc(desc, 1);
     }
 
     @Test

@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * class. This entails that there can only be a single callback function for
  * each message type.
  *
- * @author Guido Rota (2015)
+ * @author Guido Rota (2014)
  *
  */
 public final class ChannelManager {
