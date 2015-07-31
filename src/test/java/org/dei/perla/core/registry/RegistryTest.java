@@ -14,15 +14,15 @@ import static org.junit.Assert.assertThat;
 public class RegistryTest {
 
 	private static final Attribute intAtt =
-            Attribute.create("integer", DataType.INTEGER);
+			Attribute.create("integer", DataType.INTEGER);
 	private static final Attribute floatAtt =
-            Attribute.create("float", DataType.FLOAT);
+			Attribute.create("float", DataType.FLOAT);
 	private static final Attribute stringAtt =
-            Attribute.create("string", DataType.STRING);
+			Attribute.create("string", DataType.STRING);
 	private static final Attribute tempAtt =
-            Attribute.create("temperature", DataType.INTEGER);
+			Attribute.create("temperature", DataType.INTEGER);
 	private static final Attribute pressAtt =
-            Attribute.create("pressure", DataType.FLOAT);
+			Attribute.create("pressure", DataType.FLOAT);
 
 	private static final DataTemplate intTemp =
 			DataTemplate.create("integer", TypeClass.INTEGER);
@@ -33,8 +33,12 @@ public class RegistryTest {
 	private static final DataTemplate pressTemp =
 			DataTemplate.create("pressure", TypeClass.FLOAT);
 
-	private static final DataTemplate tempWild =
+	private static final DataTemplate tempWildAny =
 			DataTemplate.create("temperature", TypeClass.ANY);
+	private static final DataTemplate tempWildNumeric =
+			DataTemplate.create("temperature", TypeClass.NUMERIC);
+	private static final DataTemplate stringWildNumeric =
+			DataTemplate.create("string", TypeClass.NUMERIC);
 
 	@Test
 	public void singleAddition() throws Exception {
@@ -100,20 +104,38 @@ public class RegistryTest {
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(1));
 
-		// All fpc with 'integer' and wildcard 'temperature'
+		// All fpc with 'integer' and ANY wildcard 'temperature'
 		withSet.clear();
 		withSet.add(intTemp);
-		withSet.add(tempWild);
+		withSet.add(tempWildAny);
 		withoutSet.clear();
 		result = registry.get(withSet, withoutSet);
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(1));
 
+		// All fpc with 'integer' and NUMERIC wildcard 'temperature'
+		withSet.clear();
+		withSet.add(intTemp);
+		withSet.add(tempWildNumeric);
+		withoutSet.clear();
+		result = registry.get(withSet, withoutSet);
+		assertThat(result, notNullValue());
+		assertThat(result.size(), equalTo(1));
+
+		// All fpc with 'integer' and NUMERIC wildcard 'string'
+		withSet.clear();
+		withSet.add(intTemp);
+		withSet.add(stringWildNumeric);
+		withoutSet.clear();
+		result = registry.get(withSet, withoutSet);
+		assertThat(result, notNullValue());
+		assertThat(result.size(), equalTo(0));
+
 		// All fpcs with 'integer' but without wildcard 'temperature'
 		withSet.clear();
 		withSet.add(intTemp);
 		withoutSet.clear();
-		withoutSet.add(tempWild);
+		withoutSet.add(tempWildAny);
 		result = registry.get(withSet, withoutSet);
 		assertThat(result, notNullValue());
 		assertThat(result.size(), equalTo(0));
@@ -164,24 +186,24 @@ public class RegistryTest {
 	}
 
 	@Test(expected = DuplicateDeviceIDException.class)
-    public void idCollision() throws Exception {
-        Registry registry = new TreeRegistry();
+	public void idCollision() throws Exception {
+		Registry registry = new TreeRegistry();
 
-        Set<Attribute> attributeSet = new TreeSet<>();
-        attributeSet.add(intAtt);
-        attributeSet.add(floatAtt);
-        attributeSet.add(stringAtt);
-        attributeSet.add(tempAtt);
-        Fpc fpc1 = new FakeFpc(0, attributeSet);
-        registry.add(fpc1);
+		Set<Attribute> attributeSet = new TreeSet<>();
+		attributeSet.add(intAtt);
+		attributeSet.add(floatAtt);
+		attributeSet.add(stringAtt);
+		attributeSet.add(tempAtt);
+		Fpc fpc1 = new FakeFpc(0, attributeSet);
+		registry.add(fpc1);
 
-        attributeSet.clear();
-        attributeSet.add(intAtt);
-        attributeSet.add(floatAtt);
-        attributeSet.add(pressAtt);
-        Fpc fpc2 = new FakeFpc(0, attributeSet);
-        registry.add(fpc2);
-    }
+		attributeSet.clear();
+		attributeSet.add(intAtt);
+		attributeSet.add(floatAtt);
+		attributeSet.add(pressAtt);
+		Fpc fpc2 = new FakeFpc(0, attributeSet);
+		registry.add(fpc2);
+	}
 
 	@Test
 	public void testRemove() throws Exception {
@@ -217,37 +239,37 @@ public class RegistryTest {
 		assertThat(result.size(), equalTo(1));
 	}
 
-    @Test
-    public void generateId() throws Exception {
-        TreeRegistry registry = new TreeRegistry();
+	@Test
+	public void generateId() throws Exception {
+		TreeRegistry registry = new TreeRegistry();
 
-        assertThat(registry.generateID(), equalTo(0));
-        assertThat(registry.generateID(), equalTo(1));
-        registry.releaseID(0);
-        assertThat(registry.generateID(), equalTo(0));
-        assertThat(registry.generateID(), equalTo(2));
-        registry.releaseID(1);
-        assertThat(registry.generateID(), equalTo(1));
-        registry.releaseID(0);
-        registry.releaseID(1);
-        registry.releaseID(2);
+		assertThat(registry.generateID(), equalTo(0));
+		assertThat(registry.generateID(), equalTo(1));
+		registry.releaseID(0);
+		assertThat(registry.generateID(), equalTo(0));
+		assertThat(registry.generateID(), equalTo(2));
+		registry.releaseID(1);
+		assertThat(registry.generateID(), equalTo(1));
+		registry.releaseID(0);
+		registry.releaseID(1);
+		registry.releaseID(2);
 
-        Set<Attribute> attributeSet = new TreeSet<>();
-        attributeSet.add(intAtt);
-        attributeSet.add(floatAtt);
-        attributeSet.add(stringAtt);
-        attributeSet.add(tempAtt);
-        Fpc fpc1 = new FakeFpc(0, attributeSet);
-        registry.add(fpc1);
+		Set<Attribute> attributeSet = new TreeSet<>();
+		attributeSet.add(intAtt);
+		attributeSet.add(floatAtt);
+		attributeSet.add(stringAtt);
+		attributeSet.add(tempAtt);
+		Fpc fpc1 = new FakeFpc(0, attributeSet);
+		registry.add(fpc1);
 
-        attributeSet.clear();
-        attributeSet.add(intAtt);
-        attributeSet.add(floatAtt);
-        attributeSet.add(pressAtt);
-        Fpc fpc2 = new FakeFpc(1, attributeSet);
-        registry.add(fpc2);
+		attributeSet.clear();
+		attributeSet.add(intAtt);
+		attributeSet.add(floatAtt);
+		attributeSet.add(pressAtt);
+		Fpc fpc2 = new FakeFpc(1, attributeSet);
+		registry.add(fpc2);
 
-        assertThat(registry.generateID(), equalTo(2));
-    }
+		assertThat(registry.generateID(), equalTo(2));
+	}
 
 }

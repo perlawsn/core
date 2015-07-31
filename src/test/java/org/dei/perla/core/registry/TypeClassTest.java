@@ -178,7 +178,7 @@ public class TypeClassTest {
     }
 
     @Test
-    public void testCompareMatchWildcard() {
+    public void testCompareMatchAnyWildcard() {
         int res = TypeClass.ANY.compareMatch(DataType.ID);
         assertThat(res, equalTo(0));
         res = TypeClass.ANY.compareMatch(DataType.TIMESTAMP);
@@ -191,6 +191,22 @@ public class TypeClassTest {
         assertThat(res, equalTo(0));
         res = TypeClass.ANY.compareMatch(DataType.STRING);
         assertThat(res, equalTo(0));
+    }
+
+    @Test
+    public void testCompareMatchNumericWildcard() {
+        int res = TypeClass.NUMERIC.compareMatch(DataType.ID);
+        assertThat(res, greaterThan(0));
+        res = TypeClass.NUMERIC.compareMatch(DataType.TIMESTAMP);
+        assertThat(res, greaterThan(0));
+        res = TypeClass.NUMERIC.compareMatch(DataType.BOOLEAN);
+        assertThat(res, greaterThan(0));
+        res = TypeClass.NUMERIC.compareMatch(DataType.FLOAT);
+        assertThat(res, equalTo(0));
+        res = TypeClass.NUMERIC.compareMatch(DataType.INTEGER);
+        assertThat(res, equalTo(0));
+        res = TypeClass.NUMERIC.compareMatch(DataType.STRING);
+        assertThat(res, greaterThan(0));
     }
 
 }

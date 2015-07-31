@@ -95,10 +95,24 @@ public class DataTemplateTest {
     }
 
     @Test
-    public void testWildcardCompareMatch() {
+    public void testWildcardAnyCompareMatch() {
         DataTemplate dt = DataTemplate.create("t", TypeClass.ANY);
 
         Attribute a = Attribute.create("t", DataType.INTEGER);
+        assertThat(dt.compareMatch(a), equalTo(0));
+        a = Attribute.create("a", DataType.FLOAT);
+        assertThat(dt.compareMatch(a), greaterThan(0));
+        a = Attribute.create("z", DataType.TIMESTAMP);
+        assertThat(dt.compareMatch(a), lessThan(0));
+    }
+
+    @Test
+    public void testWildcardNumericCompareMatch() {
+        DataTemplate dt = DataTemplate.create("t", TypeClass.NUMERIC);
+
+        Attribute a = Attribute.create("t", DataType.INTEGER);
+        assertThat(dt.compareMatch(a), equalTo(0));
+        a = Attribute.create("t", DataType.FLOAT);
         assertThat(dt.compareMatch(a), equalTo(0));
         a = Attribute.create("a", DataType.FLOAT);
         assertThat(dt.compareMatch(a), greaterThan(0));

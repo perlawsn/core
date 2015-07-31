@@ -15,6 +15,7 @@ public enum TypeClass {
 
     // Wildcards
     ANY("any"),
+    NUMERIC("numeric"),
 
     // Actual types
     FLOAT("float"),
@@ -46,6 +47,8 @@ public enum TypeClass {
                 return type == DataType.STRING;
             case ANY:
                 return true;
+            case NUMERIC:
+                return type == DataType.INTEGER || type == DataType.FLOAT;
             default:
                 throw new RuntimeException("Unexpected TypeClass " + this);
         }
@@ -54,6 +57,12 @@ public enum TypeClass {
     public int compareMatch(DataType type) {
         if (this == ANY) {
             return 0;
+        } else if (this == NUMERIC) {
+            if (type == DataType.INTEGER || type == DataType.FLOAT) {
+                return 0;
+            } else {
+                return 1;
+            }
         }
 
         TypeClass o = typeToClass(type);
