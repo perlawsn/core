@@ -13,7 +13,7 @@ public enum TypeClass {
     // general to the most specific. Actual data types order must be
     // consistent with the ordering found in the DataType enum
 
-    // Wildcards
+    // Wildcards, their ordinal must be lower than actual types
     ANY("any"),
     NUMERIC("numeric"),
 
@@ -51,6 +51,26 @@ public enum TypeClass {
                 return type == DataType.INTEGER || type == DataType.FLOAT;
             default:
                 throw new RuntimeException("Unexpected TypeClass " + this);
+        }
+    }
+
+    public DataType toDataType() {
+        switch (this) {
+            case ID:
+                return DataType.ID;
+            case TIMESTAMP:
+                return DataType.TIMESTAMP;
+            case BOOLEAN:
+                return DataType.BOOLEAN;
+            case INTEGER:
+                return DataType.INTEGER;
+            case FLOAT:
+                return DataType.FLOAT;
+            case STRING:
+                return DataType.STRING;
+            default:
+                throw new RuntimeException("TypeClass " + this + " has no " +
+                        "concrete DataType representation");
         }
     }
 
