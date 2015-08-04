@@ -54,6 +54,25 @@ public enum TypeClass {
         }
     }
 
+    public boolean isConcrete() {
+        switch (this) {
+            // FALL THROUGH
+            case ID:
+            case TIMESTAMP:
+            case BOOLEAN:
+            case INTEGER:
+            case FLOAT:
+            case STRING:
+                return true;
+            // FALL THROUGH
+            case ANY:
+            case NUMERIC:
+                return false;
+            default:
+                throw new RuntimeException("Unexpected TypeClass " + this);
+        }
+    }
+
     public DataType toDataType() {
         switch (this) {
             case ID:
