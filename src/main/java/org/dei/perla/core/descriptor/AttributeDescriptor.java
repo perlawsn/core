@@ -1,5 +1,7 @@
 package org.dei.perla.core.descriptor;
 
+import org.dei.perla.core.fpc.DataType;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -65,7 +67,7 @@ public class AttributeDescriptor {
 	 * Attribute data type: FLOAT, INTEGER, BOOLEAN, STRING, ID, TIMESTAMP
 	 */
 	@XmlAttribute(required = true)
-	private DataType type;
+	private String type;
 
 	/**
 	 * Attribute access type: STATIC or DYNAMIC. Default value is DYNAMIC
@@ -98,7 +100,7 @@ public class AttributeDescriptor {
 	 * @param type Attribute type
 	 * @param permission Attribute permission
 	 */
-	public AttributeDescriptor(String id, DataType type,
+	public AttributeDescriptor(String id, String type,
 			AttributePermission permission) {
 		this.id = id;
 		this.type = type;
@@ -113,7 +115,7 @@ public class AttributeDescriptor {
 	 * @param type Attribute type
 	 * @param value Attribute value
 	 */
-	public AttributeDescriptor(String id, DataType type, String value) {
+	public AttributeDescriptor(String id, String type, String value) {
 		this.id = id;
 		this.type = type;
 		this.access = AttributeAccessType.STATIC;
@@ -125,8 +127,27 @@ public class AttributeDescriptor {
 		return id;
 	}
 
-	public DataType getType() {
+	public String getType() {
 		return type;
+	}
+
+	public DataType parseType() {
+		switch (type.toLowerCase()) {
+			case "id":
+				return DataType.ID;
+			case "integer":
+				return DataType.INTEGER;
+			case "float":
+				return DataType.FLOAT;
+			case "string":
+				return DataType.STRING;
+			case "boolean":
+				return DataType.BOOLEAN;
+			case "timestamp":
+				return DataType.TIMESTAMP;
+			default:
+				return null;
+		}
 	}
 
 	public AttributeAccessType getAccess() {

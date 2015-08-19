@@ -1,6 +1,6 @@
 package org.dei.perla.core.registry;
 
-import org.dei.perla.core.descriptor.DataType;
+import org.dei.perla.core.fpc.DataType;
 
 /**
  * @author Guido Rota 15/04/15.

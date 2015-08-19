@@ -153,22 +153,22 @@ public class SimulatorChannelFactory implements ChannelFactory {
             e.addError(INVALID_BOUNDARY_GENERATOR);
         }
 
-        switch (f.getType()) {
-            case INTEGER:
+        switch (f.getType().toLowerCase()) {
+            case "integer":
                 return new RandomIntFieldGenerator(f.getName(), f.getMin(),
                         f.getMax());
-            case FLOAT:
+            case "float":
                 return new DynamicFloatFieldGenerator(f.getName(), f.getMin(),
                         f.getMax());
-            case STRING:
+            case "string":
                 if (f.getMin() < 0) {
                     e.addError("String lenght must be greater than zero");
                 }
                 return new DynamicStringFieldGenerator(f.getName(), f.getMin(),
                         f.getMax());
-            case BOOLEAN:
+            case "boolean":
                 return new DynamicBooleanFieldGenerator(f.getName());
-            case TIMESTAMP:
+            case "timestamp":
                 return new DynamicTimestampFieldGenerator(f.getName());
             default:
                 e.addError("Unsupported dynamic field generator for type '" + f.getType()
@@ -184,11 +184,11 @@ public class SimulatorChannelFactory implements ChannelFactory {
         }
 
         try {
-            switch (f.getType()) {
-                case INTEGER:
+            switch (f.getType().toLowerCase()) {
+                case "integer":
                     int iInc = Integer.parseInt(f.getIncrement());
                     return new StepIntFieldGenerator(f.getName(), f.getMin(), f.getMax(), iInc);
-                case FLOAT:
+                case "float":
                     float fInc = Float.parseFloat(f.getIncrement());
                     return new StepFloatFieldGenerator(f.getName(), f.getMin(), f.getMax(), fInc);
                 default:

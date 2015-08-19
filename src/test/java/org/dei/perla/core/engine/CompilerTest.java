@@ -8,18 +8,14 @@ import org.dei.perla.core.channel.loopback.TestFieldDescriptor;
 import org.dei.perla.core.channel.loopback.TestMapper;
 import org.dei.perla.core.descriptor.AttributeDescriptor;
 import org.dei.perla.core.descriptor.AttributeDescriptor.AttributePermission;
-import org.dei.perla.core.descriptor.DataType;
 import org.dei.perla.core.descriptor.FieldDescriptor.FieldQualifier;
 import org.dei.perla.core.descriptor.instructions.*;
+import org.dei.perla.core.fpc.DataType;
 import org.dei.perla.core.message.Mapper;
 import org.dei.perla.core.sample.Attribute;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
@@ -27,61 +23,84 @@ import static org.junit.Assert.*;
 
 public class CompilerTest {
 
-    private static AttributeDescriptor integer;
-    private static AttributeDescriptor string;
-    private static AttributeDescriptor bool;
-
-    private static TestFieldDescriptor integerField;
-    private static TestFieldDescriptor stringField;
-    private static TestFieldDescriptor listField;
-    private static TestMapper mapper1;
-    private static TestMapper mapper2;
-
-    private static IORequestBuilder request1;
-    private static Channel channel;
-
-    private static Map<String, AttributeDescriptor> attributeMap;
-    private static Map<String, Mapper> mapperMap;
-    private static Map<String, IORequestBuilder> requestBuilderMap;
-    private static Map<String, Channel> channelMap;
-
-    @BeforeClass
-    public static void setup() {
-        integer = new AttributeDescriptor("integer", DataType.INTEGER,
+    private static final AttributeDescriptor intDesc =
+            new AttributeDescriptor("integer", DataType.INTEGER.getId(),
                 AttributePermission.READ_WRITE);
-        string = new AttributeDescriptor("string", DataType.STRING,
+    private static final AttributeDescriptor stringDesc =
+            new AttributeDescriptor("string", DataType.STRING.getId(),
                 AttributePermission.READ_WRITE);
-        bool = new AttributeDescriptor("bool", DataType.BOOLEAN,
+    private static AttributeDescriptor boolDesc =
+            new AttributeDescriptor("bool", DataType.BOOLEAN.getId(),
                 AttributePermission.READ_WRITE);
-        attributeMap = new HashMap<>();
-        attributeMap.put(integer.getId(), integer);
-        attributeMap.put(string.getId(), string);
-        attributeMap.put(bool.getId(), bool);
 
-        integerField = new TestFieldDescriptor("integer", FieldQualifier.FIELD,
+    private final static Map<String, AttributeDescriptor> attDescMap;
+    static {
+        Map<String, AttributeDescriptor> m = new HashMap<>();
+        m.put(intDesc.getId(), intDesc);
+        m.put(stringDesc.getId(), stringDesc);
+        m.put(boolDesc.getId(), boolDesc);
+        attDescMap = Collections.unmodifiableMap(m);
+    }
+
+    private final static Attribute intAtt =
+            Attribute.create("integer", DataType.INTEGER);
+    private final static Attribute stringAtt =
+            Attribute.create("string", DataType.STRING);
+    private final static Attribute boolAtt =
+            Attribute.create("bool", DataType.BOOLEAN);
+    private final static Map<String, Attribute> attMap;
+    static {
+        Map<String, Attribute> m = new HashMap<>();
+        m.put("integer", intAtt);
+        m.put("string", stringAtt);
+        m.put("bool", boolAtt);
+        attMap = Collections.unmodifiableMap(m);
+    }
+
+    private static final TestFieldDescriptor intField =
+            new TestFieldDescriptor("integer", FieldQualifier.FIELD,
                 "integer", null, null, null);
-        stringField = new TestFieldDescriptor("string", FieldQualifier.FIELD,
+    private static final TestFieldDescriptor stringField =
+            new TestFieldDescriptor("string", FieldQualifier.FIELD,
                 "string", null, null, null);
-        listField = new TestFieldDescriptor("list", FieldQualifier.LIST,
+    private static final TestFieldDescriptor listField =
+            new TestFieldDescriptor("list", FieldQualifier.LIST,
                 "string", null, null, null);
+
+    private static final TestMapper mapper1;
+    private static final TestMapper mapper2;
+    private static final Map<String, Mapper> mapperMap;
+    static {
         mapper1 = new TestMapper("message1");
-        mapper1.addField(integerField);
+        mapper1.addField(intField);
         mapper1.addField(stringField);
         mapper2 = new TestMapper("message2");
-        mapper2.addField(integerField);
+        mapper2.addField(intField);
         mapper2.addField(stringField);
         mapper2.addField(listField);
-        mapperMap = new HashMap<>();
-        mapperMap.put(mapper1.getMessageId(), mapper1);
-        mapperMap.put(mapper2.getMessageId(), mapper2);
 
+        Map<String, Mapper> m = new HashMap<>();
+        m.put(mapper1.getMessageId(), mapper1);
+        m.put(mapper2.getMessageId(), mapper2);
+        mapperMap = Collections.unmodifiableMap(m);
+    }
+
+    private final static IORequestBuilder request1;
+    private final static Map<String, IORequestBuilder> reqBldMap;
+    static {
         request1 = new LoopbackIORequestBuilder("request1");
-        requestBuilderMap = new HashMap<>();
-        requestBuilderMap.put(request1.getRequestId(), request1);
+        Map<String, IORequestBuilder> m = new HashMap<>();
+        m.put(request1.getRequestId(), request1);
+        reqBldMap = Collections.unmodifiableMap(m);
+    }
 
+    private static final Channel channel;
+    private static final Map<String, Channel> channelMap;
+    static {
         channel = new LoopbackChannel();
-        channelMap = new HashMap<>();
-        channelMap.put("loopback", channel);
+        Map<String, Channel> m = new HashMap<>();
+        m.put("loopback", channel);
+        channelMap = Collections.unmodifiableMap(m);
     }
 
     @Test
@@ -92,8 +111,8 @@ public class CompilerTest {
         iList.add(new CreateVarInstructionDescriptor("var", "message2"));
         iList.add(new AppendInstructionDescriptor("var", "list", "5"));
 
-        script = Compiler.compile(iList, "append", attributeMap, mapperMap,
-                requestBuilderMap, channelMap);
+        script = Compiler.compile(iList, "append", attDescMap, attMap,
+                mapperMap, reqBldMap, channelMap);
         i = script.getCode();
         assertTrue(i instanceof CreateComplexVarInstruction);
         i = i.next();
@@ -111,8 +130,8 @@ public class CompilerTest {
         List<InstructionDescriptor> iList = new ArrayList<>();
         iList.add(new BreakpointInstructionDescriptor());
 
-        script = Compiler.compile(iList, "breakpoint", attributeMap, mapperMap,
-                requestBuilderMap, channelMap);
+        script = Compiler.compile(iList, "breakpoint", attDescMap,
+                attMap, mapperMap, reqBldMap, channelMap);
         assertThat(script, notNullValue());
         i = script.getCode();
         assertTrue(i instanceof BreakpointInstruction);
@@ -125,8 +144,8 @@ public class CompilerTest {
         List<InstructionDescriptor> iList = new ArrayList<>();
         iList.add(new StopInstructionDescriptor());
 
-        script = Compiler.compile(iList, "stop", attributeMap, mapperMap,
-                requestBuilderMap, channelMap);
+        script = Compiler.compile(iList, "stop", attDescMap,
+                attMap, mapperMap, reqBldMap, channelMap);
         assertThat(script, notNullValue());
         i = script.getCode();
         assertTrue(i instanceof StopInstruction);
@@ -140,8 +159,8 @@ public class CompilerTest {
         iList.add(new CreateVarInstructionDescriptor("var1", "message1"));
         iList.add(new CreateVarInstructionDescriptor("var2", "string"));
 
-        script = Compiler.compile(iList, "create", attributeMap, mapperMap,
-                requestBuilderMap, channelMap);
+        script = Compiler.compile(iList, "create", attDescMap, attMap,
+                mapperMap, reqBldMap, channelMap);
         assertThat(script, notNullValue());
 
         i = script.getCode();
@@ -167,8 +186,8 @@ public class CompilerTest {
         iList.add(new CreateVarInstructionDescriptor("var2", "integer"));
         iList.add(new SetInstructionDescriptor("var2", "10"));
 
-        script = Compiler.compile(iList, "set", attributeMap, mapperMap,
-                requestBuilderMap, channelMap);
+        script = Compiler.compile(iList, "set", attDescMap, attMap, mapperMap,
+                reqBldMap, channelMap);
         assertThat(script, notNullValue());
         i = script.getCode();
         assertTrue(i instanceof CreateComplexVarInstruction);
@@ -202,8 +221,8 @@ public class CompilerTest {
         iList.add(new PutInstructionDescriptor("${var.integer}", "integer"));
         iList.add(new PutInstructionDescriptor("${var.string}", "string"));
 
-        script = Compiler.compile(iList, "put", attributeMap, mapperMap,
-                requestBuilderMap, channelMap);
+        script = Compiler.compile(iList, "put", attDescMap, attMap,
+                mapperMap, reqBldMap, channelMap);
         assertThat(script, notNullValue());
         i = script.getCode();
         assertTrue(i instanceof CreateComplexVarInstruction);
@@ -214,14 +233,14 @@ public class CompilerTest {
         assertTrue(i instanceof PutInstruction);
         put = (PutInstruction) i;
         assertThat(put.getExpression(), equalTo("${var.integer}"));
-        assertThat(put.getAttribute(), equalTo(integer));
+        assertThat(put.getType(), equalTo(Integer.class));
         assertThat(put.getIndex(), equalTo(0));
 
         i = i.next();
         assertTrue(i instanceof PutInstruction);
         put = (PutInstruction) i;
         assertThat(put.getExpression(), equalTo("${var.string}"));
-        assertThat(put.getAttribute(), equalTo(string));
+        assertThat(put.getType(), equalTo(String.class));
         assertThat(put.getIndex(), equalTo(1));
     }
 
@@ -235,8 +254,8 @@ public class CompilerTest {
         iList.add(new PutInstructionDescriptor("${var.integer}", "integer"));
         iList.add(new EmitInstructionDescriptor());
 
-        script = Compiler.compile(iList, "emit", attributeMap, mapperMap,
-                requestBuilderMap, channelMap);
+        script = Compiler.compile(iList, "emit", attDescMap, attMap,
+                mapperMap, reqBldMap, channelMap);
         assertThat(script, notNullValue());
         i = script.getCode();
         assertTrue(i instanceof CreateComplexVarInstruction);
@@ -258,8 +277,8 @@ public class CompilerTest {
         iList.add(new SubmitInstructionDescriptor("request1", "loopback",
                 "result", "message2"));
 
-        script = Compiler.compile(iList, "emit", attributeMap, mapperMap,
-                requestBuilderMap, channelMap);
+        script = Compiler.compile(iList, "emit", attDescMap, attMap,
+                mapperMap, reqBldMap, channelMap);
         assertThat(script, notNullValue());
         i = script.getCode();
         assertTrue(i instanceof CreateComplexVarInstruction);
@@ -291,8 +310,8 @@ public class CompilerTest {
         iList.add(new PutInstructionDescriptor("${var.integer}", "integer"));
         iList.add(new EmitInstructionDescriptor());
 
-        script = Compiler.compile(iList, "if", attributeMap, mapperMap,
-                requestBuilderMap, channelMap);
+        script = Compiler.compile(iList, "if", attDescMap, attMap, mapperMap,
+                reqBldMap, channelMap);
         assertThat(script, notNullValue());
         i = script.getCode();
         assertTrue(i instanceof CreateComplexVarInstruction);
@@ -330,13 +349,13 @@ public class CompilerTest {
         iList.add(new PutInstructionDescriptor("${var.string}", "string"));
         iList.add(new EmitInstructionDescriptor());
 
-        script = Compiler.compile(iList, "emit", attributeMap, mapperMap,
-                requestBuilderMap, channelMap);
+        script = Compiler.compile(iList, "emit", attDescMap, attMap, mapperMap,
+                reqBldMap, channelMap);
         assertThat(script, notNullValue());
         assertFalse(script.getEmit().isEmpty());
-        assertTrue(script.getEmit().contains(Attribute.create(integer)));
-        assertTrue(script.getEmit().contains(Attribute.create(string)));
-        assertFalse(script.getEmit().contains(Attribute.create(bool)));
+        assertTrue(script.getEmit().contains(intAtt));
+        assertTrue(script.getEmit().contains(stringAtt));
+        assertFalse(script.getEmit().contains(boolAtt));
         assertTrue(script.getSet().isEmpty());
     }
 
@@ -350,16 +369,16 @@ public class CompilerTest {
         iList.add(new PutInstructionDescriptor("${var.string}", "string"));
         iList.add(new EmitInstructionDescriptor());
 
-        script = Compiler.compile(iList, "attidx", attributeMap, mapperMap,
-                requestBuilderMap, channelMap);
+        script = Compiler.compile(iList, "attidx", attDescMap, attMap,
+                mapperMap, reqBldMap, channelMap);
         assertThat(script, notNullValue());
         assertFalse(script.getEmit().isEmpty());
         assertThat(script.getEmit().size(), equalTo(2));
 
-        Integer idx1 = script.getEmit().indexOf(Attribute.create(integer));
+        Integer idx1 = script.getEmit().indexOf(intAtt);
         assertThat(idx1, equalTo(0));
 
-        Integer idx2 = script.getEmit().indexOf(Attribute.create(string));
+        Integer idx2 = script.getEmit().indexOf(stringAtt);
         assertThat(idx2, equalTo(1));
 
         Instruction in = script.getCode();
@@ -395,14 +414,14 @@ public class CompilerTest {
         iList.add(new SetInstructionDescriptor("var", "string",
                 "${param['string']}"));
 
-        script = Compiler.compile(iList, "emit", attributeMap, mapperMap,
-                requestBuilderMap, channelMap);
+        script = Compiler.compile(iList, "emit", attDescMap, attMap,
+                mapperMap, reqBldMap, channelMap);
         assertThat(script, notNullValue());
         assertTrue(script.getEmit().isEmpty());
         assertFalse(script.getSet().isEmpty());
-        assertTrue(script.getSet().contains(Attribute.create(integer)));
-        assertTrue(script.getSet().contains(Attribute.create(string)));
-        assertFalse(script.getSet().contains(Attribute.create(bool)));
+        assertTrue(script.getSet().contains(intAtt));
+        assertTrue(script.getSet().contains(stringAtt));
+        assertFalse(script.getSet().contains(boolAtt));
     }
 
     @Test
@@ -411,8 +430,8 @@ public class CompilerTest {
         List<InstructionDescriptor> iList = new ArrayList<>();
         iList.add(new ErrorInstructionDescriptor("error"));
 
-        script = Compiler.compile(iList, "error", attributeMap, mapperMap,
-                requestBuilderMap, channelMap);
+        script = Compiler.compile(iList, "error", attDescMap, attMap,
+                mapperMap, reqBldMap, channelMap);
         assertThat(script, notNullValue());
         Instruction i = script.getCode();
         assertThat(i, notNullValue());
@@ -427,8 +446,8 @@ public class CompilerTest {
 		List<InstructionDescriptor> iList = new ArrayList<>();
 		iList.add(new UnsupportedPeriodInstructionDescriptor("suggested"));
 
-		script = Compiler.compile(iList, "unsupported", attributeMap,
-				mapperMap, requestBuilderMap, channelMap);
+		script = Compiler.compile(iList, "unsupported", attDescMap,
+				attMap, mapperMap, reqBldMap, channelMap);
 		assertThat(script, notNullValue());
 		Instruction i = script.getCode();
 		assertThat(i, notNullValue());

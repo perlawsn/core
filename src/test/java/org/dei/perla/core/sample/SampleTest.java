@@ -1,6 +1,6 @@
 package org.dei.perla.core.sample;
 
-import org.dei.perla.core.descriptor.DataType;
+import org.dei.perla.core.fpc.DataType;
 import org.junit.Test;
 
 import java.time.Instant;

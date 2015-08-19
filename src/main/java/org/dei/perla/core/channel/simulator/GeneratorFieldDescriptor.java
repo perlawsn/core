@@ -1,13 +1,13 @@
 package org.dei.perla.core.channel.simulator;
 
+import org.dei.perla.core.fpc.DataType;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlRootElement;
-
-import org.dei.perla.core.descriptor.DataType;
 
 /**
  * This class contains all information needed by the <code>SimulatorChannel</code>
@@ -32,7 +32,7 @@ public class GeneratorFieldDescriptor {
 	private GeneratorFieldStrategy strategy;
 
 	@XmlAttribute
-	private DataType type;
+	private String type;
 
 	@XmlAttribute
 	private String value;
@@ -48,7 +48,7 @@ public class GeneratorFieldDescriptor {
 
 	protected GeneratorFieldDescriptor() {
 		super();
-		type = DataType.STRING;
+		type = "string";
 		min = 0;
 		max = 1;
         increment = "1";
@@ -62,7 +62,7 @@ public class GeneratorFieldDescriptor {
 		return strategy;
 	}
 
-	public DataType getType() {
+	public String getType() {
 		return type;
 	}
 

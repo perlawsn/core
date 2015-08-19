@@ -1,7 +1,6 @@
 package org.dei.perla.core.sample;
 
-import org.dei.perla.core.descriptor.AttributeDescriptor;
-import org.dei.perla.core.descriptor.DataType;
+import org.dei.perla.core.fpc.DataType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,21 +9,17 @@ public final class Attribute implements Comparable<Attribute> {
 
     private static final Map<String, Attribute> cache = new HashMap<>();
 
-	public static final Attribute ID =
-			Attribute.create("id", DataType.ID);
-	public static final Attribute TIMESTAMP =
-			Attribute.create("timestamp", DataType.TIMESTAMP);
+    public static final Attribute ID =
+            Attribute.create("id", DataType.ID);
+    public static final Attribute TIMESTAMP =
+            Attribute.create("timestamp", DataType.TIMESTAMP);
 
-	private final String id;
-	private final DataType type;
+    private final String id;
+    private final DataType type;
 
     private Attribute(String id, DataType type) {
         this.id = id;
         this.type = type;
-    }
-
-    public static Attribute create(AttributeDescriptor d) {
-       return create(d.getId(), d.getType());
     }
 
     public static Attribute create(String id, DataType type) {
@@ -37,43 +32,43 @@ public final class Attribute implements Comparable<Attribute> {
         return a;
     }
 
-	public String getId() {
-		return id;
-	}
+    public String getId() {
+        return id;
+    }
 
-	public DataType getType() {
-		return type;
-	}
+    public DataType getType() {
+        return type;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (!(obj instanceof Attribute)) {
-			return false;
-		}
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Attribute)) {
+            return false;
+        }
 
         // Direct reference comparison. This can be performed since all
         // attributes are cached and interned.
         return this == (Attribute) obj;
-	}
+    }
 
-	@Override
-	public int hashCode() {
+    @Override
+    public int hashCode() {
         return (id + type.toString()).hashCode();
     }
 
-	@Override
-	public String toString() {
-		return "Attribute[id: " + id + ", type: " + type + "]";
-	}
+    @Override
+    public String toString() {
+        return "Attribute[id: " + id + ", type: " + type + "]";
+    }
 
-	@Override
-	public int compareTo(Attribute o) {
-		int idComparison = id.compareTo(o.id);
-		if (idComparison == 0) {
-			type.compareTo(o.type);
-		}
+    @Override
+    public int compareTo(Attribute o) {
+        int idComparison = id.compareTo(o.id);
+        if (idComparison == 0) {
+            type.compareTo(o.type);
+        }
 
-		return idComparison;
-	}
+        return idComparison;
+    }
 
 }

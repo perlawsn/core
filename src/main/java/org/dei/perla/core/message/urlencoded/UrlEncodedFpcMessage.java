@@ -4,8 +4,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.dei.perla.core.descriptor.DataType;
 import org.dei.perla.core.descriptor.FieldDescriptor;
+import org.dei.perla.core.fpc.DataType;
 import org.dei.perla.core.message.FpcMessage;
 import org.dei.perla.core.utils.DateUtils;
 
@@ -137,7 +137,7 @@ public class UrlEncodedFpcMessage implements FpcMessage {
 		DataType type = fieldDataType.get(field.getName());
 		switch (type) {
 		case BOOLEAN:
-			return new Boolean(value);
+			return Boolean.valueOf(value);
 		case FLOAT:
 			return new Float(value);
 		case INTEGER:

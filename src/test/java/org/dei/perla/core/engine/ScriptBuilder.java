@@ -37,15 +37,16 @@ public class ScriptBuilder {
 			last = in;
 		}
 
-        if (in instanceof PutInstruction) {
-            PutInstruction put = (PutInstruction) in;
-            Attribute a = Attribute.create(put.getAttribute());
-            if (!emit.contains(a)) {
-                emit.add(a);
-            }
-        }
+		throw new RuntimeException("look here, unimplemented");
+//        if (in instanceof PutInstruction) {
+//            PutInstruction put = (PutInstruction) in;
+//            Attribute a = Attribute.create(put.getAttribute());
+//            if (!emit.contains(a)) {
+//                emit.add(a);
+//            }
+//        }
 
-		return this;
+		//return this;
 	}
 
     public ScriptBuilder extraEmit(List<Attribute> atts) {

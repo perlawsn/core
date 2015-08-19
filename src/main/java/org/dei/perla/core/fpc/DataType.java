@@ -1,30 +1,16 @@
-package org.dei.perla.core.descriptor;
+package org.dei.perla.core.fpc;
 
 import org.dei.perla.core.message.FpcMessage;
 
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlEnumValue;
 import java.time.Instant;
 
-@XmlEnum
 public enum DataType {
 
-    @XmlEnumValue("float")
     FLOAT("float"),
-
-    @XmlEnumValue("integer")
     INTEGER("integer"),
-
-    @XmlEnumValue("boolean")
     BOOLEAN("boolean"),
-
-    @XmlEnumValue("string")
     STRING("string"),
-
-    @XmlEnumValue("id")
     ID("id"),
-
-    @XmlEnumValue("timestamp")
     TIMESTAMP("timestamp");
 
     // String identifier
@@ -92,16 +78,6 @@ public enum DataType {
     }
 
     /**
-     * Returns the Java class most akin to the PerLa {@code DataType}.
-     *
-     * @return Java class corresponding to the PerLa attribute type passed as
-     *         parameter
-     */
-    public Class<?> getJavaClass() {
-        return DataType.getClass(this);
-    }
-
-    /**
      * <p>
      * Returns the Java class most akin to the PerLa attribute type passed as
      * parameter. If the type identifier passed as parameter is a value of the
@@ -133,6 +109,16 @@ public enum DataType {
     }
 
     /**
+     * Returns the Java class most akin to the PerLa {@code DataType}.
+     *
+     * @return Java class corresponding to the PerLa attribute type passed as
+     *         parameter
+     */
+    public Class<?> getJavaClass() {
+        return DataType.getJavaClass(this);
+    }
+
+    /**
      * Returns the Java class most akin to the PerLa attribute type passed as
      * parameter
      *
@@ -141,7 +127,7 @@ public enum DataType {
      * @return Java class corresponding to the PerLa attribute type passed as
      *         parameter
      */
-    public static Class<?> getClass(DataType type)
+    public static Class<?> getJavaClass(DataType type)
             throws IllegalArgumentException {
         switch (type) {
         case INTEGER:

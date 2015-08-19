@@ -1,6 +1,6 @@
 package org.dei.perla.core.sample;
 
-import org.dei.perla.core.descriptor.DataType;
+import org.dei.perla.core.fpc.DataType;
 import org.dei.perla.core.sample.SampleModifier.Reorder;
 import org.dei.perla.core.sample.SampleModifier.StaticAppender;
 import org.dei.perla.core.sample.SampleModifier.TimestampAppender;
@@ -8,7 +8,10 @@ import org.dei.perla.core.sample.SamplePipeline.PipelineBuilder;
 import org.junit.Test;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;

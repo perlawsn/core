@@ -1,22 +1,23 @@
 package org.dei.perla.core.descriptor;
 
+import org.dei.perla.core.fpc.DataType;
 import org.junit.Test;
 
 import java.time.Instant;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.*;
-import static org.hamcrest.Matchers.*;
 
 public class DataTypeTest {
 
     @Test
     public void testGetClass() {
-        assertTrue(DataType.getClass(DataType.INTEGER) == Integer.class);
-        assertTrue(DataType.getClass(DataType.FLOAT) == Float.class);
-        assertTrue(DataType.getClass(DataType.BOOLEAN) == Boolean.class);
-        assertTrue(DataType.getClass(DataType.STRING) == String.class);
-        assertTrue(DataType.getClass(DataType.ID) == Integer.class);
-        assertTrue(DataType.getClass(DataType.TIMESTAMP) == Instant.class);
+        assertTrue(DataType.getJavaClass(DataType.INTEGER) == Integer.class);
+        assertTrue(DataType.getJavaClass(DataType.FLOAT) == Float.class);
+        assertTrue(DataType.getJavaClass(DataType.BOOLEAN) == Boolean.class);
+        assertTrue(DataType.getJavaClass(DataType.STRING) == String.class);
+        assertTrue(DataType.getJavaClass(DataType.ID) == Integer.class);
+        assertTrue(DataType.getJavaClass(DataType.TIMESTAMP) == Instant.class);
 
         assertTrue(DataType.getJavaClass(DataType.INTEGER.getId()) == Integer.class);
         assertTrue(DataType.getJavaClass(DataType.FLOAT.getId()) == Float.class);

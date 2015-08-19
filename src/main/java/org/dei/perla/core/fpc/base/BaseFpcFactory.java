@@ -13,6 +13,7 @@ import org.dei.perla.core.descriptor.AttributeDescriptor.AttributePermission;
 import org.dei.perla.core.descriptor.instructions.InstructionDescriptor;
 import org.dei.perla.core.engine.Compiler;
 import org.dei.perla.core.engine.Script;
+import org.dei.perla.core.fpc.DataType;
 import org.dei.perla.core.fpc.Fpc;
 import org.dei.perla.core.fpc.FpcCreationException;
 import org.dei.perla.core.fpc.FpcFactory;
@@ -163,26 +164,47 @@ public final class BaseFpcFactory implements FpcFactory {
             if (ids.contains(id)) {
                 err.addError(DUPLICATE_ATTRIBUTE_ID, id);
             }
-            if (a.getType() == DataType.TIMESTAMP) {
+            ids.add(a.getId());
+
+            DataType type = a.parseType();
+            if (type == null) {
+                err.addError(INVALID_DATA_TYPE, a.getType());
+                continue;
+            }
+            if (type == DataType.TIMESTAMP) {
                 hasNativeTimestamp = true;
             }
-            ids.add(a.getId());
-            parseAttribute(a, ctx, err.inContext("Attribute '%s'", id));
+            parseAttribute(a, type, ctx, err.inContext("Attribute '%s'", id));
         }
 
         if (!hasNativeTimestamp) {
-            ctx.add(new AttributeDescriptor("timestamp",
-                    DataType.TIMESTAMP, AttributePermission.READ_ONLY));
+            AttributeDescriptor tsAtt = new AttributeDescriptor("timestamp",
+                    DataType.TIMESTAMP.getId(), AttributePermission.READ_ONLY);
+            ctx.addAttribute(tsAtt);
         }
 
-        ctx.add(new AttributeDescriptor("id", DataType.ID, ctx.id.toString()));
+        AttributeDescriptor idAtt = new AttributeDescriptor("id",
+                DataType.ID.getId(), ctx.id.toString());
+        ctx.addAttribute(idAtt);
     }
 
-    private void parseAttribute(AttributeDescriptor a, ParsingContext ctx,
-            Errors err) {
+    private void parseAttribute(AttributeDescriptor a, DataType type,
+            ParsingContext ctx, Errors err) {
         // Check missing attribute type
         if (a.getType() == null) {
             err.addError(MISSING_ATTRIBUTE_TYPE);
+        }
+
+        // Check timestamp attribute
+        if (type == DataType.TIMESTAMP
+                && a.getAccess() == AttributeAccessType.STATIC) {
+            err.addError(FORBIDDEN_STATIC_ATTRIBUTE);
+        }
+
+        // Check id attribute
+        if (a.getId().compareToIgnoreCase("id") == 0
+                && type == DataType.ID) {
+            err.addError(FORBIDDEN_ID_ATTRIBUTE);
         }
 
         // Check attribute access
@@ -199,19 +221,7 @@ public final class BaseFpcFactory implements FpcFactory {
             err.addError(MISPLACED_ATTRIBUTE_VALUE);
         }
 
-        // Check timestamp attribute
-        if (a.getType() == DataType.TIMESTAMP
-                && a.getAccess() == AttributeAccessType.STATIC) {
-            err.addError(FORBIDDEN_STATIC_ATTRIBUTE);
-        }
-
-        // Check id attribute
-        if (a.getId().compareToIgnoreCase("id") == 0
-                && a.getType() == DataType.ID) {
-            err.addError(FORBIDDEN_ID_ATTRIBUTE);
-        }
-
-        ctx.add(a);
+        ctx.addAttribute(a);
     }
 
     private void parseMessageList(List<MessageDescriptor> msgs,
@@ -269,7 +279,7 @@ public final class BaseFpcFactory implements FpcFactory {
             err.addError(MAPPER_CREATION_ERROR);
             return;
         }
-        ctx.add(map);
+        ctx.addMapper(map);
     }
 
     private void checkField(FieldDescriptor f, Errors err) {
@@ -332,7 +342,7 @@ public final class BaseFpcFactory implements FpcFactory {
 
         try {
             Channel ch = fct.createChannel(c);
-            ctx.add(c.getId(), ch);
+            ctx.addChannel(ch);
         } catch (InvalidDeviceDescriptorException e) {
             err.addError(e, CHANNEL_CREATION_ERROR);
         }
@@ -363,7 +373,7 @@ public final class BaseFpcFactory implements FpcFactory {
         }
 
         try {
-            ctx.add(fct.create(r));
+            ctx.addIORequestBuilder(fct.create(r));
         } catch (InvalidDeviceDescriptorException e) {
             err.addError(e, REQUEST_BUILDER_CREATION_ERROR);
         }
@@ -619,7 +629,9 @@ public final class BaseFpcFactory implements FpcFactory {
     private Script compileScript(List<InstructionDescriptor> insts,
             String name, ParsingContext ctx)
             throws InvalidDeviceDescriptorException {
-        return Compiler.compile(insts, name, ctx.attDescMap,
+        return Compiler.compile(insts, name,
+                Collections.unmodifiableMap(ctx.attDescMap),
+                Collections.unmodifiableMap(ctx.attMap),
                 ctx.mappers, ctx.requests, ctx.channels);
     }
 
@@ -637,6 +649,7 @@ public final class BaseFpcFactory implements FpcFactory {
 
         // Attributes
         private final Map<String, AttributeDescriptor> attDescMap = new HashMap<>();
+        private final Map<String, Attribute> attMap = new HashMap<>();
         private final Set<Attribute> atts = new HashSet<>();
         private final Map<Attribute, Object> staticAtts = new HashMap<>();
 
@@ -664,25 +677,27 @@ public final class BaseFpcFactory implements FpcFactory {
             this.id = id;
         }
 
-        protected void add(AttributeDescriptor desc) {
-            attDescMap.put(desc.getId(), desc);
-            Attribute a = Attribute.create(desc);
-            atts.add(a);
+        protected void addAttribute(AttributeDescriptor desc) {
+            String id = desc.getId();
+            attDescMap.put(id, desc);
+            Attribute att = Attribute.create(id, desc.parseType());
+            attMap.put(id, att);
+            atts.add(att);
             if (desc.getAccess() == AttributeAccessType.STATIC) {
-                Object v = DataType.parse(a.getType(), desc.getValue());
-                staticAtts.put(a, v);
+                Object v = DataType.parse(att.getType(), desc.getValue());
+                staticAtts.put(att, v);
             }
         }
 
-        protected void add(Mapper mapper) {
+        protected void addMapper(Mapper mapper) {
             mappers.put(mapper.getMessageId(), mapper);
         }
 
-        protected void add(String id, Channel channel) {
-            channels.put(id, channel);
+        protected void addChannel(Channel channel) {
+            channels.put(channel.getId(), channel);
         }
 
-        protected void add(IORequestBuilder builder) {
+        protected void addIORequestBuilder(IORequestBuilder builder) {
             requests.put(builder.getRequestId(), builder);
         }
 
@@ -693,6 +708,7 @@ public final class BaseFpcFactory implements FpcFactory {
     private static final String MISSING_ATTRIBUTE_DECLARATIONS = "No attribute declarations found";
     private static final String MISSING_ATTRIBUTE_ID = "Empty or missing attribute identifier";
     private static final String DUPLICATE_ATTRIBUTE_ID = "Duplicate attribute identifier '%s'";
+    private static final String INVALID_DATA_TYPE = "Invalid attribute data type '%s'";
     private static final String MISSING_ATTRIBUTE_TYPE = "Missing type";
     private static final String MISSING_STATIC_ATTRIBUTE_VALUE = "Missing value for static-qualified attribute";
     private static final String INVALID_STATIC_ATTRIBUTE_PERMISSION = "Invalid '%s' permission for static attribute (only read-only is allowed)";

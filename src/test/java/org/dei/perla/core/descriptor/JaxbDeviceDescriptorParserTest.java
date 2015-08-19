@@ -63,21 +63,21 @@ public class JaxbDeviceDescriptorParserTest {
 			assertThat(attribute.getId(), not(isEmptyOrNullString()));
 			switch (attribute.getId()) {
 			case "temperature":
-				assertThat(attribute.getType(), equalTo(DataType.FLOAT));
+				assertThat(attribute.getType(), equalTo("float"));
 				assertThat(attribute.getAccess(),
 						equalTo(AttributeAccessType.DYNAMIC));
 				assertThat(attribute.getPermission(),
 						equalTo(AttributePermission.READ_WRITE));
 				break;
 			case "pressure":
-				assertThat(attribute.getType(), equalTo(DataType.FLOAT));
+				assertThat(attribute.getType(), equalTo("float"));
 				assertThat(attribute.getAccess(),
 						equalTo(AttributeAccessType.DYNAMIC));
 				assertThat(attribute.getPermission(),
 						equalTo(AttributePermission.READ_ONLY));
 				break;
 			case "room_number":
-				assertThat(attribute.getType(), equalTo(DataType.INTEGER));
+				assertThat(attribute.getType(), equalTo("integer"));
 				assertThat(attribute.getAccess(),
 						equalTo(AttributeAccessType.STATIC));
 				assertThat(attribute.getPermission(),

@@ -1,6 +1,6 @@
 package org.dei.perla.core.registry;
 
-import org.dei.perla.core.descriptor.DataType;
+import org.dei.perla.core.fpc.DataType;
 import org.dei.perla.core.fpc.Fpc;
 import org.dei.perla.core.sample.Attribute;
 import org.junit.Test;

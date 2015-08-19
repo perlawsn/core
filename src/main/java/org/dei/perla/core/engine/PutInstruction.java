@@ -1,8 +1,5 @@
 package org.dei.perla.core.engine;
 
-import org.dei.perla.core.descriptor.AttributeDescriptor;
-import org.dei.perla.core.descriptor.DataType;
-
 /**
  * Populates the current sample with the specified variable attribute. See the
  * <code>ExecutionContext</code> javadoc for more information about sample
@@ -14,12 +11,12 @@ import org.dei.perla.core.descriptor.DataType;
 public class PutInstruction extends BasicInstruction {
 
     private final String exp;
-    private final AttributeDescriptor att;
+    private final Class<?> type;
     private final int idx;
 
-    public PutInstruction(String exp, AttributeDescriptor att, int idx) {
+    public PutInstruction(String exp, Class<?> type, int idx) {
         this.exp = exp;
-        this.att = att;
+        this.type = type;
         this.idx = idx;
     }
 
@@ -27,8 +24,8 @@ public class PutInstruction extends BasicInstruction {
         return exp;
     }
 
-    protected AttributeDescriptor getAttribute() {
-        return att;
+    protected Class<?> getType() {
+        return type;
     }
 
     protected int getIndex() {
@@ -37,7 +34,6 @@ public class PutInstruction extends BasicInstruction {
 
     @Override
     protected void runBasic(Runner runner) throws ScriptException {
-        Class<?> type = DataType.getClass(att.getType());
         Object result = Executor.evaluateExpression(runner.ctx, exp, type);
         runner.ctx.putAttribute(idx, result);
     }

@@ -10,7 +10,10 @@ import org.dei.perla.core.channel.loopback.TestMapper;
 import org.dei.perla.core.channel.simulator.SimulatorChannelFactory;
 import org.dei.perla.core.channel.simulator.SimulatorIORequestBuilderFactory;
 import org.dei.perla.core.channel.simulator.SimulatorMapperFactory;
-import org.dei.perla.core.descriptor.*;
+import org.dei.perla.core.descriptor.ChannelDescriptor;
+import org.dei.perla.core.descriptor.DeviceDescriptor;
+import org.dei.perla.core.descriptor.IORequestDescriptor;
+import org.dei.perla.core.descriptor.MessageDescriptor;
 import org.dei.perla.core.engine.*;
 import org.dei.perla.core.engine.SubmitInstruction.RequestParameter;
 import org.dei.perla.core.fpc.base.AsyncOperation.AsyncMessageHandler;
@@ -25,6 +28,7 @@ import org.junit.Test;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
+import java.time.Instant;
 import java.util.*;
 
 import static org.hamcrest.Matchers.*;
@@ -52,12 +56,6 @@ public class ConcreteOperationTest {
         StreamSource xml = new StreamSource(descriptorPath);
         DeviceDescriptor device = unmarshaller.unmarshal(xml,
                 DeviceDescriptor.class).getValue();
-
-        // Attributes
-        Map<String, AttributeDescriptor> attributeMap = new HashMap<>();
-        for (AttributeDescriptor attDesc : device.getAttributeList()) {
-            attributeMap.put(attDesc.getId(), attDesc);
-        }
 
         // Message mappers
         Map<String, Mapper> mmMap = new HashMap<>();
@@ -112,12 +110,9 @@ public class ConcreteOperationTest {
                 .buildScript("stop_script");
 
         Script perOnScript = ScriptBuilder.newScript()
-                .add(new PutInstruction("${result.integer}",
-                        attributeMap.get("integer"), 0))
-                .add(new PutInstruction("${result.float}",
-                        attributeMap.get("float"), 1))
-                .add(new PutInstruction("${result.string}",
-                        attributeMap.get("string"), 2))
+                .add(new PutInstruction("${result.integer}", Integer.class, 0))
+                .add(new PutInstruction("${result.float}", Float.class, 1))
+                .add(new PutInstruction("${result.string}", String.class, 2))
                 .add(new EmitInstruction()).buildScript("on_script");
         List<MessageScript> perHandlerList = new ArrayList<>();
         perHandlerList.add(new MessageScript(perOnScript, mmMap.get("all-msg"),
@@ -143,8 +138,7 @@ public class ConcreteOperationTest {
                 .buildScript("start_script");
 
         Script asyncOnScript = ScriptBuilder.newScript()
-                .add(new PutInstruction("${result.event}",
-                        attributeMap.get("event"), 0))
+                .add(new PutInstruction("${result.event}", Integer.class, 0))
                 .add(new EmitInstruction()).buildScript("on_script");
         AsyncMessageHandler handler = new AsyncMessageHandler(
                 mmMap.get("event-msg"), asyncOnScript, "result");
@@ -169,16 +163,11 @@ public class ConcreteOperationTest {
                 .add(new SubmitInstruction(builMap.get("request1"), chMap
                         .get("loopback-channel"), getParameterArray, "res",
                         mmMap.get("message1")))
-                .add(new PutInstruction("${res.integer}",
-                        attributeMap.get("integer"), 0))
-                .add(new PutInstruction("${res.float}",
-                        attributeMap.get("float"), 1))
-                .add(new PutInstruction("${res.boolean}",
-                        attributeMap.get("boolean"), 2))
-                .add(new PutInstruction("${res.string}",
-                        attributeMap.get("string"), 3))
-                .add(new PutInstruction("${now()}",
-                        attributeMap.get("timestamp"), 4))
+                .add(new PutInstruction("${res.integer}", Integer.class, 0))
+                .add(new PutInstruction("${res.float}", Float.class, 1))
+                .add(new PutInstruction("${res.boolean}", Boolean.class, 2))
+                .add(new PutInstruction("${res.string}", String.class, 3))
+                .add(new PutInstruction("${now()}", Instant.class, 4))
                 .add(new EmitInstruction()).add(new StopInstruction())
                 .buildScript("test");
         getOp = new OneoffOperation("test", getScript.getEmit(), getScript);

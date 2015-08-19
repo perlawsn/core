@@ -15,10 +15,10 @@ import javassist.Modifier;
 import javassist.NotFoundException;
 import javassist.bytecode.BadBytecode;
 
-import org.dei.perla.core.descriptor.DataType;
 import org.dei.perla.core.descriptor.FieldDescriptor;
 import org.dei.perla.core.descriptor.InvalidDeviceDescriptorException;
 import org.dei.perla.core.descriptor.MessageDescriptor;
+import org.dei.perla.core.fpc.DataType;
 import org.dei.perla.core.message.AbstractMapperFactory;
 import org.dei.perla.core.message.FpcMessage;
 import org.dei.perla.core.message.Mapper;
@@ -55,10 +55,6 @@ public class JsonMapperFactory extends AbstractMapperFactory {
 		JsonObjectDescriptor desc = (JsonObjectDescriptor) descriptor;
 
 		Class<FpcMessage> msgClass = createObject(desc, ctx, err);
-		if (msgClass == null || !err.isEmpty()) {
-			throw new InvalidDeviceDescriptorException(err.asString());
-		}
-
 		if (msgClass == null || !err.isEmpty()) {
 			throw new InvalidDeviceDescriptorException(err.asString());
 		}
@@ -140,7 +136,7 @@ public class JsonMapperFactory extends AbstractMapperFactory {
 	 */
 	private void addField(JsonValueDescriptor field, JsonMessageContext ctx,
 			Errors err) throws CannotCompileException {
-		CtClass fieldClass = null;
+		CtClass fieldClass;
 		if (field.isList()) {
 			fieldClass = addListFieldClass(field, ctx, err);
 		} else if (DataType.isPrimitive(field.getType())) {

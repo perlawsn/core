@@ -1,6 +1,6 @@
 package org.dei.perla.core.sample;
 
-import org.dei.perla.core.descriptor.DataType;
+import org.dei.perla.core.fpc.DataType;
 
 import java.util.Arrays;
 import java.util.Collections;

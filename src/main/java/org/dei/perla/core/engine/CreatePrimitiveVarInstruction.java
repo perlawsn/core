@@ -1,6 +1,6 @@
 package org.dei.perla.core.engine;
 
-import org.dei.perla.core.descriptor.DataType;
+import org.dei.perla.core.fpc.DataType;
 
 public class CreatePrimitiveVarInstruction extends BasicInstruction {
 
@@ -32,7 +32,7 @@ public class CreatePrimitiveVarInstruction extends BasicInstruction {
 			obj =  0.0f;
 			break;
 		case STRING:
-			obj =  new String();
+			obj = "";
 			break;
 		case BOOLEAN:
 			obj = false;

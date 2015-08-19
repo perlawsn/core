@@ -6,15 +6,12 @@ import org.dei.perla.core.channel.loopback.LoopbackChannel;
 import org.dei.perla.core.channel.loopback.LoopbackIORequestBuilder;
 import org.dei.perla.core.channel.loopback.TestMapper;
 import org.dei.perla.core.channel.loopback.TestMessage;
-import org.dei.perla.core.descriptor.AttributeDescriptor;
-import org.dei.perla.core.descriptor.AttributeDescriptor.AttributePermission;
-import org.dei.perla.core.descriptor.DataType;
 import org.dei.perla.core.engine.SubmitInstruction.RequestParameter;
+import org.dei.perla.core.fpc.DataType;
 import org.dei.perla.core.message.FpcMessage;
 import org.dei.perla.core.message.Mapper;
 import org.dei.perla.core.sample.Attribute;
 import org.dei.perla.core.sample.Sample;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -29,31 +26,19 @@ import static org.junit.Assert.assertTrue;
 
 public class InstructionsTest {
 
-    private static AttributeDescriptor integer;
-    private static AttributeDescriptor string;
-    private static AttributeDescriptor bool;
+    private static final Attribute intAtt =
+            Attribute.create("integer", DataType.INTEGER);
+    private static final Attribute stringAtt =
+            Attribute.create("string", DataType.STRING);
+    private static final Attribute boolAtt =
+            Attribute.create("bool", DataType.BOOLEAN);
 
-    private static Mapper mapper1;
-    private static Mapper mapper2;
+    private static final Mapper mapper1 = new TestMapper("message1");
+    private static final Mapper mapper2 = new TestMapper("message2");
 
-    private static Channel channel;
-    private static IORequestBuilder request1;
-
-    @BeforeClass
-    public static void setup() {
-        integer = new AttributeDescriptor("integer", DataType.INTEGER,
-                AttributePermission.READ_WRITE);
-        string = new AttributeDescriptor("string", DataType.STRING,
-                AttributePermission.READ_WRITE);
-        bool = new AttributeDescriptor("bool", DataType.BOOLEAN,
-                AttributePermission.READ_WRITE);
-
-        mapper1 = new TestMapper("message1");
-        mapper2 = new TestMapper("message2");
-
-        channel = new LoopbackChannel();
-        request1 = new LoopbackIORequestBuilder("request1");
-    }
+    private static Channel channel = new LoopbackChannel();
+    private static IORequestBuilder request1 =
+            new LoopbackIORequestBuilder("request1");
 
     @Test
     public void testCreateSimpleInstruction() throws Exception {
@@ -221,10 +206,10 @@ public class InstructionsTest {
 
     @Test
     public void testForeachInstruction0() throws Exception {
-        Instruction body = new PutInstruction("${element}", integer, 0);
+        Instruction body = new PutInstruction("${element}", Integer.class, 0);
         body.setNext(new EmitInstruction());
         List<Attribute> emit = new ArrayList<>();
-        emit.add(Attribute.create(integer));
+        emit.add(intAtt);
         Script script = ScriptBuilder.newScript()
                 .add(new CreateComplexVarInstruction("var", mapper1))
                 .add(new AppendInstruction("var", "list", Integer.class, "1"))
@@ -247,10 +232,11 @@ public class InstructionsTest {
 
     @Test
     public void testForeachInstruction1() throws Exception {
-        Instruction body = new PutInstruction("${element * index}", integer, 0);
+        Instruction body =
+                new PutInstruction("${element * index}", Integer.class, 0);
         body.setNext(new EmitInstruction());
         List<Attribute> emit = new ArrayList<>();
-        emit.add(Attribute.create(integer));
+        emit.add(intAtt);
         Script script = ScriptBuilder.newScript()
                 .add(new CreateComplexVarInstruction("var", mapper1))
                 .add(new AppendInstruction("var", "list", Integer.class, "1"))
@@ -458,9 +444,9 @@ public class InstructionsTest {
                         "test"))
                 .add(new SetComplexInstruction("var", "bool", Boolean.class,
                         "false"))
-                .add(new PutInstruction("${var.integer}", integer, 0))
-                .add(new PutInstruction("${var.string}", string, 1))
-                .add(new PutInstruction("${!var.bool}", bool, 2))
+                .add(new PutInstruction("${var.integer}", Integer.class, 0))
+                .add(new PutInstruction("${var.string}", String.class, 1))
+                .add(new PutInstruction("${!var.bool}", Boolean.class, 2))
                 .add(new EmitInstruction()).add(new StopInstruction())
                 .buildScript("testPutEmitInstructions");
 
@@ -511,9 +497,9 @@ public class InstructionsTest {
                         "false"))
                 .add(new SetComplexInstruction("var2", "var1",
                         FpcMessage.class, "${var1}"))
-                .add(new PutInstruction("${var2.var1.integer}", integer, 0))
-                .add(new PutInstruction("${var2.var1.string}", string, 1))
-                .add(new PutInstruction("${!var2.var1.bool}", bool, 2))
+                .add(new PutInstruction("${var2.var1.integer}", Integer.class, 0))
+                .add(new PutInstruction("${var2.var1.string}", String.class, 1))
+                .add(new PutInstruction("${!var2.var1.bool}", Boolean.class, 2))
                 .add(new EmitInstruction()).add(new StopInstruction())
                 .buildScript("testPutEmitInstructions");
 
@@ -559,22 +545,22 @@ public class InstructionsTest {
                         "4"))
                 .add(new SetComplexInstruction("var", "string", String.class,
                         "test"))
-                .add(new PutInstruction("${var.integer}", integer, 0))
-                .add(new PutInstruction("${var.string}", string, 1))
+                .add(new PutInstruction("${var.integer}", Integer.class, 0))
+                .add(new PutInstruction("${var.string}", String.class, 1))
                 .add(new EmitInstruction())
                 .add(new SetComplexInstruction("var", "integer", Integer.class,
                         "5"))
                 .add(new SetComplexInstruction("var", "string", String.class,
                         "test"))
-                .add(new PutInstruction("${var.integer}", integer, 0))
-                .add(new PutInstruction("${var.string}", string, 1))
+                .add(new PutInstruction("${var.integer}", Integer.class, 0))
+                .add(new PutInstruction("${var.string}", String.class, 1))
                 .add(new EmitInstruction())
                 .add(new SetComplexInstruction("var", "integer", Integer.class,
                         "6"))
                 .add(new SetComplexInstruction("var", "string", String.class,
                         "test"))
-                .add(new PutInstruction("${var.integer}", integer, 0))
-                .add(new PutInstruction("${var.string}", string, 1))
+                .add(new PutInstruction("${var.integer}", Integer.class, 0))
+                .add(new PutInstruction("${var.string}", String.class, 1))
                 .add(new EmitInstruction()).add(new StopInstruction())
                 .buildScript("testMultiplePutEmitInstructions");
 
@@ -695,8 +681,8 @@ public class InstructionsTest {
                 .add(new SetComplexInstruction("param", "string", String.class,
                         "test"))
                 .add(submit)
-                .add(new PutInstruction("${output.integer}", integer, 0))
-                .add(new PutInstruction("${output.string}", string, 1))
+                .add(new PutInstruction("${output.integer}", Integer.class, 0))
+                .add(new PutInstruction("${output.string}", Integer.class, 1))
                 .add(new EmitInstruction()).add(new StopInstruction())
                 .buildScript("testSubmitInstruction");
 

@@ -5,15 +5,11 @@ import org.dei.perla.core.channel.IORequestBuilder;
 import org.dei.perla.core.channel.loopback.LoopbackChannel;
 import org.dei.perla.core.channel.loopback.LoopbackIORequestBuilder;
 import org.dei.perla.core.channel.loopback.TestMapper;
-import org.dei.perla.core.descriptor.AttributeDescriptor;
-import org.dei.perla.core.descriptor.AttributeDescriptor.AttributePermission;
-import org.dei.perla.core.descriptor.DataType;
 import org.dei.perla.core.engine.ExecutionContext.InstructionLocal;
+import org.dei.perla.core.engine.SubmitInstruction.RequestParameter;
 import org.dei.perla.core.message.Mapper;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import org.dei.perla.core.engine.SubmitInstruction.RequestParameter;
 
 import java.time.Instant;
 import java.util.List;
@@ -24,18 +20,6 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 public class ScriptExecutorTest {
-
-	private static final AttributeDescriptor integer;
-	private static final AttributeDescriptor string;
-	private static final AttributeDescriptor timestamp;
-	static {
-		integer = new AttributeDescriptor("integer", DataType.INTEGER,
-				AttributePermission.READ_WRITE);
-		string = new AttributeDescriptor("string", DataType.STRING,
-				AttributePermission.READ_WRITE);
-		timestamp = new AttributeDescriptor("timestamp", DataType.TIMESTAMP,
-				AttributePermission.WRITE_ONLY);
-	}
 
 	private static Mapper mapper1;
 
@@ -49,8 +33,8 @@ public class ScriptExecutorTest {
 				.add(new CreateComplexVarInstruction("var", mapper1))
 				.add(new SetComplexInstruction("var", "integer", Integer.class, "4"))
 				.add(new SetComplexInstruction("var", "string", String.class, "test"))
-				.add(new PutInstruction("${var.integer}", integer, 0))
-				.add(new PutInstruction("${var.string}", string, 1))
+				.add(new PutInstruction("${var.integer}", Integer.class, 0))
+				.add(new PutInstruction("${var.string}", String.class, 1))
 				.add(new EmitInstruction()).add(new StopInstruction())
 				.buildScript("testPutEmitInstructions");
 	}
@@ -100,8 +84,8 @@ public class ScriptExecutorTest {
 				.add(new CreateComplexVarInstruction("var", mapper1))
 				.add(new SetComplexInstruction("var", "integer", Integer.class, "4"))
 				.add(new SetComplexInstruction("var", "string", String.class, "test"))
-				.add(new PutInstruction("${var.integer}", integer, 0))
-				.add(new PutInstruction("${var.string}", string, 1))
+				.add(new PutInstruction("${var.integer}", Integer.class, 0))
+				.add(new PutInstruction("${var.string}", String.class, 1))
 				.add(new EmitInstruction()).add(pauseInstruction)
 				.add(new StopInstruction())
 				.buildScript("testScriptCancellation");
@@ -133,8 +117,8 @@ public class ScriptExecutorTest {
 						"${param['intParam']}"))
 				.add(new SetComplexInstruction("var", "string", String.class,
 						"${param['stringParam']}"))
-				.add(new PutInstruction("${var.integer}", integer, 0))
-				.add(new PutInstruction("${var.string}", string, 1))
+				.add(new PutInstruction("${var.integer}", Integer.class, 0))
+				.add(new PutInstruction("${var.string}", String.class, 1))
 				.add(new EmitInstruction()).add(new StopInstruction())
 				.buildScript("testParameterPassing");
 		ScriptParameter[] paramArray = new ScriptParameter[2];
@@ -160,9 +144,9 @@ public class ScriptExecutorTest {
                 .add(new CreateComplexVarInstruction("var", mapper1))
                 .add(new SetComplexInstruction("var", "integer", Integer.class, "12"))
                 .add(new SetComplexInstruction("var", "string", String.class, "test_order"))
-                .add(new PutInstruction("${var.integer}", integer, 0))
-                .add(new PutInstruction("${var.integer}", integer, 0))
-                .add(new PutInstruction("${var.string}", string, 1))
+                .add(new PutInstruction("${var.integer}", Integer.class, 0))
+                .add(new PutInstruction("${var.integer}", Integer.class, 0))
+                .add(new PutInstruction("${var.string}", String.class, 1))
                 .add(new EmitInstruction())
                 .add(new StopInstruction())
                 .buildScript("testOrder");
@@ -190,8 +174,8 @@ public class ScriptExecutorTest {
 				.add(new CreateComplexVarInstruction("var", mapper1))
 				.add(new SetComplexInstruction("var", "integer", Integer.class, "4"))
 				.add(new SetComplexInstruction("var", "string", String.class, "test"))
-				.add(new PutInstruction("${var.integer}", integer, 0))
-				.add(new PutInstruction("${var.string}", string, 1))
+				.add(new PutInstruction("${var.integer}", Integer.class, 0))
+				.add(new PutInstruction("${var.string}", String.class, 1))
 				.add(new EmitInstruction()).add(suspendInstruction)
 				.add(new StopInstruction()).buildScript("testSuspension");
 
@@ -212,7 +196,7 @@ public class ScriptExecutorTest {
 	@Test
 	public void testScriptTimestampCreation() throws Exception {
 		Script script = ScriptBuilder.newScript()
-				.add(new PutInstruction("${now()}", timestamp, 0))
+				.add(new PutInstruction("${now()}", Instant.class, 0))
 				.add(new EmitInstruction())
 				.add(new StopInstruction())
 				.buildScript("timestamp");
@@ -271,9 +255,9 @@ public class ScriptExecutorTest {
 				.add(new SetComplexInstruction("var", "integer", Integer.class, "12"))
 				.add(new SetComplexInstruction("var", "string", String.class, "test_order"))
 				.add(submit)
-				.add(new PutInstruction("${output.integer}", integer, 0))
-				.add(new PutInstruction("${output.integer}", integer, 0))
-				.add(new PutInstruction("${output.string}", string, 1))
+				.add(new PutInstruction("${output.integer}", Integer.class, 0))
+				.add(new PutInstruction("${output.integer}", Integer.class, 0))
+				.add(new PutInstruction("${output.string}", String.class, 1))
 				.add(new EmitInstruction())
 				.add(new StopInstruction())
 				.buildScript("stress_test");

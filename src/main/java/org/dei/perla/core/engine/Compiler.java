@@ -6,11 +6,11 @@ import org.dei.perla.core.channel.IORequestBuilder.IORequestParameter;
 import org.dei.perla.core.descriptor.AttributeDescriptor;
 import org.dei.perla.core.descriptor.AttributeDescriptor.AttributeAccessType;
 import org.dei.perla.core.descriptor.AttributeDescriptor.AttributePermission;
-import org.dei.perla.core.descriptor.DataType;
 import org.dei.perla.core.descriptor.FieldDescriptor;
 import org.dei.perla.core.descriptor.InvalidDeviceDescriptorException;
 import org.dei.perla.core.descriptor.instructions.*;
 import org.dei.perla.core.engine.SubmitInstruction.RequestParameter;
+import org.dei.perla.core.fpc.DataType;
 import org.dei.perla.core.message.FpcMessage;
 import org.dei.perla.core.message.Mapper;
 import org.dei.perla.core.sample.Attribute;
@@ -50,12 +50,14 @@ public class Compiler {
      */
     public static Script compile(
             List<InstructionDescriptor> inst,
-            String name, Map<String, AttributeDescriptor> atts,
+            String name,
+            Map<String, AttributeDescriptor> attDescMap,
+            Map<String, Attribute> attMap,
             Map<String, Mapper> mappers,
             Map<String, IORequestBuilder> requests,
             Map<String, Channel> channels)
             throws InvalidDeviceDescriptorException {
-        CompilerContext ctx = new CompilerContext(atts, mappers,
+        CompilerContext ctx = new CompilerContext(attDescMap, attMap, mappers,
                 requests, channels);
         Errors err = new Errors("Script '%s'", name);
 
@@ -343,8 +345,6 @@ public class Compiler {
     private static Instruction parsePutInstruction(
             PutInstructionDescriptor d, CompilerContext ctx, Errors err) {
         boolean errorFound = false;
-        int idx;
-        Attribute a;
 
         // Check value
         if (Check.nullOrEmpty(d.getExpression())) {
@@ -357,11 +357,11 @@ public class Compiler {
             err.addError(MISSING_ATTRIBUTE);
             return new NoopInstruction();
         }
-        AttributeDescriptor att = ctx.atts.get(d.getAttribute());
-        if (att == null) {
+        AttributeDescriptor desc = ctx.attDescMap.get(d.getAttribute());
+        if (desc == null) {
             err.addError(INVALID_ATTRIBUTE_PUT, d.getAttribute());
             return new NoopInstruction();
-        } else if (att.getPermission() == AttributePermission.WRITE_ONLY) {
+        } else if (desc.getPermission() == AttributePermission.WRITE_ONLY) {
             err.addError(INVALID_PERMISSION_PUT, d.getAttribute());
             errorFound = true;
         }
@@ -370,9 +370,10 @@ public class Compiler {
             return new NoopInstruction();
         }
 
-        a = Attribute.create(att);
-        idx = ctx.emitIndex(a);
-        return new PutInstruction(d.getExpression(), att, idx);
+        Attribute att = ctx.attMap.get(d.getAttribute());
+        int idx = ctx.emitIndex(att);
+        Class<?> type = att.getType().getJavaClass();
+        return new PutInstruction(d.getExpression(), type, idx);
     }
 
     private static Instruction parseSetInstruction(
@@ -438,23 +439,24 @@ public class Compiler {
             return;
         }
 
-        AttributeDescriptor att;
+        AttributeDescriptor attDesc;
         Scanner sc = new Scanner(value);
-        for (String s; (s = sc.findWithinHorizon("(?<=\\[').*?(?=\\'])", 0)) != null;) {
-            att = ctx.atts.get(s);
-            if (att == null) {
+        for (String s; (s = sc.findWithinHorizon("(?<=\\[').*?(?='\\])", 0)) != null;) {
+            attDesc = ctx.attDescMap.get(s);
+            if (attDesc == null) {
                 err.addError(UNDECLARED_ATTRIBUTE, s);
                 continue;
             }
-            if (att.getAccess() == AttributeAccessType.STATIC) {
+            if (attDesc.getAccess() == AttributeAccessType.STATIC) {
                 err.addError(STATIC_ATTRIBUTE_SET, s);
                 continue;
             }
-            if (att.getPermission() == AttributePermission.READ_ONLY) {
+            if (attDesc.getPermission() == AttributePermission.READ_ONLY) {
                 err.addError(READ_ONLY_ATTRIBUTE, s);
                 continue;
             }
-            ctx.set.add(Attribute.create(att));
+            Attribute att = ctx.attMap.get(s);
+            ctx.set.add(att);
         }
         sc.close();
     }
@@ -637,7 +639,8 @@ public class Compiler {
      */
     private static class CompilerContext {
 
-        private final Map<String, AttributeDescriptor> atts;
+        private final Map<String, AttributeDescriptor> attDescMap;
+        private final Map<String, Attribute> attMap;
         private final Map<String, Mapper> mappers;
         private final Map<String, IORequestBuilder> requests;
         private final Map<String, Channel> channels;
@@ -650,11 +653,13 @@ public class Compiler {
 
         private final Map<String, String> variableTypeMap = new HashMap<>();
 
-        private CompilerContext(Map<String, AttributeDescriptor> atts,
+        private CompilerContext(Map<String, AttributeDescriptor> attDescMap,
+                Map<String, Attribute> attMap,
                 Map<String, Mapper> mappers,
                 Map<String, IORequestBuilder> requests,
                 Map<String, Channel> channels) {
-            this.atts = atts;
+            this.attDescMap = attDescMap;
+            this.attMap = attMap;
             this.mappers = mappers;
             this.requests = requests;
             this.channels = channels;
