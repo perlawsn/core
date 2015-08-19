@@ -173,10 +173,10 @@ public class Compiler {
         if (field == null) {
             err.addError(INVALID_FIELD, d.getField(), d.getVariable(),
                     type);
-            errorFound = true;
+            return new NoopInstruction();
         }
         String fieldType = field.getType();
-        Class<?> fieldClass = null;
+        Class<?> fieldClass;
         if (DataType.isPrimitive(fieldType)) {
             fieldClass = DataType.getJavaClass(fieldType);
         } else {
@@ -314,7 +314,7 @@ public class Compiler {
 
     private static Instruction parseIfInstruction(
             IfInstructionDescriptor d, CompilerContext ctx, Errors err) {
-        Instruction thenBlock = null;
+        Instruction thenBlock;
         Instruction elseBlock = null;
         boolean errorFound = false;
 
@@ -421,7 +421,7 @@ public class Compiler {
                 return new NoopInstruction();
             }
             // Extract field type
-            Class<?> fieldType = null;
+            Class<?> fieldType;
             if (!field.isList()) {
                 fieldType = DataType.getJavaClass(field.getType());
             } else {
