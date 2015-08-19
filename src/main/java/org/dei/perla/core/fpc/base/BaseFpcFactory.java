@@ -257,7 +257,7 @@ public final class BaseFpcFactory implements FpcFactory {
             return;
         }
 
-        Mapper map = null;
+        Mapper map;
         try {
             map = mapFct.createMapper(m, ctx.mappers, ctx.classPool);
         } catch (InvalidDeviceDescriptorException e) {
@@ -327,6 +327,7 @@ public final class BaseFpcFactory implements FpcFactory {
         ChannelFactory fct = chanFcts.get(c.getClass());
         if (fct == null) {
             err.addError(MISSING_CHANNEL_FACTORY, c.getClass());
+            return;
         }
 
         try {
@@ -409,8 +410,8 @@ public final class BaseFpcFactory implements FpcFactory {
 
     private void parsePeriodicOperation(PeriodicOperationDescriptor o,
             ParsingContext ctx, Errors err) {
-        Script start = null;
-        Script stop = null;
+        Script start;
+        Script stop;
 
         try {
             start = compileScript(o.getStartScript(), "_start", ctx);
@@ -464,14 +465,10 @@ public final class BaseFpcFactory implements FpcFactory {
             }
             ctx.onMsgHandlerList.add(on.getMessage());
 
-            // Preload the variableTypeMap with the variable corresponding to
-            // the message that triggers this 'on' clause being parsed
-            Map<String, String> varTypes = new HashMap<>();
-            varTypes.put(on.getVariable(), on.getMessage());
             String scriptName = "_" + o.getId() + "_on_" + on.getMessage();
 
             // Compile the script
-            Script script = null;
+            Script script;
             try {
                 script = compileScript(on.getInstructionList(), scriptName, ctx);
             } catch (InvalidDeviceDescriptorException e) {
@@ -559,14 +556,9 @@ public final class BaseFpcFactory implements FpcFactory {
         }
         ctx.onMsgHandlerList.add(onRecv.getMessage());
 
-        // Preload the variableTypeMap with the variable corresponding to
-        // the message that triggers this 'on' clause being parsed
-        Map<String, String> variableTypeMap = new HashMap<>();
-        variableTypeMap.put(onRecv.getVariable(), o.getOnReceive()
-                .getMessage());
         String scriptName = "_" + o.getId() + "_on_" + onRecv.getMessage();
 
-        Script script = null;
+        Script script;
         try {
             script = compileScript(onRecv.getInstructionList(),
                     scriptName, ctx);
@@ -587,7 +579,7 @@ public final class BaseFpcFactory implements FpcFactory {
 
     private void parseGetOperation(GetOperationDescriptor o,
             ParsingContext ctx, Errors err) {
-        Script script = null;
+        Script script;
         try {
             script = compileScript(o.getScript(), o.getId(), ctx);
         } catch (InvalidDeviceDescriptorException e) {
@@ -605,7 +597,7 @@ public final class BaseFpcFactory implements FpcFactory {
 
     private void parseSetOperation(SetOperationDescriptor o,
             ParsingContext ctx, Errors err) {
-        Script script = null;
+        Script script;
         try {
             script = compileScript(o.getInstructionList(), o.getId(), ctx);
         } catch (InvalidDeviceDescriptorException e) {
