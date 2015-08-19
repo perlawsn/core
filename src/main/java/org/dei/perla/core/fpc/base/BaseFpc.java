@@ -51,10 +51,6 @@ public final class BaseFpc implements Fpc {
         return atts;
     }
 
-    protected Map<Attribute, Object> getStaticAttributes() {
-        return staticAtts;
-    }
-
     protected Scheduler getOperationScheduler() {
         return sched;
     }
@@ -83,7 +79,7 @@ public final class BaseFpc implements Fpc {
             throw new RuntimeException(
                     "Cannot sample, attribute list is null or empty");
         }
-        Request req = new Request(this, requestAtts);
+        Request req = new Request(requestAtts, staticAtts);
 
         if (req.isStatic()) {
             Task t = new CompletedTask(req.getStatic());
@@ -113,7 +109,7 @@ public final class BaseFpc implements Fpc {
             throw new RuntimeException(
                     "Cannot sample, attribute list is null or empty");
         }
-        Request req = new Request(this, requestAtts);
+        Request req = new Request(requestAtts, staticAtts);
 
         if (req.isStatic()) {
             StaticPeriodicTask t = new StaticPeriodicTask(req, ms, handler);
@@ -143,7 +139,7 @@ public final class BaseFpc implements Fpc {
             throw new RuntimeException(
                     "Cannot sample, attribute list is null or empty");
         }
-        Request req = new Request(this, requestAtts);
+        Request req = new Request(requestAtts, staticAtts);
 
         if (req.isStatic()) {
             return null;
