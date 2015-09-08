@@ -256,7 +256,7 @@ public class JsonMapperFactory extends AbstractMapperFactory {
 		if (type == DataType.ID || type == DataType.INTEGER) {
 			return createCtClass("java.lang.Integer", ctx, err);
 		} else if (type == DataType.FLOAT) {
-			return createCtClass("java.lang.Integer", ctx, err);
+			return createCtClass("java.lang.Float", ctx, err);
 		} else if (type == DataType.STRING) {
 			return createCtClass("java.lang.String", ctx, err);
 		} else if (type == DataType.BOOLEAN) {
