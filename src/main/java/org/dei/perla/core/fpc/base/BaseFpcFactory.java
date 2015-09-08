@@ -166,7 +166,7 @@ public final class BaseFpcFactory implements FpcFactory {
             }
             ids.add(a.getId());
 
-            DataType type = a.parseType();
+            DataType type = parseType(a.getType());
             if (type == null) {
                 err.addError(INVALID_DATA_TYPE, a.getType());
                 continue;
@@ -186,6 +186,25 @@ public final class BaseFpcFactory implements FpcFactory {
         AttributeDescriptor idAtt = new AttributeDescriptor("id",
                 DataType.ID.getId(), ctx.id.toString());
         ctx.addAttribute(idAtt);
+    }
+
+    private DataType parseType(String type) {
+        switch (type.toLowerCase()) {
+            case "id":
+                return DataType.ID;
+            case "integer":
+                return DataType.INTEGER;
+            case "float":
+                return DataType.FLOAT;
+            case "string":
+                return DataType.STRING;
+            case "boolean":
+                return DataType.BOOLEAN;
+            case "timestamp":
+                return DataType.TIMESTAMP;
+            default:
+                return null;
+        }
     }
 
     private void parseAttribute(AttributeDescriptor a, DataType type,
@@ -680,7 +699,8 @@ public final class BaseFpcFactory implements FpcFactory {
         protected void addAttribute(AttributeDescriptor desc) {
             String id = desc.getId();
             attDescMap.put(id, desc);
-            Attribute att = Attribute.create(id, desc.parseType());
+            DataType type = parseType(desc.getType());
+            Attribute att = Attribute.create(id, type);
             attMap.put(id, att);
             atts.add(att);
             if (desc.getAccess() == AttributeAccessType.STATIC) {

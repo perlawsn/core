@@ -131,25 +131,6 @@ public class AttributeDescriptor {
 		return type;
 	}
 
-	public DataType parseType() {
-		switch (type.toLowerCase()) {
-			case "id":
-				return DataType.ID;
-			case "integer":
-				return DataType.INTEGER;
-			case "float":
-				return DataType.FLOAT;
-			case "string":
-				return DataType.STRING;
-			case "boolean":
-				return DataType.BOOLEAN;
-			case "timestamp":
-				return DataType.TIMESTAMP;
-			default:
-				return null;
-		}
-	}
-
 	public AttributeAccessType getAccess() {
 		return access;
 	}
