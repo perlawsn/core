@@ -229,15 +229,18 @@ public class Compiler {
         }
 
         ConcreteType type = ConcreteType.parse(d.getType());
-        if (type != null) {
-            return new CreatePrimitiveVarInstruction(d.getName(), type);
-        } else {
+        if (type == null) {
             Mapper mapper = ctx.mappers.get(d.getType());
             if (mapper == null) {
                 err.addError(INVALID_TYPE, d.getType());
                 return new NoopInstruction();
             }
             return new CreateComplexVarInstruction(d.getName(), mapper);
+        } if (type == DataType.TIMESTAMP) {
+            err.addError(CREATE_TIMESTAMP_VAR_ERROR);
+            return new NoopInstruction();
+        } else {
+            return new CreatePrimitiveVarInstruction(d.getName(), type);
         }
     }
 
@@ -684,6 +687,7 @@ public class Compiler {
     private static final String MISSING_MESSAGE_TYPE = "Empty or missing message type";
     private static final String DUPLICATE_VARIABLE = "Duplicate instantiation of variable '%s'";
     private static final String INVALID_TYPE = "Invalid type '%s'";
+    private static final String CREATE_TIMESTAMP_VAR_ERROR = "Cannot create variable of type timestamp";
     private static final String MISSING_ERROR_MESSAGE = "Missing error message";
     private static final String MISSING_ITEMS_VARIABLE = "Missing or empty item variable name";
     private static final String MISSING_ITEMS_FIELD = "Missing or empty item variable field";

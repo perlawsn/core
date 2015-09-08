@@ -9,6 +9,7 @@ import org.dei.perla.core.channel.loopback.TestMapper;
 import org.dei.perla.core.descriptor.AttributeDescriptor;
 import org.dei.perla.core.descriptor.AttributeDescriptor.AttributePermission;
 import org.dei.perla.core.descriptor.FieldDescriptor.FieldQualifier;
+import org.dei.perla.core.descriptor.InvalidDeviceDescriptorException;
 import org.dei.perla.core.descriptor.instructions.*;
 import org.dei.perla.core.fpc.DataType;
 import org.dei.perla.core.message.Mapper;
@@ -174,6 +175,16 @@ public class CompilerTest {
         CreatePrimitiveVarInstruction prim = (CreatePrimitiveVarInstruction) i;
         assertThat(prim.getVariable(), equalTo("var2"));
         assertThat(prim.getType(), equalTo(DataType.STRING));
+    }
+
+    @Test(expected = InvalidDeviceDescriptorException.class)
+    public void testCreateTimestampParse() throws Exception {
+        Instruction i;
+        List<InstructionDescriptor> iList = new ArrayList<>();
+        iList.add(new CreateVarInstructionDescriptor("var1", "timestamp"));
+
+        Compiler.compile(iList, "create", attDescMap, attMap,
+                mapperMap, reqBldMap, channelMap);
     }
 
     @Test
