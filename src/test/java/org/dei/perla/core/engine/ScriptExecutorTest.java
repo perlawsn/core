@@ -7,7 +7,9 @@ import org.dei.perla.core.channel.loopback.LoopbackIORequestBuilder;
 import org.dei.perla.core.channel.loopback.TestMapper;
 import org.dei.perla.core.engine.ExecutionContext.InstructionLocal;
 import org.dei.perla.core.engine.SubmitInstruction.RequestParameter;
+import org.dei.perla.core.fpc.DataType;
 import org.dei.perla.core.message.Mapper;
+import org.dei.perla.core.sample.Attribute;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -21,120 +23,133 @@ import static org.junit.Assert.*;
 
 public class ScriptExecutorTest {
 
-	private static Mapper mapper1;
+    private static final Attribute intAtt =
+            Attribute.create("integer", DataType.INTEGER);
+    private static final Attribute stringAtt =
+            Attribute.create("string", DataType.STRING);
+    private static final Attribute tsAtt =
+            Attribute.create("timestamp", DataType.TIMESTAMP);
 
-	private static Script emitScript;
+    private static Mapper mapper1;
 
-	@BeforeClass
-	public static void setup() {
+    private static Script emitScript;
 
-		mapper1 = new TestMapper("message1");
-		emitScript = ScriptBuilder.newScript()
-				.add(new CreateComplexVarInstruction("var", mapper1))
-				.add(new SetComplexInstruction("var", "integer", Integer.class, "4"))
-				.add(new SetComplexInstruction("var", "string", String.class, "test"))
-				.add(new PutInstruction("${var.integer}", Integer.class, 0))
-				.add(new PutInstruction("${var.string}", String.class, 1))
-				.add(new EmitInstruction()).add(new StopInstruction())
-				.buildScript("testPutEmitInstructions");
-	}
+    @BeforeClass
+    public static void setup() {
 
-	@Test
-	public void testSynchronousCallback() throws InterruptedException,
-			ExecutionException, ScriptException {
-		SynchronizerScriptHandler syncHandler = new SynchronizerScriptHandler();
-		Runner runner = Executor.execute(emitScript, syncHandler);
-		List<Object[]> result = syncHandler.getResult();
+        mapper1 = new TestMapper("message1");
+        emitScript = ScriptBuilder.newScript()
+                .add(new CreateComplexVarInstruction("var", mapper1))
+                .add(new SetComplexInstruction("var", "integer", Integer.class, "4"))
+                .add(new SetComplexInstruction("var", "string", String.class, "test"))
+                .add(new PutInstruction("${var.integer}",
+                        Integer.class, 0), intAtt)
+                .add(new PutInstruction("${var.string}",
+                        String.class, 1), stringAtt)
+                .add(new EmitInstruction()).add(new StopInstruction())
+                .buildScript("testPutEmitInstructions");
+    }
 
-		assertTrue(runner.isDone());
-		assertFalse(runner.isCancelled());
-		assertThat(result, notNullValue());
-	}
+    @Test
+    public void testSynchronousCallback() throws InterruptedException,
+            ExecutionException, ScriptException {
+        SynchronizerScriptHandler syncHandler = new SynchronizerScriptHandler();
+        Runner runner = Executor.execute(emitScript, syncHandler);
+        List<Object[]> result = syncHandler.getResult();
 
-	@Test
-	public void testAsynchronousCallback() throws InterruptedException {
-		final LinkedBlockingQueue<List<Object[]>> resultQueue = new
-				LinkedBlockingQueue<>();
+        assertTrue(runner.isDone());
+        assertFalse(runner.isCancelled());
+        assertThat(result, notNullValue());
+    }
 
-		Runner runner = Executor.execute(emitScript, new ScriptHandler() {
-			@Override
-			public void complete(Script script, List<Object[]> samples) {
-				assertThat(script, equalTo(emitScript));
-				resultQueue.add(samples);
-			}
+    @Test
+    public void testAsynchronousCallback() throws InterruptedException {
+        final LinkedBlockingQueue<List<Object[]>> resultQueue = new
+                LinkedBlockingQueue<>();
 
-			@Override
-			public void error(Script script, Throwable cause) {
-				resultQueue.add(null);
-			}
-		});
+        Runner runner = Executor.execute(emitScript, new ScriptHandler() {
+            @Override
+            public void complete(Script script, List<Object[]> samples) {
+                assertThat(script, equalTo(emitScript));
+                resultQueue.add(samples);
+            }
 
-		List<Object[]> result = resultQueue.take();
+            @Override
+            public void error(Script script, Throwable cause) {
+                resultQueue.add(null);
+            }
+        });
 
-		assertTrue(runner.isDone());
-		assertFalse(runner.isCancelled());
-		assertThat(result, notNullValue());
-	}
+        List<Object[]> result = resultQueue.take();
 
-	@Test
-	public void testScriptCancellation() throws InterruptedException,
-			ScriptException {
-		PauseInstruction pauseInstruction = new PauseInstruction();
-		Script pauseScript = ScriptBuilder.newScript()
-				.add(new CreateComplexVarInstruction("var", mapper1))
-				.add(new SetComplexInstruction("var", "integer", Integer.class, "4"))
-				.add(new SetComplexInstruction("var", "string", String.class, "test"))
-				.add(new PutInstruction("${var.integer}", Integer.class, 0))
-				.add(new PutInstruction("${var.string}", String.class, 1))
-				.add(new EmitInstruction()).add(pauseInstruction)
-				.add(new StopInstruction())
-				.buildScript("testScriptCancellation");
+        assertTrue(runner.isDone());
+        assertFalse(runner.isCancelled());
+        assertThat(result, notNullValue());
+    }
 
-		SynchronizerScriptHandler syncHandler = new SynchronizerScriptHandler();
-		Runner runner = Executor.execute(pauseScript, syncHandler);
-		assertFalse(runner.isDone());
-		runner.cancel();
-		pauseInstruction.resume();
+    @Test
+    public void testScriptCancellation() throws InterruptedException,
+            ScriptException {
+        PauseInstruction pauseInstruction = new PauseInstruction();
+        Script pauseScript = ScriptBuilder.newScript()
+                .add(new CreateComplexVarInstruction("var", mapper1))
+                .add(new SetComplexInstruction("var", "integer", Integer.class, "4"))
+                .add(new SetComplexInstruction("var", "string", String.class, "test"))
+                .add(new PutInstruction("${var.integer}",
+                        Integer.class, 0), intAtt)
+                .add(new PutInstruction("${var.string}",
+                        String.class, 1), stringAtt)
+                .add(new EmitInstruction()).add(pauseInstruction)
+                .add(new StopInstruction())
+                .buildScript("testScriptCancellation");
 
-		assertTrue(runner.isDone());
-		assertTrue(runner.isCancelled());
+        SynchronizerScriptHandler syncHandler = new SynchronizerScriptHandler();
+        Runner runner = Executor.execute(pauseScript, syncHandler);
+        assertFalse(runner.isDone());
+        runner.cancel();
+        pauseInstruction.resume();
 
-		try {
-			syncHandler.getResult();
-		} catch (ExecutionException e) {
-			assertThat(e, notNullValue());
-			assertTrue(e.getCause() instanceof ScriptCancelledException);
-		}
-	}
+        assertTrue(runner.isDone());
+        assertTrue(runner.isCancelled());
 
-	@Test
-	public void testParameterPassing() throws InterruptedException,
-			ScriptException, ExecutionException {
-		Script script = ScriptBuilder
-				.newScript()
-				.add(new CreateComplexVarInstruction("var", mapper1))
-				.add(new SetComplexInstruction("var", "integer", Integer.class,
-						"${param['intParam']}"))
-				.add(new SetComplexInstruction("var", "string", String.class,
-						"${param['stringParam']}"))
-				.add(new PutInstruction("${var.integer}", Integer.class, 0))
-				.add(new PutInstruction("${var.string}", String.class, 1))
-				.add(new EmitInstruction()).add(new StopInstruction())
-				.buildScript("testParameterPassing");
-		ScriptParameter[] paramArray = new ScriptParameter[2];
-		paramArray[0] = new ScriptParameter("intParam", 5);
-		paramArray[1] = new ScriptParameter("stringParam", "test");
+        try {
+            syncHandler.getResult();
+        } catch (ExecutionException e) {
+            assertThat(e, notNullValue());
+            assertTrue(e.getCause() instanceof ScriptCancelledException);
+        }
+    }
 
-		SynchronizerScriptHandler syncHandler = new SynchronizerScriptHandler();
-		Executor.execute(script, paramArray, syncHandler);
+    @Test
+    public void testParameterPassing() throws InterruptedException,
+            ScriptException, ExecutionException {
+        Script script = ScriptBuilder
+                .newScript()
+                .add(new CreateComplexVarInstruction("var", mapper1))
+                .add(new SetComplexInstruction("var", "integer", Integer.class,
+                        "${param['intParam']}"))
+                .add(new SetComplexInstruction("var", "string", String.class,
+                        "${param['stringParam']}"))
+                .add(new PutInstruction("${var.integer}",
+                        Integer.class, 0), intAtt)
+                .add(new PutInstruction("${var.string}",
+                        String.class, 1), stringAtt)
+                .add(new EmitInstruction()).add(new StopInstruction())
+                .buildScript("testParameterPassing");
+        ScriptParameter[] paramArray = new ScriptParameter[2];
+        paramArray[0] = new ScriptParameter("intParam", 5);
+        paramArray[1] = new ScriptParameter("stringParam", "test");
 
-		List<Object[]> result = syncHandler.getResult();
-		assertThat(result, notNullValue());
-		assertThat(result.size(), equalTo(1));
-		Object[] sample = result.get(0);
-		assertThat((Integer) sample[0], equalTo(5));
-		assertThat((String) sample[1], equalTo("test"));
-	}
+        SynchronizerScriptHandler syncHandler = new SynchronizerScriptHandler();
+        Executor.execute(script, paramArray, syncHandler);
+
+        List<Object[]> result = syncHandler.getResult();
+        assertThat(result, notNullValue());
+        assertThat(result.size(), equalTo(1));
+        Object[] sample = result.get(0);
+        assertThat((Integer) sample[0], equalTo(5));
+        assertThat((String) sample[1], equalTo("test"));
+    }
 
     @Test
     public void testAttributeOrder() throws InterruptedException,
@@ -144,9 +159,12 @@ public class ScriptExecutorTest {
                 .add(new CreateComplexVarInstruction("var", mapper1))
                 .add(new SetComplexInstruction("var", "integer", Integer.class, "12"))
                 .add(new SetComplexInstruction("var", "string", String.class, "test_order"))
-                .add(new PutInstruction("${var.integer}", Integer.class, 0))
-                .add(new PutInstruction("${var.integer}", Integer.class, 0))
-                .add(new PutInstruction("${var.string}", String.class, 1))
+                .add(new PutInstruction("${var.integer}",
+                        Integer.class, 0), intAtt)
+                .add(new PutInstruction("${var.integer}",
+                        Integer.class, 0), intAtt)
+                .add(new PutInstruction("${var.string}",
+                        String.class, 1), stringAtt)
                 .add(new EmitInstruction())
                 .add(new StopInstruction())
                 .buildScript("testOrder");
@@ -160,114 +178,120 @@ public class ScriptExecutorTest {
 
         Object[] s = res.get(0);
         assertThat(s.length, equalTo(2));
-		assertTrue(s[0] instanceof Integer);
-		assertThat(s[0], equalTo(12));
-		assertTrue(s[1] instanceof String);
+        assertTrue(s[0] instanceof Integer);
+        assertThat(s[0], equalTo(12));
+        assertTrue(s[1] instanceof String);
         assertThat(s[1], equalTo("test_order"));
     }
 
-	@Test
-	public void testSuspension() throws InterruptedException, ScriptException,
-			ExecutionException {
-		SuspendInstruction suspendInstruction = new SuspendInstruction();
-		Script suspendScript = ScriptBuilder.newScript()
-				.add(new CreateComplexVarInstruction("var", mapper1))
-				.add(new SetComplexInstruction("var", "integer", Integer.class, "4"))
-				.add(new SetComplexInstruction("var", "string", String.class, "test"))
-				.add(new PutInstruction("${var.integer}", Integer.class, 0))
-				.add(new PutInstruction("${var.string}", String.class, 1))
-				.add(new EmitInstruction()).add(suspendInstruction)
-				.add(new StopInstruction()).buildScript("testSuspension");
+    @Test
+    public void testSuspension() throws InterruptedException, ScriptException,
+            ExecutionException {
+        SuspendInstruction suspendInstruction = new SuspendInstruction();
+        Script suspendScript = ScriptBuilder.newScript()
+                .add(new CreateComplexVarInstruction("var", mapper1))
+                .add(new SetComplexInstruction("var", "integer",Integer.class, "4"))
+                .add(new SetComplexInstruction("var", "string", String.class, "test"))
+                .add(new PutInstruction("${var.integer}",
+                        Integer.class, 0), intAtt)
+                .add(new PutInstruction("${var.string}",
+                        String.class, 1), stringAtt)
+                .add(new EmitInstruction()).add(suspendInstruction)
+                .add(new StopInstruction()).buildScript("testSuspension");
 
-		SynchronizerScriptHandler syncHandler = new SynchronizerScriptHandler();
-		Runner runner = Executor.execute(suspendScript, syncHandler);
+        SynchronizerScriptHandler syncHandler = new SynchronizerScriptHandler();
+        Runner runner = Executor.execute(suspendScript, syncHandler);
 
-		suspendInstruction.waitSuspend();
-		assertFalse(runner.isDone());
-		assertFalse(runner.isCancelled());
+        suspendInstruction.waitSuspend();
+        assertFalse(runner.isDone());
+        assertFalse(runner.isCancelled());
 
-		Executor.resume(runner);
-		List<Object[]> samples = syncHandler.getResult();
-		assertTrue(runner.isDone());
-		assertFalse(runner.isCancelled());
-		assertFalse(samples.isEmpty());
-	}
+        Executor.resume(runner);
+        List<Object[]> samples = syncHandler.getResult();
+        assertTrue(runner.isDone());
+        assertFalse(runner.isCancelled());
+        assertFalse(samples.isEmpty());
+    }
 
-	@Test
-	public void testScriptTimestampCreation() throws Exception {
-		Script script = ScriptBuilder.newScript()
-				.add(new PutInstruction("${now()}", Instant.class, 0))
-				.add(new EmitInstruction())
-				.add(new StopInstruction())
-				.buildScript("timestamp");
+    @Test
+    public void testScriptTimestampCreation() throws Exception {
+        Script script = ScriptBuilder.newScript()
+                .add(new PutInstruction("${now()}",
+                        Instant.class, 0), tsAtt)
+                .add(new EmitInstruction())
+                .add(new StopInstruction())
+                .buildScript("timestamp");
 
-		SynchronizerScriptHandler h = new SynchronizerScriptHandler();
-		Executor.execute(script, h);
-		List<Object[]> res = h.getResult();
-		assertThat(res, notNullValue());
-		assertThat(res.size(), equalTo(1));
-		assertTrue(res.get(0)[0] instanceof Instant);
-		assertThat((Instant) res.get(0)[0], lessThanOrEqualTo(Instant.now()));
-	}
+        SynchronizerScriptHandler h = new SynchronizerScriptHandler();
+        Executor.execute(script, h);
+        List<Object[]> res = h.getResult();
+        assertThat(res, notNullValue());
+        assertThat(res.size(), equalTo(1));
+        assertTrue(res.get(0)[0] instanceof Instant);
+        assertThat((Instant) res.get(0)[0], lessThanOrEqualTo(Instant.now()));
+    }
 
-	@Test
-	public void testInstructionLocalVariable() {
-		Runner runner1 = new Runner(emitScript, Executor.EMPTY_PARAMETER_ARRAY,
-				null, null);
-		Runner runner2 = new Runner(emitScript, Executor.EMPTY_PARAMETER_ARRAY,
-				null, null);
+    @Test
+    public void testInstructionLocalVariable() {
+        Runner runner1 = new Runner(emitScript, Executor.EMPTY_PARAMETER_ARRAY,
+                null, null);
+        Runner runner2 = new Runner(emitScript, Executor.EMPTY_PARAMETER_ARRAY,
+                null, null);
 
-		InstructionLocal<Integer> il = new InstructionLocal<>(5);
+        InstructionLocal<Integer> il = new InstructionLocal<>(5);
 
-		assertThat(il.getValue(runner1), equalTo(il.getValue(runner2)));
+        assertThat(il.getValue(runner1), equalTo(il.getValue(runner2)));
 
-		il.setValue(runner1, 12);
-		il.setValue(runner2, 0);
+        il.setValue(runner1, 12);
+        il.setValue(runner2, 0);
 
-		assertThat(il.getValue(runner1), not(equalTo(il.getValue(runner2))));
-		assertThat(il.getValue(runner1), equalTo(12));
-		assertThat(il.getValue(runner2), equalTo(0));
-	}
+        assertThat(il.getValue(runner1), not(equalTo(il.getValue(runner2))));
+        assertThat(il.getValue(runner1), equalTo(12));
+        assertThat(il.getValue(runner2), equalTo(0));
+    }
 
-	@Test
-	public void testHandlerError() throws InterruptedException {
-		Script s = ScriptBuilder.newScript()
-				.add(new StopInstruction())
-				.buildScript("test");
-		ErrorScriptHandler handler = new ErrorScriptHandler();
-		Executor.execute(s, handler);
-		Throwable e = handler.awaitError();
-		assertTrue(e instanceof ScriptException);
-	}
+    @Test
+    public void testHandlerError() throws InterruptedException {
+        Script s = ScriptBuilder.newScript()
+                .add(new StopInstruction())
+                .buildScript("test");
+        ErrorScriptHandler handler = new ErrorScriptHandler();
+        Executor.execute(s, handler);
+        Throwable e = handler.awaitError();
+        assertTrue(e instanceof ScriptException);
+    }
 
-	@Test
-	public void stressTest() throws InterruptedException {
-		int count = 1000;
+    @Test
+    public void stressTest() throws InterruptedException {
+        int count = 1000;
 
-		Channel channel = new LoopbackChannel();
-		IORequestBuilder request = new LoopbackIORequestBuilder("request");
-		Instruction submit = new SubmitInstruction(request, channel,
-				new RequestParameter[] { new RequestParameter("var", "var",
-						mapper1) }, "output", mapper1);
-		Script script = ScriptBuilder
-				.newScript()
-				.add(new CreateComplexVarInstruction("var", mapper1))
-				.add(new SetComplexInstruction("var", "integer", Integer.class, "12"))
-				.add(new SetComplexInstruction("var", "string", String.class, "test_order"))
-				.add(submit)
-				.add(new PutInstruction("${output.integer}", Integer.class, 0))
-				.add(new PutInstruction("${output.integer}", Integer.class, 0))
-				.add(new PutInstruction("${output.string}", String.class, 1))
-				.add(new EmitInstruction())
-				.add(new StopInstruction())
-				.buildScript("stress_test");
+        Channel channel = new LoopbackChannel();
+        IORequestBuilder request = new LoopbackIORequestBuilder("request");
+        Instruction submit = new SubmitInstruction(request, channel,
+                new RequestParameter[] { new RequestParameter("var", "var",
+                        mapper1) }, "output", mapper1);
+        Script script = ScriptBuilder
+                .newScript()
+                .add(new CreateComplexVarInstruction("var", mapper1))
+                .add(new SetComplexInstruction("var", "integer", Integer.class, "12"))
+                .add(new SetComplexInstruction("var", "string", String.class, "test_order"))
+                .add(submit)
+                .add(new PutInstruction("${output.integer}",
+                        Integer.class, 0), intAtt)
+                .add(new PutInstruction("${output.integer}",
+                        Integer.class, 0), intAtt)
+                .add(new PutInstruction("${output.string}",
+                        String.class, 1), stringAtt)
+                .add(new EmitInstruction())
+                .add(new StopInstruction())
+                .buildScript("stress_test");
 
-		LatchingScriptHandler h = new LatchingScriptHandler(count);
-		for (int i = 0; i < count; i++) {
-			Executor.execute(script, h);
-		}
+        LatchingScriptHandler h = new LatchingScriptHandler(count);
+        for (int i = 0; i < count; i++) {
+            Executor.execute(script, h);
+        }
 
-		h.await();
-	}
+        h.await();
+    }
 
 }

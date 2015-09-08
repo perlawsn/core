@@ -17,37 +17,49 @@ import java.util.List;
 public class ScriptBuilder {
 
     private final List<Attribute> emit = new ArrayList<>();
-	private Instruction first = null;
-	private Instruction last = null;
+    private Instruction first = null;
+    private Instruction last = null;
 
-	public static ScriptBuilder newScript() {
-		return new ScriptBuilder();
-	}
+    public static ScriptBuilder newScript() {
+        return new ScriptBuilder();
+    }
 
-	// Private constructor, new instances of the ScriptBuilder class have to be
-	// created using the static newScript method.
-	private ScriptBuilder() {
-	}
+    // Private constructor, new instances of the ScriptBuilder class have to be
+    // created using the static newScript method.
+    private ScriptBuilder() {
+    }
 
-	public ScriptBuilder add(Instruction in) {
-		if (first == null) {
-			first = last = in;
-		} else {
-			last.setNext(in);
-			last = in;
-		}
+    public ScriptBuilder add(Instruction in) {
+        if (in instanceof PutInstruction) {
+            throw new RuntimeException(
+                    "Use add(PutInstruction, Attribute) method");
+        }
 
-		throw new RuntimeException("look here, unimplemented");
-//        if (in instanceof PutInstruction) {
-//            PutInstruction put = (PutInstruction) in;
-//            Attribute a = Attribute.create(put.getAttribute());
-//            if (!emit.contains(a)) {
-//                emit.add(a);
-//            }
-//        }
+        if (first == null) {
+            first = last = in;
+        } else {
+            last.setNext(in);
+            last = in;
+        }
 
-		//return this;
-	}
+        return this;
+    }
+
+    public ScriptBuilder add(PutInstruction in, Attribute a) {
+        if (first == null) {
+            first = last = in;
+        } else {
+            last.setNext(in);
+            last = in;
+        }
+
+        PutInstruction put = (PutInstruction) in;
+        if (!emit.contains(a)) {
+            emit.add(a);
+        }
+
+        return this;
+    }
 
     public ScriptBuilder extraEmit(List<Attribute> atts) {
         for (Attribute a : atts) {
@@ -59,12 +71,12 @@ public class ScriptBuilder {
         return this;
     }
 
-	public Script buildScript(String name) {
-		if (!(last instanceof StopInstruction)) {
-			this.add(new StopInstruction());
-		}
-		return new Script(name, first, emit, Collections.emptyList());
-	}
+    public Script buildScript(String name) {
+        if (!(last instanceof StopInstruction)) {
+            this.add(new StopInstruction());
+        }
+        return new Script(name, first, emit, Collections.emptyList());
+    }
 
     public Instruction getCode() {
         return first;

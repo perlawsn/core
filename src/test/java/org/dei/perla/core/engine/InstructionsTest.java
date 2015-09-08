@@ -444,9 +444,12 @@ public class InstructionsTest {
                         "test"))
                 .add(new SetComplexInstruction("var", "bool", Boolean.class,
                         "false"))
-                .add(new PutInstruction("${var.integer}", Integer.class, 0))
-                .add(new PutInstruction("${var.string}", String.class, 1))
-                .add(new PutInstruction("${!var.bool}", Boolean.class, 2))
+                .add(new PutInstruction("${var.integer}", Integer.class, 0),
+                        intAtt)
+                .add(new PutInstruction("${var.string}", String.class, 1),
+                        stringAtt)
+                .add(new PutInstruction("${!var.bool}", Boolean.class, 2),
+                        boolAtt)
                 .add(new EmitInstruction()).add(new StopInstruction())
                 .buildScript("testPutEmitInstructions");
 
@@ -497,9 +500,12 @@ public class InstructionsTest {
                         "false"))
                 .add(new SetComplexInstruction("var2", "var1",
                         FpcMessage.class, "${var1}"))
-                .add(new PutInstruction("${var2.var1.integer}", Integer.class, 0))
-                .add(new PutInstruction("${var2.var1.string}", String.class, 1))
-                .add(new PutInstruction("${!var2.var1.bool}", Boolean.class, 2))
+                .add(new PutInstruction("${var2.var1.integer}",
+                        Integer.class, 0), intAtt)
+                .add(new PutInstruction("${var2.var1.string}",
+                        String.class, 1), stringAtt)
+                .add(new PutInstruction("${!var2.var1.bool}",
+                        Boolean.class, 2), boolAtt)
                 .add(new EmitInstruction()).add(new StopInstruction())
                 .buildScript("testPutEmitInstructions");
 
@@ -545,22 +551,28 @@ public class InstructionsTest {
                         "4"))
                 .add(new SetComplexInstruction("var", "string", String.class,
                         "test"))
-                .add(new PutInstruction("${var.integer}", Integer.class, 0))
-                .add(new PutInstruction("${var.string}", String.class, 1))
+                .add(new PutInstruction("${var.integer}",
+                        Integer.class, 0), intAtt)
+                .add(new PutInstruction("${var.string}",
+                        String.class, 1), stringAtt)
                 .add(new EmitInstruction())
                 .add(new SetComplexInstruction("var", "integer", Integer.class,
                         "5"))
                 .add(new SetComplexInstruction("var", "string", String.class,
                         "test"))
-                .add(new PutInstruction("${var.integer}", Integer.class, 0))
-                .add(new PutInstruction("${var.string}", String.class, 1))
+                .add(new PutInstruction("${var.integer}",
+                        Integer.class, 0), intAtt)
+                .add(new PutInstruction("${var.string}",
+                        String.class, 1), stringAtt)
                 .add(new EmitInstruction())
                 .add(new SetComplexInstruction("var", "integer", Integer.class,
                         "6"))
                 .add(new SetComplexInstruction("var", "string", String.class,
                         "test"))
-                .add(new PutInstruction("${var.integer}", Integer.class, 0))
-                .add(new PutInstruction("${var.string}", String.class, 1))
+                .add(new PutInstruction("${var.integer}",
+                        Integer.class, 0), intAtt)
+                .add(new PutInstruction("${var.string}",
+                        String.class, 1), stringAtt)
                 .add(new EmitInstruction()).add(new StopInstruction())
                 .buildScript("testMultiplePutEmitInstructions");
 
@@ -681,8 +693,10 @@ public class InstructionsTest {
                 .add(new SetComplexInstruction("param", "string", String.class,
                         "test"))
                 .add(submit)
-                .add(new PutInstruction("${output.integer}", Integer.class, 0))
-                .add(new PutInstruction("${output.string}", Integer.class, 1))
+                .add(new PutInstruction("${output.integer}",
+                        Integer.class, 0), intAtt)
+                .add(new PutInstruction("${output.string}",
+                        String.class, 1), stringAtt)
                 .add(new EmitInstruction()).add(new StopInstruction())
                 .buildScript("testSubmitInstruction");
 
