@@ -1,20 +1,7 @@
 package org.dei.perla.core.message.json;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javassist.CannotCompileException;
-import javassist.ClassPool;
-import javassist.CtClass;
-import javassist.CtConstructor;
-import javassist.CtField;
-import javassist.CtMethod;
-import javassist.Modifier;
-import javassist.NotFoundException;
+import javassist.*;
 import javassist.bytecode.BadBytecode;
-
 import org.dei.perla.core.descriptor.FieldDescriptor;
 import org.dei.perla.core.descriptor.InvalidDeviceDescriptorException;
 import org.dei.perla.core.descriptor.MessageDescriptor;
@@ -26,6 +13,11 @@ import org.dei.perla.core.message.Mapper;
 import org.dei.perla.core.utils.Check;
 import org.dei.perla.core.utils.Conditions;
 import org.dei.perla.core.utils.Errors;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A factory for generating <code>JsonMapper</code>s. This class dynamically
@@ -53,6 +45,12 @@ public class JsonMapperFactory extends AbstractMapperFactory {
 		JsonMessageContext ctx = new JsonMessageContext(descriptor, classPool,
 				mapperMap);
 		Errors err = new Errors(OBJECT_CONTEXT, descriptor.getId());
+		if (!(descriptor instanceof JsonObjectDescriptor)) {
+			throw new InvalidDeviceDescriptorException(
+					"Wrong descriptor class: expected JsonObjectDescriptor " +
+							"but received '" +
+							descriptor.getClass().getName() + "'");
+		}
 		JsonObjectDescriptor desc = (JsonObjectDescriptor) descriptor;
 
 		Class<FpcMessage> msgClass = createObject(desc, ctx, err);
@@ -180,9 +178,14 @@ public class JsonMapperFactory extends AbstractMapperFactory {
 		}
 		String className = ((JsonMapper) mapper).getMessageClassName();
 		CtClass fieldClass = createCtClass(className, ctx, err);
+		if (fieldClass == null) {
+			return null;
+		}
 		addAttributeGetSetCode(field, ctx, className);
-		ctx.validatorCode.append("if (!$0." + field.getName()
-				+ ".validate()) {\n\t return false; }\n");
+		ctx.validatorCode
+				.append("if (!$0.")
+				.append(field.getName())
+				.append(".validate()) {\n\t return false; }\n");
 
 		CtField ctField = new CtField(fieldClass, field.getName(), ctx.ctClass);
 		ctField.setModifiers(Modifier.PUBLIC);
@@ -195,30 +198,40 @@ public class JsonMapperFactory extends AbstractMapperFactory {
 			JsonMessageContext ctx, Errors err) throws CannotCompileException {
 		String className = "java.util.ArrayList";
 		CtClass fieldClass = createCtClass(className, ctx, err);
+		if (fieldClass == null) {
+			return null;
+		}
 		addAttributeGetSetCode(field, ctx, className);
 
 		// Validate all elements whose type is complex
 		ctx.validatorCode
-				.append("for (int i = 0; i < $0."
-						+ field.getName()
-						+ ".size(); i++) {\n\t "
-						+ "if (!($0."
-						+ field.getName()
-						+ ".get(i) instanceof org.dei.perla.core.message.FpcMessage)) { continue; }"
-						+ "org.dei.perla.core.message.FpcMessage m = (org.dei.perla.core.message.FpcMessage) $0."
-						+ field.getName()
-						+ ".get(i);\n"
-						+ "if (m instanceof org.dei.perla.core.message.FpcMessage && !m.validate()) {\n\t\t return false; \n\t } \n}");
+				.append("for (int i = 0; i < $0.")
+				.append(field.getName())
+				.append(".size(); i++) {\n\t ")
+				.append("if (!($0.")
+				.append(field.getName())
+				.append(".get(i) instanceof org.dei.perla.core.message.FpcMessage)) { continue; }")
+				.append("org.dei.perla.core.message.FpcMessage m = (org.dei.perla.core.message.FpcMessage) $0.")
+				.append(field.getName())
+				.append(".get(i);\n")
+				.append("if (m instanceof org.dei.perla.core.message.FpcMessage && !m.validate()) {\n\t\t return false; \n\t } \n}");
 
 		// Append method
-		ctx.appendElementCode.append("if (\"" + field.getName()
-					+ "\".equals($1)) { $0." + field.getName() + ".add($2); return; }");
+		ctx.appendElementCode
+				.append("if (\"")
+                .append(field.getName())
+				.append("\".equals($1)) { $0.")
+				.append(field.getName())
+				.append(".add($2)")
+				.append("; return; }");
 
 		CtField ctField = new CtField(fieldClass, field.getName(), ctx.ctClass);
 		ctField.setModifiers(Modifier.PUBLIC);
 		ctx.ctClass.addField(ctField);
-		ctx.constructorCode.append("$0." + field.getName()
-				+ " = new java.util.ArrayList();\n");
+		ctx.constructorCode
+				.append("$0.")
+                .append(field.getName())
+				.append(" = new java.util.ArrayList();\n");
 
 		return fieldClass;
 	}
@@ -290,34 +303,52 @@ public class JsonMapperFactory extends AbstractMapperFactory {
 	 */
 	private void addValidationCode(JsonValueDescriptor field, ConcreteType type,
 			JsonMessageContext ctx, Errors err) {
-		ctx.validatorCode.append("if (!$0." + field.getName() + ".equals("
-				+ "template." + field.getName()
-				+ ")) { \n\t return false; \n}\n");
+		ctx.validatorCode
+				.append("if (!$0.")
+				.append(field.getName())
+				.append(".equals(")
+				.append("template.")
+				.append(field.getName())
+				.append(")) { \n\t return false; \n}\n");
 		addStaticValue(field, type, ctx, err);
 	}
 
 	private void addStaticValue(JsonValueDescriptor field,
 			ConcreteType type, JsonMessageContext ctx, Errors errors) {
 		if (type == DataType.STRING) {
-			ctx.constructorCode.append(field.getName() + " = \"" + field.getValue()
-					+ "\";");
+			ctx.constructorCode
+					.append(field.getName())
+					.append(" = \"")
+					.append(field.getValue())
+					.append("\";");
 		} else if (type == DataType.INTEGER) {
-			ctx.constructorCode.append(field.getName() + " = new java.lang.Integer("
-					+ field.getValue() + ");");
+			ctx.constructorCode
+					.append(field.getName())
+					.append(" = new java.lang.Integer(")
+					.append(field.getValue())
+					.append(");");
 		} else if (type == DataType.FLOAT) {
-			ctx.constructorCode.append(field.getName() + " = new java.lang.Float("
-					+ field.getValue() + "f);");
+			ctx.constructorCode
+					.append(field.getName())
+					.append(" = new java.lang.Float(")
+					.append(field.getValue())
+					.append("f);");
 		} else if (type == DataType.BOOLEAN) {
-			ctx.constructorCode.append(field.getName() + " = new java.lang.Boolean("
-					+ field.getValue() + ");");
+			ctx.constructorCode
+					.append(field.getName())
+					.append(" = new java.lang.Boolean(")
+					.append(field.getValue())
+					.append(");");
 		} else if (type == DataType.TIMESTAMP) {
-			ctx.constructorCode.append("java.time.format.DateTimeFormatter fmt;"
-					+ "fmt = java.time.format.DateTimeFormatter.ofPattern(\""
-					+ field.getFormat()
-					+ "\").withLocale(java.util.Locale.ENGLISH);"
-					+ "$0."
-					+ field.getName()
-					+ " = org.dei.perla.core.utils.DateUtils.format(fmt, " + field.getValue() + ");");
+			ctx.constructorCode
+					.append("java.time.format.DateTimeFormatter fmt;")
+					.append("fmt = java.time.format.DateTimeFormatter.ofPattern(\"")
+					.append(field.getFormat())
+					.append("\").withLocale(java.util.Locale.ENGLISH); $0.")
+					.append(field.getName())
+					.append(" = org.dei.perla.core.utils.DateUtils.format(fmt, ")
+                    .append(field.getValue())
+					.append(");");
 		} else {
 			errors.addError(MISPLACED_STATIC_QUALIFIER,
 					field.getType());
@@ -331,46 +362,64 @@ public class JsonMapperFactory extends AbstractMapperFactory {
 	private void addAttributeGetSetCode(JsonValueDescriptor field,
 			JsonMessageContext ctx, String castType) {
 
-		ctx.getFieldCode.append("if (\"" + field.getName() + "\".equals($1)) "
-				+ "{\n\t return $0." + field.getName() + ";\n}\n");
+		ctx.getFieldCode
+				.append("if (\"")
+				.append(field.getName())
+				.append("\".equals($1)) ")
+				.append("{\n\t return $0.")
+				.append(field.getName())
+				.append(";\n}\n");
 
 		if (!field.isStatic() && !field.isList()) {
-			ctx.setFieldCode.append("if (\"" + field.getName()
-					+ "\".equals($1)) " + "{\n\t $0." + field.getName()
-					+ " = (" + castType + ")$2; \n\t return; \n}\n");
+			ctx.setFieldCode
+					.append("if (\"")
+					.append(field.getName())
+					.append("\".equals($1)) ")
+					.append("{\n\t $0.")
+					.append(field.getName())
+					.append(" = (")
+					.append(castType)
+					.append(")$2; \n\t return; \n}\n");
 		}
 
-		ctx.hasFieldCode.append("if (\"" + field.getName()
-				+ "\".equals($1)) {\n\t return true; \n}\n");
+		ctx.hasFieldCode
+				.append("if (\"")
+				.append(field.getName())
+				.append("\".equals($1)) {\n\t return true; \n}\n");
 	}
 
 	private void addTimestampAttributeGetSetCode(JsonValueDescriptor field,
 			JsonMessageContext context, Errors err) {
 
-		context.getFieldCode.append("if (\"" + field.getName()
-				+ "\".equals($1)) "
-				+ "{ java.time.format.DateTimeFormatter fmt;"
-				+ "fmt = java.time.format.DateTimeFormatter.ofPattern(\""
-				+ field.getFormat() + "\")"
-                + ".withLocale(java.util.Locale.ENGLISH);"
-				+ "return org.dei.perla.core.utils.DateUtils.parse(fmt, $0."
-				+ field.getName() + "); }");
+		context.getFieldCode
+				.append("if (\"")
+				.append(field.getName())
+				.append("\".equals($1)) ")
+				.append("{ java.time.format.DateTimeFormatter fmt;")
+				.append("fmt = java.time.format.DateTimeFormatter.ofPattern(\"")
+				.append(field.getFormat())
+				.append("\")")
+                .append(".withLocale(java.util.Locale.ENGLISH);")
+				.append("return org.dei.perla.core.utils.DateUtils.parse(fmt, $0.")
+				.append(field.getName())
+				.append("); }");
 
 		if (!field.isStatic()) {
 			context.setFieldCode
-					.append("if (\""
-							+ field.getName()
-							+ "\".equals($1)) { java.time.format.DateTimeFormatter fmt;"
-							+ "fmt = java.time.format.DateTimeFormatter.ofPattern(\""
-							+ field.getFormat()
-							+ "\").withLocale(java.util.Locale.ENGLISH);"
-							+ "$0."
-							+ field.getName()
-							+ " = org.dei.perla.core.utils.DateUtils.format(fmt, $2); return; }");
+					.append("if (\"")
+					.append(field.getName())
+					.append("\".equals($1)) { java.time.format.DateTimeFormatter fmt;")
+					.append("fmt = java.time.format.DateTimeFormatter.ofPattern(\"")
+					.append(field.getFormat())
+					.append("\").withLocale(java.util.Locale.ENGLISH); $0.")
+					.append(field.getName())
+					.append(" = org.dei.perla.core.utils.DateUtils.format(fmt, $2); return; }");
 		}
 
-		context.hasFieldCode.append("if (\"" + field.getName()
-				+ "\".equals($1)) { return true; }");
+		context.hasFieldCode
+				.append("if (\"")
+				.append(field.getName())
+				.append("\".equals($1)) { return true; }");
 	}
 
 	/*
