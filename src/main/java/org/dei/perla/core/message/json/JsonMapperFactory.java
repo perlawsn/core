@@ -19,6 +19,7 @@ import org.dei.perla.core.descriptor.FieldDescriptor;
 import org.dei.perla.core.descriptor.InvalidDeviceDescriptorException;
 import org.dei.perla.core.descriptor.MessageDescriptor;
 import org.dei.perla.core.fpc.DataType;
+import org.dei.perla.core.fpc.DataType.ConcreteType;
 import org.dei.perla.core.message.AbstractMapperFactory;
 import org.dei.perla.core.message.FpcMessage;
 import org.dei.perla.core.message.Mapper;
@@ -227,7 +228,7 @@ public class JsonMapperFactory extends AbstractMapperFactory {
 	 */
 	private CtClass addScalarField(JsonValueDescriptor field,
 			JsonMessageContext ctx, Errors err) throws CannotCompileException {
-		DataType type = DataType.valueOf(field.getType().toUpperCase());
+		ConcreteType type = ConcreteType.parse(field.getType());
 		CtClass fieldClass = getScalarFieldClass(type, ctx, err);
 		if (fieldClass == null) {
 			return null;
@@ -250,21 +251,19 @@ public class JsonMapperFactory extends AbstractMapperFactory {
 		return fieldClass;
 	}
 
-	private CtClass getScalarFieldClass(DataType type, JsonMessageContext ctx,
-			Errors err) {
-		switch (type) {
-		case ID:
-		case INTEGER:
+	private CtClass getScalarFieldClass(ConcreteType type,
+			JsonMessageContext ctx, Errors err) {
+		if (type == DataType.ID || type == DataType.INTEGER) {
 			return createCtClass("java.lang.Integer", ctx, err);
-		case FLOAT:
-			return createCtClass("java.lang.Float", ctx, err);
-		case STRING:
+		} else if (type == DataType.FLOAT) {
+			return createCtClass("java.lang.Integer", ctx, err);
+		} else if (type == DataType.STRING) {
 			return createCtClass("java.lang.String", ctx, err);
-		case BOOLEAN:
+		} else if (type == DataType.BOOLEAN) {
 			return createCtClass("java.lang.Boolean", ctx, err);
-		case TIMESTAMP:
+		} else if (type == DataType.TIMESTAMP) {
 			return createCtClass("java.lang.String", ctx, err);
-		default:
+		} else {
 			throw new RuntimeException("Unexpected '" + type + "' DataType");
 		}
 	}
@@ -289,7 +288,7 @@ public class JsonMapperFactory extends AbstractMapperFactory {
 	 * the current field, based on the static constructor code specified in the
 	 * Device Descriptor
 	 */
-	private void addValidationCode(JsonValueDescriptor field, DataType type,
+	private void addValidationCode(JsonValueDescriptor field, ConcreteType type,
 			JsonMessageContext ctx, Errors err) {
 		ctx.validatorCode.append("if (!$0." + field.getName() + ".equals("
 				+ "template." + field.getName()
@@ -298,25 +297,20 @@ public class JsonMapperFactory extends AbstractMapperFactory {
 	}
 
 	private void addStaticValue(JsonValueDescriptor field,
-			DataType type, JsonMessageContext ctx, Errors errors) {
-		switch (type) {
-		case STRING:
+			ConcreteType type, JsonMessageContext ctx, Errors errors) {
+		if (type == DataType.STRING) {
 			ctx.constructorCode.append(field.getName() + " = \"" + field.getValue()
 					+ "\";");
-			break;
-		case INTEGER:
+		} else if (type == DataType.INTEGER) {
 			ctx.constructorCode.append(field.getName() + " = new java.lang.Integer("
 					+ field.getValue() + ");");
-			break;
-		case FLOAT:
+		} else if (type == DataType.FLOAT) {
 			ctx.constructorCode.append(field.getName() + " = new java.lang.Float("
 					+ field.getValue() + "f);");
-			break;
-		case BOOLEAN:
+		} else if (type == DataType.BOOLEAN) {
 			ctx.constructorCode.append(field.getName() + " = new java.lang.Boolean("
 					+ field.getValue() + ");");
-			break;
-		case TIMESTAMP:
+		} else if (type == DataType.TIMESTAMP) {
 			ctx.constructorCode.append("java.time.format.DateTimeFormatter fmt;"
 					+ "fmt = java.time.format.DateTimeFormatter.ofPattern(\""
 					+ field.getFormat()
@@ -324,8 +318,7 @@ public class JsonMapperFactory extends AbstractMapperFactory {
 					+ "$0."
 					+ field.getName()
 					+ " = org.dei.perla.core.utils.DateUtils.format(fmt, " + field.getValue() + ");");
-			break;
-		default:
+		} else {
 			errors.addError(MISPLACED_STATIC_QUALIFIER,
 					field.getType());
 		}

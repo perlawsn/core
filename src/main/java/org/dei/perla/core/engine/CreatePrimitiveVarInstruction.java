@@ -4,45 +4,38 @@ import org.dei.perla.core.fpc.DataType;
 
 public class CreatePrimitiveVarInstruction extends BasicInstruction {
 
-	private final String name;
-	private final DataType type;
+    private final String name;
+    private final DataType type;
 
-	public CreatePrimitiveVarInstruction(String name, DataType type) {
-		this.name = name;
-		this.type = type;
-	}
+    public CreatePrimitiveVarInstruction(String name, DataType type) {
+        this.name = name;
+        this.type = type;
+    }
 
-	protected String getVariable() {
-		return name;
-	}
+    protected String getVariable() {
+        return name;
+    }
 
-	protected DataType getType() {
-		return type;
-	}
+    protected DataType getType() {
+        return type;
+    }
 
-	@Override
-	protected void runBasic(Runner runner) throws ScriptException {
-		Object obj = null;
-		switch (type) {
-		case ID:
-		case INTEGER:
+    @Override
+    protected void runBasic(Runner runner) throws ScriptException {
+        Object obj = null;
+        if (type == DataType.ID || type == DataType.INTEGER) {
 			obj = 0;
-			break;
-		case FLOAT:
-			obj =  0.0f;
-			break;
-		case STRING:
-			obj = "";
-			break;
-		case BOOLEAN:
-			obj = false;
-			break;
-		case TIMESTAMP:
-			// TODO: Implement
-			throw new RuntimeException("unimplemented");
-		}
+		} else if (type == DataType.FLOAT) {
+            obj = 0.0f;
+        } else if (type == DataType.STRING) {
+            obj = "";
+        } else if (type == DataType.BOOLEAN) {
+            obj = false;
+        } else if (type == DataType.TIMESTAMP) {
+            throw new RuntimeException("Timestamp variables cannot be created");
+        }
 
         runner.ctx.setVariable(name, obj);
-	}
+    }
 
 }

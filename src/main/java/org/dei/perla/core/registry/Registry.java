@@ -1,6 +1,7 @@
 package org.dei.perla.core.registry;
 
 import org.dei.perla.core.fpc.Fpc;
+import org.dei.perla.core.sample.Attribute;
 
 import java.util.Collection;
 
@@ -38,8 +39,8 @@ public interface Registry {
      *                considered for selection
      * @return list of {@link Fpc} with the desired attributes
      */
-	public Collection<Fpc> get(Collection<DataTemplate> with,
-			Collection<DataTemplate> without);
+	public Collection<Fpc> get(Collection<Attribute> with,
+			Collection<Attribute> without);
 
     /**
      * Adds a new {@link Fpc} to the {@code Registry}.

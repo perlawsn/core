@@ -14,6 +14,7 @@ import org.dei.perla.core.descriptor.instructions.InstructionDescriptor;
 import org.dei.perla.core.engine.Compiler;
 import org.dei.perla.core.engine.Script;
 import org.dei.perla.core.fpc.DataType;
+import org.dei.perla.core.fpc.DataType.ConcreteType;
 import org.dei.perla.core.fpc.Fpc;
 import org.dei.perla.core.fpc.FpcCreationException;
 import org.dei.perla.core.fpc.FpcFactory;
@@ -166,7 +167,7 @@ public final class BaseFpcFactory implements FpcFactory {
             }
             ids.add(a.getId());
 
-            DataType type = parseType(a.getType());
+            DataType type = ConcreteType.parse(a.getType());
             if (type == null) {
                 err.addError(INVALID_DATA_TYPE, a.getType());
                 continue;
@@ -188,24 +189,6 @@ public final class BaseFpcFactory implements FpcFactory {
         ctx.addAttribute(idAtt);
     }
 
-    private DataType parseType(String type) {
-        switch (type.toLowerCase()) {
-            case "id":
-                return DataType.ID;
-            case "integer":
-                return DataType.INTEGER;
-            case "float":
-                return DataType.FLOAT;
-            case "string":
-                return DataType.STRING;
-            case "boolean":
-                return DataType.BOOLEAN;
-            case "timestamp":
-                return DataType.TIMESTAMP;
-            default:
-                return null;
-        }
-    }
 
     private void parseAttribute(AttributeDescriptor a, DataType type,
             ParsingContext ctx, Errors err) {
@@ -324,10 +307,11 @@ public final class BaseFpcFactory implements FpcFactory {
         }
 
         // Check Timestamp
-        if (!DataType.TIMESTAMP.is(f.getType())
+        String tsId = DataType.TIMESTAMP.getId();
+        if (!tsId.equals(f.getType())
                 && !Check.nullOrEmpty(f.getFormat())) {
             err.addError(INVALID_TIMESTMAP_FORMAT);
-        } else if (DataType.TIMESTAMP.is(f.getType())
+        } else if (tsId.equals(f.getType())
                 && !Check.nullOrEmpty(f.getFormat())) {
             err.addError(MISSING_TIMESTAMP_FORMAT);
         }
@@ -699,12 +683,18 @@ public final class BaseFpcFactory implements FpcFactory {
         protected void addAttribute(AttributeDescriptor desc) {
             String id = desc.getId();
             attDescMap.put(id, desc);
-            DataType type = parseType(desc.getType());
+            ConcreteType type = ConcreteType.parse(desc.getType());
+            if (type == null) {
+                throw new RuntimeException(
+                        "Possible bug in 'BaseFpcFactory', attribute type " +
+                                "should have already been checked");
+            }
+
             Attribute att = Attribute.create(id, type);
             attMap.put(id, att);
             atts.add(att);
             if (desc.getAccess() == AttributeAccessType.STATIC) {
-                Object v = DataType.parse(att.getType(), desc.getValue());
+                Object v = type.valueOf(desc.getValue());
                 staticAtts.put(att, v);
             }
         }

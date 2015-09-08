@@ -11,6 +11,7 @@ import org.dei.perla.core.descriptor.InvalidDeviceDescriptorException;
 import org.dei.perla.core.descriptor.instructions.*;
 import org.dei.perla.core.engine.SubmitInstruction.RequestParameter;
 import org.dei.perla.core.fpc.DataType;
+import org.dei.perla.core.fpc.DataType.ConcreteType;
 import org.dei.perla.core.message.FpcMessage;
 import org.dei.perla.core.message.Mapper;
 import org.dei.perla.core.sample.Attribute;
@@ -177,10 +178,11 @@ public class Compiler {
                     type);
             return new NoopInstruction();
         }
-        String fieldType = field.getType();
+
+        ConcreteType fieldType = ConcreteType.parse(field.getType());
         Class<?> fieldClass;
-        if (DataType.isPrimitive(fieldType)) {
-            fieldClass = DataType.getJavaClass(fieldType);
+        if (fieldType != null) {
+            fieldClass = fieldType.getJavaClass();
         } else {
             fieldClass = FpcMessage.class;
         }
@@ -226,8 +228,8 @@ public class Compiler {
             return new NoopInstruction();
         }
 
-        if (DataType.isPrimitive(d.getType())) {
-            DataType type = DataType.valueOf(d.getType().toUpperCase());
+        ConcreteType type = ConcreteType.parse(d.getType());
+        if (type != null) {
             return new CreatePrimitiveVarInstruction(d.getName(), type);
         } else {
             Mapper mapper = ctx.mappers.get(d.getType());
@@ -390,11 +392,11 @@ public class Compiler {
         }
 
         // Check field
-        if (DataType.isComplex(varType) && Check.nullOrEmpty(d.getField())) {
+        ConcreteType type = ConcreteType.parse(varType);
+        if (type == null && Check.nullOrEmpty(d.getField())) {
             err.addError(MISSING_FIELD_SET, d.getVariable(), varType);
             return new NoopInstruction();
-        } else if (DataType.isPrimitive(varType)
-                && !Check.nullOrEmpty(d.getField())) {
+        } else if (type != null && !Check.nullOrEmpty(d.getField())) {
             err.addError(INVALID_FIELD_PRIMITIVE, d.getVariable());
         }
 
@@ -408,8 +410,7 @@ public class Compiler {
         // the collection of attributes which are 'set' by this script
         extractAttributes(d.getValue(), ctx, err);
 
-        if (DataType.isPrimitive(varType)) {
-            DataType type = DataType.valueOf(varType.toUpperCase());
+        if (type != null) {
             return new SetPrimitiveInstruction(d.getVariable(),
                     type.getJavaClass(), d.getValue());
 
@@ -422,14 +423,16 @@ public class Compiler {
                 return new NoopInstruction();
             }
             // Extract field type
-            Class<?> fieldType;
-            if (!field.isList()) {
-                fieldType = DataType.getJavaClass(field.getType());
+            ConcreteType fieldType = ConcreteType.parse(field.getType());
+            Class<?> fieldClass;
+            if (field.isList()) {
+                fieldClass = List.class;
             } else {
-                fieldType = List.class;
+                fieldClass = fieldType == null ? FpcMessage.class :
+                        fieldType.getJavaClass();
             }
             return new SetComplexInstruction(d.getVariable(),
-                    d.getField(), fieldType, d.getValue());
+                    d.getField(), fieldClass, d.getValue());
         }
     }
 

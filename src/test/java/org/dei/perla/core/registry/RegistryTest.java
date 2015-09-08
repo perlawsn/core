@@ -24,28 +24,28 @@ public class RegistryTest {
 	private static final Attribute pressAtt =
 			Attribute.create("pressure", DataType.FLOAT);
 
-	private static final DataTemplate intTemp =
-			DataTemplate.create("integer", TypeClass.INTEGER);
-	private static final DataTemplate stringTemp =
-			DataTemplate.create("string", TypeClass.STRING);
-	private static final DataTemplate tempTemp =
-			DataTemplate.create("temperature", TypeClass.INTEGER);
-	private static final DataTemplate pressTemp =
-			DataTemplate.create("pressure", TypeClass.FLOAT);
+	private static final Attribute intTemp =
+			Attribute.create("integer", DataType.INTEGER);
+	private static final Attribute stringTemp =
+			Attribute.create("string", DataType.STRING);
+	private static final Attribute tempTemp =
+			Attribute.create("temperature", DataType.INTEGER);
+	private static final Attribute pressTemp =
+			Attribute.create("pressure", DataType.FLOAT);
 
-	private static final DataTemplate tempWildAny =
-			DataTemplate.create("temperature", TypeClass.ANY);
-	private static final DataTemplate tempWildNumeric =
-			DataTemplate.create("temperature", TypeClass.NUMERIC);
-	private static final DataTemplate stringWildNumeric =
-			DataTemplate.create("string", TypeClass.NUMERIC);
+	private static final Attribute tempWildAny =
+			Attribute.create("temperature", DataType.ANY);
+	private static final Attribute tempWildNumeric =
+			Attribute.create("temperature", DataType.NUMERIC);
+	private static final Attribute stringWildNumeric =
+			Attribute.create("string", DataType.NUMERIC);
 
 	@Test
 	public void singleAddition() throws Exception {
 		Registry registry = new TreeRegistry();
 		Collection<Fpc> result;
-		Set<DataTemplate> withSet = new HashSet<>();
-		Set<DataTemplate> withoutSet = new HashSet<>();
+		Set<Attribute> withSet = new HashSet<>();
+		Set<Attribute> withoutSet = new HashSet<>();
 
 		Set<Attribute> attributeSet = new TreeSet<>();
 		attributeSet.add(intAtt);
@@ -145,8 +145,8 @@ public class RegistryTest {
 	public void multipleAdditions() throws Exception {
 		Registry registry = new TreeRegistry();
 		Collection<Fpc> result;
-		Set<DataTemplate> withSet = new HashSet<>();
-		Set<DataTemplate> withoutSet = new HashSet<>();
+		Set<Attribute> withSet = new HashSet<>();
+		Set<Attribute> withoutSet = new HashSet<>();
 
 		Set<Attribute> attributeSet = new TreeSet<>();
 		attributeSet.add(intAtt);
@@ -209,7 +209,7 @@ public class RegistryTest {
 	public void testRemove() throws Exception {
 		Registry registry = new TreeRegistry();
 		Collection<Fpc> result;
-		Set<DataTemplate> withSet = new HashSet<>();
+		Set<Attribute> withSet = new HashSet<>();
 
 		Set<Attribute> attributeSet = new TreeSet<>();
 		attributeSet.add(intAtt);

@@ -61,6 +61,26 @@ public final class Attribute implements Comparable<Attribute> {
         return "Attribute[id: " + id + ", type: " + type + "]";
     }
 
+    public boolean match(Attribute a) {
+        if (!a.getId().equals(id)) {
+            return false;
+        }
+
+        if (!type.match(a.getType())) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public int compareMatch(Attribute a) {
+        int c = id.compareTo(a.getId());
+        if (c == 0) {
+            c = type.compareMatch(a.getType());
+        }
+        return c;
+    }
+
     @Override
     public int compareTo(Attribute o) {
         int idComparison = id.compareTo(o.id);
