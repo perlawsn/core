@@ -16,8 +16,10 @@ import org.dei.perla.core.descriptor.IORequestDescriptor;
 import org.dei.perla.core.descriptor.MessageDescriptor;
 import org.dei.perla.core.engine.*;
 import org.dei.perla.core.engine.SubmitInstruction.RequestParameter;
+import org.dei.perla.core.fpc.DataType;
 import org.dei.perla.core.message.Mapper;
 import org.dei.perla.core.message.MapperFactory;
+import org.dei.perla.core.sample.Attribute;
 import org.dei.perla.core.sample.SamplePipeline;
 import org.dei.perla.core.sample.SamplePipeline.PipelineBuilder;
 import org.junit.BeforeClass;
@@ -37,6 +39,17 @@ import static org.junit.Assert.assertThat;
  * @author Guido Rota 23/05/15.
  */
 public class OperationErrorTest {
+
+    private static final Attribute intAtt =
+            Attribute.create("integer", DataType.INTEGER);
+    private static final Attribute floatAtt =
+            Attribute.create("float", DataType.FLOAT);
+    private static final Attribute stringAtt =
+            Attribute.create("string", DataType.STRING);
+    private static final Attribute boolAtt =
+            Attribute.create("boolean", DataType.BOOLEAN);
+    private static final Attribute tsAtt =
+            Attribute.create("timestamp", DataType.TIMESTAMP);
 
     private static final String descriptorPath =
             "src/test/java/org/dei/perla/core/fpc/base/fpc_descriptor.xml";
@@ -94,11 +107,16 @@ public class OperationErrorTest {
                 .add(new SubmitInstruction(builMap.get("request1"), chMap
                         .get("loopback-channel"), getParameterArray, "res",
                         mmMap.get("message1")))
-                .add(new PutInstruction("${res.integer}", Integer.class, 0))
-                .add(new PutInstruction("${res.float}", Float.class, 1))
-                .add(new PutInstruction("${res.boolean}", Boolean.class, 2))
-                .add(new PutInstruction("${res.string}", String.class, 3))
-                .add(new PutInstruction("${now()}", Instant.class, 4))
+                .add(new PutInstruction("${res.integer}",
+                        Integer.class, 0), intAtt)
+                .add(new PutInstruction("${res.float}",
+                        Float.class, 1), floatAtt)
+                .add(new PutInstruction("${res.boolean}",
+                        Boolean.class, 2), boolAtt)
+                .add(new PutInstruction("${res.string}",
+                        String.class, 3), stringAtt)
+                .add(new PutInstruction("${now()}",
+                        Instant.class, 4), tsAtt)
                 .add(new EmitInstruction()).add(new StopInstruction())
                 .buildScript("test");
         getOp = new OneoffOperation("test", getScript.getEmit(), getScript);
