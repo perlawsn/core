@@ -31,10 +31,10 @@ public abstract class DataType implements Comparable<DataType> {
     private static int orderSeq = 0;
 
     private final String id;
-    protected final Integer order;
+    protected final Integer ordinal;
 
     public DataType(String id) {
-        this.order = orderSeq++;
+        this.ordinal = orderSeq++;
         this.id = id;
     }
 
@@ -46,6 +46,23 @@ public abstract class DataType implements Comparable<DataType> {
     public final String getId() {
         return id;
     }
+
+    /**
+     * Returns an ordinal number associated with the {@code DataType}. This
+     * number can be employed to order the PerLa types.
+     *
+     * @return ordinal number associated with the {@code DataType}
+     */
+    public final int ordinal() {
+        return ordinal;
+    }
+
+    /**
+     * Returns true if the type is concrete, false if it's a {@link TypeClass}
+     *
+     * @return true if the type is concrete, false if it's a {@link TypeClass}
+     */
+    public abstract boolean isConcrete();
 
     /**
      * Returns the Java class associated with the PerLa {@code DataType}.
@@ -87,9 +104,9 @@ public abstract class DataType implements Comparable<DataType> {
     public abstract int compareMatch(DataType o);
 
     public final int compareTo(DataType o) {
-        if (order.equals(o.order)) {
+        if (ordinal.equals(o.ordinal)) {
             return 0;
-        } else if (order < o.order) {
+        } else if (ordinal < o.ordinal) {
             return -1;
         } else {
             return 1;
@@ -137,6 +154,10 @@ public abstract class DataType implements Comparable<DataType> {
             this.javaClass = javaClass;
         }
 
+        public boolean isConcrete() {
+            return true;
+        }
+
         public Class<?> getJavaClass() {
             return javaClass;
         }
@@ -153,7 +174,7 @@ public abstract class DataType implements Comparable<DataType> {
             if (o instanceof TypeClass) {
                 return -1 * o.compareMatch(this);
             } else {
-                return this.order.compareTo(o.order);
+                return this.ordinal.compareTo(o.ordinal);
             }
         }
 
@@ -215,6 +236,10 @@ public abstract class DataType implements Comparable<DataType> {
         public Class<?> getJavaClass() {
             throw new RuntimeException(
                     "No Java class available for PerLa Type Class");
+        }
+
+        public boolean isConcrete() {
+            return false;
         }
 
         public boolean match(DataType o) {

@@ -16,26 +16,42 @@ public class DataTypeTest {
     @Test
     public void testParameters() {
         assertThat(DataType.ANY.getId(), equalTo("any"));
+        assertThat(DataType.ANY.ordinal(), equalTo(0));
+        assertFalse(DataType.ANY.isConcrete());
 
         assertThat(DataType.NUMERIC.getId(), equalTo("numeric"));
+        assertThat(DataType.NUMERIC.ordinal(), equalTo(1));
+        assertFalse(DataType.NUMERIC.isConcrete());
 
         assertThat(DataType.ID.getId(), equalTo("id"));
+        assertThat(DataType.ID.ordinal(), equalTo(2));
         assertThat(DataType.ID.getJavaClass(), equalTo(Integer.class));
+        assertTrue(DataType.ID.isConcrete());
 
         assertThat(DataType.INTEGER.getId(), equalTo("integer"));
-        assertThat(DataType.ID.getJavaClass(), equalTo(Integer.class));
+        assertThat(DataType.INTEGER.ordinal(), equalTo(3));
+        assertThat(DataType.INTEGER.getJavaClass(), equalTo(Integer.class));
+        assertTrue(DataType.INTEGER.isConcrete());
 
         assertThat(DataType.FLOAT.getId(), equalTo("float"));
+        assertThat(DataType.FLOAT.ordinal(), equalTo(4));
         assertThat(DataType.FLOAT.getJavaClass(), equalTo(Float.class));
+        assertTrue(DataType.FLOAT.isConcrete());
 
         assertThat(DataType.STRING.getId(), equalTo("string"));
+        assertThat(DataType.STRING.ordinal(), equalTo(5));
         assertThat(DataType.STRING.getJavaClass(), equalTo(String.class));
+        assertTrue(DataType.STRING.isConcrete());
 
         assertThat(DataType.BOOLEAN.getId(), equalTo("boolean"));
+        assertThat(DataType.BOOLEAN.ordinal(), equalTo(6));
         assertThat(DataType.BOOLEAN.getJavaClass(), equalTo(Boolean.class));
+        assertTrue(DataType.BOOLEAN.isConcrete());
 
         assertThat(DataType.TIMESTAMP.getId(), equalTo("timestamp"));
+        assertThat(DataType.TIMESTAMP.ordinal(), equalTo(7));
         assertThat(DataType.TIMESTAMP.getJavaClass(), equalTo(Instant.class));
+        assertTrue(DataType.TIMESTAMP.isConcrete());
     }
 
     @Test
