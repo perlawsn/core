@@ -1,10 +1,10 @@
-package org.dei.perla.core.sample;
+package org.dei.perla.core.fpc;
 
-import org.dei.perla.core.fpc.DataType;
-import org.dei.perla.core.sample.SampleModifier.Reorder;
-import org.dei.perla.core.sample.SampleModifier.StaticAppender;
-import org.dei.perla.core.sample.SampleModifier.TimestampAppender;
-import org.dei.perla.core.sample.SamplePipeline.PipelineBuilder;
+import org.dei.perla.core.fpc.*;
+import org.dei.perla.core.fpc.SampleModifier.Reorder;
+import org.dei.perla.core.fpc.SampleModifier.StaticAppender;
+import org.dei.perla.core.fpc.SampleModifier.TimestampAppender;
+import org.dei.perla.core.fpc.SamplePipeline.PipelineBuilder;
 import org.junit.Test;
 
 import java.time.Instant;

@@ -20,10 +20,10 @@ import org.dei.perla.core.fpc.DataType;
 import org.dei.perla.core.fpc.base.AsyncOperation.AsyncMessageHandler;
 import org.dei.perla.core.message.Mapper;
 import org.dei.perla.core.message.MapperFactory;
-import org.dei.perla.core.sample.Attribute;
-import org.dei.perla.core.sample.Sample;
-import org.dei.perla.core.sample.SamplePipeline;
-import org.dei.perla.core.sample.SamplePipeline.PipelineBuilder;
+import org.dei.perla.core.fpc.Attribute;
+import org.dei.perla.core.fpc.Sample;
+import org.dei.perla.core.fpc.SamplePipeline;
+import org.dei.perla.core.fpc.SamplePipeline.PipelineBuilder;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

@@ -1,6 +1,4 @@
-package org.dei.perla.core.sample;
-
-import org.dei.perla.core.fpc.DataType;
+package org.dei.perla.core.fpc;
 
 import java.util.HashMap;
 import java.util.Map;

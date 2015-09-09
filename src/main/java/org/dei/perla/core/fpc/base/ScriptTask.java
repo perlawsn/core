@@ -5,7 +5,7 @@ import org.dei.perla.core.engine.Runner;
 import org.dei.perla.core.engine.Script;
 import org.dei.perla.core.engine.ScriptHandler;
 import org.dei.perla.core.fpc.TaskHandler;
-import org.dei.perla.core.sample.SamplePipeline;
+import org.dei.perla.core.fpc.SamplePipeline;
 
 import java.util.List;
 

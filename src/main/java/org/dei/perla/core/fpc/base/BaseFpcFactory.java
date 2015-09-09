@@ -21,7 +21,7 @@ import org.dei.perla.core.fpc.FpcFactory;
 import org.dei.perla.core.fpc.base.AsyncOperation.AsyncMessageHandler;
 import org.dei.perla.core.message.Mapper;
 import org.dei.perla.core.message.MapperFactory;
-import org.dei.perla.core.sample.Attribute;
+import org.dei.perla.core.fpc.Attribute;
 import org.dei.perla.core.utils.Check;
 import org.dei.perla.core.utils.Conditions;
 import org.dei.perla.core.utils.Errors;

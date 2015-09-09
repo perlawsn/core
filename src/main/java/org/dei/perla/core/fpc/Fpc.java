@@ -1,7 +1,5 @@
 package org.dei.perla.core.fpc;
 
-import org.dei.perla.core.sample.Attribute;
-
 import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
@@ -27,7 +25,7 @@ public interface Fpc {
     public String getType();
 
     /**
-     * Returns the list of {@link org.dei.perla.core.sample.Attribute} managed
+     * Returns the list of {@link Attribute} managed
      * by this {@code Fpc}.
      *
      * @return attributes managed by the {@code Fpc}

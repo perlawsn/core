@@ -13,7 +13,7 @@ import org.dei.perla.core.descriptor.InvalidDeviceDescriptorException;
 import org.dei.perla.core.descriptor.instructions.*;
 import org.dei.perla.core.fpc.DataType;
 import org.dei.perla.core.message.Mapper;
-import org.dei.perla.core.sample.Attribute;
+import org.dei.perla.core.fpc.Attribute;
 import org.junit.Test;
 
 import java.util.*;

@@ -1,6 +1,6 @@
 package org.dei.perla.core.fpc.base;
 
-import org.dei.perla.core.sample.Attribute;
+import org.dei.perla.core.fpc.Attribute;
 
 import java.util.*;
 import java.util.function.Consumer;

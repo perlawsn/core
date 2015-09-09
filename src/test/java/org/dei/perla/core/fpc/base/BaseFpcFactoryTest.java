@@ -13,7 +13,7 @@ import org.dei.perla.core.fpc.DataType;
 import org.dei.perla.core.fpc.Fpc;
 import org.dei.perla.core.fpc.FpcFactory;
 import org.dei.perla.core.message.MapperFactory;
-import org.dei.perla.core.sample.Attribute;
+import org.dei.perla.core.fpc.Attribute;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

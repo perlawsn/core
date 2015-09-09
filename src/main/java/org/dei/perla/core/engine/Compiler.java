@@ -14,7 +14,7 @@ import org.dei.perla.core.fpc.DataType;
 import org.dei.perla.core.fpc.DataType.ConcreteType;
 import org.dei.perla.core.message.FpcMessage;
 import org.dei.perla.core.message.Mapper;
-import org.dei.perla.core.sample.Attribute;
+import org.dei.perla.core.fpc.Attribute;
 import org.dei.perla.core.utils.Check;
 import org.dei.perla.core.utils.Errors;
 

@@ -1,4 +1,4 @@
-package org.dei.perla.core.sample;
+package org.dei.perla.core.fpc;
 
 import java.time.Instant;
 import java.util.List;

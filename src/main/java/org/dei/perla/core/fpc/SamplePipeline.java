@@ -1,8 +1,8 @@
-package org.dei.perla.core.sample;
+package org.dei.perla.core.fpc;
 
-import org.dei.perla.core.sample.SampleModifier.Reorder;
-import org.dei.perla.core.sample.SampleModifier.StaticAppender;
-import org.dei.perla.core.sample.SampleModifier.TimestampAppender;
+import org.dei.perla.core.fpc.SampleModifier.Reorder;
+import org.dei.perla.core.fpc.SampleModifier.StaticAppender;
+import org.dei.perla.core.fpc.SampleModifier.TimestampAppender;
 
 import java.util.*;
 import java.util.Map.Entry;

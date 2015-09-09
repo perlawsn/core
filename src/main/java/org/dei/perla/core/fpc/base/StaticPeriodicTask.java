@@ -2,7 +2,7 @@ package org.dei.perla.core.fpc.base;
 
 import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.TaskHandler;
-import org.dei.perla.core.sample.Attribute;
+import org.dei.perla.core.fpc.Attribute;
 
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;

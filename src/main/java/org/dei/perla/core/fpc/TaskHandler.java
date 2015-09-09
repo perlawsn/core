@@ -1,7 +1,5 @@
 package org.dei.perla.core.fpc;
 
-import org.dei.perla.core.sample.Sample;
-
 /**
  * <p>
  * A general handler interface for collecting the result of an asynchronous Fpc

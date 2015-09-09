@@ -1,5 +1,6 @@
-package org.dei.perla.core.sample;
+package org.dei.perla.core.fpc;
 
+import org.dei.perla.core.fpc.Attribute;
 import org.dei.perla.core.fpc.DataType;
 import org.junit.Test;
 

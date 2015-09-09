@@ -2,9 +2,9 @@ package org.dei.perla.core.fpc.base;
 
 import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.fpc.TaskHandler;
-import org.dei.perla.core.sample.Sample;
-import org.dei.perla.core.sample.SamplePipeline;
-import org.dei.perla.core.sample.SamplePipeline.PipelineBuilder;
+import org.dei.perla.core.fpc.Sample;
+import org.dei.perla.core.fpc.SamplePipeline;
+import org.dei.perla.core.fpc.SamplePipeline.PipelineBuilder;
 import org.junit.Test;
 
 import java.math.BigDecimal;

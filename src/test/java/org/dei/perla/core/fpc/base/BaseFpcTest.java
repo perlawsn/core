@@ -12,8 +12,8 @@ import org.dei.perla.core.fpc.Fpc;
 import org.dei.perla.core.fpc.FpcFactory;
 import org.dei.perla.core.fpc.Task;
 import org.dei.perla.core.message.MapperFactory;
-import org.dei.perla.core.sample.Attribute;
-import org.dei.perla.core.sample.Sample;
+import org.dei.perla.core.fpc.Attribute;
+import org.dei.perla.core.fpc.Sample;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

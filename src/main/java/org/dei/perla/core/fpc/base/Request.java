@@ -1,9 +1,9 @@
 package org.dei.perla.core.fpc.base;
 
-import org.dei.perla.core.sample.Attribute;
-import org.dei.perla.core.sample.Sample;
-import org.dei.perla.core.sample.SamplePipeline;
-import org.dei.perla.core.sample.SamplePipeline.PipelineBuilder;
+import org.dei.perla.core.fpc.Attribute;
+import org.dei.perla.core.fpc.Sample;
+import org.dei.perla.core.fpc.SamplePipeline;
+import org.dei.perla.core.fpc.SamplePipeline.PipelineBuilder;
 
 import java.time.Instant;
 import java.util.*;
