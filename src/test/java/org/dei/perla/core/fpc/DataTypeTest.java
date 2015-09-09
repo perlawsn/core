@@ -1,12 +1,12 @@
 package org.dei.perla.core.fpc;
 
 import org.dei.perla.core.fpc.DataType.ConcreteType;
-
-import static org.junit.Assert.*;
-import static org.hamcrest.Matchers.*;
 import org.junit.Test;
 
 import java.time.Instant;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * @author Guido Rota 08/09/15.
@@ -16,33 +16,25 @@ public class DataTypeTest {
     @Test
     public void testParameters() {
         assertThat(DataType.ANY.getId(), equalTo("any"));
-        assertThat(DataType.ANY.getOrder(), equalTo(0));
 
         assertThat(DataType.NUMERIC.getId(), equalTo("numeric"));
-        assertThat(DataType.NUMERIC.getOrder(), equalTo(1));
 
         assertThat(DataType.ID.getId(), equalTo("id"));
-        assertThat(DataType.ID.getOrder(), equalTo(2));
         assertThat(DataType.ID.getJavaClass(), equalTo(Integer.class));
 
         assertThat(DataType.INTEGER.getId(), equalTo("integer"));
-        assertThat(DataType.INTEGER.getOrder(), equalTo(3));
         assertThat(DataType.ID.getJavaClass(), equalTo(Integer.class));
 
         assertThat(DataType.FLOAT.getId(), equalTo("float"));
-        assertThat(DataType.FLOAT.getOrder(), equalTo(4));
         assertThat(DataType.FLOAT.getJavaClass(), equalTo(Float.class));
 
         assertThat(DataType.STRING.getId(), equalTo("string"));
-        assertThat(DataType.STRING.getOrder(), equalTo(5));
         assertThat(DataType.STRING.getJavaClass(), equalTo(String.class));
 
         assertThat(DataType.BOOLEAN.getId(), equalTo("boolean"));
-        assertThat(DataType.BOOLEAN.getOrder(), equalTo(6));
         assertThat(DataType.BOOLEAN.getJavaClass(), equalTo(Boolean.class));
 
         assertThat(DataType.TIMESTAMP.getId(), equalTo("timestamp"));
-        assertThat(DataType.TIMESTAMP.getOrder(), equalTo(7));
         assertThat(DataType.TIMESTAMP.getJavaClass(), equalTo(Instant.class));
     }
 

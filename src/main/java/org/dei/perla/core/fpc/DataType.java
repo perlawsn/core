@@ -38,18 +38,52 @@ public abstract class DataType implements Comparable<DataType> {
         this.id = id;
     }
 
+    /**
+     * Returns the type identifier
+     *
+     * @return String type identifier
+     */
     public final String getId() {
         return id;
     }
 
-    protected final int getOrder() {
-        return order;
-    }
-
+    /**
+     * Returns the Java class associated with the PerLa {@code DataType}.
+     * This information is used by the middleware to determine which object
+     * type has to be instantiated in order to store a value of a well
+     * defined data type.
+     *
+     * <p> Invocation of this method only defined for concrete data types
+     * (ID, INTEGER, FLOAT, STRING, BOOLEAN, TIMESTAMP). Invocation of
+     * this method on {@link TypeClass} objects will throw an exception.
+     *
+     * @return Java class associated with the type
+     * @throws RuntimeException if the method is invoked on a {@link TypeClass}
+     */
     public abstract Class<?> getJavaClass();
 
+    /**
+     * Matches the current type with another data type. Match is different
+     * from equalTo, as it correctly identifies {@link TypeClass}es and acts
+     * accordingly, as it positively matches INTEGER and FLOAT with NUMERIC,
+     * and all concrete types to ANY.
+     *
+     * @param o type to match the current instance with
+     * @return true if the two types are compatible, false otherwise
+     */
     public abstract boolean match(DataType o);
 
+    /**
+     * Similar to {@code match}, provides an additional ordering between types.
+     *
+     * <p> Returns 0 whenever {@code match} return true, otherwise returns
+     * the relative order between types (types order follows their
+     * declaration order in this class).
+     *
+     * @param o
+     * @return 0 if the types are equal or match, < 0 if the current object is
+     * lower than the other, > 0 otherwise.
+     */
     public abstract int compareMatch(DataType o);
 
     public final int compareTo(DataType o) {
@@ -62,6 +96,19 @@ public abstract class DataType implements Comparable<DataType> {
         }
     }
 
+    @Override
+    public String toString() {
+        return id;
+    }
+
+    /**
+     * Indicates if the string passed as parameter corresponds to the id of
+     * one of the concrete PerLa data types.
+     *
+     * @param name String to check
+     * @return true if the String corresponds to the identifier of one of the
+     * concrete PerLa types, false otherwise.
+     */
     public static boolean isPrimitive(String name) {
         if (name.equals(ID.getId()) ||
                 name.equals(INTEGER.getId()) ||
@@ -171,10 +218,10 @@ public abstract class DataType implements Comparable<DataType> {
         }
 
         public boolean match(DataType o) {
-            if (this == ANY) {
+            if (this == ANY || o == ANY) {
                 return true;
             } else if (this == NUMERIC) {
-                return o == INTEGER || o == FLOAT;
+                return o == INTEGER || o == FLOAT || o == NUMERIC;
             } else {
                 throw new RuntimeException("Unknown TypeClass '" + this + "'");
             }
