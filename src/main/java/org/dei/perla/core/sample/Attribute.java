@@ -5,6 +5,12 @@ import org.dei.perla.core.fpc.DataType;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * An {@code Attribute} is an object that describes a data element that can
+ * be set or retrieved using an FPC.
+ *
+ * @author Guido Rota (2015)
+ */
 public final class Attribute implements Comparable<Attribute> {
 
     private static final Map<String, Attribute> cache = new HashMap<>();
@@ -32,10 +38,20 @@ public final class Attribute implements Comparable<Attribute> {
         return a;
     }
 
+    /**
+     * Returns the {@code Attribute} identifier
+     *
+     * @return {@code Attribute} identifier
+     */
     public String getId() {
         return id;
     }
 
+    /**
+     * Returns the {@code Attribute} type
+     *
+     * @return {@code Attribute} type
+     */
     public DataType getType() {
         return type;
     }
@@ -61,6 +77,14 @@ public final class Attribute implements Comparable<Attribute> {
         return "Attribute[id: " + id + ", type: " + type + "]";
     }
 
+    /**
+     * Matches the current attribute with another one. Matching consists in
+     * equalling the ID, and matching the attributes' data types. See the
+     * {@code DataType.match()} method for further information.
+     *
+     * @param a {@code Attribute} to match
+     * @return true if the two attributes match, false otherwise
+     */
     public boolean match(Attribute a) {
         if (!a.getId().equals(id)) {
             return false;
@@ -73,6 +97,15 @@ public final class Attribute implements Comparable<Attribute> {
         return true;
     }
 
+    /**
+     * Similar to {@code match}, provides an additional ordering between
+     * types. Attribute order is computed using the attributes' ids first, and
+     * then compare-matching the attributes' data types.
+     *
+     * @param o
+     * @return 0 if the attributes are equal or match, < 0 if the current
+     * object is lower than the other, > 0 otherwise.
+     */
     public int compareMatch(Attribute a) {
         int c = id.compareTo(a.getId());
         if (c == 0) {
