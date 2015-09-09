@@ -66,4 +66,148 @@ public class DataTypeTest {
         assertThat(DataType.BOOLEAN.valueOf("false"), equalTo(false));
     }
 
+    @Test
+    public void testIsPrimitive() {
+        assertTrue(DataType.isPrimitive("id"));
+        assertTrue(DataType.isPrimitive("integer"));
+        assertTrue(DataType.isPrimitive("float"));
+        assertTrue(DataType.isPrimitive("string"));
+        assertTrue(DataType.isPrimitive("boolean"));
+        assertTrue(DataType.isPrimitive("timestamp"));
+    }
+
+    @Test
+    public void testMatch() {
+        assertTrue(DataType.ANY.match(DataType.ID));
+        assertTrue(DataType.ANY.match(DataType.INTEGER));
+        assertTrue(DataType.ANY.match(DataType.FLOAT));
+        assertTrue(DataType.ANY.match(DataType.STRING));
+        assertTrue(DataType.ANY.match(DataType.BOOLEAN));
+        assertTrue(DataType.ANY.match(DataType.TIMESTAMP));
+
+        assertTrue(DataType.NUMERIC.match(DataType.INTEGER));
+        assertTrue(DataType.NUMERIC.match(DataType.FLOAT));
+        assertFalse(DataType.NUMERIC.match(DataType.ID));
+        assertFalse(DataType.NUMERIC.match(DataType.STRING));
+        assertFalse(DataType.NUMERIC.match(DataType.BOOLEAN));
+        assertFalse(DataType.NUMERIC.match(DataType.TIMESTAMP));
+
+        assertTrue(DataType.ID.match(DataType.ID));
+        assertFalse(DataType.ID.match(DataType.INTEGER));
+        assertFalse(DataType.ID.match(DataType.FLOAT));
+        assertFalse(DataType.ID.match(DataType.STRING));
+        assertFalse(DataType.ID.match(DataType.BOOLEAN));
+        assertFalse(DataType.ID.match(DataType.TIMESTAMP));
+
+        assertFalse(DataType.INTEGER.match(DataType.ID));
+        assertTrue(DataType.INTEGER.match(DataType.INTEGER));
+        assertFalse(DataType.INTEGER.match(DataType.FLOAT));
+        assertFalse(DataType.INTEGER.match(DataType.STRING));
+        assertFalse(DataType.INTEGER.match(DataType.BOOLEAN));
+        assertFalse(DataType.INTEGER.match(DataType.TIMESTAMP));
+
+        assertFalse(DataType.FLOAT.match(DataType.ID));
+        assertFalse(DataType.FLOAT.match(DataType.INTEGER));
+        assertTrue(DataType.FLOAT.match(DataType.FLOAT));
+        assertFalse(DataType.FLOAT.match(DataType.STRING));
+        assertFalse(DataType.FLOAT.match(DataType.BOOLEAN));
+        assertFalse(DataType.FLOAT.match(DataType.TIMESTAMP));
+
+        assertFalse(DataType.STRING.match(DataType.ID));
+        assertFalse(DataType.STRING.match(DataType.INTEGER));
+        assertFalse(DataType.STRING.match(DataType.FLOAT));
+        assertTrue(DataType.STRING.match(DataType.STRING));
+        assertFalse(DataType.STRING.match(DataType.BOOLEAN));
+        assertFalse(DataType.STRING.match(DataType.TIMESTAMP));
+
+        assertFalse(DataType.BOOLEAN.match(DataType.ID));
+        assertFalse(DataType.BOOLEAN.match(DataType.INTEGER));
+        assertFalse(DataType.BOOLEAN.match(DataType.FLOAT));
+        assertFalse(DataType.BOOLEAN.match(DataType.STRING));
+        assertTrue(DataType.BOOLEAN.match(DataType.BOOLEAN));
+        assertFalse(DataType.BOOLEAN.match(DataType.TIMESTAMP));
+
+        assertFalse(DataType.TIMESTAMP.match(DataType.ID));
+        assertFalse(DataType.TIMESTAMP.match(DataType.INTEGER));
+        assertFalse(DataType.TIMESTAMP.match(DataType.FLOAT));
+        assertFalse(DataType.TIMESTAMP.match(DataType.STRING));
+        assertFalse(DataType.TIMESTAMP.match(DataType.BOOLEAN));
+        assertTrue(DataType.TIMESTAMP.match(DataType.TIMESTAMP));
+    }
+
+    @Test
+    public void testCompareMatch() {
+        assertThat(DataType.ANY.compareMatch(DataType.ID), equalTo(0));
+        assertThat(DataType.ANY.compareMatch(DataType.INTEGER), equalTo(0));
+        assertThat(DataType.ANY.compareMatch(DataType.FLOAT), equalTo(0));
+        assertThat(DataType.ANY.compareMatch(DataType.STRING), equalTo(0));
+        assertThat(DataType.ANY.compareMatch(DataType.BOOLEAN), equalTo(0));
+        assertThat(DataType.ANY.compareMatch(DataType.TIMESTAMP), equalTo(0));
+        assertThat(DataType.ANY.compareMatch(DataType.NUMERIC), equalTo(0));
+        assertThat(DataType.ANY.compareMatch(DataType.ANY), equalTo(0));
+
+        assertThat(DataType.NUMERIC.compareMatch(DataType.ID), lessThan(0));
+        assertThat(DataType.NUMERIC.compareMatch(DataType.INTEGER), equalTo(0));
+        assertThat(DataType.NUMERIC.compareMatch(DataType.FLOAT), equalTo(0));
+        assertThat(DataType.NUMERIC.compareMatch(DataType.STRING), lessThan(0));
+        assertThat(DataType.NUMERIC.compareMatch(DataType.BOOLEAN), lessThan(0));
+        assertThat(DataType.NUMERIC.compareMatch(DataType.TIMESTAMP), lessThan(0));
+        assertThat(DataType.NUMERIC.compareMatch(DataType.NUMERIC), equalTo(0));
+        assertThat(DataType.NUMERIC.compareMatch(DataType.ANY), equalTo(0));
+
+        assertThat(DataType.ID.compareMatch(DataType.ID), equalTo(0));
+        assertThat(DataType.ID.compareMatch(DataType.INTEGER), lessThan(0));
+        assertThat(DataType.ID.compareMatch(DataType.FLOAT), lessThan(0));
+        assertThat(DataType.ID.compareMatch(DataType.STRING), lessThan(0));
+        assertThat(DataType.ID.compareMatch(DataType.BOOLEAN), lessThan(0));
+        assertThat(DataType.ID.compareMatch(DataType.TIMESTAMP), lessThan(0));
+        assertThat(DataType.ID.compareMatch(DataType.NUMERIC), greaterThan(0));
+        assertThat(DataType.ID.compareMatch(DataType.ANY), equalTo(0));
+
+        assertThat(DataType.INTEGER.compareMatch(DataType.ID), greaterThan(0));
+        assertThat(DataType.INTEGER.compareMatch(DataType.INTEGER), equalTo(0));
+        assertThat(DataType.INTEGER.compareMatch(DataType.FLOAT), lessThan(0));
+        assertThat(DataType.INTEGER.compareMatch(DataType.STRING), lessThan(0));
+        assertThat(DataType.INTEGER.compareMatch(DataType.BOOLEAN), lessThan(0));
+        assertThat(DataType.INTEGER.compareMatch(DataType.TIMESTAMP), lessThan(0));
+        assertThat(DataType.INTEGER.compareMatch(DataType.NUMERIC), equalTo(0));
+        assertThat(DataType.INTEGER.compareMatch(DataType.ANY), equalTo(0));
+
+        assertThat(DataType.FLOAT.compareMatch(DataType.ID), greaterThan(0));
+        assertThat(DataType.FLOAT.compareMatch(DataType.INTEGER), greaterThan(0));
+        assertThat(DataType.FLOAT.compareMatch(DataType.FLOAT), equalTo(0));
+        assertThat(DataType.FLOAT.compareMatch(DataType.STRING), lessThan(0));
+        assertThat(DataType.FLOAT.compareMatch(DataType.BOOLEAN), lessThan(0));
+        assertThat(DataType.FLOAT.compareMatch(DataType.TIMESTAMP), lessThan(0));
+        assertThat(DataType.FLOAT.compareMatch(DataType.NUMERIC), equalTo(0));
+        assertThat(DataType.FLOAT.compareMatch(DataType.ANY), equalTo(0));
+
+        assertThat(DataType.STRING.compareMatch(DataType.ID), greaterThan(0));
+        assertThat(DataType.STRING.compareMatch(DataType.INTEGER), greaterThan(0));
+        assertThat(DataType.STRING.compareMatch(DataType.FLOAT), greaterThan(0));
+        assertThat(DataType.STRING.compareMatch(DataType.STRING), equalTo(0));
+        assertThat(DataType.STRING.compareMatch(DataType.BOOLEAN), lessThan(0));
+        assertThat(DataType.STRING.compareMatch(DataType.TIMESTAMP), lessThan(0));
+        assertThat(DataType.STRING.compareMatch(DataType.NUMERIC), greaterThan(0));
+        assertThat(DataType.STRING.compareMatch(DataType.ANY), equalTo(0));
+
+        assertThat(DataType.BOOLEAN.compareMatch(DataType.ID), greaterThan(0));
+        assertThat(DataType.BOOLEAN.compareMatch(DataType.INTEGER), greaterThan(0));
+        assertThat(DataType.BOOLEAN.compareMatch(DataType.FLOAT), greaterThan(0));
+        assertThat(DataType.BOOLEAN.compareMatch(DataType.STRING), greaterThan(0));
+        assertThat(DataType.BOOLEAN.compareMatch(DataType.BOOLEAN), equalTo(0));
+        assertThat(DataType.BOOLEAN.compareMatch(DataType.TIMESTAMP), lessThan(0));
+        assertThat(DataType.BOOLEAN.compareMatch(DataType.NUMERIC), greaterThan(0));
+        assertThat(DataType.BOOLEAN.compareMatch(DataType.ANY), equalTo(0));
+
+        assertThat(DataType.TIMESTAMP.compareMatch(DataType.ID), greaterThan(0));
+        assertThat(DataType.TIMESTAMP.compareMatch(DataType.INTEGER), greaterThan(0));
+        assertThat(DataType.TIMESTAMP.compareMatch(DataType.FLOAT), greaterThan(0));
+        assertThat(DataType.TIMESTAMP.compareMatch(DataType.STRING), greaterThan(0));
+        assertThat(DataType.TIMESTAMP.compareMatch(DataType.BOOLEAN), greaterThan(0));
+        assertThat(DataType.TIMESTAMP.compareMatch(DataType.TIMESTAMP), equalTo(0));
+        assertThat(DataType.TIMESTAMP.compareMatch(DataType.NUMERIC), greaterThan(0));
+        assertThat(DataType.TIMESTAMP.compareMatch(DataType.ANY), equalTo(0));
+    }
+
 }

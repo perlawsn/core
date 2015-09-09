@@ -104,7 +104,7 @@ public abstract class DataType implements Comparable<DataType> {
 
         public int compareMatch(DataType o) {
             if (o instanceof TypeClass) {
-                return -1 * o.compareMatch(o);
+                return -1 * o.compareMatch(this);
             } else {
                 return this.order.compareTo(o.order);
             }
@@ -181,13 +181,13 @@ public abstract class DataType implements Comparable<DataType> {
         }
 
         public int compareMatch(DataType o) {
-            if (this == ANY) {
+            if (this == ANY || o == ANY) {
                 return 0;
             } else if (this == NUMERIC) {
-                if (o == INTEGER || o == FLOAT) {
+                if (o == INTEGER || o == FLOAT || o == NUMERIC) {
                     return 0;
                 } else {
-                    return 1;
+                    return -1;
                 }
             } else {
                 throw new RuntimeException("Unknown TypeClass '" + this + "'");
