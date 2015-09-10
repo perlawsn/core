@@ -48,21 +48,20 @@ public abstract class DataType implements Comparable<DataType> {
     }
 
     /**
-     * Returns an ordinal number associated with the {@code DataType}. This
-     * number can be employed to order the PerLa types.
-     *
-     * @return ordinal number associated with the {@code DataType}
-     */
-    public final int ordinal() {
-        return ordinal;
-    }
-
-    /**
      * Returns true if the type is concrete, false if it's a {@link TypeClass}
      *
      * @return true if the type is concrete, false if it's a {@link TypeClass}
      */
     public abstract boolean isConcrete();
+
+    /**
+     * Returns true if the type is a {@link TypeClass}, false if it's concrete
+     *
+     * @return true if the type is a {@link TypeClass}, false if it's concrete
+     */
+    public final boolean isTypeClass() {
+        return !isConcrete();
+    }
 
     /**
      * Returns the Java class associated with the PerLa {@code DataType}.
