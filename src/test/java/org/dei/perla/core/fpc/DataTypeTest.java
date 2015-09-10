@@ -218,4 +218,143 @@ public class DataTypeTest {
         assertThat(DataType.TIMESTAMP.compareMatch(DataType.ANY), equalTo(0));
     }
 
+    @Test
+    public void testStrictest() {
+        DataType r = DataType.strictest(DataType.ANY, DataType.ANY);
+        assertThat(r, equalTo(DataType.ANY));
+        r = DataType.strictest(DataType.ANY, DataType.NUMERIC);
+        assertThat(r, equalTo(DataType.NUMERIC));
+        r = DataType.strictest(DataType.ANY, DataType.ID);
+        assertThat(r, equalTo(DataType.ID));
+        r = DataType.strictest(DataType.ANY, DataType.INTEGER);
+        assertThat(r, equalTo(DataType.INTEGER));
+        r = DataType.strictest(DataType.ANY, DataType.FLOAT);
+        assertThat(r, equalTo(DataType.FLOAT));
+        r = DataType.strictest(DataType.ANY, DataType.STRING);
+        assertThat(r, equalTo(DataType.STRING));
+        r = DataType.strictest(DataType.ANY, DataType.BOOLEAN);
+        assertThat(r, equalTo(DataType.BOOLEAN));
+        r = DataType.strictest(DataType.ANY, DataType.TIMESTAMP);
+        assertThat(r, equalTo(DataType.TIMESTAMP));
+
+        r = DataType.strictest(DataType.NUMERIC, DataType.ANY);
+        assertThat(r, equalTo(DataType.NUMERIC));
+        r = DataType.strictest(DataType.NUMERIC, DataType.NUMERIC);
+        assertThat(r, equalTo(DataType.NUMERIC));
+        r = DataType.strictest(DataType.NUMERIC, DataType.ID);
+        assertThat(r, nullValue());
+        r = DataType.strictest(DataType.NUMERIC, DataType.INTEGER);
+        assertThat(r, equalTo(DataType.INTEGER));
+        r = DataType.strictest(DataType.NUMERIC, DataType.FLOAT);
+        assertThat(r, equalTo(DataType.FLOAT));
+        r = DataType.strictest(DataType.NUMERIC, DataType.STRING);
+        assertThat(r, nullValue());
+        r = DataType.strictest(DataType.NUMERIC, DataType.BOOLEAN);
+        assertThat(r, nullValue());
+        r = DataType.strictest(DataType.NUMERIC, DataType.TIMESTAMP);
+        assertThat(r, nullValue());
+
+        r = DataType.strictest(DataType.ID, DataType.ANY);
+        assertThat(r, equalTo(DataType.ID));
+        r = DataType.strictest(DataType.ID, DataType.NUMERIC);
+        assertThat(r, nullValue());
+        r = DataType.strictest(DataType.ID, DataType.ID);
+        assertThat(r, equalTo(DataType.ID));
+        r = DataType.strictest(DataType.ID, DataType.INTEGER);
+        assertThat(r, nullValue());
+        r = DataType.strictest(DataType.ID, DataType.FLOAT);
+        assertThat(r, nullValue());
+        r = DataType.strictest(DataType.ID, DataType.STRING);
+        assertThat(r, nullValue());
+        r = DataType.strictest(DataType.ID, DataType.BOOLEAN);
+        assertThat(r, nullValue());
+        r = DataType.strictest(DataType.ID, DataType.TIMESTAMP);
+        assertThat(r, nullValue());
+
+        r = DataType.strictest(DataType.INTEGER, DataType.ANY);
+        assertThat(r, equalTo(DataType.INTEGER));
+        r = DataType.strictest(DataType.INTEGER, DataType.NUMERIC);
+        assertThat(r, equalTo(DataType.INTEGER));
+        r = DataType.strictest(DataType.INTEGER, DataType.ID);
+        assertThat(r, nullValue());
+        r = DataType.strictest(DataType.INTEGER, DataType.INTEGER);
+        assertThat(r, equalTo(DataType.INTEGER));
+        r = DataType.strictest(DataType.INTEGER, DataType.FLOAT);
+        assertThat(r, nullValue());
+        r = DataType.strictest(DataType.INTEGER, DataType.STRING);
+        assertThat(r, nullValue());
+        r = DataType.strictest(DataType.INTEGER, DataType.BOOLEAN);
+        assertThat(r, nullValue());
+        r = DataType.strictest(DataType.INTEGER, DataType.TIMESTAMP);
+        assertThat(r, nullValue());
+
+        r = DataType.strictest(DataType.FLOAT, DataType.ANY);
+        assertThat(r, equalTo(DataType.FLOAT));
+        r = DataType.strictest(DataType.FLOAT, DataType.NUMERIC);
+        assertThat(r, equalTo(DataType.FLOAT));
+        r = DataType.strictest(DataType.FLOAT, DataType.ID);
+        assertThat(r, nullValue());
+        r = DataType.strictest(DataType.FLOAT, DataType.INTEGER);
+        assertThat(r, nullValue());
+        r = DataType.strictest(DataType.FLOAT, DataType.FLOAT);
+        assertThat(r, equalTo(DataType.FLOAT));
+        r = DataType.strictest(DataType.FLOAT, DataType.STRING);
+        assertThat(r, nullValue());
+        r = DataType.strictest(DataType.FLOAT, DataType.BOOLEAN);
+        assertThat(r, nullValue());
+        r = DataType.strictest(DataType.FLOAT, DataType.TIMESTAMP);
+        assertThat(r, nullValue());
+
+        r = DataType.strictest(DataType.STRING, DataType.ANY);
+        assertThat(r, equalTo(DataType.STRING));
+        r = DataType.strictest(DataType.STRING, DataType.NUMERIC);
+        assertThat(r, nullValue());
+        r = DataType.strictest(DataType.STRING, DataType.ID);
+        assertThat(r, nullValue());
+        r = DataType.strictest(DataType.STRING, DataType.INTEGER);
+        assertThat(r, nullValue());
+        r = DataType.strictest(DataType.STRING, DataType.FLOAT);
+        assertThat(r, nullValue());
+        r = DataType.strictest(DataType.STRING, DataType.STRING);
+        assertThat(r, equalTo(DataType.STRING));
+        r = DataType.strictest(DataType.STRING, DataType.BOOLEAN);
+        assertThat(r, nullValue());
+        r = DataType.strictest(DataType.STRING, DataType.TIMESTAMP);
+        assertThat(r, nullValue());
+
+        r = DataType.strictest(DataType.BOOLEAN, DataType.ANY);
+        assertThat(r, equalTo(DataType.BOOLEAN));
+        r = DataType.strictest(DataType.BOOLEAN, DataType.NUMERIC);
+        assertThat(r, nullValue());
+        r = DataType.strictest(DataType.BOOLEAN, DataType.ID);
+        assertThat(r, nullValue());
+        r = DataType.strictest(DataType.BOOLEAN, DataType.INTEGER);
+        assertThat(r, nullValue());
+        r = DataType.strictest(DataType.BOOLEAN, DataType.FLOAT);
+        assertThat(r, nullValue());
+        r = DataType.strictest(DataType.BOOLEAN, DataType.STRING);
+        assertThat(r, nullValue());
+        r = DataType.strictest(DataType.BOOLEAN, DataType.BOOLEAN);
+        assertThat(r, equalTo(DataType.BOOLEAN));
+        r = DataType.strictest(DataType.BOOLEAN, DataType.TIMESTAMP);
+        assertThat(r, nullValue());
+
+        r = DataType.strictest(DataType.TIMESTAMP, DataType.ANY);
+        assertThat(r, equalTo(DataType.TIMESTAMP));
+        r = DataType.strictest(DataType.TIMESTAMP, DataType.NUMERIC);
+        assertThat(r, nullValue());
+        r = DataType.strictest(DataType.TIMESTAMP, DataType.ID);
+        assertThat(r, nullValue());
+        r = DataType.strictest(DataType.TIMESTAMP, DataType.INTEGER);
+        assertThat(r, nullValue());
+        r = DataType.strictest(DataType.TIMESTAMP, DataType.FLOAT);
+        assertThat(r, nullValue());
+        r = DataType.strictest(DataType.TIMESTAMP, DataType.STRING);
+        assertThat(r, nullValue());
+        r = DataType.strictest(DataType.TIMESTAMP, DataType.BOOLEAN);
+        assertThat(r, nullValue());
+        r = DataType.strictest(DataType.TIMESTAMP, DataType.TIMESTAMP);
+        assertThat(r, equalTo(DataType.TIMESTAMP));
+    }
+
 }
