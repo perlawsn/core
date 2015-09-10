@@ -79,6 +79,41 @@ public abstract class DataType implements Comparable<DataType> {
     public abstract Class<?> getJavaClass();
 
     /**
+     * Finds the strictest of the two {@link DataType}s passed as parameter.
+     * Returns {@code null} if the two types are not compatible.
+     *
+     * <p> Both types have to be compatible: i.e., strictest(ANY, NUMERIC)
+     * returns NUMERIC, strictest(NUMERIC, BOOLEAN) returns {@code null}. This
+     * method returns {@code null} if both types are concrete, as by
+     * definitions two concrete types are always incompatible.
+     *
+     * @param t1 first type
+     * @param t2 second type
+     * @return the strictest of the two types, null if the types are not
+     * compatible
+     */
+    public static final DataType strictest(DataType t1, DataType t2) {
+        if (t1 == t2) {
+            return t1;
+        }
+
+        if (t1.ordinal > t2.ordinal) {
+            DataType tmp = t1;
+            t1 = t2;
+            t2 = tmp;
+        }
+
+        if (t1 == DataType.ANY) {
+            return t2;
+        } else if (t1 == DataType.NUMERIC &&
+                (t2 == DataType.INTEGER || t2 == DataType.FLOAT)) {
+            return t2;
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * Matches the current type with another data type. Match is different
      * from equalTo, as it correctly identifies {@link TypeClass}es and acts
      * accordingly, as it positively matches INTEGER and FLOAT with NUMERIC,
@@ -125,7 +160,7 @@ public abstract class DataType implements Comparable<DataType> {
      * @return true if the String corresponds to the identifier of one of the
      * concrete PerLa types, false otherwise.
      */
-    public static boolean isPrimitive(String name) {
+    public static final boolean isPrimitive(String name) {
         if (name.equals(ID.getId()) ||
                 name.equals(INTEGER.getId()) ||
                 name.equals(FLOAT.getId()) ||
