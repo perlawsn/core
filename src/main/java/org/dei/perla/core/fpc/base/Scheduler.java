@@ -65,16 +65,17 @@ public final class Scheduler {
         return bestFit(async, strict, req);
     }
 
-    private Operation bestFit(List<? extends Operation> ops, boolean strict,
+    // Protected modifier allows access to this method during tests
+    protected Operation bestFit(List<? extends Operation> ops, boolean strict,
             Collection<Attribute> req) throws IllegalStateException {
         if (!schedulable) {
             throw new IllegalStateException("Scheduler has been stopped.");
         }
 
-        long score = 0;
+        int score = 0;
         Operation match = null;
         for (Operation op : ops) {
-            long s = getScore(op, req);
+            int s = getScore(op, req);
             if (s > score) {
                 score = s;
                 match = op;
@@ -92,7 +93,8 @@ public final class Scheduler {
 
     // The score is simply the number of requested attributes that are
     // present in the operation.
-    private long getScore(Operation o, Collection<Attribute> req) {
+    // Protected modifier allows access to this method during tests
+    protected int getScore(Operation o, Collection<Attribute> req) {
         int score = 0;
         for (Attribute oa : o.getAttributes()) {
             for (Attribute ra : req) {
