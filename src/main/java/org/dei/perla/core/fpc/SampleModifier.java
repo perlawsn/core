@@ -103,7 +103,7 @@ public interface SampleModifier {
             int i;
             for (i = 0; i < out.size(); i++) {
                 a = out.get(i);
-                int idx = in.indexOf(a);
+                int idx = indexOf(in, a);
                 if (idx == -1) {
                     idx = last++;
                     in.add(a);
@@ -113,6 +113,17 @@ public interface SampleModifier {
                 in.set(i, in.get(idx));
                 in.set(idx, tmp);
             }
+        }
+
+        // Custom indexOf function allows the Reorder SampleModifier with
+        // TypeClasses
+        private static int indexOf(List<Attribute> list, Attribute a) {
+            for (int i = 0; i < list.size(); i++) {
+                if (a.match(list.get(i))) {
+                    return i;
+                }
+            }
+            return -1;
         }
 
         @Override
