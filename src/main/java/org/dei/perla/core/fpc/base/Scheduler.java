@@ -45,28 +45,28 @@ public final class Scheduler {
         Collections.sort(this.async, attComp);
     }
 
-    protected Operation set(Collection<Attribute> atts, boolean strict)
+    protected Operation set(Collection<Attribute> req, boolean strict)
             throws IllegalStateException {
-        return bestFit(set, strict, atts);
+        return bestFit(set, strict, req);
     }
 
-    protected Operation get(List<Attribute> atts, boolean strict)
+    protected Operation get(List<Attribute> req, boolean strict)
             throws IllegalStateException {
-        return bestFit(get, strict, atts);
+        return bestFit(get, strict, req);
     }
 
-    protected Operation periodic(List<Attribute> atts, boolean strict)
+    protected Operation periodic(List<Attribute> req, boolean strict)
             throws IllegalStateException {
-        return bestFit(periodic, strict, atts);
+        return bestFit(periodic, strict, req);
     }
 
-    protected Operation async(List<Attribute> atts, boolean strict)
+    protected Operation async(List<Attribute> req, boolean strict)
             throws IllegalStateException {
-        return bestFit(async, strict, atts);
+        return bestFit(async, strict, req);
     }
 
     private Operation bestFit(List<? extends Operation> ops, boolean strict,
-            Collection<Attribute> atts) throws IllegalStateException {
+            Collection<Attribute> req) throws IllegalStateException {
         if (!schedulable) {
             throw new IllegalStateException("Scheduler has been stopped.");
         }
@@ -74,7 +74,7 @@ public final class Scheduler {
         long score = 0;
         Operation match = null;
         for (Operation op : ops) {
-            long s = getScore(op, atts);
+            long s = getScore(op, req);
             if (s > score) {
                 score = s;
                 match = op;
@@ -83,17 +83,26 @@ public final class Scheduler {
 
         // Return null match when scheduling is strict and the selected
         // operation cannot fully answer the user's query
-        if (match != null && strict &&
-                !match.getAttributes().containsAll(atts)) {
+        if (match != null && strict && score != req.size()) {
             return null;
         }
 
         return match;
     }
 
-    private long getScore(Operation o, Collection<Attribute> atts) {
-        Collection<Attribute> opAtts = o.getAttributes();
-        return opAtts.stream().filter(atts::contains).count();
+    // The score is simply the number of requested attributes that are
+    // present in the operation.
+    private long getScore(Operation o, Collection<Attribute> req) {
+        int score = 0;
+        for (Attribute oa : o.getAttributes()) {
+            for (Attribute ra : req) {
+                if (ra.match(oa)) {
+                    score++;
+                    break;
+                }
+            }
+        }
+        return score;
     }
 
     protected Operation getGetOperation(String id) {
