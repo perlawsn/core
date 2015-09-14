@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * <p>
- * Unsupported sampling period instruction. This error instruction can be
+ * Unsupported sampling rate instruction. This error instruction can be
  * used to notify the the user that the selected sampling period is not
  * supported by the end device, and that the requested sampling cannot be
  * performed.
@@ -19,24 +19,24 @@ import javax.xml.bind.annotation.XmlRootElement;
  * Usage:
  *
  * <pre>
- * {@code <i:unsupported-period suggested="50" /> }
+ * {@code <i:unsupported-rate suggested="50" /> }
  * </pre>
  *
  * @author Guido Rota (2015)
  */
-@XmlRootElement(name = "unsupported-period")
+@XmlRootElement(name = "unsupported-rate")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class UnsupportedPeriodInstructionDescriptor extends
+public class UnsupportedRateInstructionDescriptor extends
         InstructionDescriptor {
 
     @XmlAttribute(required = true)
     private String suggested;
 
-    public UnsupportedPeriodInstructionDescriptor() {
+    public UnsupportedRateInstructionDescriptor() {
         this.suggested = "";
     }
 
-    public UnsupportedPeriodInstructionDescriptor(String suggested) {
+    public UnsupportedRateInstructionDescriptor(String suggested) {
         this.suggested = suggested;
     }
 

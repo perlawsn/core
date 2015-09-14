@@ -103,11 +103,11 @@
 			<i:var name="set-data" type="set-msg"/>
 			<i:set variable="set-data" field="test" value="${param['integer']}"/>
 		</set>
-		<periodic id="unsupported-period">
+		<periodic id="unsupported-rate">
 			<start>
 				<i:var name="period" type="sampling-period"/>
 				<i:set variable="period" field="period" value="12"/>
-				<i:unsupported-period suggested="${period.period}"/>
+				<i:unsupported-rate suggested="${period.period}"/>
 			</start>
 			<stop>
 				<!-- NOOP -->

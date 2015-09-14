@@ -455,7 +455,7 @@ public class CompilerTest {
     public void testUnsupportedPeriod() throws Exception {
         Script script;
 		List<InstructionDescriptor> iList = new ArrayList<>();
-		iList.add(new UnsupportedPeriodInstructionDescriptor("suggested"));
+		iList.add(new UnsupportedRateInstructionDescriptor("suggested"));
 
 		script = Compiler.compile(iList, "unsupported", attDescMap,
 				attMap, mapperMap, reqBldMap, channelMap);

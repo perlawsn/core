@@ -140,9 +140,9 @@ public class Compiler {
             return parseSubmitInstruction((SubmitInstructionDescriptor) d,
                     ctx, iErr);
 
-        } else if (d instanceof UnsupportedPeriodInstructionDescriptor) {
+        } else if (d instanceof UnsupportedRateInstructionDescriptor) {
             return parseUnsupportedPeriodInstruction(
-                    (UnsupportedPeriodInstructionDescriptor) d);
+                    (UnsupportedRateInstructionDescriptor) d);
 
         } else {
             throw new RuntimeException("Cannot parse '"
@@ -526,7 +526,7 @@ public class Compiler {
     }
 
     private static UnsupportedPeriodInstruction parseUnsupportedPeriodInstruction
-            (UnsupportedPeriodInstructionDescriptor d) {
+            (UnsupportedRateInstructionDescriptor d) {
         return new UnsupportedPeriodInstruction(d.getSuggested());
     }
 

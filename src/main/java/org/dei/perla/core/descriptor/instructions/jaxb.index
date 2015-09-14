@@ -10,4 +10,4 @@ SetInstructionDescriptor
 StopInstructionDescriptor
 SubmitInstructionDescriptor
 ParameterBinding
-UnsupportedPeriodInstructionDescriptor
+UnsupportedRateInstructionDescriptor
