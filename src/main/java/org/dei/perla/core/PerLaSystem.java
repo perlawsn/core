@@ -29,7 +29,7 @@ public final class PerLaSystem {
     private final DeviceDescriptorParser parser;
     private final FpcFactory factory;
     private final TreeRegistry registry;
-    
+
     private final FactoryHandler fctHand = new FactoryHandler();
 
     /**
@@ -74,6 +74,47 @@ public final class PerLaSystem {
         // Create FPC Factory
         parser = new JaxbDeviceDescriptorParser(pkgs);
         factory = new BaseFpcFactory(maps, chans, reqs);
+    }
+
+    /**
+     * Reads an XML Device Descriptor from the {@link InputStream} passed as
+     * parameter and uses it to create a new {@link Fpc}.
+     *
+     * <p> Differently from {@code injectDescirptor}, this method does not
+     * store an {@link Fpc} with the {@link Registry}, and is intended
+     * to be used when the user need to perform additional operations before an
+     * {@link Fpc} instance is added to the register.
+     *
+     * @param is Device Descriptor {@link InputStream}
+     * @return the newly created {@link Fpc} object
+     * @throws FpcCreationException if the {@link Fpc} creation process
+     * fails due to an error in the Device Descriptor
+     */
+    public Fpc createFpc(InputStream is) throws FpcCreationException {
+        int id = -1;
+        boolean idGenerated = false;
+
+        try {
+
+            DeviceDescriptor d = parser.parse(is);
+
+            if (d.getId() != null) {
+                id = d.getId();
+            } else {
+                id = registry.generateID();
+                idGenerated = true;
+            }
+
+            return factory.createFpc(d, id);
+
+        } catch(Exception e) {
+            if (idGenerated) {
+                registry.releaseID(id);
+            }
+            String msg = "Error creating Fpc '" + id + "'";
+            log.error(msg, e);
+            throw new FpcCreationException(msg, e);
+        }
     }
 
     /**
