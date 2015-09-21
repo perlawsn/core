@@ -38,6 +38,15 @@ public final class SamplePipeline {
     }
 
     /**
+     * Returns the list of modifiers contained in this {@code SamplePipeline}
+     *
+     * @return list of sample modifiers in the pipeline
+     */
+    public List<SampleModifier> getModifiers() {
+        return mods;
+    }
+
+    /**
      * Creates a passthrough {@code SamplePipeline} that creates a new sample
      * without performing any modification to the source data
      *

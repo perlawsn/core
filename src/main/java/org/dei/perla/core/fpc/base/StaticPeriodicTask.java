@@ -40,12 +40,12 @@ public class StaticPeriodicTask implements Task {
     }
 
     private synchronized void sample() {
-        handler.data(this, request.newStaticSample());
+        handler.data(this, request.generateSample());
     }
 
     @Override
     public List<Attribute> getAttributes() {
-        return request.getStatic();
+        return request.getGenerated();
     }
 
     @Override

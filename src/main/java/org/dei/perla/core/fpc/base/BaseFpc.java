@@ -1,10 +1,6 @@
 package org.dei.perla.core.fpc.base;
 
-import org.dei.perla.core.fpc.Fpc;
-import org.dei.perla.core.fpc.Task;
-import org.dei.perla.core.fpc.TaskHandler;
-import org.dei.perla.core.fpc.Attribute;
-import org.dei.perla.core.fpc.SamplePipeline;
+import org.dei.perla.core.fpc.*;
 import org.dei.perla.core.utils.AsyncUtils;
 import org.dei.perla.core.utils.Check;
 
@@ -81,16 +77,16 @@ public final class BaseFpc implements Fpc {
         }
         Request req = new Request(requestAtts, staticAtts);
 
-        if (req.isStatic()) {
-            Task t = new CompletedTask(req.getStatic());
+        if (!req.isSampled()) {
+            Task t = new CompletedTask(req.getGenerated());
             // Running in a new thread to preserve asynchronous semantics
             AsyncUtils.runInNewThread(() -> {
-                handler.data(t, req.newStaticSample());
+                handler.data(t, req.generateSample());
                 handler.complete(t);
             });
             return t;
         } else {
-            Operation op = sched.get(req.getDynamic(), strict);
+            Operation op = sched.get(req.getSampled(), strict);
             if (op == null) {
                 return null;
             }
@@ -111,13 +107,13 @@ public final class BaseFpc implements Fpc {
         }
         Request req = new Request(requestAtts, staticAtts);
 
-        if (req.isStatic()) {
+        if (!req.isSampled()) {
             StaticPeriodicTask t = new StaticPeriodicTask(req, ms, handler);
             t.start();
             return t;
 
         } else {
-            Operation op = sched.periodic(req.getDynamic(), strict);
+            Operation op = sched.periodic(req.getSampled(), strict);
             if (op == null) {
                 return null;
             }
@@ -141,11 +137,11 @@ public final class BaseFpc implements Fpc {
         }
         Request req = new Request(requestAtts, staticAtts);
 
-        if (req.isStatic()) {
+        if (!req.isSampled()) {
             return null;
         }
 
-        Operation op = sched.async(req.getDynamic(), strict);
+        Operation op = sched.async(req.getSampled(), strict);
         if (op == null) {
             return null;
         }
