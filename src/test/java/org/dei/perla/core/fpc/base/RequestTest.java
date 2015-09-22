@@ -45,21 +45,11 @@ public class RequestTest {
                 tempAtt
         });
         SamplePipeline s = r.createPipeline(opAtts);
-        boolean hasTimestampMod = false;
-        boolean hasReorderMod = false;
-        boolean hasStaticAppender = false;
-        for (Modifier sm : s.getModifiers()) {
-            if (sm instanceof TimestampAdder) {
-                hasTimestampMod = true;
-            } else if (sm instanceof Reorder) {
-                hasReorderMod = true;
-            } else if (sm instanceof StaticAppender) {
-                hasStaticAppender = true;
-            }
-        }
-        assertTrue(hasTimestampMod);
-        assertTrue(hasReorderMod);
-        assertFalse(hasStaticAppender);
+
+        List<Modifier> mods = s.getModifiers();
+        assertThat(mods.size(), equalTo(2));
+        assertTrue(mods.get(0) instanceof TimestampAdder);
+        assertTrue(mods.get(1) instanceof Reorder);
 
         // Check sample pipeline, native timestamp
         opAtts = Arrays.asList(new Attribute[] {
@@ -68,21 +58,10 @@ public class RequestTest {
                 Attribute.TIMESTAMP
         });
         s = r.createPipeline(opAtts);
-        hasTimestampMod = false;
-        hasReorderMod = false;
-        hasStaticAppender = false;
-        for (Modifier sm : s.getModifiers()) {
-            if (sm instanceof TimestampAdder) {
-                hasTimestampMod = true;
-            } else if (sm instanceof Reorder) {
-                hasReorderMod = true;
-            } else if (sm instanceof StaticAppender) {
-                hasStaticAppender = true;
-            }
-        }
-        assertFalse(hasTimestampMod);
-        assertTrue(hasReorderMod);
-        assertFalse(hasStaticAppender);
+
+        mods = s.getModifiers();
+        assertThat(mods.size(), equalTo(1));
+        assertTrue(mods.get(0) instanceof Reorder);
     }
 
     @Test

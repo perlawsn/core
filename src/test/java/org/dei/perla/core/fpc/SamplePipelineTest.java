@@ -87,7 +87,52 @@ public class SamplePipelineTest {
     }
 
     @Test
-    public void testPipelineSimple() {
+    public void testPipelineSimple1() {
+        Attribute s1 = Attribute.create("source1", DataType.STRING);
+        Attribute s2 = Attribute.create("source2", DataType.STRING);
+        Attribute s3 = Attribute.create("source3", DataType.STRING);
+
+        List<Attribute> in = Arrays.asList(new Attribute[] {
+                s1, s2, s3
+        });
+        List<Attribute> out = Arrays.asList(new Attribute[] {
+                s1, s2
+        });
+
+        SamplePipeline p = new SamplePipeline(in, out);
+        List<Attribute> atts = p.getAttributes();
+        assertThat(atts.size(), equalTo(3));
+        assertThat(atts.get(0), equalTo(s1));
+        assertThat(atts.get(1), equalTo(s2));
+        assertThat(atts.get(2), equalTo(Attribute.TIMESTAMP));
+
+        List<Modifier> mods = p.getModifiers();
+        assertThat(mods.size(), equalTo(2));
+        assertTrue(mods.get(0) instanceof Reorder);
+        assertTrue(mods.get(1) instanceof TimestampAdder);
+
+        Object[] source = new Object[]{"source1", "source2"};
+        Sample sample = p.run(source);
+        assertThat(sample, notNullValue());
+        assertThat(sample.getValue("source1"), equalTo("source1"));
+        assertThat(sample.getValue("source2"), equalTo("source2"));
+        assertTrue(sample.getValue("timestamp") instanceof Instant);
+
+        Object[] values = sample.values();
+        assertThat(values.length, equalTo(3));
+        assertThat(values[0], equalTo("source1"));
+        assertThat(values[1], equalTo("source2"));
+        assertTrue(values[2] instanceof Instant);
+
+        atts = sample.fields();
+        assertThat(atts.size(), equalTo(3));
+        assertThat(atts.get(0), equalTo(s1));
+        assertThat(atts.get(1), equalTo(s2));
+        assertThat(atts.get(2), equalTo(Attribute.TIMESTAMP));
+    }
+
+    @Test
+    public void testPipelineSimple2() {
         Attribute s1 = Attribute.create("source1", DataType.STRING);
         Attribute s2 = Attribute.create("source2", DataType.STRING);
 
@@ -331,8 +376,8 @@ public class SamplePipelineTest {
         List<Modifier> mods = p.getModifiers();
         assertThat(mods.size(), equalTo(3));
         assertTrue(mods.get(0) instanceof StaticAppender);
-        assertTrue(mods.get(1) instanceof TimestampAdder);
-        assertTrue(mods.get(2) instanceof Reorder);
+        assertTrue(mods.get(1) instanceof Reorder);
+        assertTrue(mods.get(2) instanceof TimestampAdder);
 
         Object[] source = new Object[]{"source1", "source2"};
         Sample sample = p.run(source);

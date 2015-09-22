@@ -49,20 +49,31 @@ public final class SamplePipeline {
      */
     public SamplePipeline(List<Attribute> in,
             Map<Attribute, Object> values, List<Attribute> out) {
+        List<Modifier> mods = new ArrayList<>();
         in = new ArrayList<>(in);
         out = new ArrayList<>(out);
-        List<Modifier> mods = new ArrayList<>();
 
-        addStatic(in, values, mods);
-        addTimestamp(in, out, mods);
+        boolean nativeTs = in.contains(Attribute.TIMESTAMP);
+        int tsIdx = indexOf(out, Attribute.TIMESTAMP);
+        // Custom by-id attribute check
+        if (tsIdx == -1) {
+            out.add(Attribute.TIMESTAMP);
+        }
+
+        addStatic(in, out, values, mods);
         addReorder(in, out, mods);
+
+        if (!nativeTs) {
+            tsIdx = indexOf(out, Attribute.TIMESTAMP);
+            mods.add(new TimestampAdder(tsIdx));
+        }
 
         modifiers = Collections.unmodifiableList(mods);
         attributes = Collections.unmodifiableList(out);
     }
 
-    private void addStatic(List<Attribute> in, Map<Attribute, Object> values,
-            List<Modifier> mods) {
+    private void addStatic(List<Attribute> in, List<Attribute> out,
+            Map<Attribute, Object> values, List<Modifier> mods) {
         if (values.size() == 0) {
             return;
         }
@@ -75,30 +86,14 @@ public final class SamplePipeline {
                 throw new IllegalArgumentException("Cannot override sampled " +
                         "attribute '" + a + "' with static value");
             }
+            if (!out.contains(a)) {
+                throw new IllegalArgumentException("Attribute '" + a + "' is " +
+                        "not an output attribute");
+            }
             in.add(a);
             v[i] = values.get(a);
         }
         mods.add(new StaticAppender(base, v));
-    }
-
-    private void addTimestamp(List<Attribute> in, List<Attribute> out,
-            List<Modifier> mods) {
-        if (!in.contains(Attribute.TIMESTAMP)) {
-            mods.add(new TimestampAdder(in.size()));
-            in.add(Attribute.TIMESTAMP);
-        }
-
-        boolean hasTs = false;
-        // Custom by-id attribute check
-        for (Attribute a : out) {
-            if (a.getId().equals(Attribute.TIMESTAMP.getId())) {
-                hasTs = true;
-                break;
-            }
-        }
-        if (!hasTs) {
-            out.add(Attribute.TIMESTAMP);
-        }
     }
 
     private void addReorder(List<Attribute> in, List<Attribute> out,
@@ -237,9 +232,7 @@ public final class SamplePipeline {
 
         @Override
         public void process(Object[] sample) {
-            for (int i = 0; i < values.length; i++) {
-                sample[base + i] = values[i];
-            }
+            System.arraycopy(values, 0, sample, base, values.length);
         }
 
     }

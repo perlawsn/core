@@ -178,7 +178,7 @@ public final class Request {
                             " sampling the remote sensing device");
         }
 
-        return new SamplePipeline(sampled, values, request);
+        return new SamplePipeline(opAtts, values, request);
     }
 
 }

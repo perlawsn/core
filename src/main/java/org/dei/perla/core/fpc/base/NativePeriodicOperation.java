@@ -33,7 +33,7 @@ public final class NativePeriodicOperation extends PeriodicOperation {
     // Current sample, used to merge the results from different async messages
     // The currentSample contains an up-to-date view on the most recent value
     // of all attributes managed by the Operation
-    private Object[] currentSample;
+    private final Object[] currentSample;
 
     public NativePeriodicOperation(String id, List<Attribute> atts,
             Script start, Script stop, List<MessageScript> msgs,
@@ -314,9 +314,7 @@ public final class NativePeriodicOperation extends PeriodicOperation {
          * @param s sample to merge
          */
         private void merge(Object[] s) {
-            for (int i = 0; i < s.length; i++) {
-                currentSample[msgs.getBase() + i] = s[i];
-            }
+            System.arraycopy(s, 0, currentSample, msgs.getBase(), s.length);
         }
 
         @Override

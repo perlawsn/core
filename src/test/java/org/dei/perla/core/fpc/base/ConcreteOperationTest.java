@@ -272,7 +272,7 @@ public class ConcreteOperationTest {
     @Test
     public void singleNativePeriodicOperation() throws InterruptedException {
         LatchingTaskHandler handler = new LatchingTaskHandler(1000);
-        SamplePipeline pipe = new SamplePipeline(getOp.getAttributes());
+        SamplePipeline pipe = new SamplePipeline(natPeriodicOp.getAttributes());
         Map<String, Object> parameterMap = new HashMap<>();
         parameterMap.put("period", 1);
 
@@ -309,7 +309,7 @@ public class ConcreteOperationTest {
         Map<String, Object> paramMap3 = new HashMap<>();
         paramMap3.put("period", 1);
 
-        SamplePipeline pipe = new SamplePipeline(getOp.getAttributes());
+        SamplePipeline pipe = new SamplePipeline(natPeriodicOp.getAttributes());
 
         BaseTask task1 = natPeriodicOp.schedule(paramMap1, h1, pipe);
         assertThat(task1, notNullValue());
