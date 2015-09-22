@@ -1,11 +1,7 @@
 package org.dei.perla.core.fpc;
 
-import org.dei.perla.core.fpc.SampleModifier.Reorder;
-import org.dei.perla.core.fpc.SampleModifier.StaticAppender;
-import org.dei.perla.core.fpc.SampleModifier.TimestampAppender;
-
+import java.time.Instant;
 import java.util.*;
-import java.util.Map.Entry;
 
 /**
  * An immutable pipeline of {@link SampleModifier}s for adding new fields to an
@@ -20,156 +16,271 @@ import java.util.Map.Entry;
  */
 public final class SamplePipeline {
 
-    public final List<SampleModifier> mods;
-    public final List<Attribute> atts;
+    public final List<Modifier> modifiers;
+    public final List<Attribute> attributes;
 
     /**
-     * Private {@code SamplePipeline} constructor, new intances must be
-     * built using the {@link PipelineBuilder} class.
+     * Creates a new passthrough {@code SamplePipeline}
      *
-     * @param mods {@link SampleModifier} used by the pipeline
-     * @param atts {@link Attribute}s contained in the {@link Sample}s
-     *                              processed by the pipeline
+     * @param atts pipeline parameters
      */
-    private SamplePipeline(List<SampleModifier> mods,
-            List<Attribute> atts) {
-        this.mods = Collections.unmodifiableList(mods);
-        this.atts = Collections.unmodifiableList(atts);
+    public SamplePipeline(List<Attribute> atts) {
+        modifiers = Collections.emptyList();
+        atts = new ArrayList<>(atts);
+        attributes = Collections.unmodifiableList(atts);
     }
+
+    /**
+     * Creates a new {@code SamplePipeline}
+     *
+     * @param in attributes given as an input to the pipeline
+     * @param out attributes returned as an output by the pipeline
+     */
+    public SamplePipeline(List<Attribute> in, List<Attribute> out) {
+        this(in, Collections.emptyMap(), out);
+    }
+
+    /**
+     * Creates a new {@code SamplePipeline}
+     *
+     * @param in attributes given as an input to the pipeline
+     * @param values static attribute values
+     * @param out attributes returned as an output by the pipeline
+     */
+    public SamplePipeline(List<Attribute> in,
+            Map<Attribute, Object> values, List<Attribute> out) {
+        in = new ArrayList<>(in);
+        out = new ArrayList<>(out);
+        List<Modifier> mods = new ArrayList<>();
+
+        addStatic(in, values, mods);
+        addTimestamp(in, out, mods);
+        addReorder(in, out, mods);
+
+        modifiers = Collections.unmodifiableList(mods);
+        attributes = Collections.unmodifiableList(out);
+    }
+
+    private void addStatic(List<Attribute> in, Map<Attribute, Object> values,
+            List<Modifier> mods) {
+        if (values.size() == 0) {
+            return;
+        }
+
+        Object[] v = new Object[values.size()];
+        int base = in.size();
+        int i = 0;
+        for (Attribute a : values.keySet()) {
+            if (in.contains(a)) {
+                throw new IllegalArgumentException("Cannot override sampled " +
+                        "attribute '" + a + "' with static value");
+            }
+            in.add(a);
+            v[i] = values.get(a);
+        }
+        mods.add(new StaticAppender(base, v));
+    }
+
+    private void addTimestamp(List<Attribute> in, List<Attribute> out,
+            List<Modifier> mods) {
+        if (!in.contains(Attribute.TIMESTAMP)) {
+            mods.add(new TimestampAdder(in.size()));
+            in.add(Attribute.TIMESTAMP);
+        }
+
+        boolean hasTs = false;
+        // Custom by-id attribute check
+        for (Attribute a : out) {
+            if (a.getId().equals(Attribute.TIMESTAMP.getId())) {
+                hasTs = true;
+                break;
+            }
+        }
+        if (!hasTs) {
+            out.add(Attribute.TIMESTAMP);
+        }
+    }
+
+    private void addReorder(List<Attribute> in, List<Attribute> out,
+            List<Modifier> mods) {
+        int[] order = new int[out.size()];
+
+        for (int i = 0; i < out.size(); i++) {
+            Attribute a = out.get(i);
+            int idx = indexOf(in, a);
+            if (idx != -1) {
+                order[i] = idx;
+                Attribute tmp = in.get(i);
+                in.set(i, in.get(idx));
+                in.set(idx, tmp);
+            } else {
+                order[i] = in.size();
+                in.add(in.get(i));
+                in.set(i, a);
+            }
+        }
+
+        mods.add(new Reorder(order));
+    }
+
+    private int indexOf(List<Attribute> list, Attribute a) {
+        for (int i = 0; i < list.size(); i++) {
+            Attribute b = list.get(i);
+            if (b.getId().equals(a.getId())) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
 
     /**
      * Returns the list of modifiers contained in this {@code SamplePipeline}
      *
      * @return list of sample modifiers in the pipeline
      */
-    public List<SampleModifier> getModifiers() {
-        return mods;
+    public List<Modifier> getModifiers() {
+        return modifiers;
     }
 
     /**
-     * Creates a passthrough {@code SamplePipeline} that creates a new sample
-     * without performing any modification to the source data
+     * Returns the {@link Attribute}s that are contained in the {@link
+     * Sample}s processed using the {@code SamplePipeline}.
      *
-     * @param atts sample attributes
-     * @return a passthrough {@code SamplePipeline} that does not perform any
-     * operation to the data received as an input.
+     * @return {@link Attribute}s added to the processed {@link Sample}
      */
-    public static SamplePipeline passthrough(List<Attribute> atts) {
-        return new SamplePipeline(Collections.emptyList(), atts);
-    }
-
-    /**
-     * Returns a new {@code PipelineBuilder} instance for creating new
-     * {@code SamplePipeline} objects.
-     *
-     * @return New {@code PipelineBuilder} object
-     */
-    public static PipelineBuilder newBuilder(List<Attribute> atts) {
-        return new PipelineBuilder(atts);
+    public List<Attribute> getAttributes() {
+        return attributes;
     }
 
 	/**
-	 * Returns a collection of all {@link Attribute}s that this
-	 * {@code SamplePipeline} adds to the processed {@link Sample}
+	 * Runs data sampled by the {@link Fpc} through the {@code
+     * SamplePipeline} in order to create an output {@link Sample}.
 	 *
-	 * @return {@link Attribute}s added to the processed {@link Sample}
-	 */
-	public List<Attribute> attributes() {
-        return atts;
-    }
-
-	/**
-	 * Runs a sample through the {@code SamplePipeline}.
-	 *
-	 * @param sample
-	 *            {@link Sample} to be processed
+	 * @param sample data to be processed
 	 * @return New {@link Sample} produced by the pipeline
 	 */
 	public Sample run(Object[] sample) {
-        int size = atts.size() > sample.length ? atts.size() : sample.length;
-        Object[] r = Arrays.copyOf(sample, size);
-        for (SampleModifier m : mods) {
-            m.process(r);
+        Object[] s = Arrays.copyOf(sample, attributes.size());
+        for (Modifier m : modifiers) {
+            m.process(s);
         }
-
-        return new Sample(atts, r);
+        return new Sample(attributes, s);
     }
 
-	/**
-	 * A builder class for creating new {@code SamplePipeline} objects.
-	 *
-	 * @author Guido Rota (2014)
-	 *
-	 */
-	public static class PipelineBuilder {
 
-        private final List<Attribute> atts = new ArrayList<>();
-		private final List<SampleModifier> mods = new ArrayList<>();
+    /**
+     * A class implementing a single processing operation to be performed on a
+     * {@code Sample}.
+     *
+     * @author Guido Rota (2014)
+     */
+    public interface Modifier {
 
         /**
-         * Private constructor, {@code PipelineBuilder} instances are
-         * supposed to be built using the static newBuilder method available
-         * in the {@link SamplePipeline} class.
-         */
-		private PipelineBuilder(List<Attribute> original) {
-            atts.addAll(original);
-        }
-
-        /**
-         * Adds a {@link SampleModifier} that adds a timestamp {@link Attribute}
-         */
-        public void addTimestamp() {
-            if (atts.contains(Attribute.TIMESTAMP)) {
-                throw new RuntimeException(
-                        "The sample already contains a timestamp field");
-            }
-            SampleModifier m = new TimestampAppender(atts.size());
-            atts.add(Attribute.TIMESTAMP);
-            mods.add(m);
-        }
-
-        /**
-         * Adds a {@link SampleModifier} that adds static {@link Attribute}
-         * values to every {@link Sample} processed.
+         * Processes the contents of the sample array passed as parameter
          *
-         * @param staticValues attribute-value pairs to add
+         * @param sample sample to modify
          */
-        public void addStatic(Map<Attribute, Object> staticValues) {
-            int base = atts.size();
-            Object[] values = new Object[staticValues.size()];
+        public void process(Object[] sample);
 
-            int i = 0;
-            for (Entry<Attribute, Object> e : staticValues.entrySet()) {
-                Attribute a = e.getKey();
-                if (atts.contains(a)) {
-                    throw new RuntimeException(
-                            "The sample already contains the " + a + " field");
+    }
+
+
+    /**
+     * {@code SampleModifier} for adding a Timestamp field
+     *
+     * @author Guido Rota (2014)
+     *
+     */
+    public static final class TimestampAdder implements Modifier {
+
+        private final int idx;
+
+        /**
+         * @param idx position where the timestamp attribute has to be added
+         */
+        protected TimestampAdder(int idx) {
+            this.idx = idx;
+        }
+
+        @Override
+        public void process(Object[] sample) {
+            sample[idx] = Instant.now();
+        }
+
+    }
+
+
+    /**
+     * {@link Modifier} for adding static attribute values
+     *
+     * @author Guido Rota (2014)
+     */
+    public static final class StaticAppender implements Modifier {
+
+        private final Object[] values;
+        private final int base;
+
+        /**
+         * Creates a new {@link Modifier} that adds new static values
+         * to the output samples.
+         *
+         * @param base index at which the attributes must be added
+         * @param am attibute-value map identifying the values to be added in
+         *                 the output sample
+         */
+        protected StaticAppender(int base, Object[] values) {
+            this.base = base;
+            this.values = values;
+        }
+
+        @Override
+        public void process(Object[] sample) {
+            for (int i = 0; i < values.length; i++) {
+                sample[base + i] = values[i];
+            }
+        }
+
+    }
+
+
+    /**
+     * {@link Modifier} for reordering the sample attributes
+     *
+     * @author Guido Rota (2014)
+     */
+    public static final class Reorder implements Modifier {
+
+        private final int[] order;
+
+        /**
+         * Creates a new {@link SampleModifier} that rearranges the order of
+         * the output {@link Attribute}s.
+         *
+         * @param order order of arrangemet of the attributes
+         */
+        protected Reorder(int[] order) {
+            this.order = order;
+        }
+
+        @Override
+        public void process(Object[] sample) {
+            Object tmp;
+            int idx;
+
+            for (int i = 0; i < order.length; i++) {
+                idx = order[i];
+                if (idx == -1) {
+                    continue;
                 }
-                atts.add(a);
-                values[i++] = e.getValue();
+                tmp = sample[i];
+                sample[i] = sample[idx];
+                sample[idx] = tmp;
             }
-            SampleModifier m = new StaticAppender(base, values);
-            mods.add(m);
         }
 
-        /**
-         * Adds a {@link SampleModifier} that orders the {@link Sample}
-         * {@link Attribute}s according to the order found in the input list.
-         *
-         * @param order Desired {@link Attribute} order
-         */
-        public void reorder(List<Attribute> order) {
-            mods.add(new Reorder(atts, order));
-        }
+    }
 
-		/**
-		 * Creates a new immutable {@code SamplePipeline} containing all
-		 * {@link SampleModifier}s added to the builder
-		 */
-		public SamplePipeline create() {
-			return new SamplePipeline(mods, atts);
-		}
-
-	}
 
 }

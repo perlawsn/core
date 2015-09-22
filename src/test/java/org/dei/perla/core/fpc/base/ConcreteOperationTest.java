@@ -16,14 +16,13 @@ import org.dei.perla.core.descriptor.IORequestDescriptor;
 import org.dei.perla.core.descriptor.MessageDescriptor;
 import org.dei.perla.core.engine.*;
 import org.dei.perla.core.engine.SubmitInstruction.RequestParameter;
+import org.dei.perla.core.fpc.Attribute;
 import org.dei.perla.core.fpc.DataType;
+import org.dei.perla.core.fpc.Sample;
+import org.dei.perla.core.fpc.SamplePipeline;
 import org.dei.perla.core.fpc.base.AsyncOperation.AsyncMessageHandler;
 import org.dei.perla.core.message.Mapper;
 import org.dei.perla.core.message.MapperFactory;
-import org.dei.perla.core.fpc.Attribute;
-import org.dei.perla.core.fpc.Sample;
-import org.dei.perla.core.fpc.SamplePipeline;
-import org.dei.perla.core.fpc.SamplePipeline.PipelineBuilder;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -220,9 +219,9 @@ public class ConcreteOperationTest {
 
     @Test
     public void testGetOperation() throws Exception {
-        PipelineBuilder pb = SamplePipeline.newBuilder(getOp.getAttributes());
+        SamplePipeline pipe = new SamplePipeline(getOp.getAttributes());
         LatchingTaskHandler syncHandler = new LatchingTaskHandler(1);
-        BaseTask task = getOp.schedule(null, syncHandler, pb.create());
+        BaseTask task = getOp.schedule(null, syncHandler, pipe);
         assertThat(task, notNullValue());
         assertFalse(task.isRunning());
         task.start();
@@ -258,9 +257,9 @@ public class ConcreteOperationTest {
 
     @Test
     public void testSetOperation() throws Exception {
-        PipelineBuilder pb = SamplePipeline.newBuilder(Collections.emptyList());
+        SamplePipeline pipe = new SamplePipeline(getOp.getAttributes());
         LatchingTaskHandler handler = new LatchingTaskHandler(1);
-        BaseTask task = setOp.schedule(null, handler, pb.create());
+        BaseTask task = setOp.schedule(null, handler, pipe);
         assertThat(task, notNullValue());
         assertFalse(task.isRunning());
         task.start();
@@ -273,14 +272,12 @@ public class ConcreteOperationTest {
     @Test
     public void singleNativePeriodicOperation() throws InterruptedException {
         LatchingTaskHandler handler = new LatchingTaskHandler(1000);
-        PipelineBuilder pb = SamplePipeline.newBuilder(
-                natPeriodicOp.getAttributes());
+        SamplePipeline pipe = new SamplePipeline(getOp.getAttributes());
         Map<String, Object> parameterMap = new HashMap<>();
         parameterMap.put("period", 1);
 
         // Start test
-        BaseTask task = natPeriodicOp.schedule(parameterMap, handler,
-                pb.create());
+        BaseTask task = natPeriodicOp.schedule(parameterMap, handler, pipe);
         assertThat(task, notNullValue());
         assertFalse(task.isRunning());
         task.start();
@@ -312,23 +309,21 @@ public class ConcreteOperationTest {
         Map<String, Object> paramMap3 = new HashMap<>();
         paramMap3.put("period", 1);
 
-        PipelineBuilder pb = SamplePipeline.newBuilder(
-                natPeriodicOp.getAttributes());
-        SamplePipeline p = pb.create();
+        SamplePipeline pipe = new SamplePipeline(getOp.getAttributes());
 
-        BaseTask task1 = natPeriodicOp.schedule(paramMap1, h1, p);
+        BaseTask task1 = natPeriodicOp.schedule(paramMap1, h1, pipe);
         assertThat(task1, notNullValue());
         assertFalse(task1.isRunning());
         task1.start();
         assertTrue(task1.isRunning());
         assertThat(natPeriodicOp.getSamplingPeriod(), equalTo(100l));
-        BaseTask task2 = natPeriodicOp.schedule(paramMap2, h2, p);
+        BaseTask task2 = natPeriodicOp.schedule(paramMap2, h2, pipe);
         assertThat(task2, notNullValue());
         assertFalse(task2.isRunning());
         task2.start();
         assertTrue(task2.isRunning());
         assertThat(natPeriodicOp.getSamplingPeriod(), equalTo(10l));
-        BaseTask task3 = natPeriodicOp.schedule(paramMap3, h3, p);
+        BaseTask task3 = natPeriodicOp.schedule(paramMap3, h3, pipe);
         assertThat(task3, notNullValue());
         assertFalse(task3.isRunning());
         task3.start();
@@ -393,11 +388,10 @@ public class ConcreteOperationTest {
         LatchingTaskHandler handler = new LatchingTaskHandler(100);
         Map<String, Object> parameterMap = new HashMap<>();
         parameterMap.put("period", 10);
-        SamplePipeline p = SamplePipeline.passthrough(
-                simPeriodicOp.getAttributes());
+        SamplePipeline pipe = new SamplePipeline(simPeriodicOp.getAttributes());
 
         // Start test
-        BaseTask task = simPeriodicOp.schedule(parameterMap, handler, p);
+        BaseTask task = simPeriodicOp.schedule(parameterMap, handler, pipe);
         assertThat(task, notNullValue());
         assertFalse(task.isRunning());
         task.start();
@@ -426,7 +420,7 @@ public class ConcreteOperationTest {
         Map<String, Object> paramMap3 = new HashMap<>();
         paramMap3.put("period", 1);
 
-        SamplePipeline p = SamplePipeline.passthrough(
+        SamplePipeline p = new SamplePipeline(
                 simPeriodicOp.getAttributes());
 
         BaseTask task1 = simPeriodicOp.schedule(paramMap1, h1, p);

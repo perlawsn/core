@@ -1,12 +1,20 @@
 package org.dei.perla.core.fpc.base;
 
-import org.dei.perla.core.fpc.*;
+import org.dei.perla.core.fpc.Attribute;
+import org.dei.perla.core.fpc.DataType;
+import org.dei.perla.core.fpc.Sample;
+import org.dei.perla.core.fpc.SamplePipeline;
+import org.dei.perla.core.fpc.SamplePipeline.Modifier;
+import org.dei.perla.core.fpc.SamplePipeline.Reorder;
+import org.dei.perla.core.fpc.SamplePipeline.StaticAppender;
+import org.dei.perla.core.fpc.SamplePipeline.TimestampAdder;
 import org.junit.Test;
 
 import java.util.*;
 
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.*;
-import static org.hamcrest.Matchers.*;
 
 /**
  * @author Guido Rota 21/09/15.
@@ -40,12 +48,12 @@ public class RequestTest {
         boolean hasTimestampMod = false;
         boolean hasReorderMod = false;
         boolean hasStaticAppender = false;
-        for (SampleModifier sm : s.getModifiers()) {
-            if (sm instanceof SampleModifier.TimestampAppender) {
+        for (Modifier sm : s.getModifiers()) {
+            if (sm instanceof TimestampAdder) {
                 hasTimestampMod = true;
-            } else if (sm instanceof SampleModifier.Reorder) {
+            } else if (sm instanceof Reorder) {
                 hasReorderMod = true;
-            } else if (sm instanceof SampleModifier.StaticAppender) {
+            } else if (sm instanceof StaticAppender) {
                 hasStaticAppender = true;
             }
         }
@@ -63,12 +71,12 @@ public class RequestTest {
         hasTimestampMod = false;
         hasReorderMod = false;
         hasStaticAppender = false;
-        for (SampleModifier sm : s.getModifiers()) {
-            if (sm instanceof SampleModifier.TimestampAppender) {
+        for (Modifier sm : s.getModifiers()) {
+            if (sm instanceof TimestampAdder) {
                 hasTimestampMod = true;
-            } else if (sm instanceof SampleModifier.Reorder) {
+            } else if (sm instanceof Reorder) {
                 hasReorderMod = true;
-            } else if (sm instanceof SampleModifier.StaticAppender) {
+            } else if (sm instanceof StaticAppender) {
                 hasStaticAppender = true;
             }
         }
@@ -156,12 +164,12 @@ public class RequestTest {
         boolean hasTimestampMod = false;
         boolean hasReorderMod = false;
         boolean hasStaticMod = false;
-        for (SampleModifier sm : s.getModifiers()) {
-            if (sm instanceof SampleModifier.TimestampAppender) {
+        for (Modifier sm : s.getModifiers()) {
+            if (sm instanceof TimestampAdder) {
                 hasTimestampMod = true;
-            } else if (sm instanceof SampleModifier.Reorder) {
+            } else if (sm instanceof Reorder) {
                 hasReorderMod = true;
-            } else if (sm instanceof SampleModifier.StaticAppender) {
+            } else if (sm instanceof StaticAppender) {
                 hasStaticMod = true;
             }
         }

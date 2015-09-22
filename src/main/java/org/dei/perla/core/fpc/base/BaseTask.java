@@ -49,7 +49,7 @@ public abstract class BaseTask implements Task {
         this.op = op;
         this.handler = handler;
         this.pipeline = pipeline;
-        this.atts = pipeline.atts;
+        this.atts = pipeline.getAttributes();
 
         log = Logger.getLogger(op.getClass().getSimpleName() + " task");
     }
@@ -253,7 +253,7 @@ public abstract class BaseTask implements Task {
                 if (!running) {
                     return;
                 }
-                if (stop && running) {
+                if (stop) {
                     running = false;
                     op.remove(this);
                 }

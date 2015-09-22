@@ -1,10 +1,9 @@
 package org.dei.perla.core.fpc.base;
 
-import org.dei.perla.core.fpc.Task;
-import org.dei.perla.core.fpc.TaskHandler;
 import org.dei.perla.core.fpc.Sample;
 import org.dei.perla.core.fpc.SamplePipeline;
-import org.dei.perla.core.fpc.SamplePipeline.PipelineBuilder;
+import org.dei.perla.core.fpc.Task;
+import org.dei.perla.core.fpc.TaskHandler;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -21,9 +20,7 @@ public class PeriodicTaskTest {
     private static final Object[] EMPTY_SAMPLE = new Object[0];
     private static final SamplePipeline EMPTY_PIPELINE;
     static {
-        PipelineBuilder pb = SamplePipeline.newBuilder(
-                Collections.emptyList());
-        EMPTY_PIPELINE = pb.create();
+        EMPTY_PIPELINE = new SamplePipeline(Collections.emptyList());
     }
 
     @Test

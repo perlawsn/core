@@ -57,7 +57,7 @@ public abstract class BaseOperation<T extends BaseTask>
         this.id = id;
         this.atts = Collections.unmodifiableList(atts);
         schedulable = true;
-        defPipeline = SamplePipeline.passthrough(atts);
+        defPipeline = new SamplePipeline(atts);
     }
 
     @Override

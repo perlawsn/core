@@ -16,12 +16,11 @@ import org.dei.perla.core.descriptor.IORequestDescriptor;
 import org.dei.perla.core.descriptor.MessageDescriptor;
 import org.dei.perla.core.engine.*;
 import org.dei.perla.core.engine.SubmitInstruction.RequestParameter;
+import org.dei.perla.core.fpc.Attribute;
 import org.dei.perla.core.fpc.DataType;
+import org.dei.perla.core.fpc.SamplePipeline;
 import org.dei.perla.core.message.Mapper;
 import org.dei.perla.core.message.MapperFactory;
-import org.dei.perla.core.fpc.Attribute;
-import org.dei.perla.core.fpc.SamplePipeline;
-import org.dei.perla.core.fpc.SamplePipeline.PipelineBuilder;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -124,13 +123,12 @@ public class OperationErrorTest {
 
     @Test
     public void getError() throws InterruptedException {
-        PipelineBuilder pb = SamplePipeline.newBuilder(getOp.getAttributes());
+        SamplePipeline pipe = new SamplePipeline(getOp.getAttributes());
         ErrorTaskHandler handler = new ErrorTaskHandler();
-        BaseTask t = getOp.doSchedule(null, handler, pb.create());
+        BaseTask t = getOp.doSchedule(null, handler, pipe);
         t.start();
         Throwable err = handler.awaitError();
         assertThat(err, notNullValue());
     }
-
 
 }
