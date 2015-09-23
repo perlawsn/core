@@ -3,7 +3,6 @@ package org.dei.perla.core.fpc.base;
 import org.dei.perla.core.engine.Script;
 import org.dei.perla.core.fpc.TaskHandler;
 import org.dei.perla.core.fpc.Attribute;
-import org.dei.perla.core.fpc.SamplePipeline;
 import org.dei.perla.core.utils.AsyncUtils;
 
 import java.util.List;

@@ -3,11 +3,10 @@ package org.dei.perla.core.fpc.base;
 import org.dei.perla.core.fpc.Attribute;
 import org.dei.perla.core.fpc.DataType;
 import org.dei.perla.core.fpc.Sample;
-import org.dei.perla.core.fpc.SamplePipeline;
-import org.dei.perla.core.fpc.SamplePipeline.Modifier;
-import org.dei.perla.core.fpc.SamplePipeline.Reorder;
-import org.dei.perla.core.fpc.SamplePipeline.StaticAppender;
-import org.dei.perla.core.fpc.SamplePipeline.TimestampAdder;
+import org.dei.perla.core.fpc.base.SamplePipeline.Modifier;
+import org.dei.perla.core.fpc.base.SamplePipeline.Copy;
+import org.dei.perla.core.fpc.base.SamplePipeline.StaticAppender;
+import org.dei.perla.core.fpc.base.SamplePipeline.TimestampAdder;
 import org.junit.Test;
 
 import java.util.*;
@@ -48,8 +47,8 @@ public class RequestTest {
 
         List<Modifier> mods = s.getModifiers();
         assertThat(mods.size(), equalTo(2));
-        assertTrue(mods.get(0) instanceof TimestampAdder);
-        assertTrue(mods.get(1) instanceof Reorder);
+        assertTrue(mods.get(0) instanceof Copy);
+        assertTrue(mods.get(1) instanceof TimestampAdder);
 
         // Check sample pipeline, native timestamp
         opAtts = Arrays.asList(new Attribute[] {
@@ -61,7 +60,7 @@ public class RequestTest {
 
         mods = s.getModifiers();
         assertThat(mods.size(), equalTo(1));
-        assertTrue(mods.get(0) instanceof Reorder);
+        assertTrue(mods.get(0) instanceof Copy);
     }
 
     @Test
@@ -146,7 +145,7 @@ public class RequestTest {
         for (Modifier sm : s.getModifiers()) {
             if (sm instanceof TimestampAdder) {
                 hasTimestampMod = true;
-            } else if (sm instanceof Reorder) {
+            } else if (sm instanceof Copy) {
                 hasReorderMod = true;
             } else if (sm instanceof StaticAppender) {
                 hasStaticMod = true;

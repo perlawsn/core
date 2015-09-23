@@ -1,7 +1,6 @@
 package org.dei.perla.core.fpc.base;
 
 import org.dei.perla.core.fpc.TaskHandler;
-import org.dei.perla.core.fpc.SamplePipeline;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

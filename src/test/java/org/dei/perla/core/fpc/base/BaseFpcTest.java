@@ -185,8 +185,7 @@ public class BaseFpcTest {
         assertThat(sample, notNullValue());
         assertThat(sample.getValue("string"), notNullValue());
         assertTrue(sample.getValue("string") instanceof String);
-        assertThat(sample.getValue("float"), notNullValue());
-        assertTrue(sample.getValue("float") instanceof Float);
+        assertThat(sample.getValue("float"), nullValue());
         // Check if the Fpc is adding the timestamp
         assertThat(sample.getValue("timestamp"), notNullValue());
         assertTrue(sample.getValue("timestamp") instanceof Instant);

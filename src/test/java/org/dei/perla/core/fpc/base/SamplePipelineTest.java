@@ -1,9 +1,12 @@
-package org.dei.perla.core.fpc;
+package org.dei.perla.core.fpc.base;
 
-import org.dei.perla.core.fpc.SamplePipeline.Modifier;
-import org.dei.perla.core.fpc.SamplePipeline.Reorder;
-import org.dei.perla.core.fpc.SamplePipeline.StaticAppender;
-import org.dei.perla.core.fpc.SamplePipeline.TimestampAdder;
+import org.dei.perla.core.fpc.Attribute;
+import org.dei.perla.core.fpc.DataType;
+import org.dei.perla.core.fpc.Sample;
+import org.dei.perla.core.fpc.base.SamplePipeline.Modifier;
+import org.dei.perla.core.fpc.base.SamplePipeline.Copy;
+import org.dei.perla.core.fpc.base.SamplePipeline.StaticAppender;
+import org.dei.perla.core.fpc.base.SamplePipeline.TimestampAdder;
 import org.junit.Test;
 
 import java.time.Instant;
@@ -44,46 +47,57 @@ public class SamplePipelineTest {
 
     @Test
     public void testTimestampAppender() {
-        Modifier tsAppend = new TimestampAdder(0);
-        Object[] r = new Object[1];
-        assertThat(r[0], nullValue());
-        tsAppend.process(r);
-        assertThat(r[0], notNullValue());
-        assertTrue(r[0] instanceof Instant);
+        Modifier tsAppend = new TimestampAdder(3);
+        Object[] out = new Object[4];
+        for (Object o : out) {
+            assertThat(o, nullValue());
+        }
+        tsAppend.process(null, out);
+        for (int i = 0; i < out.length; i++) {
+            if (i == 3) {
+                assertTrue(out[i] instanceof Instant);
+            } else {
+                assertThat(out[i], nullValue());
+            }
+        }
     }
 
     @Test
     public void testStaticAppender() {
-        Object[] values = new Object[]{v1, v2};
+        Object[] values = new Object[]{v1, null, v2};
 
         // Multiple static attributes appender
-        Modifier allAppender = new StaticAppender(0, values);
+        Modifier allAppender = new StaticAppender(values);
 
-        Object[] r = new Object[2];
+        Object[] r = new Object[3];
         assertThat(r[0], nullValue());
         assertThat(r[1], nullValue());
-        allAppender.process(r);
-        assertThat(r[0], equalTo(1));
-        assertThat(r[1], equalTo("test"));
+        assertThat(r[2], nullValue());
+        allAppender.process(null, r);
+        assertThat(r[0], equalTo(v1));
+        assertThat(r[1], nullValue());
+        assertThat(r[2], equalTo(v2));
     }
 
     @Test
-    public void testReorder() {
-        Object[] values = new Object[]{5, 3, 1, 2, 4, 0, null, null};
-        int[] order = new int[]{5, 6, 2, 3, 7, 6, 7, 7};
+    public void testCopy() {
+        Object[] in = new Object[]{5, 3, 1, 2, 4, 0};
+        int[] order = new int[]{7, 4, 1, 2, 6, 0};
 
-        Reorder reorder = new Reorder(order);
-        reorder.process(values);
-        int j = 0;
-        for (int i = 0; i < values.length; i++) {
-            Object o = values[i];
-            if (i == 1 || i == 4) {
-                assertThat(o, nullValue());
-            } else {
-                assertTrue(o instanceof Integer);
-                assertThat((Integer) o, equalTo(j++));
-            }
+        Copy copy = new Copy(order);
+        Object[] out = new Object[8];
+        for (Object o : out) {
+            assertThat(o, nullValue());
         }
+        copy.process(in, out);
+        assertThat(out[0], equalTo(0));
+        assertThat(out[1], equalTo(1));
+        assertThat(out[2], equalTo(2));
+        assertThat(out[3], nullValue());
+        assertThat(out[4], equalTo(3));
+        assertThat(out[5], nullValue());
+        assertThat(out[6], equalTo(4));
+        assertThat(out[7], equalTo(5));
     }
 
     @Test
@@ -108,7 +122,7 @@ public class SamplePipelineTest {
 
         List<Modifier> mods = p.getModifiers();
         assertThat(mods.size(), equalTo(2));
-        assertTrue(mods.get(0) instanceof Reorder);
+        assertTrue(mods.get(0) instanceof Copy);
         assertTrue(mods.get(1) instanceof TimestampAdder);
 
         Object[] source = new Object[]{"source1", "source2"};
@@ -151,8 +165,8 @@ public class SamplePipelineTest {
 
         List<Modifier> mods = p.getModifiers();
         assertThat(mods.size(), equalTo(2));
-        assertTrue(mods.get(0) instanceof TimestampAdder);
-        assertTrue(mods.get(1) instanceof Reorder);
+        assertTrue(mods.get(0) instanceof Copy);
+        assertTrue(mods.get(1) instanceof TimestampAdder);
 
         Object[] source = new Object[]{"source1", "source2"};
         Sample sample = p.run(source);
@@ -203,8 +217,8 @@ public class SamplePipelineTest {
         List<Modifier> mods = p.getModifiers();
         assertThat(mods.size(), equalTo(3));
         assertTrue(mods.get(0) instanceof StaticAppender);
-        assertTrue(mods.get(1) instanceof TimestampAdder);
-        assertTrue(mods.get(2) instanceof Reorder);
+        assertTrue(mods.get(1) instanceof Copy);
+        assertTrue(mods.get(2) instanceof TimestampAdder);
 
         Object[] source = new Object[]{"source1", "source2"};
         Sample sample = p.run(source);
@@ -259,7 +273,7 @@ public class SamplePipelineTest {
         List<Modifier> mods = p.getModifiers();
         assertThat(mods.size(), equalTo(2));
         assertTrue(mods.get(0) instanceof StaticAppender);
-        assertTrue(mods.get(1) instanceof Reorder);
+        assertTrue(mods.get(1) instanceof Copy);
 
         Object[] source = new Object[]{"source1", "source2", Instant.now()};
         Sample sample = p.run(source);
@@ -315,7 +329,7 @@ public class SamplePipelineTest {
         List<Modifier> mods = p.getModifiers();
         assertThat(mods.size(), equalTo(2));
         assertTrue(mods.get(0) instanceof StaticAppender);
-        assertTrue(mods.get(1) instanceof Reorder);
+        assertTrue(mods.get(1) instanceof Copy);
 
         Object[] source = new Object[]{"source1", "source2", Instant.now()};
         Sample sample = p.run(source);
@@ -376,7 +390,7 @@ public class SamplePipelineTest {
         List<Modifier> mods = p.getModifiers();
         assertThat(mods.size(), equalTo(3));
         assertTrue(mods.get(0) instanceof StaticAppender);
-        assertTrue(mods.get(1) instanceof Reorder);
+        assertTrue(mods.get(1) instanceof Copy);
         assertTrue(mods.get(2) instanceof TimestampAdder);
 
         Object[] source = new Object[]{"source1", "source2"};

@@ -18,7 +18,6 @@ import org.dei.perla.core.engine.*;
 import org.dei.perla.core.engine.SubmitInstruction.RequestParameter;
 import org.dei.perla.core.fpc.Attribute;
 import org.dei.perla.core.fpc.DataType;
-import org.dei.perla.core.fpc.SamplePipeline;
 import org.dei.perla.core.message.Mapper;
 import org.dei.perla.core.message.MapperFactory;
 import org.junit.BeforeClass;

@@ -4,7 +4,6 @@ import org.apache.log4j.Logger;
 import org.dei.perla.core.fpc.FpcException;
 import org.dei.perla.core.fpc.TaskHandler;
 import org.dei.perla.core.fpc.Attribute;
-import org.dei.perla.core.fpc.SamplePipeline;
 import org.dei.perla.core.utils.Conditions;
 
 import java.util.ArrayList;
