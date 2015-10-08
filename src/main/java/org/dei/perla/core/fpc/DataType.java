@@ -1,5 +1,6 @@
 package org.dei.perla.core.fpc;
 
+import java.io.Serializable;
 import java.time.Instant;
 
 /**
@@ -7,7 +8,9 @@ import java.time.Instant;
  *
  * @author Guido Rota (2015)
  */
-public abstract class DataType implements Comparable<DataType> {
+public abstract class DataType implements Comparable<DataType>, Serializable {
+
+    private static final long serialVersionUID = -7865518840767634515L;
 
     public static final TypeClass ANY =
             new TypeClass("any");
@@ -181,6 +184,8 @@ public abstract class DataType implements Comparable<DataType> {
      */
     public static final class ConcreteType extends DataType {
 
+        private static final long serialVersionUID = -2017732297278880515L;
+
         private final Class<?> javaClass;
 
         private ConcreteType(String name, Class<?> javaClass) {
@@ -262,6 +267,8 @@ public abstract class DataType implements Comparable<DataType> {
      * @author Guido Rota (2015)
      */
     public static final class TypeClass extends DataType {
+
+        private static final long serialVersionUID = -6607431406079431811L;
 
         private TypeClass(String name) {
             super(name);

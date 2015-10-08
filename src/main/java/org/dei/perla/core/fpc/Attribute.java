@@ -1,5 +1,6 @@
 package org.dei.perla.core.fpc;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,7 +10,9 @@ import java.util.Map;
  *
  * @author Guido Rota (2015)
  */
-public final class Attribute implements Comparable<Attribute> {
+public final class Attribute implements Comparable<Attribute>, Serializable {
+
+    private static final long serialVersionUID = -7088996235899905068L;
 
     private static final Map<String, Attribute> cache = new HashMap<>();
 
