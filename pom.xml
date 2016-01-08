@@ -8,6 +8,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <!-- github server corresponds to entry in ~/.m2/settings.xml -->
     <github.global.server>github</github.global.server>
+    <maven.javadoc.skip>true</maven.javadoc.skip>
   </properties>
   <dependencies>
   	<dependency>
