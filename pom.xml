@@ -140,8 +140,6 @@
           <outputDirectory>${project.build.directory}/mvn-repo</outputDirectory>
           <branch>refs/heads/mvn-repo</branch>
           <includes><include>**/*</include></includes>
-          <repositoryName>core</repositoryName>
-          <repositoryOwner>perlawsn</repositoryOwner>
         </configuration>
         <executions>
           <!-- run site-maven-plugin's 'site' target as part of the build's normal 'deploy' phase -->
