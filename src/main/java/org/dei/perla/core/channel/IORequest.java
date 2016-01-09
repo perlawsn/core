@@ -4,10 +4,9 @@ package org.dei.perla.core.channel;
 /**
  * A generic interface for requesting the execution of a {@link Channel}
  * operation. A default {@link IORequest} implementation is not supplied
- * since different {@link Channels} might require different parameters to
+ * since different {@link Channel}s might require different parameters to
  * execute a user request.
  *
- * <p/>
  * A single {@link IORequest} may contain several {@link Payload}
  * objects, set through the {@link IORequest#setParameter} method.
  * {@link Payload}s are used in a request for the following reasons:

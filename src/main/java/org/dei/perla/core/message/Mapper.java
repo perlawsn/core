@@ -1,25 +1,21 @@
 package org.dei.perla.core.message;
 
-import java.util.Collection;
-
-import org.apache.http.annotation.ThreadSafe;
 import org.dei.perla.core.channel.Payload;
 import org.dei.perla.core.descriptor.FieldDescriptor;
+
+import java.util.Collection;
 
 /**
  * <p>
  * A class for marshalling and unmarshalling data. Each <code>Mapper</code>
  * object is tailored to managea single message type.
- * </p>
  *
  * @author Guido Rota (2014)
- *
  */
-@ThreadSafe
 public interface Mapper {
 
 	/**
-	 * Identifier of the message managed by this <code>Mapper<code>
+	 * Identifier of the message managed by this <code>Mapper</code>
 	 *
 	 * @return Message identifier
 	 */
@@ -59,7 +55,7 @@ public interface Mapper {
 	 *
 	 * @param payload
 	 *            <code>Payload</code> to unmarshal
-	 * @return <codee>FpcMessage</code> instance populated with data
+	 * @return <code>FpcMessage</code> instance populated with data
 	 *         unmarshalled from the payload
 	 */
 	public FpcMessage unmarshal(Payload payload);

@@ -99,13 +99,14 @@ public final class Attribute implements Comparable<Attribute>, Serializable {
     }
 
     /**
-     * Similar to {@code match}, provides an additional ordering between
-     * types. Attribute order is computed using the attributes' ids first, and
-     * then compare-matching the attributes' data types.
+     * Similar to {@link Attribute#match(Attribute)}, provides an additional
+     * ordering between types. Attribute order is computed using the
+     * attributes' ids first, and then compare-matching the attributes' data
+     * types.
      *
-     * @param o
-     * @return 0 if the attributes are equal or match, < 0 if the current
-     * object is lower than the other, > 0 otherwise.
+     * @param a attribute to match
+     * @return 0 if the attributes are equal or match, &lt; 0 if the current
+     * object is lower than the other, &gt; 0 otherwise.
      */
     public int compareMatch(Attribute a) {
         int c = id.compareTo(a.getId());

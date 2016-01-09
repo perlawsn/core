@@ -21,11 +21,10 @@ import org.dei.perla.core.utils.Errors;
 import java.util.*;
 
 /**
- * Script compiler. This class can be used to compile a list of {@Link
+ * Script compiler. This class can be used to compile a list of {@link
  * InstructionDescriptor}s into an executable {@link Script}.
  *
  * @author Guido Rota (2014)
- *
  */
 public class Compiler {
 
@@ -33,11 +32,13 @@ public class Compiler {
      * Compilers a list of {@link InstructionDescriptor}s into a {@link Script}.
      *
      * @param inst
-     *            List of {@link InstructionDescriptors}s to be compiled
+     *            List of {@link InstructionDescriptor}s to be compiled
      * @param name
      *            Script name
-     * @param atts
+     * @param attDescMap
      *            Map of {@link AttributeDescriptor}s, indexed by attribute name
+     * @param attMap
+     *            Map of {@link Attribute}s, indexed by attribute name
      * @param mappers
      *            Map of message {@link Mapper}s, indexed by message id
      * @param requests

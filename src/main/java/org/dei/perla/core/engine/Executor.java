@@ -69,6 +69,8 @@ public class Executor {
      * @param timeoutSec
      *            seconds that this method waits before interrupting all
      *            running {@link Script}s.
+     * @throws InterruptedException if the thread is interrupted while
+     * waiting for the {@link Executor}'s termination
      */
     public static synchronized void shutdown(int timeoutSec)
             throws InterruptedException {
@@ -84,6 +86,8 @@ public class Executor {
     /**
      * Indicates if the {@code Executor} is currently running and can accept new
      * {@link Script}s.
+     *
+     * @return true if running, false otherwise
      */
     public static synchronized boolean isRunning() {
         return running;
@@ -212,12 +216,10 @@ public class Executor {
      * Evaluates an EL expression and returns the results appropriately coerced
      * into the specified type.
      *
-     * @param context
-     *            {@link ExecutionContext} to be used during evaluation
-     * @param expression
-     *            Expression to evaluate
-     * @param type
-     *            Result type
+     * @param context {@link ExecutionContext} to be used during evaluation
+     * @param expression Expression to evaluate
+     * @param type Result class
+     * @param <T> reslut type
      * @return Result of the expression coerced into the specified type
      */
     // @SuppressWarnings("unchecked") If something goes wrong it's because the

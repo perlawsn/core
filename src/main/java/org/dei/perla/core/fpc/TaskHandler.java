@@ -4,16 +4,13 @@ package org.dei.perla.core.fpc;
  * <p>
  * A general handler interface for collecting the result of an asynchronous Fpc
  * {@link Task}
- * </p>
  *
  * <p>
  * The implementations of the {@code complete} and {@code error} methods should
  * terminate quickly so as to avoid blocking the invoking thread from continuing
  * normally.
- * </p>
  *
  * @author Guido Rota (2014)
- *
  */
 public interface TaskHandler {
 
@@ -21,11 +18,9 @@ public interface TaskHandler {
 	 * <p>
 	 * Invoked when the {@link Task} completes its execution successfully. This
 	 * method is not invoked when the {@link Task} stops due to an error.
-	 * </p>
 	 *
 	 * <p>
 	 * No more samples or errors will be produced after this method is invoked.
-	 * </p>
 	 *
 	 * @param task {@link Task} that completed its execution
 	 */
@@ -47,7 +42,7 @@ public interface TaskHandler {
 	 * {@link Task} to terminate or not.
 	 *
 	 * @param task
-	 *            {@link task} that caused the error
+	 *            {@link Task} that caused the error
 	 * @param cause
 	 *            Error cause
 	 */

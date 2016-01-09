@@ -38,11 +38,19 @@ public interface Fpc {
      *
      * @param values attribute-value map containing the parameters to be set
      *               on the remote device
+     * @param strict strict scheduling policy flag. If set to true the
+     *               operation will be run only if the {@code Fpc} can
+     *               collect all the attributes requested by the user. If set
+     *               to false, the operation will be run as long as the
+     *               {@code Fpc} can collect at least one of the requested
+     *               attributes.
      * @param handler completion handler invoked by the {@code Fpc} to notify
      *                the completion of the set operation
      * @return {@link Task} object corresponding to the set operation
      */
-    public Task set(Map<Attribute, Object> values, boolean strict,
+    public Task set(
+            Map<Attribute, Object> values,
+            boolean strict,
             TaskHandler handler);
 
     /**
@@ -51,12 +59,6 @@ public interface Fpc {
      *
      * @param values attribute-value map containing the parameters to be set
      *               on the remote device
-     * @param strict strict scheduling policy flag. If set to true the
-     *               operation will be run only if the {@code Fpc} can
-     *               manage all the attributes requested by the user. If set
-     *               to false, the operation will be run as long as the
-     *               {@code Fpc} can manage at least one of the requested
-     *               attributes.
      * @param handler completion handler invoked by the {@code Fpc} to notify
      *                the completion of the set operation
      * @return {@link Task} object corresponding to the set operation

@@ -6,12 +6,11 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * A <code>Script</code> that can be executed by the Fpc execution engine. Each
- * <code>Script</code> is identified by a name and a linked list of
+ * A {@link Script} that can be executed by the Fpc execution engine. Each
+ * {@link Script} is identified by a name and a linked list of
  * instructions.
  *
  * @author Guido Rota (2014)
- *
  */
 public final class Script {
 
@@ -53,7 +52,7 @@ public final class Script {
      * Returns the list of {@link Attribute}s that the {@code Script} gathers
      * from the remote device.
      *
-     * It is important to note that the order of the {@link Atttibute}s in
+     * It is important to note that the order of the {@link Attribute}s in
      * this list is guaranteed to be the same as the {@link Attribute} order in
      * the records produced by the {@code Script}.
      *

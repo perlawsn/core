@@ -151,8 +151,8 @@ public final class AsyncOperation
     }
 
     /**
-     * Implementation of a {@link Task} for managing asynchronous data
-     * transmissions.
+     * Implementation of a {@link org.dei.perla.core.fpc.Task} for managing
+     * asynchronous data transmissions.
      *
      * @author Guido Rota
      */

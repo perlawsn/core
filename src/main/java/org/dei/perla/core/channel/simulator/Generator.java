@@ -5,7 +5,7 @@ import java.util.Map;
 
 /**
  * An abstract class for a generic value-generating component.
- * <p/>
+ *
  * Implementations of this class are used by the <code>SimulatorChannel</code>
  * to dynamically create random generated responses.
  *

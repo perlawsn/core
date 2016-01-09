@@ -15,8 +15,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * <p> The {@code ChannelManager} is a component responsible for managing
- * multiple asynchronous callbacks registered on the available {@link Fpc}
- * {@link Channel}s.
+ * multiple asynchronous callbacks registered on the available
+ * {@link org.dei.perla.core.fpc.Fpc} {@link Channel}s.
  *
  * <p> Every callback registered in the {@code ChannelManager} is
  * associated with a specific message type. When a registered message type is
@@ -27,7 +27,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * each message type.
  *
  * @author Guido Rota (2014)
- *
  */
 public final class ChannelManager {
 
@@ -57,8 +56,6 @@ public final class ChannelManager {
 
     /**
      * Registers a new callback function with a particular message type,
-     * identified by the {@link Mapper} parameter. The callback function will
-     * be invoked every time the associated message type is received by any
      * of the {@link Channel}s managed by the {@link ChannelManager}
      *
      * @param mapper {@link Mapper} object identifying the message type
@@ -111,14 +108,13 @@ public final class ChannelManager {
      * Callback interface for the {@link ChannelManager}
      *
      * @author Guido Rota (2015)
-     *
      */
     public static interface AsyncChannelCallback {
 
         /**
          * Invoked when a new message is received asynchronously
          *
-         * @param message
+         * @param message new message
          */
         public void newMessage(FpcMessage message);
 

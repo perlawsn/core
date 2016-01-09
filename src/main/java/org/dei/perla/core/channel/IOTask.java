@@ -1,10 +1,8 @@
 package org.dei.perla.core.channel;
 
 /**
- * <p>
  * This interface represents the state of execution of an <code>IORequest</code>
  * submitted to a <code>Channel</code>.
- * </p>
  *
  * <p>
  * <code>IOTask</code> classes can be used to:
@@ -12,10 +10,8 @@ package org.dei.perla.core.channel;
  * <li>Retrieve the <code>IORequest</code> associated with the IOTask</li>
  * <li>Cancel an <code>IORequest</code> or query the completion status</li>
  * </ul>
- * </p>
  *
  * @author Guido Rota (2014)
- *
  */
 public interface IOTask {
 

@@ -126,8 +126,8 @@ public final class Check {
 	/**
 	 * Checks if the {@code Array} passed as parameter is either null or empty
 	 *
-	 * @param collection
-	 *            {@code Array} to check
+	 * @param array {@code Array} to check
+	 * @param <T> array element type
 	 * @return true if the {@code Array} passed as parameter is either null or
 	 *         empty, false otherwise.
 	 */

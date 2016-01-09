@@ -9,14 +9,13 @@ import java.util.List;
  * <p>
  * A class for storing errors and their associated context. <code>Errors</code>
  * instances can be used to store several error messages and exceptions thrown
- * during program execution.</p
+ * during program execution.
  *
  * <p>
  * The main purpose of this class is storing various error messages and
  * exceptions for deferred evaluation. <code>Errors</code> is particularly
  * useful when the execution logic of the program being implemented is required
  * to continue even in presence of errors or warnings.
- * </p>
  *
  * <p>
  * A Parser is a typical example of such a program: the parsing procedure needs
@@ -24,7 +23,6 @@ import java.util.List;
  * problems possible. Error management is deferred until the input is completely
  * consumed. Only then the list of errors and warnings is analyzed and shown to
  * the user.
- * </p>
  *
  * <p>
  * Additional context information can be attached to an <code>Errors</code>
@@ -46,11 +44,10 @@ import java.util.List;
  * error count. Moreover, invocations of the <code>asString()</code> method will
  * retrieve all error messages in the current <code>Errors</code> object and all
  * child instances generated from it.
- * </p>
+ *
  * <p>
  * It is important to note that child <code>Errors</code> instances have no
  * access to the messages stored in their parents.
- * </p>
  *
  * @author Guido Rota (2014)
  *

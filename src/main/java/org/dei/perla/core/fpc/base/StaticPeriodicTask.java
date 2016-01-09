@@ -10,8 +10,9 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * A {@link Task} that periodically creates a new {@link Sample} using only
- * static {@link Fpc} attributes.
+ * A {@link Task} that periodically creates a new
+ * {@link org.dei.perla.core.fpc.Sample} using only static
+ * {@link org.dei.perla.core.fpc.Fpc} attributes.
  *
  * @author Guido Rota 02/07/15.
  */

@@ -15,7 +15,6 @@ import java.util.Map;
  * method.
  *
  * @author Guido Rota (2014)
- *
  */
 @ThreadSafe
 public interface MapperFactory extends Plugin {
@@ -32,24 +31,18 @@ public interface MapperFactory extends Plugin {
 	/**
 	 * <p>
 	 * Creates a new <code>Mapper</code> instance.
-	 * </p>
 	 *
 	 * <p>
 	 * Each <code>Mapper</code> returned by this method is tailored to marshal
 	 * and unmarshal a single message type, whose characteristics are detailed
 	 * inside the <Code>MessageDescriptor</code> object.
-	 * </p>
 	 *
 	 * <p>
 	 * The content of the <code>MessageDescriptor</code> is partially validated
 	 * by <code>FpcFactory</code>. Consult the <code>FpcFactory</code> javadoc
 	 * to check which checks are performed on the <code>MessageDescriptor</code>
 	 * so to avoid replicating them.
-	 * </p>
 	 *
-	 *
-	 * @param deviceName
-	 *            Name of the device that will use the <code>Mapper</code>
 	 * @param descriptor
 	 *            Java description of the message that the <code>Mapper</code>
 	 *            will have to marshal and unmarshal
@@ -65,10 +58,12 @@ public interface MapperFactory extends Plugin {
 	 * @return <code>Mapper</code> for marshalling and unmarshalling messages
 	 *         that follow the message format indicated in the MessageDescriptor
 	 *         argument
-	 * @throws InvalidDeviceDescriptorException
+	 * @throws InvalidDeviceDescriptorException if the device descriptor
+	 * contains errors
 	 */
-	public Mapper createMapper(MessageDescriptor descriptor,
-			Map<String, Mapper> mapperMap, ClassPool classPool)
-			throws InvalidDeviceDescriptorException;
+	public Mapper createMapper(
+			MessageDescriptor descriptor,
+			Map<String, Mapper> mapperMap,
+			ClassPool classPool) throws InvalidDeviceDescriptorException;
 
 }

@@ -4,9 +4,10 @@ import org.dei.perla.core.engine.Script;
 import org.dei.perla.core.message.Mapper;
 
 /**
- * A wrapper object that stores the relation between a {@link Message} type,
- * identified by a {@link Mapper} object, and the {@link Script} that must be
- * employed to process it.
+ * A wrapper object that stores the relation between an
+ * {@link org.dei.perla.core.message.FpcMessage} type, identified by a
+ * {@link Mapper} object, and the {@link Script} that must be employed to
+ * process it.
  *
  * @author Guido Rota 31/03/15.
  */

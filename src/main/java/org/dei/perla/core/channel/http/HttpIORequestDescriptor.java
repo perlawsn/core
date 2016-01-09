@@ -23,8 +23,7 @@ public class HttpIORequestDescriptor extends IORequestDescriptor {
 	/**
 	 * It is mandatory.
 	 *
-	 * @return The first part of URL Http request.<br />
-	 *         ex. http://www.yourhost.com
+	 * @return The first part of URL Http request, e.g. http://www.yourhost.com
 	 */
 	public String getHost() {
 		return host;

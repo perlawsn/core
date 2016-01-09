@@ -17,16 +17,14 @@ import java.util.function.Consumer;
  * An abstract implementation of the {@link BaseOperation} interface. This
  * class provides a common implementation of several housekeeping methods needed
  * by all {@link Operation} classes.
- * </p>
  *
  * <p>
  * This implementation keeps a list of all tasks scheduled by the operation.
  * Imlementing classes are responsible for managing the addition or removal of
- * {@link Task}s using the {@code add()} and {@code remove()} methods.
- * </p>
+ * {@link org.dei.perla.core.fpc.Task}s using the {@code add()} and
+ * {@code remove()} methods.
  *
  * @author Guido Rota (2014)
- *
  */
 public abstract class BaseOperation<T extends BaseTask>
         implements Operation {
@@ -98,7 +96,8 @@ public abstract class BaseOperation<T extends BaseTask>
     }
 
     /**
-     * Performs the actual scheduling of a new {@link Task}.
+     * Performs the actual scheduling of a new
+     * {@link org.dei.perla.core.fpc.Task}.
      *
      * This method is executed in mutual exclusion with all other operation that
      * may change the task list content or the internal state of this
@@ -106,11 +105,12 @@ public abstract class BaseOperation<T extends BaseTask>
      *
      * @param params
      *            Parameters to be passed
-     * @param h
+     * @param handler
      *            {@link TaskHandler} object used to asynchronously collect the
      *            {@code Operation} output
-     * @return {@link Task} object for controlling the {@code Operation}
-     *         execution
+     * @param pipeline to be used to process the samples
+     * @return {@link org.dei.perla.core.fpc.Task} object for controlling the
+     * {@code Operation} execution
      * @throws IllegalArgumentException
      *             When the parameters required to run this operation are
      *             notfound in the parameterMap
@@ -118,8 +118,10 @@ public abstract class BaseOperation<T extends BaseTask>
      *             If the {@code schedule} method is invoked when the
      *             {@code Operation} is not running
      */
-    protected abstract T doSchedule(Map<String, Object> params, TaskHandler h,
-            SamplePipeline p) throws IllegalArgumentException;
+    protected abstract T doSchedule(
+            Map<String, Object> params,
+            TaskHandler handler,
+            SamplePipeline pipeline) throws IllegalArgumentException;
 
     @Override
     public final synchronized void stop(Consumer<Operation> h) {
@@ -143,7 +145,7 @@ public abstract class BaseOperation<T extends BaseTask>
      * Method invoked to stop the {@code BaseOperation}. It can be
      * overridden if a custom stop behaviour is required.
      *
-     * This version of the {@code doStop()} method takes a {@link StopHandler}
+     * This version of the {@code doStop()} method takes a stop handler
      * argument to asynchronously notify the caller about the correct shutdown
      * of the {@link Operation}. All implementations of the
      * {@code BaseOperation} class must invoke the
@@ -199,8 +201,8 @@ public abstract class BaseOperation<T extends BaseTask>
     }
 
     /**
-     * Method invoked after a {@link Task} is removed from the internal task
-     * list. It is intended to be overridden by concrete
+     * Method invoked after a {@link org.dei.perla.core.fpc.Task} is removed
+     * from the internal task list. It is intended to be overridden by concrete
      * {@code BaseOperation} implementations.
      *
      * This method will not be invoked when the task list is empty. In this
@@ -211,13 +213,13 @@ public abstract class BaseOperation<T extends BaseTask>
      * {@link BaseOperation}.
      *
      * @param tasks
-     *            List of remaining {@link Task}s
+     *            List of remaining {@link org.dei.perla.core.fpc.Task}s
      */
     protected void postRemove(List<T> tasks) { }
 
     /**
-     * Stops all active {@link Task}s and signal the cause of the error that
-     * prompted this action.
+     * Stops all active {@link org.dei.perla.core.fpc.Task}s and signal the
+     * cause of the error that prompted this action.
      *
      * This method is executed in mutual exclusion with all other operation that
      * may change the task list content or the internal state of this
@@ -242,10 +244,10 @@ public abstract class BaseOperation<T extends BaseTask>
     ///////////////////
 
     /**
-     * Returns the number of {@link Task}s currently scheduled on this
-     * {@code BaseOperation}
+     * Returns the number of {@link org.dei.perla.core.fpc.Task}s currently
+     * scheduled on this {@code BaseOperation}
      *
-     * @return Number of scheduled {@link Task}s
+     * @return Number of scheduled {@link org.dei.perla.core.fpc.Task}s
      */
     protected final synchronized int taskCount() {
         return tasks.size();
@@ -260,8 +262,7 @@ public abstract class BaseOperation<T extends BaseTask>
      * NOTE: This function is not thread-safe. For proper synchronization, a
      * lock to the Operation object must be acquired.
      *
-     * @param operation
-     *            Operation to execute
+     * @param op Operation to execute
      */
     public final void forEachTask(Consumer<T> op) {
         tasks.forEach(op);

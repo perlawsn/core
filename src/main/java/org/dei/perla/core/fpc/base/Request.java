@@ -10,7 +10,7 @@ import java.util.*;
  * {@code Request} objects are a utility objects that implement the
  * functionalities required to determine, given a list of attributes, which
  * of these are associated to values that can be generated statically by an
- * {@link FPC}.
+ * {@link org.dei.perla.core.fpc.Fpc}.
  *
  * @author Guido Rota 02/07/15.
  */
@@ -34,10 +34,11 @@ public final class Request {
      * Creates a new {@code Request} object
      *
      * @param request {@link Attribute}s requested by the user
-     * @param staticFpc {@link Attribute}s that can be served statically by
-     *                                   an {@link FPC}
+     * @param staticFpc {@link Attribute}s that can be served statically by an
+     * {@link org.dei.perla.core.fpc.Fpc}
      */
-    public Request(List<Attribute> request,
+    public Request(
+            List<Attribute> request,
             Map<Attribute, Object> staticFpc) {
         this.request = Collections.unmodifiableList(request);
         List<Attribute> ge = new ArrayList<>();
@@ -128,7 +129,8 @@ public final class Request {
 
     /**
      * Returns a list of the user requested {@link Attribute}s whose value
-     * must be sampled from the device connected to the {@link FPC}
+     * must be sampled from the device connected to the
+     * {@link org.dei.perla.core.fpc.Fpc}
      *
      * @return list of {@link Attribute}s that must be sampled from the
      * sensing device
@@ -138,9 +140,10 @@ public final class Request {
     }
 
     /**
-     * Creates a new {@link Sample} using the static {@link Fpc} {@link
-     * Attributes}. This method is employed to create a new sample when the
-     * user request contains only static {@link Attribute}s.
+     * Creates a new {@link Sample} using the static
+     * {@link org.dei.perla.core.fpc.Fpc} {@link Attribute}s. This method is
+     * employed to create a new sample when the user request contains only
+     * static {@link Attribute}s.
      *
      * @return new {@link Sample} instance
      * @throws RuntimeException if the {@code Request} is not completely static
@@ -158,8 +161,8 @@ public final class Request {
 
     /**
      * Creates a {@link SamplePipeline} that can be used to process the data
-     * coming from the underlying {@link Operaiton}. This method will take care
-     * to decorate the raw samples coming from the {@link Operaiton} with
+     * coming from the underlying {@link Operation}. This method will take care
+     * to decorate the raw samples coming from the {@link Operation} with
      * a timestamp (if needed) and static attributes. Moreover, it will
      * instruct the pipeline to reorder the attribute order to
      *

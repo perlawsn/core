@@ -8,7 +8,7 @@ import java.time.Instant;
 import java.util.*;
 
 /**
- * An immutable pipeline of {@link SampleModifier}s for adding new fields to an
+ * An immutable pipeline of {@link Modifier}s for adding new fields to an
  * existing {@link Sample}.
  *
  * New {@code SamplePipeline} objects are created using a
@@ -153,7 +153,7 @@ public final class SamplePipeline {
 	 * Runs data sampled by the {@link Fpc} through the {@code
      * SamplePipeline} in order to create an output {@link Sample}.
 	 *
-	 * @param sample data to be processed
+	 * @param in data to be processed
 	 * @return New {@link Sample} produced by the pipeline
 	 */
 	public Sample run(Object[] in) {
@@ -256,7 +256,8 @@ public final class SamplePipeline {
         private final int[] order;
 
         /**
-         * Creates a new {@link SampleModifier} that
+         * Creates a new {@link Modifier} for copying input values in their
+         * appropriate position in the output sample.
          *
          * @param order order of arrangemet of the attributes
          */

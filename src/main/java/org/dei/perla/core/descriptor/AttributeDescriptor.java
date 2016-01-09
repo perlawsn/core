@@ -12,7 +12,6 @@ import javax.xml.bind.annotation.XmlEnumValue;
  * <p>
  * Java representation of a PerLa attribute, mainly to be used by the FPCFactory
  * and related classes to create new FPCs.
- * </p>
  *
  * <p>
  * Each device attribute describes a unit of information that can be queried or
@@ -43,16 +42,12 @@ import javax.xml.bind.annotation.XmlEnumValue;
  * <li>value: value of the attribute. This property can only be used to
  * characterized STATIC attributes.</li>
  * </ul>
- * </p>
  *
  * <p>
  * This class contains various JAXB annotations that allow automatic data
  * binding from an XML file.
- * </p>
- *
  *
  * @author Guido Rota (2014)
- *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 public class AttributeDescriptor {

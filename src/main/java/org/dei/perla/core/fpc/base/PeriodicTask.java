@@ -6,7 +6,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 /**
- * A {@link Task} implementation for managing a periodic stream of data.
+ * A {@link org.dei.perla.core.fpc.Task} implementation for managing a periodic
+ * stream of data.
  *
  * <p>
  * This class can downsample the data coming from the sensing device in order
@@ -76,7 +77,8 @@ public final class PeriodicTask extends BaseTask {
 	}
 
 	/**
-	 * Process a new data sample through the {@link Task}.
+	 * Process a new data sample through the
+	 * {@link org.dei.perla.core.fpc.Task}.
 	 *
 	 * <p>
 	 * This function relays the data sample to the associated {@link

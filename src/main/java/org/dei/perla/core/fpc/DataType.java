@@ -122,21 +122,22 @@ public abstract class DataType implements Comparable<DataType>, Serializable {
      * accordingly, as it positively matches INTEGER and FLOAT with NUMERIC,
      * and all concrete types to ANY.
      *
-     * @param o type to match the current instance with
+     * @param o type to match
      * @return true if the two types are compatible, false otherwise
      */
     public abstract boolean match(DataType o);
 
     /**
-     * Similar to {@code match}, provides an additional ordering between types.
+     * Similar to {@link DataType#match(DataType)}, provides an additional
+     * ordering between types.
      *
      * <p> Returns 0 whenever {@code match} return true, otherwise returns
      * the relative order between types (types order follows their
      * declaration order in this class).
      *
-     * @param o
-     * @return 0 if the types are equal or match, < 0 if the current object is
-     * lower than the other, > 0 otherwise.
+     * @param o type to compare
+     * @return 0 if the types are equal or match, &lt; 0 if the current object is
+     * lower than the other, &gt; 0 otherwise.
      */
     public abstract int compareMatch(DataType o);
 

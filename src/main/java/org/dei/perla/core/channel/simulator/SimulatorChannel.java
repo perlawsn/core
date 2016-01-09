@@ -13,16 +13,13 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * <p>
  * A <code>Channel</code> for simulating a network node.
- * </p>
- * <p/>
+ *
  * <p>
  * The <code>SimulatorChannel</code> behaviour can be specified directly in the
  * XML Device Descriptor using the appropriate {@code<channel>} element with
  * namespace http://perla.dei.org/channel/simulator.
- * </p>
- * <p/>
+ *
  * <p>
  * A <code>SimulatorChannel</code> is able to reply a user-defined series of
  * messages containing fixed or random data. The following snippet of code
@@ -41,7 +38,6 @@ import java.util.concurrent.TimeUnit;
  * <li>A {@code pressure} field with random value between 450 and 600</li>
  * </ul>
  * </li>
- * </li>
  * <li>{@code all} message:
  * <ul>
  * <li>A {@code type} field with static value "all"</li>
@@ -49,11 +45,8 @@ import java.util.concurrent.TimeUnit;
  * <li>A {@code pressure} field with random value between 450 and 600</li>
  * </ul>
  * </li>
- * <ul>
- * </p>
- * <p/>
- * <p>
- * <p/>
+ * </ul>
+ *
  * <pre>
  * {@code
  * <sim:channel id="test">
@@ -77,9 +70,7 @@ import java.util.concurrent.TimeUnit;
  * </sim:channel>
  * }
  * </pre>
- * <p/>
- * </p>
- * <p/>
+ *
  * <p>
  * The {@code<field>} qualifier attribute allows users to specify how that field
  * is produced by the <code>SimulatorChannel</code>.
@@ -90,8 +81,7 @@ import java.util.concurrent.TimeUnit;
  * <code>min</code> and <code>max</code> attributes of the {@code<field>}
  * element.</li>
  * </ul>
- * </p>
- * <p/>
+ *
  * <p>
  * Dynamic field generation depends on the field type:
  * <ul>
@@ -102,29 +92,24 @@ import java.util.concurrent.TimeUnit;
  * <li><code>timestamp</code>: response creation date and time (min and max
  * ignored)</li>
  * <li><code>id</code>: NOT ALLOWED</li>
- * <li></li>
  * </ul>
- * </p>
- * <p/>
+ *
  * <p>
  * <code>SimulatorChannel</code> does not provide any means of creating dynamic
  * attributes with a static value. Such behaviour can be achieved by configuring
  * an FPC attribute with static <code>access</code>.
- * </p>
- * <p/>
+ *
  * <p>
  * <code>SimulatorChannel</code> users can request a specific response by
  * sending a <code>SimulatorIORequest</code> with the desired response
  * identifier set in the <code>generatorId</code> field.
- * </p>
- * <p/>
+ *
  * <p>
  * For example, sending a <code>SimulatorIORequest</code> with the
  * <code>responseId</code> field set to <code>press-only</code> will result in
  * the creation of a <code>ChannelResponse</code> conforming to the
  * <code>press-only</code> section of the XML code snippet above.
- * </p>
- * <p/>
+ *
  * <p>
  * The <code>period</code> parameter inside the <code>SimulatorIORequest</code>
  * is used for starting, stopping and re-scheduling value generation at periodic
@@ -132,13 +117,11 @@ import java.util.concurrent.TimeUnit;
  * must be marshalled from a <code>SimulatorMessage</code> with a field named
  * 'period', which represents the interval in ms of the periodic value
  * generation task.
- * </p>
- * <p/>
+ *
  * <p>
- * Scheduling (or re-scheduling) happens when the period is > 0. A running
+ * Scheduling (or re-scheduling) happens when the period is &gt; 0. A running
  * periodic generation task is stopped when the <code>SimulatorChannel</code>
  * receive a request with period equal to 0.
- * </p>
  *
  * @author Guido Rota (2014)
  */

@@ -108,8 +108,9 @@ public final class DateUtils {
 	 * </p>
 	 *
 	 * <p>
-	 * This method was implemented for allowing {@link Mapper}s to
-	 * format an unknown object of PerLa type TIMESTAMP.
+	 * This method was implemented for allowing
+	 * {@link org.dei.perla.core.message.Mapper}s to format an unknown object
+	 * of PerLa type TIMESTAMP.
 	 * </p>
 	 *
 	 * @param formatter

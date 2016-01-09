@@ -3,28 +3,30 @@ package org.dei.perla.core.fpc;
 import org.dei.perla.core.descriptor.DeviceDescriptor;
 
 /**
- * A software component for creating new <code>FPC</code> entities.
+ * A software component for creating new {@link Fpc} entities.
  *
  * @author Guido Rota (2014)
- *
  */
 public interface FpcFactory {
 
     /**
-     * Parses a <code>DeviceDescriptor</code> and creates an <code>FPC</code>
+     * Parses a {@link DeviceDescriptor} and creates an {@link Fpc}
      * tailored to handle the associated device.
      *
      * The following validation steps must be performed on the
-     * <code>DeviceDescriptor</code>
+     * {@link DeviceDescriptor}
      * <ul>
-     * <li>Device checks:</li>
+     * <li>
+     *     Device checks:
      * <ul>
      * <li>Device name is set</li>
      * <li>At least one attribute is declared</li>
      * <li>At least one message is declared</li>
      * </ul>
+     * </li>
      *
-     * <li>Attribute checks:</li>
+     * <li>
+     *     Attribute checks:
      * <ul>
      * <li>Attribute ids are set</li>
      * <li>There are no duplicate attribute ids</li>
@@ -32,8 +34,10 @@ public interface FpcFactory {
      * <li>Permission is set to READ-ONLY for STATIC attributes</li>
      * <li>Timestamp attributes cannot be static</li>
      * </ul>
+     * </li>
      *
-     * <li>Message checks:</li>
+     * <li>
+     *     Message checks:
      * <ul>
      * <li>Message ids are set</li>
      * <li>There are no duplicate message ids</li>
@@ -44,12 +48,15 @@ public interface FpcFactory {
      * <li>The same attribute is not bound multiple time to the same message
      * field</li>
      * </ul>
+     * </li>
      *
-     * <li>Channel checks:</li>
+     * <li>
+     *     Channel checks:
      * <ul>
      * <li>Channel ids are set</li>
      * <li>There are no duplicate channel ids</li>
      * </ul>
+     * </li>
      *
      * </ul>
      *

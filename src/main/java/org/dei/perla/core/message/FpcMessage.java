@@ -2,17 +2,15 @@ package org.dei.perla.core.message;
 
 /**
  * <p>
- * <code>FpcMessage</code> is a generic interface that specifies a common set of
- * methods for interacting with messages unmarshalled by a <code>Mapper</code>.
- * </p>
+ * {@link FpcMessage} is a generic interface that specifies a common set of
+ * methods for interacting with messages unmarshalled by a {@link Mapper}.
  *
  * <p>
- * This interface allows every <code>Fpc</code> to set and retrieve fields from
- * a message, regardless of the underlying message implementation details.
- * </p>
+ * This interface allows every {@link org.dei.perla.core.fpc.Fpc} to set and
+ * retrieve fields from a message, regardless of the underlying message
+ * implementation details.
  *
  * @author Guido Rota (2014)
- *
  */
 public interface FpcMessage {
 
@@ -24,7 +22,7 @@ public interface FpcMessage {
 	public String getId();
 
 	/**
-	 * Returns true if the current <code>FpcMessage</code> contains the field
+	 * Returns true if the current {@link FpcMessage} contains the field
 	 * passed as parameter.
 	 *
 	 * @param name
@@ -40,7 +38,7 @@ public interface FpcMessage {
 	 * @param name
 	 *            Name of the field to retrieve
 	 * @return Value of the field
-	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
 	 *             If the identifier passed as a parameter does not correspond
 	 *             to any field in the message
 	 */
