@@ -4,7 +4,7 @@ import org.dei.perla.core.channel.*;
 import org.dei.perla.core.engine.ExecutionContext.InstructionLocal;
 import org.dei.perla.core.message.FpcMessage;
 import org.dei.perla.core.message.Mapper;
-import org.dei.perla.core.utils.Conditions;
+import org.dei.perla.core.utils.Check;
 
 import java.util.Optional;
 
@@ -66,7 +66,7 @@ public class SubmitInstruction implements Instruction {
 
 	@Override
 	public void setNext(Instruction instruction) {
-		this.next = Conditions.checkNotNull(instruction, "next");
+		this.next = Check.notNull(instruction, "next");
 	}
 
 	@Override

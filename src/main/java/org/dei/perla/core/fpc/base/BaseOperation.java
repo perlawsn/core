@@ -1,10 +1,10 @@
 package org.dei.perla.core.fpc.base;
 
 import org.apache.log4j.Logger;
+import org.dei.perla.core.fpc.Attribute;
 import org.dei.perla.core.fpc.FpcException;
 import org.dei.perla.core.fpc.TaskHandler;
-import org.dei.perla.core.fpc.Attribute;
-import org.dei.perla.core.utils.Conditions;
+import org.dei.perla.core.utils.Check;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -84,7 +84,7 @@ public abstract class BaseOperation<T extends BaseTask>
     public final synchronized BaseTask schedule(
             Map<String, Object> params, TaskHandler h, SamplePipeline p)
             throws IllegalArgumentException, IllegalStateException {
-        Conditions.checkNotNull(h, "handler");
+        Check.notNull(h, "handler");
         if (!schedulable) {
             throw new IllegalStateException(
                     "Operation '" + id + "' is not schedulable");

@@ -1,17 +1,16 @@
 package org.dei.perla.core.channel.simulator;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javassist.ClassPool;
-
 import org.dei.perla.core.descriptor.FieldDescriptor;
 import org.dei.perla.core.descriptor.InvalidDeviceDescriptorException;
 import org.dei.perla.core.descriptor.MessageDescriptor;
 import org.dei.perla.core.message.AbstractMapperFactory;
 import org.dei.perla.core.message.Mapper;
-import org.dei.perla.core.utils.Conditions;
+import org.dei.perla.core.utils.Check;
 import org.dei.perla.core.utils.Errors;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A custom <code>MapperFactory</code> implementation designed for the
@@ -35,9 +34,8 @@ public class SimulatorMapperFactory extends AbstractMapperFactory {
 		Map<String, String> staticFieldMap = new HashMap<>();
 		Map<String, FieldDescriptor> msgFieldMap = new HashMap<>();
 
-		Conditions.checkNotNull(descriptor, "descriptor");
-		Conditions
-				.checkIllegalArgument(descriptor instanceof SimulatorMessageDescriptor);
+		Check.notNull(descriptor, "descriptor");
+		Check.argument(descriptor instanceof SimulatorMessageDescriptor);
 
 		for (FieldDescriptor field : descriptor.getFieldList()) {
 			msgFieldMap.put(field.getName(), field);

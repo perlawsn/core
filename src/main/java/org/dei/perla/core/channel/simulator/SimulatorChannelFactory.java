@@ -1,21 +1,20 @@
 package org.dei.perla.core.channel.simulator;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.dei.perla.core.channel.Channel;
 import org.dei.perla.core.channel.ChannelFactory;
-import org.dei.perla.core.channel.simulator.FieldGenerator.StaticFieldGenerator;
 import org.dei.perla.core.channel.simulator.DynamicFieldGenerator.*;
+import org.dei.perla.core.channel.simulator.FieldGenerator.StaticFieldGenerator;
 import org.dei.perla.core.channel.simulator.StepFieldGenerator.StepFloatFieldGenerator;
 import org.dei.perla.core.channel.simulator.StepFieldGenerator.StepIntFieldGenerator;
 import org.dei.perla.core.descriptor.ChannelDescriptor;
 import org.dei.perla.core.descriptor.InvalidDeviceDescriptorException;
 import org.dei.perla.core.utils.Check;
-import org.dei.perla.core.utils.Conditions;
 import org.dei.perla.core.utils.Errors;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * <code>ChannelFactory</code> implementation for generating
@@ -37,9 +36,8 @@ public class SimulatorChannelFactory implements ChannelFactory {
                 + "'");
         Generator[] generatorArray;
 
-        Conditions.checkNotNull(descriptor, "descriptor");
-        Conditions.checkIllegalArgument(
-                descriptor instanceof SimulatorChannelDescriptor,
+        Check.notNull(descriptor, "descriptor");
+        Check.argument(descriptor instanceof SimulatorChannelDescriptor,
                 "Cannot create SimulatorChannel: expected "
                         + SimulatorChannelDescriptor.class.getCanonicalName()
                         + " but received "

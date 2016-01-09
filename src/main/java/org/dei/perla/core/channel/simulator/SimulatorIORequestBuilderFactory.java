@@ -4,7 +4,6 @@ import org.dei.perla.core.channel.IORequestBuilderFactory;
 import org.dei.perla.core.descriptor.IORequestDescriptor;
 import org.dei.perla.core.descriptor.InvalidDeviceDescriptorException;
 import org.dei.perla.core.utils.Check;
-import org.dei.perla.core.utils.Conditions;
 
 /**
  * <code>RequestBuilderFactory</code> implementation for the
@@ -24,11 +23,11 @@ public class SimulatorIORequestBuilderFactory implements
 	@Override
 	public SimulatorIORequestBuilder create(IORequestDescriptor descriptor)
 			throws InvalidDeviceDescriptorException {
-		Conditions.checkNotNull(descriptor, "descriptor");
-		Conditions
-				.checkIllegalArgument(descriptor instanceof SimulatorIORequestDescriptor);
+		Check.notNull(descriptor, "descriptor");
+		Check.argument(descriptor instanceof SimulatorIORequestDescriptor);
 
-		SimulatorIORequestDescriptor simDesc = (SimulatorIORequestDescriptor) descriptor;
+		SimulatorIORequestDescriptor simDesc =
+				(SimulatorIORequestDescriptor) descriptor;
 		if (Check.nullOrEmpty(simDesc.getGeneratorId())) {
 			throw new InvalidDeviceDescriptorException(
 					"Missing 'generator' field in '" + simDesc.getId()

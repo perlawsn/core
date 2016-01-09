@@ -39,7 +39,8 @@ public interface ChannelFactory {
 	 * @param descriptor
 	 *            Java description of the <code>Channel</code>
 	 * @return Channel instance
-	 * @throws InvalidDeviceDescriptorException
+	 * @throws InvalidDeviceDescriptorException if the factory cannot parse
+	 * the specified {@link ChannelDescriptor}
 	 */
 	public Channel createChannel(ChannelDescriptor descriptor)
 			throws InvalidDeviceDescriptorException;

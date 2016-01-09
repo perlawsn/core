@@ -13,17 +13,12 @@ import org.dei.perla.core.descriptor.AttributeDescriptor.AttributePermission;
 import org.dei.perla.core.descriptor.instructions.InstructionDescriptor;
 import org.dei.perla.core.engine.Compiler;
 import org.dei.perla.core.engine.Script;
-import org.dei.perla.core.fpc.DataType;
+import org.dei.perla.core.fpc.*;
 import org.dei.perla.core.fpc.DataType.ConcreteType;
-import org.dei.perla.core.fpc.Fpc;
-import org.dei.perla.core.fpc.FpcCreationException;
-import org.dei.perla.core.fpc.FpcFactory;
 import org.dei.perla.core.fpc.base.AsyncOperation.AsyncMessageHandler;
 import org.dei.perla.core.message.Mapper;
 import org.dei.perla.core.message.MapperFactory;
-import org.dei.perla.core.fpc.Attribute;
 import org.dei.perla.core.utils.Check;
-import org.dei.perla.core.utils.Conditions;
 import org.dei.perla.core.utils.Errors;
 
 import java.util.*;
@@ -45,9 +40,9 @@ public final class BaseFpcFactory implements FpcFactory {
 
     public BaseFpcFactory(List<MapperFactory> mapFcts, List<ChannelFactory> chanFcts,
             List<IORequestBuilderFactory> reqFcts) {
-        Conditions.checkNotNull(mapFcts, "mapperFactoryList");
-        Conditions.checkNotNull(chanFcts, "channelFactoryList");
-        Conditions.checkNotNull(reqFcts, "requestBuilderFactoryList");
+        Check.notNull(mapFcts, "mapperFactoryList");
+        Check.notNull(chanFcts, "channelFactoryList");
+        Check.notNull(reqFcts, "requestBuilderFactoryList");
 
         for (MapperFactory f : mapFcts) {
             this.mapFcts.put(f.acceptedMessageDescriptorClass(), f);
@@ -63,7 +58,7 @@ public final class BaseFpcFactory implements FpcFactory {
     @Override
     public Fpc createFpc(DeviceDescriptor desc, int id)
             throws FpcCreationException {
-        Conditions.checkNotNull(desc, "descriptor");
+        Check.notNull(desc, "descriptor");
 
         Errors err = new Errors("Device descriptor '%s'", desc.getType());
         ParsingContext ctx = new ParsingContext(id);

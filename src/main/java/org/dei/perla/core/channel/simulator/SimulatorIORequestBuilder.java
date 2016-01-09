@@ -1,11 +1,11 @@
 package org.dei.perla.core.channel.simulator;
 
+import org.dei.perla.core.channel.IORequestBuilder;
+import org.dei.perla.core.utils.Check;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import org.dei.perla.core.channel.IORequestBuilder;
-import org.dei.perla.core.utils.Conditions;
 
 /**
  * <code>RequestBuilder</code> implementation for the
@@ -28,8 +28,8 @@ public class SimulatorIORequestBuilder implements IORequestBuilder {
 	private final String generatorId;
 
 	protected SimulatorIORequestBuilder(String requestId, String generatorId) {
-		this.requestId = Conditions.checkNotNull(requestId, "requestId");
-		this.generatorId = Conditions.checkNotNull(generatorId, "generatorId");
+		this.requestId = Check.notNull(requestId, "requestId");
+		this.generatorId = Check.notNull(generatorId, "generatorId");
 	}
 
 	@Override

@@ -1,7 +1,7 @@
 package org.dei.perla.core.engine;
 
 import org.dei.perla.core.message.FpcMessage;
-import org.dei.perla.core.utils.Conditions;
+import org.dei.perla.core.utils.Check;
 
 /**
  * Sets a field in a <code>Script</code> variable. The value being set
@@ -44,10 +44,11 @@ public class SetComplexInstruction extends BasicInstruction {
     @Override
     public void runBasic(Runner runner) throws ScriptException {
         Object target = runner.ctx.getVariable(variable);
-        Conditions.checkNotNull(target, "Target variable '" + variable + "' " +
-                "does not exist");
+        Check.notNull(target, "Target variable '" + variable +
+                "' does not exist");
         if (!(target instanceof FpcMessage)) {
-            throw new ScriptException("Target variable '" + variable + "' is not an FpcMessage");
+            throw new ScriptException(
+                    "Target variable '" + variable + "' is not an FpcMessage");
         }
         Object object = Executor.evaluateExpression(runner.ctx, value, fieldType);
         ((FpcMessage) target).setField(field, object);

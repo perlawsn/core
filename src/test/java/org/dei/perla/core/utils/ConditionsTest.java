@@ -1,11 +1,12 @@
 package org.dei.perla.core.utils;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
-
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.junit.Test;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertThat;
 
 public class ConditionsTest {
 
@@ -14,38 +15,38 @@ public class ConditionsTest {
 		Object object = new Object();
 
 		assertThat(object, notNullValue());
-		Object returned = Conditions.checkNotNull(object);
+		Object returned = Check.notNull(object);
 		assertThat(returned, equalTo(object));
 	}
 
 	@Test(expected = NullPointerException.class)
 	public void checkNotNullFailureTest() {
-		Conditions.checkNotNull(null);
+		Check.notNull(null);
 	}
 
 	@Test
 	public void checkIllegalArgumentSuccess() {
-		Conditions.checkIllegalArgument(true);
-		Conditions.checkIllegalArgument(true, "test");
-		Conditions.checkIllegalArgument(true, "test",
+		Check.argument(true);
+		Check.argument(true, "test");
+		Check.argument(true, "test",
 				Logger.getLogger(ConditionsTest.class));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void checkIllegalArgumentFailure1() {
-		Conditions.checkIllegalArgument(false);
+		Check.argument(false);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void checkIllegalArgumentFailure2() {
-		Conditions.checkIllegalArgument(false, "test");
+		Check.argument(false, "test");
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void checkIllegalArgumentFailure3() {
 		Logger logger = Logger.getLogger(ConditionsTest.class);
 		logger.setLevel(Level.OFF);
-		Conditions.checkIllegalArgument(false, "test", logger);
+		Check.argument(false, "test", logger);
 	}
 
 }

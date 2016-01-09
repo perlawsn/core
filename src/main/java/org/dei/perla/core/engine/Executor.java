@@ -2,7 +2,7 @@ package org.dei.perla.core.engine;
 
 import org.apache.http.annotation.ThreadSafe;
 import org.apache.log4j.Logger;
-import org.dei.perla.core.utils.Conditions;
+import org.dei.perla.core.utils.Check;
 
 import javax.el.ELContext;
 import javax.el.ExpressionFactory;
@@ -154,9 +154,9 @@ public class Executor {
 
         log.debug("Starting script '" + script.getName() + "'");
 
-        script = Conditions.checkNotNull(script, "script");
-        paramArray = Conditions.checkNotNull(paramArray, "paramArray");
-        handler = Conditions.checkNotNull(handler, "handler");
+        script = Check.notNull(script, "script");
+        paramArray = Check.notNull(paramArray, "paramArray");
+        handler = Check.notNull(handler, "handler");
 
         Runner runner = new Runner(script, paramArray, handler, debugger);
         pool.submit(runner::execute);

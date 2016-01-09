@@ -1,6 +1,6 @@
 package org.dei.perla.core.engine;
 
-import org.dei.perla.core.utils.Conditions;
+import org.dei.perla.core.utils.Check;
 
 /**
  * Abstract base implementation of the <code>Instruction</code> interface.
@@ -19,7 +19,7 @@ public abstract class BasicInstruction implements Instruction {
 			throw new IllegalStateException(
 					"The next instruction has already been set.");
 		}
-		this.next = Conditions.checkNotNull(next, "next");
+		this.next = Check.notNull(next, "next");
 	}
 
 	@Override

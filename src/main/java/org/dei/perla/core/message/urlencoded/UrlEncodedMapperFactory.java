@@ -8,7 +8,7 @@ import org.dei.perla.core.fpc.DataType;
 import org.dei.perla.core.fpc.DataType.ConcreteType;
 import org.dei.perla.core.message.AbstractMapperFactory;
 import org.dei.perla.core.message.Mapper;
-import org.dei.perla.core.utils.Conditions;
+import org.dei.perla.core.utils.Check;
 import org.dei.perla.core.utils.Errors;
 
 import java.time.ZoneId;
@@ -31,9 +31,8 @@ public class UrlEncodedMapperFactory extends AbstractMapperFactory {
         UrlEncodedMessageDescriptor ueMsgDesc;
         ParsingContext ctx;
 
-        Conditions.checkNotNull(descriptor, "descriptor");
-        Conditions.checkIllegalArgument(
-                descriptor instanceof UrlEncodedMessageDescriptor,
+        Check.notNull(descriptor, "descriptor");
+        Check.argument(descriptor instanceof UrlEncodedMessageDescriptor,
                 "Cannot create UrlEncodedMapper: expected "
                         + UrlEncodedMessageDescriptor.class.getCanonicalName()
                         + " but received "

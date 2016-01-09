@@ -151,7 +151,7 @@ public final class Errors {
 	 * @return New child <code>Errors</code> instance
 	 */
 	public Errors inContext(String context) {
-		Conditions.checkNotNull(context, "context");
+		Check.notNull(context, "context");
 		Errors child = new Errors(this, context);
 		if (errorList == null) {
 			errorList = new ArrayList<>();
@@ -168,8 +168,7 @@ public final class Errors {
 	 *            Cause of the error
 	 */
 	public void addError(Throwable cause) {
-		Conditions.checkNotNull(cause, "cause");
-		addError(cause, null);
+		addError(Check.notNull(cause), null);
 	}
 
 	/**
@@ -185,9 +184,10 @@ public final class Errors {
 	 *            Objects referenced in the format String
 	 */
 	public void addError(Throwable cause, String format, Object... objects) {
-		Conditions.checkNotNull(cause, "cause");
-		Conditions.checkNotNull(format, "format");
-		addError(cause, String.format(format, objects));
+		addError(
+				Check.notNull(cause),
+				String.format(Check.notNull(format), objects)
+		);
 	}
 
 	/**
@@ -201,8 +201,7 @@ public final class Errors {
 	 *            Error information
 	 */
 	public void addError(Throwable cause, String message) {
-		Conditions.checkNotNull(cause, "cause");
-		addMessageObject(new ThrowableMessage(cause, message));
+		addMessageObject(new ThrowableMessage(Check.notNull(cause), message));
 	}
 
 	/**
@@ -214,8 +213,7 @@ public final class Errors {
 	 *            Objects referenced in the format String
 	 */
 	public void addError(String message, Object... objects) {
-		Conditions.checkNotNull(message, "message");
-		addError(String.format(message, objects));
+		addError(String.format(Check.notNull(message), objects));
 	}
 
 	/**
@@ -225,8 +223,7 @@ public final class Errors {
 	 *            Error information
 	 */
 	public void addError(String message) {
-		Conditions.checkNotNull(message, "message");
-		addMessageObject(new StringMessage(message));
+		addMessageObject(new StringMessage(Check.notNull(message)));
 	}
 
 	private void addMessageObject(Message message) {

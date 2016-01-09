@@ -1,7 +1,7 @@
 package org.dei.perla.core.channel;
 
 import org.apache.log4j.Logger;
-import org.dei.perla.core.utils.Conditions;
+import org.dei.perla.core.utils.Check;
 
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
@@ -57,7 +57,7 @@ public abstract class AbstractChannel implements Channel {
 			throw new IllegalStateException(
 					"An IOHandler has already been set for this Channel");
 		}
-		this.asyncHandler = Conditions.checkNotNull(handler, "handler");
+		this.asyncHandler = Check.notNull(handler, "handler");
 	}
 
 	@Override
@@ -180,7 +180,8 @@ public abstract class AbstractChannel implements Channel {
 	 * @throws ChannelException
 	 *             if an error occurs while processing the
 	 *             <code>IORequest</code>
-	 * @throws InterruptedException
+	 * @throws InterruptedException when the thread executing the request is
+	 * interrupted
 	 */
 	public abstract Payload handleRequest(IORequest request)
 			throws ChannelException, InterruptedException;

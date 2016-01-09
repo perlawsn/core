@@ -2,7 +2,7 @@ package org.dei.perla.core.fpc.base;
 
 import org.dei.perla.core.fpc.TaskHandler;
 import org.dei.perla.core.fpc.Attribute;
-import org.dei.perla.core.utils.Conditions;
+import org.dei.perla.core.utils.Check;
 
 import java.util.List;
 import java.util.Map;
@@ -44,8 +44,7 @@ public abstract class PeriodicOperation extends BaseOperation<PeriodicTask> {
 			throws IllegalArgumentException {
 		long period;
 
-		Conditions.checkIllegalArgument(
-				parameterMap.containsKey(SAMPLING_PERIOD),
+		Check.argument(parameterMap.containsKey(SAMPLING_PERIOD),
 				"Missing sampling period in parameterMap");
 
 		Object o = parameterMap.get(SAMPLING_PERIOD);
@@ -64,8 +63,7 @@ public abstract class PeriodicOperation extends BaseOperation<PeriodicTask> {
 							+ "' received instead)");
 		}
 
-		Conditions.checkIllegalArgument(period >= 0,
-				"Sampling period must be greater than zero");
+		Check.argument(period >= 0, "Sampling period must be greater than zero");
 
 		return period;
 	}

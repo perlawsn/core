@@ -11,7 +11,6 @@ import org.dei.perla.core.message.AbstractMapperFactory;
 import org.dei.perla.core.message.FpcMessage;
 import org.dei.perla.core.message.Mapper;
 import org.dei.perla.core.utils.Check;
-import org.dei.perla.core.utils.Conditions;
 import org.dei.perla.core.utils.Errors;
 
 import java.util.Collections;
@@ -36,10 +35,9 @@ public class JsonMapperFactory extends AbstractMapperFactory {
 	public Mapper createMapper(MessageDescriptor descriptor,
 			Map<String, Mapper> mapperMap, ClassPool classPool)
 			throws InvalidDeviceDescriptorException {
-		Conditions.checkNotNull(descriptor, "descriptor");
-		Conditions.checkIllegalArgument(
-				descriptor instanceof JsonObjectDescriptor, String.format(
-						WRONG_DESCRIPTOR_CLASS, descriptor.getClass()
+		Check.notNull(descriptor, "descriptor");
+		Check.argument(descriptor instanceof JsonObjectDescriptor,
+				String.format(WRONG_DESCRIPTOR_CLASS, descriptor.getClass()
 								.getCanonicalName()));
 
 		JsonMessageContext ctx = new JsonMessageContext(descriptor, classPool,
