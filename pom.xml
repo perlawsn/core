@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.dei.perla</groupId>
   <artifactId>perla-core</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.0.0</version>
   <name>perla-core</name>
   <description>Data access middleware for sensor networks and pervasive systems</description>
   <url>http://perlawsn.github.io</url>
@@ -102,7 +102,7 @@
       scm:git:git@github.com:perlawsn/core.git
     </developerConnection>
     <tag>
-      HEAD
+      perla-core-1.0.0
     </tag>
   </scm>
   <build>
