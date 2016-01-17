@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.dei.perla</groupId>
   <artifactId>perla-core</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1-SNAPSHOT</version>
   <name>perla-core</name>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -83,7 +83,7 @@
       scm:git:git@github.com:perlawsn/core.git
     </developerConnection>
     <tag>
-      perla-core-1.0.0
+      HEAD
     </tag>
   </scm>
   <build>
