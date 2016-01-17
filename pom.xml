@@ -2,8 +2,27 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.dei.perla</groupId>
   <artifactId>perla-core</artifactId>
-  <version>1.0.1-SNAPSHOT</version>
+  <version>1.0.0-SNAPSHOT</version>
   <name>perla-core</name>
+  <description>Data access middleware for sensor networks and pervasive systems</description>
+  <url>http://perlawsn.github.io</url>
+  <licenses>
+    <license>
+      <name>GNU General Public License v2.0</name>
+      <url>http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>guido.rota</id>
+      <name>Guido Rota</name>
+    </developer>
+    <developer>
+      <id>fili.pazzi</id>
+      <name>Francesco Filipazzi</name>
+    </developer>
+  </developers>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
