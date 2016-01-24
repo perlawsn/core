@@ -3,6 +3,7 @@ package org.dei.perla.core.fpc.base;
 import org.dei.perla.core.fpc.Attribute;
 import org.dei.perla.core.fpc.Fpc;
 import org.dei.perla.core.fpc.Sample;
+import org.dei.perla.core.utils.AttributeUtils;
 
 import java.time.Instant;
 import java.util.*;
@@ -58,7 +59,7 @@ public final class SamplePipeline {
         out = new ArrayList<>(out);
 
         boolean nativeTs = in.contains(Attribute.TIMESTAMP);
-        int tsIdx = indexOf(out, Attribute.TIMESTAMP);
+        int tsIdx = AttributeUtils.indexOf(out, Attribute.TIMESTAMP.getId());
         // Custom by-id attribute check
         if (tsIdx == -1) {
             out.add(Attribute.TIMESTAMP);
@@ -68,7 +69,7 @@ public final class SamplePipeline {
         addCopy(in, out, mods);
 
         if (!nativeTs) {
-            tsIdx = indexOf(out, Attribute.TIMESTAMP);
+            tsIdx = AttributeUtils.indexOf(out, Attribute.TIMESTAMP.getId());
             mods.add(new TimestampAdder(tsIdx));
         }
 
@@ -89,7 +90,7 @@ public final class SamplePipeline {
                 throw new IllegalArgumentException("Cannot override sampled " +
                         "attribute '" + a + "' with static value");
             }
-            int idx = indexOf(out, a);
+            int idx = AttributeUtils.indexOf(out, a.getId());
             if (idx == -1) {
                 throw new IllegalArgumentException("Attribute '" + a + "' is " +
                         "not an output attribute");
@@ -109,7 +110,7 @@ public final class SamplePipeline {
 
         for (int i = 0; i < out.size(); i++) {
             Attribute a = out.get(i);
-            int idx = indexOf(in, a);
+            int idx = AttributeUtils.indexOf(in, a.getId());
             if (idx == -1) {
                 continue;
             }
@@ -117,16 +118,6 @@ public final class SamplePipeline {
         }
 
         mods.add(new Copy(order));
-    }
-
-    private int indexOf(List<Attribute> list, Attribute a) {
-        for (int i = 0; i < list.size(); i++) {
-            Attribute b = list.get(i);
-            if (b.getId().equals(a.getId())) {
-                return i;
-            }
-        }
-        return -1;
     }
 
 

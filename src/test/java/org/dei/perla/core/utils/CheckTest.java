@@ -6,6 +6,8 @@ import static org.junit.Assert.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.junit.Test;
 
 public class CheckTest {
@@ -43,6 +45,45 @@ public class CheckTest {
 		assertTrue(Check.nullOrEmpty(nullList));
 		assertTrue(Check.nullOrEmpty(emptyList));
 		assertFalse(Check.nullOrEmpty(list));
+	}
+
+	@Test
+	public void checkNotNullSuccessTest() {
+		Object object = new Object();
+
+		assertThat(object, notNullValue());
+		Object returned = Check.notNull(object);
+		assertThat(returned, equalTo(object));
+	}
+
+	@Test(expected = NullPointerException.class)
+	public void checkNotNullFailureTest() {
+		Check.notNull(null);
+	}
+
+	@Test
+	public void checkIllegalArgumentSuccess() {
+		Check.argument(true);
+		Check.argument(true, "test");
+		Check.argument(true, "test",
+				Logger.getLogger(CheckTest.class));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void checkIllegalArgumentFailure1() {
+		Check.argument(false);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void checkIllegalArgumentFailure2() {
+		Check.argument(false, "test");
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void checkIllegalArgumentFailure3() {
+		Logger logger = Logger.getLogger(CheckTest.class);
+		logger.setLevel(Level.OFF);
+		Check.argument(false, "test", logger);
 	}
 
 }
